@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux.document.commands;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -50,8 +49,8 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentLoader;
-import de.muenchen.allg.itd51.wollmux.document.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel.OverrideFragChainException;
+import de.muenchen.allg.itd51.wollmux.document.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.OverrideFrag;
@@ -191,10 +190,8 @@ class DocumentExpander extends AbstractExecutor
           cmd.getFragID()));
       }
 
-      Iterator<String> iter = urls.iterator();
-      while (iter.hasNext() && !found)
+      for (String urlStr : urls)
       {
-        String urlStr = iter.next();
         try
         {
           URL url = WollMuxFiles.makeURL(urlStr);
@@ -206,8 +203,8 @@ class DocumentExpander extends AbstractExecutor
           {
             insertDocumentFromURL(cmd, url);
           }
-
           found = true;
+          break;
         }
         catch (java.lang.Exception e)
         {

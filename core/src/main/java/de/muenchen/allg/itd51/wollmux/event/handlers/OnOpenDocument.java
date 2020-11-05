@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -98,21 +97,19 @@ public class OnOpenDocument extends WollMuxEvent
     String[] fragUrls = new String[fragIDs.size() - 1];
     String urlStr = "";
 
-    Iterator<String> iter = fragIDs.iterator();
-    for (int i = 0; iter.hasNext(); ++i)
+    int i = 0;
+    for (String fragId : fragIDs)
     {
-      String frag_id = iter.next();
-
       // Fragment-URL holen und aufbereiten:
       List<String> urls = new ArrayList<>();
 
       java.lang.Exception error = new ConfigurationErrorException(L.m(
           "Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!",
-          frag_id));
+          fragId));
       try
       {
         urls = VisibleTextFragmentList
-            .getURLsByID(WollMuxFiles.getWollmuxConf(), frag_id);
+            .getURLsByID(WollMuxFiles.getWollmuxConf(), fragId);
       } catch (InvalidIdentifierException e)
       {
         error = e;
@@ -120,9 +117,7 @@ public class OnOpenDocument extends WollMuxEvent
       if (urls.isEmpty())
       {
         throw new WollMuxFehlerException(
-            L.m("Die URL zum Textfragment mit der FRAG_ID '%1' kann nicht bestimmt werden:",
-                frag_id),
-            error);
+            L.m("Die URL zum Textfragment mit der FRAG_ID '%1' kann nicht bestimmt werden:", fragId), error);
       }
 
       // Nur die erste funktionierende URL verwenden. Dazu werden alle URL zu
@@ -130,10 +125,9 @@ public class OnOpenDocument extends WollMuxEvent
       // übernommen.
       StringBuilder  errors = new StringBuilder();
       boolean found = false;
-      Iterator<String> iterUrls = urls.iterator();
-      while (iterUrls.hasNext() && !found)
+      for (String urlString : urls)
       {
-        urlStr = iterUrls.next();
+        urlStr = urlString;
 
         // URL erzeugen und prüfen, ob sie aufgelöst werden kann
         try
@@ -146,6 +140,7 @@ public class OnOpenDocument extends WollMuxEvent
           {
             WollMuxSingleton.checkURL(url);
             found = true;
+            break;
           }
         } catch (MalformedURLException e)
         {
@@ -165,7 +160,7 @@ public class OnOpenDocument extends WollMuxEvent
       {
         throw new WollMuxFehlerException(L.m(
             "Das Textfragment mit der FRAG_ID '%1' kann nicht aufgelöst werden:",
-            frag_id)
+            fragId)
             + "\n\n" + errors);
       }
 
@@ -178,6 +173,7 @@ public class OnOpenDocument extends WollMuxEvent
       {
         fragUrls[i - 1] = urlStr;
       }
+      i++;
     }
 
     // open document as Template (or as document):

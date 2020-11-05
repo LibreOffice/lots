@@ -1131,13 +1131,11 @@ public abstract class DocumentCommand
         throw new InvalidCommandException(L.m("Fehlendes Attribut DB_SPALTE"));
       }
 
-      Iterator<ConfigThingy> autoseps = wmCmd.query("AUTOSEP").iterator();
       Iterator<ConfigThingy> seps = wmCmd.query("SEPARATOR").iterator();
       String currentSep = " "; // initialize with default separator
 
-      while (autoseps.hasNext())
+      for (ConfigThingy as : wmCmd.query("AUTOSEP"))
       {
-        ConfigThingy as = autoseps.next();
         String sep = currentSep;
         if (seps.hasNext())
         {

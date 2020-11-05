@@ -23,7 +23,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,14 +65,11 @@ public class DialogFactory
     Set<String> dialogsInBlock = new HashSet<>();
 
     conf = conf.query("Funktionsdialoge");
-    Iterator<ConfigThingy> parentIter = conf.iterator();
-    while (parentIter.hasNext())
+    for (ConfigThingy dialogsConf : conf)
     {
       dialogsInBlock.clear();
-      Iterator<ConfigThingy> iter = parentIter.next().iterator();
-      while (iter.hasNext())
+      for (ConfigThingy dialogConf : dialogsConf)
       {
-        ConfigThingy dialogConf = iter.next();
         String name = dialogConf.getName();
         if (dialogsInBlock.contains(name))
           LOGGER.error("Funktionsdialog \"{}\" im selben Funktionsdialoge-Abschnitt mehrmals definiert", name);

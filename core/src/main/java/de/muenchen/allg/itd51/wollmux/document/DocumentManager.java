@@ -209,10 +209,8 @@ public class DocumentManager
       return;
     }
 
-    Iterator<XEventListener> i = registeredDocumentEventListener.iterator();
-    while (i.hasNext())
+    for (XEventListener l : registeredDocumentEventListener)
     {
-      XInterface l = UNO.XInterface(i.next());
       if (UnoRuntime.areSame(l, listener)) {
         return;
       }

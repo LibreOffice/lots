@@ -23,7 +23,6 @@
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -180,10 +179,8 @@ class SurroundingGarbageCollector extends AbstractExecutor
   int execute(DocumentCommands commands)
   {
     int errors = 0;
-    Iterator<DocumentCommand> iter = commands.iterator();
-    while (iter.hasNext())
+    for (DocumentCommand cmd : commands)
     {
-      DocumentCommand cmd = iter.next();
       errors += cmd.execute(this);
     }
 
@@ -197,10 +194,8 @@ class SurroundingGarbageCollector extends AbstractExecutor
    */
   void removeGarbage()
   {
-    Iterator<Cleaner> iter = muellmaenner.iterator();
-    while (iter.hasNext())
+    for (Cleaner muellmann : muellmaenner)
     {
-      Cleaner muellmann = iter.next();
       muellmann.clean();
     }
   }

@@ -22,8 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.document.commands;
 
-import java.util.Iterator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,10 +75,8 @@ public abstract class AbstractExecutor implements DocumentCommand.Executor
     int errors = 0;
 
     // Alle DocumentCommands durchlaufen und mit execute aufrufen.
-    for (Iterator<DocumentCommand> iter = commands.iterator(); iter.hasNext();)
+    for (DocumentCommand cmd : commands)
     {
-      DocumentCommand cmd = iter.next();
-
       if (!cmd.isDone() && !cmd.hasError())
       {
         // Kommando ausführen und Fehler zählen

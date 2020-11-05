@@ -483,9 +483,8 @@ public class TextDocumentModel
     }
 
     ConfigThingy functions = conf.query("WM").query("Druckfunktionen").queryByChild(FUNCTION);
-    for (Iterator<ConfigThingy> iter = functions.iterator(); iter.hasNext();)
+    for (ConfigThingy func : functions)
     {
-      ConfigThingy func = iter.next();
       String name = func.getString(FUNCTION);
 
       if (name != null && !name.isEmpty())
@@ -522,9 +521,8 @@ public class TextDocumentModel
     }
 
     ConfigThingy formulare = conf.query(FORMULAR);
-    for (Iterator<ConfigThingy> iter = formulare.iterator(); iter.hasNext();)
+    for (ConfigThingy formular : formulare)
     {
-      ConfigThingy formular = iter.next();
       formDesc.addChild(formular);
     }
   }

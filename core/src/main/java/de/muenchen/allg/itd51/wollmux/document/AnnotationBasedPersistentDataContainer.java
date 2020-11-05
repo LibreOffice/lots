@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux.document;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -108,11 +107,10 @@ public class AnnotationBasedPersistentDataContainer implements
     if (textfields.isEmpty()) {
       return null;
     }
-    Iterator<Object> iter = textfields.iterator();
     StringBuilder buffy = new StringBuilder();
-    while (iter.hasNext())
+    for (Object textField : textfields)
     {
-      buffy.append((String) Utils.getProperty(iter.next(), UnoProperty.CONTENT));
+      buffy.append((String) Utils.getProperty(textField, UnoProperty.CONTENT));
     }
     return buffy.toString();
   }
@@ -261,10 +259,9 @@ public class AnnotationBasedPersistentDataContainer implements
     }
 
     modifiedDataIDs.add(dataId);
-    Iterator<Object> iter = textfields.iterator();
     int start = 0;
     int len = dataValue.length();
-    while (iter.hasNext())
+    for (Object textfield : textfields)
     {
       int blocksize = len - start;
       if (blocksize > TEXTFIELD_MAXLEN) {
@@ -277,7 +274,7 @@ public class AnnotationBasedPersistentDataContainer implements
         start += blocksize;
       }
 
-      Utils.setProperty(iter.next(), "Content", str);
+      Utils.setProperty(textfield, "Content", str);
     }
     Utils.setProperty(doc, UnoProperty.RECORD_CHANGES, recordChanges);
   }
@@ -294,10 +291,9 @@ public class AnnotationBasedPersistentDataContainer implements
       getWollMuxTextFields(dataId.getDescriptor(), false, 0);
     if (!textfields.isEmpty())
     {
-      Iterator<Object> iter = textfields.iterator();
-      while (iter.hasNext())
+      for (Object textfield : textfields)
       {
-        XTextContent txt = UNO.XTextContent(iter.next());
+        XTextContent txt = UNO.XTextContent(textfield);
         try
         {
           txt.getAnchor().getText().removeTextContent(txt);

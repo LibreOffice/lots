@@ -1038,9 +1038,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     model.updateLastTouchedByVersionInfo();
 
     model.setMailmergeConf(new ConfigThingy("Seriendruck"));
-    for (Iterator<ConfigThingy> iter = conf.iterator(); iter.hasNext();)
+    for (ConfigThingy child : conf)
     {
-      ConfigThingy c = new ConfigThingy(iter.next());
+      ConfigThingy c = new ConfigThingy(child);
       model.getMailmergeConf().addChild(c);
     }
     ConfigThingy wm = new ConfigThingy("WM");

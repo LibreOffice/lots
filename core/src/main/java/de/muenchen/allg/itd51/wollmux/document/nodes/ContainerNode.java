@@ -67,10 +67,10 @@ public class ContainerNode implements Container, Node
       return false;
     }
 
-    Iterator<Node> iter = iterator();
-    while (iter.hasNext())
+    for (Node node : this)
     {
-      if (!iter.next().visit(visit)) {
+      if (!node.visit(visit))
+      {
         return false;
       }
     }

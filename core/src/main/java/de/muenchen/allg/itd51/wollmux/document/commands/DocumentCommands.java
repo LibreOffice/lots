@@ -237,9 +237,8 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     HashSet<String> knownBookmarks = new HashSet<>();
     HashSet<DocumentCommand> retiredDocumentCommands =
       new HashSet<>();
-    for (Iterator<DocumentCommand> iter = allCommands.iterator(); iter.hasNext();)
+    for (DocumentCommand cmd : allCommands)
     {
-      DocumentCommand cmd = iter.next();
       if (cmd.isRetired())
         retiredDocumentCommands.add(cmd);
       else
@@ -301,9 +300,8 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     // und den ungültigen TextSections erstellen:
     HashSet<String> knownTextSections = new HashSet<>();
     HashSet<TextSection> invalidTextSections = new HashSet<>();
-    for (Iterator<TextSection> iter = allTextSectionsWithGROUPS.iterator(); iter.hasNext();)
+    for (TextSection s : allTextSectionsWithGROUPS)
     {
-      TextSection s = iter.next();
       if (s.isInvalid())
         invalidTextSections.add(s);
       else
@@ -355,10 +353,8 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     LOGGER.trace("addNewDocumentCommands");
 
     long lastTime = System.currentTimeMillis();
-    for (Iterator<DocumentCommand> iter = newDocumentCommands.iterator(); iter.hasNext();)
+    for (DocumentCommand cmd : newDocumentCommands)
     {
-      DocumentCommand cmd = iter.next();
-
       int id = 0;
       allCommands.add(cmd);
 
@@ -404,10 +400,8 @@ public class DocumentCommands implements Iterable<DocumentCommand>
    */
   private void addNewTextSections(HashSet<TextSection> newElements)
   {
-    for (Iterator<TextSection> iter = newElements.iterator(); iter.hasNext();)
+    for (TextSection s : newElements)
     {
-      TextSection s = iter.next();
-
       allTextSectionsWithGROUPS.add(s);
 
       addNewVisibilityElement(s);

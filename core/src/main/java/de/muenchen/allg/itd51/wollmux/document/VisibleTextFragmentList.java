@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux.document;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -147,19 +146,14 @@ public class VisibleTextFragmentList
 
     LinkedList<ConfigThingy> tfListe = new LinkedList<>();
     ConfigThingy tfConf = conf.query("Textfragmente");
-    Iterator<ConfigThingy> iter = tfConf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy confTextfragmente : tfConf)
     {
-      ConfigThingy confTextfragmente = iter.next();
       tfListe.addFirst(confTextfragmente);
     }
 
-    Iterator<ConfigThingy> iterTbListe = tfListe.iterator();
     List<String> urls = new ArrayList<>();
-    while (iterTbListe.hasNext())
+    for (ConfigThingy textfragmente : tfListe)
     {
-      ConfigThingy textfragmente = iterTbListe.next();
-
       ConfigThingy mappingsConf = textfragmente.queryByChild("FRAG_ID");
 
       for (ConfigThingy mappingConf : mappingsConf)
