@@ -157,13 +157,11 @@ public class InsertionModelList implements Iterable<InsertionModel>
       return;
     }
     String comboId = comboIdd.toString();
-    Iterator<InsertionModel> iter = iterator();
-    while (iter.hasNext())
+    for (InsertionModel m : this)
     {
       try
       {
-        InsertionModel4InsertXValue model =
-          (InsertionModel4InsertXValue) iter.next();
+        InsertionModel4InsertXValue model = (InsertionModel4InsertXValue) m;
         String comboValue = desc.getMapCheckboxId2ComboboxEntry().get(model.getDataID());
         if (comboValue != null)
         {
@@ -211,14 +209,14 @@ public class InsertionModelList implements Iterable<InsertionModel>
     if (comboId == null) return;
     Collection<String> items = combo.getItems();
     Collection<String> unusedItems = new HashSet<>(items);
+
     Collection<InsertionModel> brokenInsertionModels = new ArrayList<>();
-    Iterator<InsertionModel> iter = iterator();
-    while (iter.hasNext())
+    for (InsertionModel m : this)
     {
       InsertionModel4InsertXValue model;
       try
       {
-        model = (InsertionModel4InsertXValue) iter.next();
+        model = (InsertionModel4InsertXValue) m;
       }
       catch (ClassCastException x)
       {
@@ -252,10 +250,8 @@ public class InsertionModelList implements Iterable<InsertionModel>
 
         Pattern p = Pattern.compile(regex);
         boolean found = false;
-        Iterator<String> itemsIter = items.iterator();
-        while (itemsIter.hasNext())
+        for (String item : items)
         {
-          String item = itemsIter.next();
           if (p.matcher(item).matches())
           {
             unusedItems.remove(item);
@@ -274,10 +270,8 @@ public class InsertionModelList implements Iterable<InsertionModel>
     if (!unusedItems.isEmpty())
     {
       String item = unusedItems.iterator().next();
-      iter = brokenInsertionModels.iterator();
-      while (iter.hasNext())
+      for (InsertionModel model : brokenInsertionModels)
       {
-        InsertionModel model = iter.next();
         setMatchTrafo(model, item);
       }
     }
@@ -325,17 +319,14 @@ public class InsertionModelList implements Iterable<InsertionModel>
   public void updateDocument(Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
     List<InsertionModel> defunct = new ArrayList<>();
-    Iterator<InsertionModel> iter = models.iterator();
-    while (iter.hasNext())
+    for (InsertionModel model : models)
     {
-      InsertionModel model = iter.next();
       if (!model.updateDocument(mapFunctionNameToConfigThingy)) defunct.add(model);
     }
 
-    iter = defunct.iterator();
-    while (iter.hasNext())
+    for (InsertionModel model : defunct)
     {
-      remove(iter.next());
+      remove(model);
     }
   }
 
@@ -356,10 +347,8 @@ public class InsertionModelList implements Iterable<InsertionModel>
    */
   private void notifyListeners(InsertionModel model, int index, boolean removed)
   {
-    Iterator<ItemListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ItemListener listener : listeners)
     {
-      ItemListener listener = iter.next();
       if (removed)
         listener.itemRemoved(model, index);
       else
@@ -410,10 +399,8 @@ public class InsertionModelList implements Iterable<InsertionModel>
     { // TESTED
       if (!insertionViewsSelected) return;
       boolean clearSelection = true;
-      Iterator<InsertionModel> iter = models.iterator();
-      while (iter.hasNext())
+      for (InsertionModel model : models)
       {
-        InsertionModel model = iter.next();
         if (bookmarkNames.contains(model.getName()))
         {
           formularMax4000.broadcast(new BroadcastObjectSelection(model, 1,

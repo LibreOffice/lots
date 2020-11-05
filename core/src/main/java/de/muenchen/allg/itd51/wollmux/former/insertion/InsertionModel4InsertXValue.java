@@ -27,7 +27,6 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -200,11 +199,9 @@ public class InsertionModel4InsertXValue extends InsertionModel
     }
 
     // INSERT(WM(<zu iterierender Teil>))
-    Iterator<ConfigThingy> iter = (conf.iterator().next()).iterator();
     AutosepInfo autosepInfo = null;
-    while (iter.hasNext())
+    for (ConfigThingy subConf : conf.iterator().next())
     {
-      ConfigThingy subConf = iter.next();
       String name = subConf.getName();
       String value = subConf.toString();
 
@@ -279,10 +276,8 @@ public class InsertionModel4InsertXValue extends InsertionModel
       }
     }
 
-    Iterator<AutosepInfo> iter = autosep.iterator();
-    while (iter.hasNext())
+    for (AutosepInfo autosepInfo : autosep)
     {
-      AutosepInfo autosepInfo = iter.next();
       String autosepStr = "both";
       if (autosepInfo.autosep == AUTOSEP_LEFT)
         autosepStr = "left";

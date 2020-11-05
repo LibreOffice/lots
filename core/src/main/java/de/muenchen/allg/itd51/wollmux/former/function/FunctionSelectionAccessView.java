@@ -30,7 +30,6 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.StringReader;
-import java.util.Iterator;
 
 import javax.swing.Box;
 import javax.swing.JComboBox;
@@ -269,10 +268,9 @@ public class FunctionSelectionAccessView implements View
         expertFunctionIsComplex = true;
 
         StringBuilder code = new StringBuilder();
-        Iterator<ConfigThingy> iter = conf.iterator();
-        while (iter.hasNext())
+        for (ConfigThingy child : conf)
         {
-          code.append(iter.next().stringRepresentation());
+          code.append(child.stringRepresentation());
         }
 
         complexFunctionArea = new JTextArea(code.toString());
@@ -455,10 +453,8 @@ public class FunctionSelectionAccessView implements View
     combo.addItem(UNSPECIFIED_ITEM);
     combo.setSelectedIndex(0);
     boolean found = currentValue.equals(UNSPECIFIED_ITEM);
-    Iterator<IDManager.ID> iter = idManager.getAllIDs(namespace).iterator();
-    while (iter.hasNext())
+    for (IDManager.ID id : idManager.getAllIDs(namespace))
     {
-      IDManager.ID id = iter.next();
       if (id.isActive())
       {
         String brackId = "[" + id.toString() + "]";
@@ -493,13 +489,10 @@ public class FunctionSelectionAccessView implements View
     functionSelectorBox.addItem(NONE_ITEM);
     int string_index = functionSelectorBox.getItemCount();
     functionSelectorBox.addItem(STRING_ITEM);
-    Iterator<String> iter = funcLib.getFunctionNames().iterator();
     int i = functionSelectorBox.getItemCount();
 
-    while (iter.hasNext())
+    for (String funcName : funcLib.getFunctionNames())
     {
-      String funcName = iter.next();
-
       if (funcName.equals(funcSel.getFunctionName())) selectedIndex = i;
       functionSelectorBox.addItem(funcName);
       ++i;

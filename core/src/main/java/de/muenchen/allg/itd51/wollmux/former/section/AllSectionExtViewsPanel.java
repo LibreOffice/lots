@@ -22,8 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.section;
 
-import java.util.Iterator;
-
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -62,10 +60,8 @@ public class AllSectionExtViewsPanel extends OnDemandCardView
     sectionModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
 
-    Iterator<SectionModel> iter = sectionModelList.iterator();
-    while (iter.hasNext())
+    for (SectionModel model : sectionModelList)
     {
-      SectionModel model = iter.next();
       if (model.hasGroups()) addItem(model);
     }
   }

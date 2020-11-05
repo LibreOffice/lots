@@ -136,11 +136,9 @@ public class FormControlModelList implements Iterable<FormControlModel>
   public String makeUniqueId(String str)
   {
     if (str.equals("")) return str;
-    Iterator<FormControlModel> iter = models.iterator();
     int count = 0;
-    while (iter.hasNext())
+    for (FormControlModel model : models)
     {
-      FormControlModel model = iter.next();
       IDManager.ID id = model.getId();
       if (id != null && id.toString().startsWith(str))
       {
@@ -284,10 +282,8 @@ public class FormControlModelList implements Iterable<FormControlModel>
     FormControlModel currentTab =
     FormControlModel.createTab(id, id, formularMax4000);
 
-    Iterator<FormControlModel> iter = models.iterator();
-    while (iter.hasNext())
+    for (FormControlModel model : models)
     {
-      FormControlModel model = iter.next();
       if (phase == 0 && model.getType() == FormControlModel.TAB_TYPE)
         currentTab = model;
       else if (phase > 0 && model.getType() == FormControlModel.TAB_TYPE)
@@ -413,10 +409,8 @@ public class FormControlModelList implements Iterable<FormControlModel>
    */
   private void notifyListeners(FormControlModel model, int index)
   {
-    Iterator<ItemListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ItemListener listener : listeners)
     {
-      ItemListener listener = iter.next();
       listener.itemAdded(model, index);
     }
     formularMax4000.documentNeedsUpdating();
@@ -428,10 +422,8 @@ public class FormControlModelList implements Iterable<FormControlModel>
    */
   private void notifyListeners(int index1, int index2)
   {
-    Iterator<ItemListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ItemListener listener : listeners)
     {
-      ItemListener listener = iter.next();
       listener.itemSwapped(index1, index2);
     }
     formularMax4000.documentNeedsUpdating();

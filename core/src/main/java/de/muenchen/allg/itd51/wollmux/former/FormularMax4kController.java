@@ -30,7 +30,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -714,11 +713,9 @@ public class FormularMax4kController
     if (!mapFunctionNameToConfigThingy.isEmpty())
     {
       ConfigThingy funcs = form.add("Funktionen");
-      Iterator<ConfigThingy> iter =
-        mapFunctionNameToConfigThingy.values().iterator();
-      while (iter.hasNext())
+      for (ConfigThingy func : mapFunctionNameToConfigThingy.values())
       {
-        funcs.addChild(iter.next());
+        funcs.addChild(func);
       }
     }
     return conf;
@@ -737,14 +734,10 @@ public class FormularMax4kController
 
     ConfigThingy fensterAbschnitte =
       formDescription.query("Formular").query("Fenster");
-    Iterator<ConfigThingy> fensterAbschnittIterator = fensterAbschnitte.iterator();
-    while (fensterAbschnittIterator.hasNext())
+    for (ConfigThingy fensterAbschnitt : fensterAbschnitte)
     {
-      ConfigThingy fensterAbschnitt = fensterAbschnittIterator.next();
-      Iterator<ConfigThingy> tabIter = fensterAbschnitt.iterator();
-      while (tabIter.hasNext())
+      for (ConfigThingy tab : fensterAbschnitt)
       {
-        ConfigThingy tab = tabIter.next();
         parseTab(tab, -1);
       }
     }
@@ -810,16 +803,10 @@ public class FormularMax4kController
     groupModelList.clear();
     ConfigThingy visibilityConf =
       formDescription.query("Formular").query("Sichtbarkeit");
-    Iterator<ConfigThingy> sichtbarkeitsAbschnittIterator =
-      visibilityConf.iterator();
-    while (sichtbarkeitsAbschnittIterator.hasNext())
+    for (ConfigThingy sichtbarkeitsAbschnitt : visibilityConf)
     {
-      ConfigThingy sichtbarkeitsAbschnitt = sichtbarkeitsAbschnittIterator.next();
-      Iterator<ConfigThingy> sichtbarkeitsFunktionIterator =
-        sichtbarkeitsAbschnitt.iterator();
-      while (sichtbarkeitsFunktionIterator.hasNext())
+      for (ConfigThingy sichtbarkeitsFunktion : sichtbarkeitsAbschnitt)
       {
-        ConfigThingy sichtbarkeitsFunktion = sichtbarkeitsFunktionIterator.next();
         String groupName = sichtbarkeitsFunktion.getName();
         try
         {
@@ -935,10 +922,8 @@ public class FormularMax4kController
     String tooltip = "";
     char hotkey = 0;
 
-    Iterator<ConfigThingy> iter = conf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy attr : conf)
     {
-      ConfigThingy attr = iter.next();
       String name = attr.getName();
       String str = attr.toString();
       if (name.equals("TITLE"))
@@ -1004,13 +989,11 @@ public class FormularMax4kController
     boolean lastIsGlue = false;
     FormControlModel model = null;
     int count = 0;
-    Iterator<ConfigThingy> grandmaIter = grandma.iterator();
-    while (grandmaIter.hasNext())
+    for (ConfigThingy parent : grandma)
     {
-      Iterator<ConfigThingy> iter = grandmaIter.next().iterator();
-      while (iter.hasNext())
+      for (ConfigThingy child : parent)
       {
-        model = new FormControlModel(iter.next(), functionSelectionProvider, this);
+        model = new FormControlModel(child, functionSelectionProvider, this);
         lastIsGlue = model.isGlue();
         ++count;
         formControlModelList.add(model, idx++);

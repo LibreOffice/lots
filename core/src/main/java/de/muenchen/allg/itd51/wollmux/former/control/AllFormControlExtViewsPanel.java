@@ -22,8 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
-import java.util.Iterator;
-
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -74,10 +72,8 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
     formControlModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
 
-    Iterator<FormControlModel> iter = formControlModelList.iterator();
-    while (iter.hasNext())
+    for (FormControlModel model : formControlModelList)
     {
-      FormControlModel model = iter.next();
       if (model.hasPlausi() || model.hasAutofill() || model.hasGroups())
         addItem(model);
     }

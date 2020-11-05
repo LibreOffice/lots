@@ -30,7 +30,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -270,10 +269,8 @@ public class FunctionTester
     String currentValue = getComboBoxValue(combo, "");
     combo.removeAllItems();
     boolean found = false;
-    Iterator<IDManager.ID> iter = idManager.getAllIDsSorted(namespace).iterator();
-    while (iter.hasNext())
+    for (IDManager.ID id : idManager.getAllIDsSorted(namespace))
     {
-      IDManager.ID id = iter.next();
       if (id.isActive())
       {
         String idStr = id.toString();
@@ -540,10 +537,8 @@ public class FunctionTester
 
     private ValueBox getValueBox(String id)
     {
-      Iterator<ValueBox> iter = valueBoxes.iterator();
-      while (iter.hasNext())
+      for (ValueBox box : valueBoxes)
       {
-        ValueBox box = iter.next();
         String boxId = getComboBoxValue(box.combo, "");
         if (boxId.equals(id)) return box;
       }

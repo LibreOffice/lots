@@ -27,7 +27,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.Box;
@@ -187,11 +186,9 @@ public class AllInsertionLineViewsPanel implements View
    */
   private void clearSelection()
   {
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
+    for (int sel : selection)
     {
-      Integer i = iter.next();
-      OneInsertionLineView view = views.get(i.intValue());
+      OneInsertionLineView view = views.get(sel);
       view.unmark();
     }
     selection.clear();

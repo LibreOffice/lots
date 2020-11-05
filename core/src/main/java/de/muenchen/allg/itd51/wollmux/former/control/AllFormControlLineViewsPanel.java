@@ -29,7 +29,6 @@ import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -304,10 +303,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     int gridY = 0;
     int tabIndex = 0;
     JComponent tab = firstTab;
-    Iterator<Object> iter = viewDescriptors.iterator();
-    while (iter.hasNext())
+    for (Object ob : viewDescriptors)
     {
-      ViewDescriptor desc = (ViewDescriptor) iter.next();
+      ViewDescriptor desc = (ViewDescriptor) ob;
       if (desc.isTab && gridY > 0)
       {
         ++tabIndex;
@@ -345,10 +343,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     while (tabIndex < tabPane.getTabCount())
       tabPane.removeTabAt(tabPane.getTabCount() - 1);
 
-    iter = toValidate.iterator();
-    while (iter.hasNext())
+    for (Object ob : toValidate)
     {
-      ((JComponent) iter.next()).validate();
+      ((JComponent) ob).validate();
     }
   }
 
@@ -415,12 +412,10 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    */
   private void clearSelection()
   {
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
+    for (int sel : selection)
     {
-      Integer I = iter.next();
       OneFormControlLineView view =
-        ((ViewDescriptor) viewDescriptors.get(I.intValue())).view;
+          ((ViewDescriptor) viewDescriptors.get(sel)).view;
       view.unmark();
     }
     selection.clear();
@@ -480,10 +475,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     Map<ID, String> mapCheckboxId2ComboboxEntry = new HashMap<>();
     int count = 0;
     ArrayList<String> itemList = new ArrayList<>();
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
+    for (int idx : selection)
     {
-      int idx = iter.next().intValue();
       OneFormControlLineView view = ((ViewDescriptor) viewDescriptors.get(idx)).view;
       FormControlModel model = view.getModel();
       if (model.getType() != FormControlModel.CHECKBOX_TYPE)
@@ -536,10 +529,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   private boolean noSelectedElementsOnVisibleTab()
   {
     int tabIndex = tabPane.getSelectedIndex();
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
+    for (int i : selection)
     {
-      int i = iter.next().intValue();
       ViewDescriptor desc = (ViewDescriptor) viewDescriptors.get(i);
       if (desc.containingTabIndex == tabIndex) return false;
     }
@@ -572,10 +563,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
      * Zuerst suchen wir die Selektion durch und liefern falls vorhanden das erste
      * ausgewählte Element, das auf dem sichtbaren Tab ist.
      */
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
+    for (int i : selection)
     {
-      int i = iter.next().intValue();
       ViewDescriptor desc = (ViewDescriptor) viewDescriptors.get(i);
       if (desc.containingTabIndex == tabIndex) return i;
     }
@@ -713,10 +702,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       ViewVisibilityDescriptor newDesc = new ViewVisibilityDescriptor(desc);
       panel.visibilityDescriptor = newDesc;
 
-      Iterator<Object> iter = viewDescriptors.iterator();
-      while (iter.hasNext())
+      for (Object ob : viewDescriptors)
       {
-        ViewDescriptor viewDescriptor = (ViewDescriptor) iter.next();
+        ViewDescriptor viewDescriptor = (ViewDescriptor) ob;
         viewDescriptor.view.setViewVisibilityDescriptor(newDesc);
       }
     }

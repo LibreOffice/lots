@@ -23,7 +23,6 @@
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -148,10 +147,8 @@ public abstract class InsertionModel
    */
   public void hasBeenRemoved()
   {
-    Iterator<ModelChangeListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ModelChangeListener listener : listeners)
     {
-      ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
     formularMax4000.documentNeedsUpdating();
@@ -164,10 +161,8 @@ public abstract class InsertionModel
    */
   protected void notifyListeners(int attributeId, Object newValue)
   {
-    Iterator<ModelChangeListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ModelChangeListener listener : listeners)
     {
-      ModelChangeListener listener = iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
     formularMax4000.documentNeedsUpdating();

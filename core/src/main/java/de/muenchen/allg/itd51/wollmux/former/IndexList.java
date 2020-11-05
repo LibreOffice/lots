@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-public class IndexList
+public class IndexList implements Iterable<Integer>
 {
   /**
    * Die (immer aufsteigend sortierte) Liste der Indizes.
@@ -79,6 +79,7 @@ public class IndexList
    *
    * @return An independent iterator of the current list.
    */
+  @Override
   public ListIterator<Integer> iterator()
   {
     // copy list, so that it is independent of changing selections

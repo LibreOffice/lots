@@ -23,7 +23,6 @@
 package de.muenchen.allg.itd51.wollmux.former.function;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
@@ -79,10 +78,8 @@ public class FunctionSelectionProvider
     this.idManager = idManager;
     this.namespace = namespace;
     mapNameToFunctionSelection = new HashMap<>();
-    Iterator<ConfigThingy> iter = funConf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy conf : funConf)
     {
-      ConfigThingy conf = iter.next();
       FunctionSelection funcSel = getFunctionSelection(conf);
       mapNameToFunctionSelection.put(conf.getName(), funcSel);
     }
@@ -155,10 +152,8 @@ public class FunctionSelectionProvider
      */
     Map<String, ParamValue> mapNameToParamValue = new HashMap<>();
     String funcName = null;
-    Iterator<ConfigThingy> iter = conf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy childConf : conf)
     {
-      ConfigThingy childConf = iter.next();
       String name = childConf.getName();
       if (name.equals("FUNCTION"))
       {

@@ -25,7 +25,6 @@ package de.muenchen.allg.itd51.wollmux.former.control;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -204,10 +203,8 @@ public class FormControlModel
     String idStr = "";
     ConfigThingy plausiConf = null;
 
-    Iterator<ConfigThingy> iter = conf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy attr : conf)
     {
-      ConfigThingy attr = iter.next();
       String name = attr.getName();
       String str = attr.toString();
       if (name.equals("LABEL"))
@@ -287,10 +284,9 @@ public class FormControlModel
   private List<String> parseValues(ConfigThingy conf)
   {
     List<String> list = new ArrayList<>(conf.count());
-    Iterator<ConfigThingy> iter = conf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy child : conf)
     {
-      list.add(iter.next().toString());
+      list.add(child.toString());
     }
     return list;
   }
@@ -303,11 +299,10 @@ public class FormControlModel
   private void parseGroups(ConfigThingy conf)
   {
     HashSet<IDManager.ID> set = new HashSet<>(conf.count());
-    Iterator<ConfigThingy> iter = conf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy child : conf)
     {
       set.add(formularMax4000.getIDManager().getID(FormularMax4kController.NAMESPACE_GROUPS,
-        iter.next().toString()));
+          child.toString()));
     }
     groups.initGroups(set);
   }
@@ -934,10 +929,9 @@ public class FormControlModel
     if (!values.isEmpty())
     {
       ConfigThingy valuesConf = conf.add("VALUES");
-      Iterator<String> iter = values.iterator();
-      while (iter.hasNext())
+      for (String value : values)
       {
-        valuesConf.add(iter.next());
+        valuesConf.add(value);
       }
     }
 
@@ -991,10 +985,8 @@ public class FormControlModel
   public void hasBeenRemoved()
   {
     if (id != null) id.deactivate();
-    Iterator<ModelChangeListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ModelChangeListener listener : listeners)
     {
-      ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
     formularMax4000.documentNeedsUpdating();

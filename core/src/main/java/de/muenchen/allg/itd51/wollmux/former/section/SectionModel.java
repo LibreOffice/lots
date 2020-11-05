@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux.former.section;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -145,11 +144,10 @@ public class SectionModel
         ConfigThingy conf = new ConfigThingy("GROUPS", m.group(2)); // GROUPS-GROUPS-(...)
         conf = conf.getFirstChild(); // der eigentliche "GROUPS" Knoten
         HashSet<IDManager.ID> set = new HashSet<>(conf.count());
-        Iterator<ConfigThingy> iter = conf.iterator();
-        while (iter.hasNext())
+        for (ConfigThingy child : conf)
         {
           set.add(formularMax4000.getIDManager().getID(
-            FormularMax4kController.NAMESPACE_GROUPS, iter.next().toString()));
+              FormularMax4kController.NAMESPACE_GROUPS, child.toString()));
         }
         // Prefix erst hier ins globale Feld übertragen, wenn keine Exception
         // geflogen ist.
@@ -336,10 +334,8 @@ public class SectionModel
    */
   public void hasBeenRemoved()
   {
-    Iterator<ModelChangeListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ModelChangeListener listener : listeners)
     {
-      ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
     formularMax4000.documentNeedsUpdating();
@@ -351,10 +347,8 @@ public class SectionModel
    */
   protected void notifyListeners(int attributeId, Object newValue)
   {
-    Iterator<ModelChangeListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ModelChangeListener listener : listeners)
     {
-      ModelChangeListener listener = iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
     formularMax4000.documentNeedsUpdating();

@@ -33,10 +33,7 @@ import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
@@ -316,33 +313,25 @@ public class Common
 
     LOGGER.debug("zoomFonts({})", zoomFactor);
     UIDefaults def = UIManager.getLookAndFeelDefaults();
-    Set<Map.Entry<Object, Float>> mappings;
-    mappings = defaultFontsizes.entrySet();
-    Iterator<Entry<Object, Float>> mappingEntries = mappings.iterator();
-    Entry<Object,Float> mappingEntry;
-    Object key;
-    Float size;
-    Font oldFnt;
-    Font newFont;
     int changedFonts = 0;
-    while (mappingEntries.hasNext())
+    try
     {
-      try
+      for (Entry<Object, Float> mappingEntry : defaultFontsizes.entrySet())
       {
-        mappingEntry = mappingEntries.next();
-        key = mappingEntry.getKey();
-        size = mappingEntry.getValue();
-        oldFnt = def.getFont(key);
-        if (oldFnt != null) {
-          newFont = oldFnt.deriveFont((float)(size * zoomFactor));
+        Object key = mappingEntry.getKey();
+        Float size = mappingEntry.getValue();
+        Font oldFnt = def.getFont(key);
+        if (oldFnt != null)
+        {
+          Font newFont = oldFnt.deriveFont((float) (size * zoomFactor));
           def.put(key, newFont);
           ++changedFonts;
         }
       }
-      catch (Exception ex)
-      {
-        LOGGER.debug("", ex);
-      }
+    }
+    catch (Exception ex)
+    {
+      LOGGER.debug("", ex);
     }
 
     LOGGER.debug("{} Fontgrößen verändert!", changedFonts);

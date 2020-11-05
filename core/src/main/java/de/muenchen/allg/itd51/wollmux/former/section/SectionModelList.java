@@ -112,17 +112,14 @@ public class SectionModelList implements Iterable<SectionModel>
   public void updateDocument()
   {
     List<SectionModel> defunct = new ArrayList<>();
-    Iterator<SectionModel> iter = models.iterator();
-    while (iter.hasNext())
+    for (SectionModel model : models)
     {
-      SectionModel model = iter.next();
       if (!model.updateDocument()) defunct.add(model);
     }
 
-    iter = defunct.iterator();
-    while (iter.hasNext())
+    for (SectionModel model : defunct)
     {
-      remove(iter.next());
+      remove(model);
     }
   }
 
@@ -152,10 +149,8 @@ public class SectionModelList implements Iterable<SectionModel>
    */
   private void notifyListeners(SectionModel model, int index, boolean removed)
   {
-    Iterator<ItemListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ItemListener listener : listeners)
     {
-      ItemListener listener = iter.next();
       if (removed)
         listener.itemRemoved(model, index);
       else

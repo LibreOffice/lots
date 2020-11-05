@@ -102,10 +102,8 @@ public class GroupModelList implements Iterable<GroupModel>
   public ConfigThingy export()
   {
     ConfigThingy conf = new ConfigThingy("Sichtbarkeit");
-    Iterator<GroupModel> iter = models.iterator();
-    while (iter.hasNext())
+    for (GroupModel model : models)
     {
-      GroupModel model = iter.next();
       conf.addChild(model.export());
     }
     return conf;
@@ -158,10 +156,8 @@ public class GroupModelList implements Iterable<GroupModel>
    */
   private void notifyListeners(GroupModel model, int index, boolean removed)
   {
-    Iterator<ItemListener> iter = listeners.iterator();
-    while (iter.hasNext())
+    for (ItemListener listener : listeners)
     {
-      ItemListener listener = iter.next();
       if (removed)
         listener.itemRemoved(model, index);
       else

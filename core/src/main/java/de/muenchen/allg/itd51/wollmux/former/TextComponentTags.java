@@ -27,7 +27,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -196,10 +195,8 @@ public class TextComponentTags
       conf.add("");
     } else
     {
-      Iterator<ContentElement> iter = content.iterator();
-      while (iter.hasNext())
+      for (ContentElement ele : content)
       {
-        ContentElement ele = iter.next();
         if (ele.isTag())
           conf.add("VALUE").add(ele.toString());
         else
@@ -258,10 +255,8 @@ public class TextComponentTags
       throw new IllegalArgumentException(L.m("Oberster Knoten muss \"CAT\" sein"));
 
     StringBuilder buffy = new StringBuilder();
-    Iterator<ConfigThingy> iter = conf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy subConf : conf)
     {
-      ConfigThingy subConf = iter.next();
       if ("VALUE".equals(subConf.getName()) && subConf.count() == 1)
       {
         // ACHTUNG! Änderungen hier müssen auch in insertTag() gemacht werden
@@ -285,10 +280,8 @@ public class TextComponentTags
   public static List<Action> makeInsertFieldActions(List<String> fieldNames, final TextComponentTags text)
   {
     List<Action> actions = new ArrayList<>();
-    Iterator<String> iter = fieldNames.iterator();
-    while (iter.hasNext())
+    for (String name : fieldNames)
     {
-      final String name = iter.next();
       Action action = new AbstractAction(name)
       {
         private static final long serialVersionUID = -9123184290299840565L;

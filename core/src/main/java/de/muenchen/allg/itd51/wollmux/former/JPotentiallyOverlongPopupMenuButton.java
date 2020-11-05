@@ -26,7 +26,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.util.Iterator;
 
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -61,10 +60,8 @@ public class JPotentiallyOverlongPopupMenuButton extends JButton
     this.addActionListener(event -> {
       JPopupMenu menu = new JPopupMenu();
       menu.setLayout(new VerticalFlowLayout());
-      Iterator<?> iter = actions.iterator();
-      while (iter.hasNext())
+      for (Object action : actions)
       {
-        Object action = iter.next();
         if (action instanceof Action)
           menu.add((Action) action);
         else

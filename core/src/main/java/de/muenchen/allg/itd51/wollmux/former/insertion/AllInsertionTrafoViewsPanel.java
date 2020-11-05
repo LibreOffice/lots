@@ -22,8 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
-import java.util.Iterator;
-
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
@@ -65,10 +63,8 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
     insertionModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
 
-    Iterator<InsertionModel> iter = insertionModelList.iterator();
-    while (iter.hasNext())
+    for (InsertionModel model : insertionModelList)
     {
-      InsertionModel model = iter.next();
       if (model.hasTrafo()) addItem(model);
     }
   }
