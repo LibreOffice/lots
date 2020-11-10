@@ -140,6 +140,7 @@ public class OneGroupsProviderGroupsEditView implements View
     myList.removeListSelectionListener(myListener);
   }
 
+  @Override
   public JComponent getComponent()
   {
     return myPanel;
@@ -153,6 +154,7 @@ public class OneGroupsProviderGroupsEditView implements View
      * Zu groupModelList (d.h. zur Menge aller verfügbaren Gruppen) wurde eine Gruppe
      * hinzugefügt.
      */
+    @Override
     public void itemAdded(GroupModel model, int index)
     {
       if (recursion) return;
@@ -166,6 +168,7 @@ public class OneGroupsProviderGroupsEditView implements View
      * Aus groupModelList (d.h. aus der Menge aller verfügbaren Gruppen) wurde eine
      * Gruppe entfernt.
      */
+    @Override
     public void itemRemoved(GroupModel model, int index)
     {
       if (recursion) return;
@@ -180,6 +183,7 @@ public class OneGroupsProviderGroupsEditView implements View
      * Zu groupsProvider (d.h. der Liste der selektierten Gruppen) wurde eine Gruppe
      * hinzugefügt.
      */
+    @Override
     public void groupAdded(ID groupID)
     {
       if (recursion) return;
@@ -194,6 +198,7 @@ public class OneGroupsProviderGroupsEditView implements View
      * Aus groupsProvider (d.h. aus der Liste der selektierten Gruppen) wurde eine
      * Gruppe entfernt.
      */
+    @Override
     public void groupRemoved(ID groupID)
     {
       if (recursion) return;
@@ -207,6 +212,7 @@ public class OneGroupsProviderGroupsEditView implements View
     /**
      * Die Selektion wurde in der GUI geändert.
      */
+    @Override
     public void valueChanged(ListSelectionEvent e)
     {
       if (recursion) return;
@@ -242,10 +248,13 @@ public class OneGroupsProviderGroupsEditView implements View
     }
 
     /**
-     * Die ID einer der Gruppen aus groupModelList (d.h. der Liste aller verfügbaren
-     * Gruppen) sich geändert.
+     * Die ID einer der Gruppen aus groupModelList (d.h. der Liste aller verfügbaren Gruppen) sich
+     * geändert.
      */
+    @Override
     public void idHasChanged(ID id)
-    {}
+    {
+      // nothing to do
+    }
   }
 }
