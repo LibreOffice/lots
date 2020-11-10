@@ -56,6 +56,7 @@ import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.db.Datasources;
+import de.muenchen.allg.itd51.wollmux.db.DummyDatasourceWithMessagebox;
 import de.muenchen.allg.itd51.wollmux.db.QueryPart;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
@@ -163,7 +164,12 @@ public class SenderService implements XPALProvider
         ColumnTransformer columnTransformer = new ColumnTransformer(FunctionFactory
             .parseTrafos(WollMuxFiles.getWollmuxConf(), "AbsenderdatenSpaltenumsetzung", funcLib, dialogLib, context));
 
-        instance = new SenderService(dataSources.get(senderSourceStr), columnTransformer, cache, overrideFragDbSpalte);
+        Datasource datasource = dataSources.get(senderSourceStr);
+        if (datasource == null)
+        {
+          datasource = new DummyDatasourceWithMessagebox(cache.getSchema(), senderSourceStr);
+        }
+        instance = new SenderService(datasource, columnTransformer, cache, overrideFragDbSpalte);
       } catch (ConfigurationErrorException | SenderException e)
       {
         LOGGER.error("", e);
