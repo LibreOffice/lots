@@ -22,6 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.form.sidebar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.FocusChangeReason;
 import com.sun.star.awt.FocusEvent;
-import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.WindowEvent;
 import com.sun.star.awt.XControl;
@@ -72,8 +72,10 @@ import de.muenchen.allg.itd51.wollmux.ui.HTMLElement;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementType;
 import de.muenchen.allg.itd51.wollmux.ui.layout.ControlLayout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.FixedVerticalLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
+import de.muenchen.allg.itd51.wollmux.ui.layout.TabLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
 import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
@@ -88,15 +90,12 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   private XWindow parentWindow;
   private XControlContainer controlContainer;
   private Layout vLayout;
-  private Layout buttonLayout;
   private XComponentContext context;
   private XMultiComponentFactory xMCF;
-  private Map<Short, Layout> tabPageLayouts = new HashMap<>();
   private Map<Control, Short> buttons = new HashMap<>();
   private XTabPageContainer tabControlContainer;
   private FormSidebarController formSidebarController;
   private Map<String, Pair<XControl, XControl>> controls = new HashMap<>();
-  private boolean visibilityChanged = false;
   private boolean tabChanged = true;
 
   /**
@@ -120,7 +119,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     this.xMCF = UNO.XMultiComponentFactory(context.getServiceManager());
 
     vLayout = new VerticalLayout();
-    buttonLayout = new VerticalLayout(20, 5, 0, 0, 5);
 
     this.parentWindow = parentWindow;
     controlContainer = UNO
@@ -144,26 +142,11 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   /**
    * Paint the tabs and their content.
    */
-  private void paint()
+  public void paint()
   {
-    Rectangle rect = parentWindow.getPosSize();
     if (tabControlContainer != null)
     {
-      if (visibilityChanged)
-      {
-        for (Map.Entry<Short, Layout> entry : tabPageLayouts.entrySet())
-        {
-          UNO.XTabPageModel(UNO.XControl(tabControlContainer.getTabPageByID(entry.getKey())).getModel())
-              .setEnabled(entry.getValue().isVisible());
-        }
-      }
-      visibilityChanged = false;
       short activeTab = tabControlContainer.getActiveTabPageID();
-      Rectangle tabRect = UNO.XWindow(tabControlContainer.getTabPageByID(activeTab)).getPosSize();
-      Rectangle newTabRect = new Rectangle(tabRect.X, rect.Y, rect.Width,
-          tabPageLayouts.get(activeTab).getHeightForWidth(rect.Width));
-      Pair<Integer, Integer> tabSize = tabPageLayouts.get(activeTab).layout(newTabRect);
-
       for (Map.Entry<Control, Short> entry : buttons.entrySet())
       {
         XWindow window = UNO.XWindow(controls.get(entry.getKey().getId()).getRight());
@@ -172,20 +155,8 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           window.setVisible(entry.getValue() == activeTab && entry.getKey().isVisible());
         }
       }
-
-      UNO.XWindow(tabControlContainer.getTabPageByID(activeTab)).setPosSize(tabRect.X, tabRect.Y, tabSize.getRight(),
-          tabSize.getLeft() + tabRect.Y, PosSize.POSSIZE);
-      Rectangle r = UNO.XWindow(tabControlContainer).getPosSize();
-      UNO.XWindow(tabControlContainer).setPosSize(r.X, r.Y, tabSize.getRight(),
-          tabSize.getLeft() + tabRect.Y,
-          PosSize.POSSIZE);
-      Rectangle buttonRect = new Rectangle(tabRect.X, tabRect.Y + tabSize.getLeft(), tabSize.getRight(),
-          rect.Height - tabSize.getLeft());
-      buttonLayout.layout(buttonRect);
-    } else
-    {
-      vLayout.layout(rect);
     }
+    vLayout.layout(parentWindow.getPosSize());
   }
 
   /**
@@ -203,24 +174,24 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       XControl tabControl = GuiFactory.createTabPageContainer(xMCF, context);
       controlContainer.addControl("tabControl", tabControl);
       tabControlContainer = UNO.XTabPageContainer(tabControl);
-      AbstractTabPageContainerListener listener = event -> formSidebarController.requestLayout();
+      AbstractTabPageContainerListener listener = event -> this.paint();
       tabControlContainer.addTabPageContainerListener(listener);
 
       tabControlContainer = UNO.XTabPageContainer(tabControl);
-      vLayout.addControl(tabControl);
-      vLayout.addLayout(buttonLayout, 1);
+      Layout buttonLayout = new VerticalLayout(20, 5, 0, 0, 5);
 
       short tabId = 1;
       List<TabConfig> tabs = config.getTabs();
+      List<Layout> tabLayouts = new ArrayList<>();
       for (int i = 0; i < tabs.size(); i++)
       {
         TabConfig tab = tabs.get(i);
         HTMLElement element = new HTMLElement(tab.getTitle());
         GuiFactory.createTab(this.xMCF, this.context, UNO.XTabPageContainerModel(tabControl.getModel()),
-            element.getText(), tabId);
+            element.getText(), tabId, 1000);
         XTabPage xTabPage = tabControlContainer.getTabPageByID(tabId);
         XControlContainer tabPageControlContainer = UNO.XControlContainer(xTabPage);
-        Layout controlsVLayout = new VerticalLayout(5, 5, 0, 0, 6);
+        Layout controlsVLayout = new VerticalLayout(5, 5, 0, 15, 6);
 
         if (i > 0)
         {
@@ -240,11 +211,20 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           }, tabPageControlContainer, controlsVLayout);
         }
 
+        tabLayouts.add(controlsVLayout);
         addButtonsToLayout(tab, model, controlContainer, buttonLayout, tabId);
-        tabPageLayouts.put(tabId, controlsVLayout);
 
         tabId++;
       }
+
+      Layout tabLayout = new TabLayout(UNO.XTabPageContainer(tabControl), xMCF, context);
+      for (Layout l : tabLayouts)
+      {
+        tabLayout.addLayout(l, 1);
+      }
+      vLayout = new FixedVerticalLayout(tabLayout);
+      vLayout.addLayout(buttonLayout, 1);
+
       tabControlContainer.setActiveTabPageID((short) 1);
     } else
     {
@@ -254,7 +234,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       vLayout.addControl(label);
     }
 
-    formSidebarController.requestLayout();
+    paint();
   }
 
   /**
@@ -583,17 +563,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   @Override
   public LayoutSize getHeightForWidth(int width)
   {
-    int height = vLayout.getHeightForWidth(width);
-    if (tabControlContainer != null)
-    {
-      short activeId = tabControlContainer.getActiveTabPageID();
-      Rectangle r = UNO.XWindow(tabControlContainer.getTabPageByID(activeId)).getPosSize();
-      Layout currentLayout = tabPageLayouts.get(activeId);
-      height = currentLayout.getHeightForWidth(width);
-      height += buttonLayout.getHeightForWidth(width);
-      height += r.Y + 5;
-    }
-    return new LayoutSize(height, height, height);
+    return new LayoutSize(-1, -1, -1);
   }
 
   @Override
@@ -604,15 +574,10 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     {
       int maxWidth = (int) UnoConfiguration.getConfiguration("org.openoffice.Office.UI.Sidebar/General",
           "MaximumWidth") - 60;
-      for (Map.Entry<Short, Layout> e : tabPageLayouts.entrySet())
-      {
-        width = Integer.max(width, e.getValue().getMinimalWidth(maxWidth));
-      }
-      width = Integer.max(width, buttonLayout.getMinimalWidth(maxWidth));
+      width = vLayout.getMinimalWidth(maxWidth);
     } catch (UnoHelperException e)
     {
       LOGGER.debug("", e);
-      return width;
     }
     return width;
   }
@@ -658,7 +623,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       {
         tabControlContainer.setActiveTabPageID(tabControlContainer.getTabPageCount());
       }
-      formSidebarController.requestLayout();
       tabChanged = true;
     }
   }
@@ -681,7 +645,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       {
         tabControlContainer.setActiveTabPageID(next);
       }
-      formSidebarController.requestLayout();
       tabChanged = true;
     }
   }
@@ -705,7 +668,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     {
       UNO.XWindow(control.getRight()).setVisible(visible);
     }
-    visibilityChanged = true;
   }
 
   /**

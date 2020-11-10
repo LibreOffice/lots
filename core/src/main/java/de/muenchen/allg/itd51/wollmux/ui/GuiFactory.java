@@ -53,6 +53,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
@@ -344,19 +345,30 @@ public class GuiFactory
    *          The title of the tab.
    * @param tabId
    *          The Id of the tab.
+   * @param scrollHeight
+   *          The height of scroll bar. If 0 or negative no scroll bar is added.
    */
   public static void createTab(XMultiComponentFactory xMCF, XComponentContext context, XTabPageContainerModel model,
-      String tabTitle, short tabId)
+      String tabTitle, short tabId, int scrollHeight)
   {
     XTabPageModel tabPageModel = model.createTabPage(tabId); // 0 is not valid
     tabPageModel.setTitle(tabTitle);
+    if (scrollHeight > 0)
+    {
+      try
+      {
+        UnoProperty.setProperty(tabPageModel, UnoProperty.V_SCROLL, true);
+      } catch (UnoHelperException e)
+      {
+        LOGGER.error("", e);
+      }
+    }
 
-    XTabPage xTabPage = null;
     try
     {
       Object tabPageService = UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_TAB_UNO_CONTROL_TAB_PAGE,
           xMCF, context);
-      xTabPage = UNO.XTabPage(tabPageService);
+      XTabPage xTabPage = UNO.XTabPage(tabPageService);
       UNO.XControl(xTabPage).setModel(UNO.XControlModel(tabPageModel));
       model.insertByIndex(model.getCount(), tabPageModel);
     } catch (IllegalArgumentException | IndexOutOfBoundsException | WrappedTargetException e)
