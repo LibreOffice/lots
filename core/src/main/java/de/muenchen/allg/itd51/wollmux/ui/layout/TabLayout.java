@@ -25,6 +25,7 @@ package de.muenchen.allg.itd51.wollmux.ui.layout;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +33,18 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.Size;
+import com.sun.star.awt.XControl;
 import com.sun.star.awt.XUnitConversion;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.tab.XTabPage;
 import com.sun.star.awt.tab.XTabPageContainer;
-import com.sun.star.uno.AnyConverter;
+import com.sun.star.lang.XMultiComponentFactory;
+import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.MeasureUnit;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
 import de.muenchen.allg.util.UnoProperty;
 
 /**
@@ -62,14 +66,36 @@ public class TabLayout implements Layout
   private XTabPageContainer tabPageContainer;
 
   /**
+   * List of invisible labels. Each tab page contains one label. The labels are used to compute the
+   * offset created by scrolling. Unfortunately LibreOffice can't return the properties ScrollTop
+   * and ScrollWidth properly. We need those values to reposition our controls because the
+   * coordinate (0,0) is always the first visible pixel in the window.
+   */
+  private List<XWindow> anchors;
+
+  /**
    * Vertical layout without margin.
    * 
    * @param tabPageContainer
-   *          The container of the tab pages. Is also an {@link XWindow}.
+   *          The container of the tab pages. Is also an {@link XWindow}. All tab pages have to be
+   *          added to the container before this layout should be created. Otherwise it may not work
+   *          properly.
+   * @param xMCF
+   *          The {@link XMultiComponentFactory} used to create controls in the tab pages.
+   * @param context
+   *          The {@link XComponentContext} for the created controls.
    */
-  public TabLayout(XTabPageContainer tabPageContainer)
+  public TabLayout(XTabPageContainer tabPageContainer, XMultiComponentFactory xMCF, XComponentContext context)
   {
     this.tabPageContainer = tabPageContainer;
+    this.anchors = new ArrayList<>(tabPageContainer.getTabPageCount());
+    for (short i = 0; i < tabPageContainer.getTabPageCount(); i++)
+    {
+      XTabPage page = tabPageContainer.getTabPage(i);
+      XControl anchor = GuiFactory.createLabel(xMCF, context, "", new Rectangle(), null);
+      UNO.XControlContainer(page).addControl(RandomStringUtils.random(10), anchor);
+      anchors.add(i, UNO.XWindow(anchor));
+    }
   }
 
   @Override
@@ -87,11 +113,9 @@ public class TabLayout implements Layout
   @Override
   public Pair<Integer, Integer> layout(Rectangle rect)
   {
-    XTabPage activePage = getActivetTabPage();
     // Properties use logical coordinates so we have to convert them.
     // XWindow.setPosSize use pixels.
     XUnitConversion converter = UNO.XUnitConversion(getActivetTabPage());
-    Rectangle tabRect = UNO.XWindow(activePage).getPosSize();
     for (int i = 0; i < layouts.size(); i++)
     {
       UNO.XTabPageModel(UNO.XControl(tabPageContainer.getTabPageByID((short) (i + 1))).getModel())
@@ -99,15 +123,10 @@ public class TabLayout implements Layout
     }
     try
     {
-      Object o = UnoProperty.getProperty(UNO.XControl(activePage).getModel(), UnoProperty.SCROLL_TOP);
-      int scrollTop = 0;
-      if (AnyConverter.isInt(o))
-      {
-        scrollTop = converter.convertSizeToPixel(new Size(0, AnyConverter.toInt(o)), MeasureUnit.APPFONT).Height;
-      }
       UNO.XWindow(tabPageContainer).setPosSize(rect.X, rect.Y, rect.Width, rect.Height, PosSize.POSSIZE);
-      Pair<Integer, Integer> size = getLayoutForActiveTabPageId().layout(new Rectangle(tabRect.X, rect.Y - scrollTop,
-          rect.Width, getLayoutForActiveTabPageId().getHeightForWidth(rect.Width)));
+      Rectangle anchorRect = anchors.get(tabPageContainer.getActiveTabPageID() - 1).getPosSize();
+      Pair<Integer, Integer> size = getLayoutForActiveTabPageId().layout(new Rectangle(anchorRect.X,
+          anchorRect.Y, rect.Width, getLayoutForActiveTabPageId().getHeightForWidth(rect.Width)));
       Size scrollableSize = converter.convertSizeToLogic(new Size(0, size.getLeft()), MeasureUnit.APPFONT);
       UnoProperty.setProperty(UNO.XControl(getActivetTabPage()).getModel(), UnoProperty.SCROLL_HEIGHT,
           scrollableSize.Height);

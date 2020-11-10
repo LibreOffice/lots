@@ -22,6 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.form.sidebar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,13 +178,11 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       tabControlContainer.addTabPageContainerListener(listener);
 
       tabControlContainer = UNO.XTabPageContainer(tabControl);
-      Layout tabLayout = new TabLayout(UNO.XTabPageContainer(tabControl));
-      vLayout = new FixedVerticalLayout(tabLayout);
       Layout buttonLayout = new VerticalLayout(20, 5, 0, 0, 5);
-      vLayout.addLayout(buttonLayout, 1);
 
       short tabId = 1;
       List<TabConfig> tabs = config.getTabs();
+      List<Layout> tabLayouts = new ArrayList<>();
       for (int i = 0; i < tabs.size(); i++)
       {
         TabConfig tab = tabs.get(i);
@@ -212,11 +211,20 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           }, tabPageControlContainer, controlsVLayout);
         }
 
-        tabLayout.addLayout(controlsVLayout, 1);
+        tabLayouts.add(controlsVLayout);
         addButtonsToLayout(tab, model, controlContainer, buttonLayout, tabId);
 
         tabId++;
       }
+
+      Layout tabLayout = new TabLayout(UNO.XTabPageContainer(tabControl), xMCF, context);
+      for (Layout l : tabLayouts)
+      {
+        tabLayout.addLayout(l, 1);
+      }
+      vLayout = new FixedVerticalLayout(tabLayout);
+      vLayout.addLayout(buttonLayout, 1);
+
       tabControlContainer.setActiveTabPageID((short) 1);
     } else
     {
