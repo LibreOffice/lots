@@ -30,7 +30,9 @@ import com.sun.star.awt.MessageBoxResults;
 import com.sun.star.awt.MessageBoxType;
 import com.sun.star.awt.XMessageBox;
 import com.sun.star.awt.XToolkit2;
+import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
+import com.sun.star.frame.XFrame;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperRuntimeException;
@@ -60,7 +62,14 @@ public class InfoDialog
    */
   public static void showInfoModal(String title, String message)
   {
-    showInfoModal(UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow()), title, message);
+    XFrame frame = UNO.desktop.getCurrentFrame();
+    if (frame == null)
+    {
+      LOGGER.debug("Frame isn't available");
+      return;
+    }
+    XWindow window = frame.getContainerWindow();
+    showInfoModal(UNO.XWindowPeer(window), title, message);
   }
 
   /**
