@@ -250,6 +250,16 @@
           <groupId>org.jacoco</groupId>
           <artifactId>org.jacoco.core</artifactId>
         </dependency>
+        <dependency>
+          <groupId>org.libreoffice</groupId>
+          <artifactId>libreoffice</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.libreoffice</groupId>
+          <artifactId>unoloader</artifactId>
+          <scope>test</scope>
+        </dependency>
       </dependencies>
     </profile>
     <profile>
