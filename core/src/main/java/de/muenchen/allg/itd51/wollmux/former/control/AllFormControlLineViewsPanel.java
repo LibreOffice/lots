@@ -30,9 +30,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -123,7 +123,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   /**
    * Enthält die {@link ViewDescriptor}s in der richtigen Reihenfolge.
    */
-  private Vector<Object> viewDescriptors = new Vector<>();
+  private List<Object> viewDescriptors = new ArrayList<>();
 
   /**
    * Die Indizes der ausgewählten Elemente in {@link #viewDescriptors}.
@@ -256,7 +256,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   {
     if (index < 0 || index > viewDescriptors.size())
     {
-      LOGGER.error(L.m("Inkonsistenz zwischen Model und View!"));
+      LOGGER.error("Inkonsistenz zwischen Model und View!");
       return;
     }
     OneFormControlLineView ofclView =
@@ -286,7 +286,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     tab.validate();
 
     fixTabStructure();
-    tab = null; // tab ist eventuell entfernt worden!
 
     tabPane.validate();
     scrollPane.validate();
@@ -380,7 +379,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     tab.validate();
 
     fixTabStructure();
-    tab = null; // tab ist eventuell entfernt worden!
 
     tabPane.validate();
     scrollPane.validate();
@@ -490,7 +488,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       FormControlModel model = view.getModel();
       if (model.getType() != FormControlModel.CHECKBOX_TYPE)
       {
-        LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox ist ein Element selektiert, das keine Checkbox ist"));
+        LOGGER.info("FM4000: Beim Aufruf von Checkbox->Combobox ist ein Element selektiert, das keine Checkbox ist");
         return null;
       }
       else
@@ -498,13 +496,13 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
         IDManager.ID id = model.getId();
         if (id == null)
         {
-          LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox ist eine Checkbox ohne ID selektiert"));
+          LOGGER.info("FM4000: Beim Aufruf von Checkbox->Combobox ist eine Checkbox ohne ID selektiert");
           return null;
         }
         String label = model.getLabel();
         if (mapCheckboxId2ComboboxEntry.containsValue(label))
         {
-          LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox sind 2 Checkboxen mit gleichem Label selektiert"));
+          LOGGER.info("FM4000: Beim Aufruf von Checkbox->Combobox sind 2 Checkboxen mit gleichem Label selektiert");
           return null;
         }
         mapCheckboxId2ComboboxEntry.put(id, label);
@@ -515,7 +513,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     if (count < 2)
     {
-      LOGGER.info(L.m("FM4000: Beim Aufruf von Checkbox->Combobox sind weniger als 2 Checkboxen selektiert"));
+      LOGGER.info("FM4000: Beim Aufruf von Checkbox->Combobox sind weniger als 2 Checkboxen selektiert");
       return null;
     }
 
@@ -637,8 +635,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   {
     ViewDescriptor desc1 = (ViewDescriptor) viewDescriptors.get(index1);
     ViewDescriptor desc2 = (ViewDescriptor) viewDescriptors.get(index2);
-    viewDescriptors.setElementAt(desc1, index2);
-    viewDescriptors.setElementAt(desc2, index1);
+    viewDescriptors.set(index2, desc1);
+    viewDescriptors.set(index1, desc2);
 
     fixTabStructure();
 
@@ -678,7 +676,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
           else if (state == BroadcastObjectSelection.STATE_SHIFT_CLICK)
           {
             state = 1;
-            selindex = index;
           }
 
 
@@ -693,20 +690,13 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
           break;
         }
-        else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK)
+        else if (b.getState() == BroadcastObjectSelection.STATE_SHIFT_CLICK
+            && ((selindex == -1 && (index > selection.firstElement() || index > selection.lastElement()))
+                || (selindex != -1
+                    && (index > selindex && (index < selection.firstElement() || index < selection.lastElement())))))
         {
-          boolean sel = false;
-          if ((selindex == -1 && (index > selection.firstElement() || index > selection.lastElement())))
-            sel = true;
-          else if (selindex != -1
-            && (index > selindex && (index < selection.firstElement() || index < selection.lastElement())))
-            sel = true;
-
-          if (sel)
-          {
-            view.mark();
-            selection.add(index);
-          }
+          view.mark();
+          selection.add(index);
         }
       }
 

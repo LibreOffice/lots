@@ -176,8 +176,8 @@ public class DocumentCommandInterpreter
       // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
       // können, damit der DocumentCommandTree vollständig aufgebaut werden
       // kann.
-      errors +=
-        new DocumentExpander(this, getDocumentController().getModel().getFragUrls()).execute(getDocumentController().getModel().getDocumentCommands());
+      errors += new DocumentExpander(this, getDocumentController().getModel().getFragUrls())
+          .execute(getDocumentController().getModel().getDocumentCommands());
 
       // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
       // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
@@ -206,15 +206,6 @@ public class DocumentCommandInterpreter
       errors +=
         new MainProcessor(this).execute(getDocumentController().getModel().getDocumentCommands());
 
-      // Da keine neuen Elemente mehr eingefügt werden müssen, können
-      // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
-      // InsertContent-Kommandos gelöscht werden.
-      // errors += cleanInsertMarks(tree);
-
-      // Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
-      // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
-      // sauber erkennen und entfernen.
-      // errors += new EmptyParagraphCleaner().execute(tree);
       SurroundingGarbageCollector collect = new SurroundingGarbageCollector(this);
       errors +=
         collect.execute(getDocumentController().getModel().getDocumentCommands());

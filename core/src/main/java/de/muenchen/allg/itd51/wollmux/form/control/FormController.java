@@ -43,7 +43,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnResetDocumentState;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSaveTempAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Der Controller für die FormularGUI.
@@ -209,7 +208,7 @@ public class FormController
     Dialog dlg = model.getDialogLib().get(dialogName);
     if (dlg == null)
     {
-      LOGGER.error(L.m("Funktionsdialog \"%1\" ist nicht definiert", dialogName));
+      LOGGER.error("Funktionsdialog \"{}\" ist nicht definiert", dialogName);
     }
     else
     {

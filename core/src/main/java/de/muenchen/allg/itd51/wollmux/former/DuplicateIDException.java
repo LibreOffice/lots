@@ -34,8 +34,19 @@ public class DuplicateIDException extends Exception
    * keine Ahnung, was das soll, aber es macht Eclipse glücklich.
    */
   private static final long serialVersionUID = 4349143792168156649L;
-  public DuplicateIDException() {};
-  public DuplicateIDException(String message) {super(message);}
-  public DuplicateIDException(String message, Throwable cause) {super(message,cause);}
-  public DuplicateIDException(Throwable cause) {super(cause);}
+
+  public DuplicateIDException()
+  {
+  }
+
+  /**
+   * New duplicate ID exception.
+   *
+   * @param message
+   *          The exception message.
+   */
+  public DuplicateIDException(String message)
+  {
+    super(message);
+  }
 }

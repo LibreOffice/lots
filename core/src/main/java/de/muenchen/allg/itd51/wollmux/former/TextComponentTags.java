@@ -236,7 +236,9 @@ public class TextComponentTags
         else
           buf.append("<" + key + ">");
       } else
+      {
         buf.append(el.toString());
+      }
     }
     return buf.toString();
   }
@@ -570,7 +572,9 @@ public class TextComponentTags
         Highlighter.HighlightPainter hp = new DefaultHighlighter.DefaultHighlightPainter(new Color(0xddddff));
         extraHighlightTag = hl.addHighlight(pos1, pos2, hp);
       } else
+      {
         hl.changeHighlight(extraHighlightTag, pos1, pos2);
+      }
     } catch (BadLocationException e1)
     {
       LOGGER.trace("", e1);

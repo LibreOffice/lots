@@ -27,8 +27,6 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.StringReader;
@@ -179,14 +177,7 @@ public class FunctionSelectionAccessView implements View
     this.namespace = namespace;
     myPanel = new JPanel(new GridBagLayout());
 
-    updateExpertFunctionTimer = new Timer(250, new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        updateExpertFunction();
-      }
-    });
+    updateExpertFunctionTimer = new Timer(250, e -> updateExpertFunction());
     updateExpertFunctionTimer.setCoalesce(true);
     updateExpertFunctionTimer.setRepeats(false);
 
@@ -318,7 +309,7 @@ public class FunctionSelectionAccessView implements View
 
     Component glue = Box.createGlue();
     gbcGlue.gridx = 0;
-    gbcGlue.gridy = y++;
+    gbcGlue.gridy = y + 1;
     myPanel.add(glue, gbcGlue);
 
     myPanel.validate();
@@ -336,7 +327,7 @@ public class FunctionSelectionAccessView implements View
    */
   private JComboBox<String> buildParameterBox(final String paramName, ParamValue startValue)
   {
-    final JComboBox<String> combo = new JComboBox<String>();
+    final JComboBox<String> combo = new JComboBox<>();
     combo.setEditable(true);
 
     combo.addItem(UNSPECIFIED_ITEM);
@@ -496,7 +487,7 @@ public class FunctionSelectionAccessView implements View
    */
   private JComboBox<String> buildFunctionSelector()
   {
-    functionSelectorBox = new JComboBox<String>();
+    functionSelectorBox = new JComboBox<>();
     int selectedIndex = 0;
     int none_index = functionSelectorBox.getItemCount();
     functionSelectorBox.addItem(NONE_ITEM);
@@ -634,15 +625,15 @@ public class FunctionSelectionAccessView implements View
         String functionName = item;
         String[] paramNames = null;
         if (item.equals(EXPERT_ITEM) || item.equals(STRING_ITEM))
-          functionName = FunctionSelectionAccess.EXPERT_FUNCTION;
+          functionName = FunctionSelection.EXPERT_FUNCTION;
         else if (item.equals(NONE_ITEM))
-          functionName = FunctionSelectionAccess.NO_FUNCTION;
+          functionName = FunctionSelection.NO_FUNCTION;
         else
         {
           Function func = funcLib.get(functionName);
           if (func == null)
           {
-            LOGGER.error(L.m("Funktion \"%1\"\" ist verschwunden ?!?", functionName));
+            LOGGER.error("Funktion \"{}\"\" ist verschwunden ?!?", functionName);
           } else
           {
             paramNames = func.parameters();

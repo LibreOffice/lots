@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.util.L;
 
@@ -169,8 +168,7 @@ public class IDManager
     /**
      * Liste von {@link WeakReference}s auf {@link IDManager.IDChangeListener}.
      */
-    private List<WeakReference<IDChangeListener>> listeners =
-        new Vector<>();
+    private List<WeakReference<IDChangeListener>> listeners = new ArrayList<>();
 
     /**
      * Erstellt ein neues ID Objekt, das inaktiv (siehe {@link #isActive()} ist.
@@ -308,6 +306,7 @@ public class IDManager
     /**
      * wie {@link #getID()}.
      */
+    @Override
     public String toString()
     {
       return id;
@@ -319,11 +318,13 @@ public class IDManager
      * existiert. Dies ist auch Voraussetzung dafür, dass die IDs ihre Funktion
      * erfüllen können.
      */
+    @Override
     public boolean equals(Object obj)
     {
       return this == obj;
     }
 
+    @Override
     public int hashCode()
     {
       return super.hashCode();

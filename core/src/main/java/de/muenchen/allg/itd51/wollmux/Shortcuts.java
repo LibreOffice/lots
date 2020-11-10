@@ -47,6 +47,11 @@ public class Shortcuts
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Shortcuts.class);
 
+  private Shortcuts()
+  {
+    // hide public constructor
+  }
+
   /**
    * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus, löscht
    * alle bisher vorhandenen Tastenkombinationen deren URL mit "wollmux:" beginnt und
@@ -122,9 +127,7 @@ public class Shortcuts
       }
       else
       {
-        LOGGER.error(L.m(
-          "Ungültige Tastenkombination '%1' im .conf Abschnitt Tastenkuerzel",
-          shortcut));
+        LOGGER.error("Ungültige Tastenkombination '{}' im .conf Abschnitt Tastenkuerzel", shortcut);
       }
     }
 
@@ -195,8 +198,8 @@ public class Shortcuts
     {
       for (int i = 0; i < keys.length; i++)
       {
-        LOGGER.trace("Modifiers: " + keys[i].Modifiers + " KeyCode: "
-          + keys[i].KeyCode + " --> " + xac.getCommandByKeyEvent(keys[i]));
+        LOGGER.trace("Modifiers: {} KeyCode: {} --> {}", keys[i].Modifiers, keys[i].KeyCode,
+            xac.getCommandByKeyEvent(keys[i]));
 
       }
     }
@@ -262,7 +265,7 @@ public class Shortcuts
   private static Short returnKeyCode(String shortcut)
   {
 
-    final Map<String, Short> myMap = new HashMap<String, Short>();
+    final Map<String, Short> myMap = new HashMap<>();
 
     // Zahlen 0-9
     myMap.put("0", Short.valueOf(Key.NUM0));
@@ -380,9 +383,7 @@ public class Shortcuts
     myMap.put("EQUAL", Short.valueOf(Key.EQUAL));
     myMap.put("=", Short.valueOf(Key.EQUAL));
 
-    final Short keyCode = myMap.get(shortcut.toUpperCase());
-
-    return keyCode;
+    return myMap.get(shortcut.toUpperCase());
   }
 
   /**
@@ -396,7 +397,7 @@ public class Shortcuts
   private static Short returnKeyModifier(String shortcut)
   {
 
-    final Map<String, Short> myMap = new HashMap<String, Short>();
+    final Map<String, Short> myMap = new HashMap<>();
 
     // SHIFT, CTRL und ALT
     myMap.put("SHIFT", Short.valueOf(KeyModifier.SHIFT));
@@ -405,8 +406,6 @@ public class Shortcuts
     myMap.put("STRG", Short.valueOf(KeyModifier.MOD1));
     myMap.put("ALT", Short.valueOf(KeyModifier.MOD2));
 
-    final Short keyModifier = myMap.get(shortcut.toUpperCase());
-
-    return keyModifier;
+    return myMap.get(shortcut.toUpperCase());
   }
 }

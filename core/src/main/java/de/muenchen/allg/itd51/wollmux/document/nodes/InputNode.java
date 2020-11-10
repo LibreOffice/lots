@@ -70,9 +70,9 @@ public class InputNode extends TextFieldNode implements FormControl
   }
 
   @Override
-  public int getType()
+  public FormControlType getType()
   {
-    return INPUT_CONTROL;
+    return FormControlType.INPUT_CONTROL;
   }
 
   @Override

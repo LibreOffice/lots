@@ -141,14 +141,12 @@ public class OverlayDatasource extends Datasource
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
-      throw new ConfigurationErrorException(L.m(
-          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
-          name, source1Name));
+      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
+          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source1Name));
 
     if (source2 == null)
-      throw new ConfigurationErrorException(L.m(
-          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
-          name, source2Name));
+      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
+          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source2Name));
 
     schema1 = new HashSet<>(source1.getSchema());
     schema2 = new HashSet<>(source2.getSchema());

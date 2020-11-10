@@ -24,7 +24,6 @@ package de.muenchen.allg.itd51.wollmux.former.control;
 
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
@@ -112,13 +111,13 @@ public class OneFormControlExtView implements LazyView
     this.funcLib = funcLib;
     myTabbedPane = new JTabbedPane();
     model.addListener(new MyModelChangeListener());
-    myTabbedPane.addChangeListener(new ChangeListener()
-    {
-      @Override
-      public void stateChanged(ChangeEvent e)
+    myTabbedPane.addChangeListener(e -> {
+      if (myTabbedPane.getTabCount() > 1 && myTabbedPane.getSelectedIndex() >= 0)
       {
-        if (myTabbedPane.getTabCount() > 1 && myTabbedPane.getSelectedIndex() >= 0)
+        synchronized (OneFormControlExtView.class)
+        {
           selectedTab = myTabbedPane.getSelectedIndex();
+        }
       }
     });
   }

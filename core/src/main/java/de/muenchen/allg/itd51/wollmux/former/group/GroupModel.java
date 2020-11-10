@@ -22,10 +22,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.group;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
@@ -72,7 +72,7 @@ public class GroupModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert
    * werden wollen.
    */
-  private List<ModelChangeListener> listeners = new Vector<>(1);
+  private List<ModelChangeListener> listeners = new ArrayList<>(1);
 
   /**
    * Der FormularMax4000 zu dem dieses Model gehört.

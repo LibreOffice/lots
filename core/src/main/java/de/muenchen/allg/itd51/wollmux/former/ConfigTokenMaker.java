@@ -22,8 +22,6 @@
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
-import java.util.regex.Pattern;
-
 import javax.swing.text.Segment;
 
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
@@ -33,7 +31,6 @@ import org.fife.ui.rsyntaxtextarea.TokenMap;
 
 public class ConfigTokenMaker extends AbstractTokenMaker
 {
-  private final static Pattern IDENT = Pattern.compile("[a-zA-Z][_a-zA-Z0-9]*");
 
   @Override
   public Token getTokenList(Segment text, int initialTokenType, int startOffset)

@@ -24,11 +24,11 @@ package de.muenchen.allg.itd51.wollmux.former.group;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
@@ -46,8 +46,7 @@ public class GroupsProvider implements Iterable<IDManager.ID>
   /**
    * Wer wird alles benachrichtigt, wenn Gruppen hinzukommen oder entfernt werden.
    */
-  private List<WeakReference<GroupsChangedListener>> listeners =
-      new Vector<>();
+  private List<WeakReference<GroupsChangedListener>> listeners = new ArrayList<>();
 
   /**
    * Der heilige Meister, den wir anbeten.

@@ -26,7 +26,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
 
@@ -46,10 +45,23 @@ public class PrintFunctionDialog extends JDialog
 {
   private static final long serialVersionUID = 1L;
   
-  private TextDocumentController documentController;
-  PrintFunctionLibrary printFunctionLibrary;
+  private transient TextDocumentController documentController;
+  transient PrintFunctionLibrary printFunctionLibrary;
 
-  public PrintFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController, PrintFunctionLibrary printFuncLib)
+  /**
+   * A new dialog for editing the print function.
+   *
+   * @param owner
+   *          The owning frame.
+   * @param modal
+   *          If true the dialog is modal.
+   * @param documentController
+   *          The controller of the document.
+   * @param printFuncLib
+   *          The print function library.
+   */
+  public PrintFunctionDialog(Frame owner, boolean modal, TextDocumentController documentController,
+      PrintFunctionLibrary printFuncLib)
   {
     super(owner, modal);
     
@@ -79,38 +91,29 @@ public class PrintFunctionDialog extends JDialog
   private void createGui()
   {
     final JList<String> printFunctionCurrentList =
-        new JList<String>(new Vector<String>(documentController.getModel().getPrintFunctions()));
+        new JList<>(new Vector<String>(documentController.getModel().getPrintFunctions()));
       JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
       printFunctionEditorContentPanel.add(printFunctionCurrentList,
         BorderLayout.CENTER);
 
-      final JComboBox<String> printFunctionComboBox = new JComboBox<String>(printFunctionLibrary.getFunctionNames().toArray(new String[]{}));
+      final JComboBox<String> printFunctionComboBox = new JComboBox<>(
+          printFunctionLibrary.getFunctionNames().toArray(new String[] {}));
       printFunctionComboBox.setEditable(true);
 
       printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);
 
-      ActionListener removeFunc = new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
+      ActionListener removeFunc = e -> {
+        for (Object o : printFunctionCurrentList.getSelectedValuesList())
         {
-          for (Object o : printFunctionCurrentList.getSelectedValuesList())
-            documentController.removePrintFunction("" + o);
-          printFunctionCurrentList.setListData(new Vector<String>(
-            documentController.getModel().getPrintFunctions()));
+          documentController.removePrintFunction("" + o);
         }
+        printFunctionCurrentList.setListData(new Vector<String>(documentController.getModel().getPrintFunctions()));
       };
 
-      ActionListener addFunc = new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
-          documentController.addPrintFunction(newFunctionName);
-          printFunctionCurrentList.setListData(new Vector<String>(
-            documentController.getModel().getPrintFunctions()));
-        }
+      ActionListener addFunc = e -> {
+        String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
+        documentController.addPrintFunction(newFunctionName);
+        printFunctionCurrentList.setListData(new Vector<String>(documentController.getModel().getPrintFunctions()));
       };
 
       JButton wegDamit = new JButton(L.m("Entfernen"));
@@ -120,14 +123,7 @@ public class PrintFunctionDialog extends JDialog
       machDazu.addActionListener(addFunc);
 
       JButton ok = new JButton(L.m("OK"));
-      ok.addActionListener(new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          dispose();
-        }
-      });
+      ok.addActionListener(e -> dispose());
 
       Box buttons = Box.createHorizontalBox();
       buttons.add(wegDamit);

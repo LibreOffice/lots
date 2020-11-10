@@ -32,27 +32,33 @@ import de.muenchen.allg.afid.UnoHelperException;
 public interface FormControl
 {
   /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle einer Checkbox.
+   * Types of {@link FormControl}.
    */
-  public static final int CHECKBOX_CONTROL = 0;
+  public enum FormControlType
+  {
+    /**
+     * Rückgabewert für {@link FormControl#getType()} im Falle einer Checkbox.
+     */
+    CHECKBOX_CONTROL,
+
+    /**
+     * Rückgabewert für {@link FormControl#getType()} im Falle einer Eingabeliste.
+     */
+    DROPDOWN_CONTROL,
+
+    /**
+     * Rückgabewert für {@link FormControl#getType()} im Falle eines Eingabefeldes.
+     */
+    INPUT_CONTROL;
+  }
+
 
   /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle einer Eingabeliste.
-   */
-  public static final int DROPDOWN_CONTROL = 1;
-
-  /**
-   * Rückgabewert für {@link FormControl#getType()} im Falle eines Eingabefeldes.
-   */
-  public static final int INPUT_CONTROL = 2;
-
-
-  /**
-   * Liefert die Art des Steuerelements, z,B, {@link FormControl#CHECKBOX_CONTROL}.
+   * Liefert die Art des Steuerelements, z,B, {@link FormControlType#CHECKBOX_CONTROL}.
    *
    * @return Art des Steuerelements.
    */
-  public int getType();
+  public FormControlType getType();
 
   /**
    * Liefert einen String, der das Steuerelement beschreibt. Bei Eingabefeldern ist

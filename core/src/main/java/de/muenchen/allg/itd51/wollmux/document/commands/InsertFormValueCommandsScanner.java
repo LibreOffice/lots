@@ -80,7 +80,7 @@ class InsertFormValueCommandsScanner extends AbstractExecutor
     }
     else
     {
-      fields = new LinkedList<FormField>();
+      fields = new LinkedList<>();
       idToFormFields.put(id, fields);
     }
     FormField field =

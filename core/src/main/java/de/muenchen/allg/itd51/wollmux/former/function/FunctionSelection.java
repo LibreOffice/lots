@@ -26,9 +26,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class FunctionSelection implements FunctionSelectionAccess
 {
+
+  /**
+   * Dieser spezielle Funktionsname signalisiert, dass keine Funktion ausgewählt ist.
+   */
+  public static final String NO_FUNCTION = L.m("<keine>");
+
+  /**
+   * Dieser spezielle Funktionsname signalisiert, dass der Benutzer die Funktion manuell eingegeben
+   * hat und sie direkt in dieser FunctionSelection gespeichert ist.
+   */
+  public static final String EXPERT_FUNCTION = L.m("<Experte>");
+
   /**
    * Leere Liste von Parameternamen.
    */
@@ -215,6 +228,7 @@ public class FunctionSelection implements FunctionSelectionAccess
     return rootConf;
   }
 
+  @Override
   public boolean hasSpecifiedParameters()
   {
     for (int i = 0; i < paramNames.length; ++i)
@@ -225,6 +239,7 @@ public class FunctionSelection implements FunctionSelectionAccess
     return false;
   }
 
+  @Override
   public ParamValue getParameterValue(String paramName)
   {
     ParamValue val = mapNameToParamValue.get(paramName);
@@ -232,6 +247,7 @@ public class FunctionSelection implements FunctionSelectionAccess
     return new ParamValue(val);
   }
 
+  @Override
   public void setParameterValue(String paramName, ParamValue paramValue)
   {
     mapNameToParamValue.put(paramName, paramValue);

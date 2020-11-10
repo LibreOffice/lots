@@ -85,9 +85,9 @@ public class DropdownNode extends TextFieldNode implements
   }
 
   @Override
-  public int getType()
+  public FormControlType getType()
   {
-    return DROPDOWN_CONTROL;
+    return FormControlType.DROPDOWN_CONTROL;
   }
 
   @Override

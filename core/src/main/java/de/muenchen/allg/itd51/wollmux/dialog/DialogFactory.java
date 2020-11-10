@@ -41,6 +41,11 @@ public class DialogFactory
   private static final Logger LOGGER = LoggerFactory
       .getLogger(DialogFactory.class);
 
+  private DialogFactory()
+  {
+    // hide public constructor
+  }
+
   /**
    * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis eine
    * DialogLibrary zurück.
@@ -71,9 +76,7 @@ public class DialogFactory
         ConfigThingy dialogConf = iter.next();
         String name = dialogConf.getName();
         if (dialogsInBlock.contains(name))
-          LOGGER.error(L.m(
-            "Funktionsdialog \"%1\" im selben Funktionsdialoge-Abschnitt mehrmals definiert",
-            name));
+          LOGGER.error("Funktionsdialog \"{}\" im selben Funktionsdialoge-Abschnitt mehrmals definiert", name);
         dialogsInBlock.add(name);
         try
         {

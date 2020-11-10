@@ -194,7 +194,7 @@ public abstract class AbstractExecutor implements DocumentCommand.Executor
     XTextCursor insCursor = cmd.getTextCursor();
     if (insCursor == null)
     {
-      LOGGER.error(L.m("Kann Fehler-Feld nicht einfügen, da kein InsertCursor erzeugt werden konnte."));
+      LOGGER.error("Kann Fehler-Feld nicht einfügen, da kein InsertCursor erzeugt werden konnte.");
       return;
       // Anmerkung: Aufruf von cmd.setTextRangeString() oben macht nichts, falls kein
       // InsertCursor erzeugt werden kann, daher kein Problem, dass die Abfrage nach

@@ -273,14 +273,7 @@ public class FormularMax4kController
     groupModelList = new GroupModelList(this);
     sectionModelList = new SectionModelList(this);
 
-    writeChangesTimer = new Timer(500, new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        updateDocument(FormularMax4kController.this.documentController);
-      }
-    });
+    writeChangesTimer = new Timer(500, e -> updateDocument(FormularMax4kController.this.documentController));
     writeChangesTimer.setCoalesce(true);
     writeChangesTimer.setRepeats(false);
 
@@ -308,24 +301,18 @@ public class FormularMax4kController
   {
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        try
         {
-          try
-          {
-            view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
+          view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
 
-            writeChangesTimer.stop();
+          writeChangesTimer.stop();
 
-            view.setFrameSize();
-            view.setVisible(true);
-          }
-          catch (Exception x)
-          {
-            LOGGER.error("", x);
-          }
+          view.setFrameSize();
+          view.setVisible(true);
+        } catch (Exception x)
+        {
+          LOGGER.error("", x);
         }
       });
     }
@@ -492,14 +479,8 @@ public class FormularMax4kController
   {
     if (functionTester == null)
     {
-      functionTester = new FunctionTester(functionLibrary, new ActionListener()
-      {
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          functionTester = null;
-        }
-      }, idManager, NAMESPACE_FORMCONTROLMODEL);
+      functionTester = new FunctionTester(functionLibrary, e -> functionTester = null, idManager,
+          NAMESPACE_FORMCONTROLMODEL);
     }
     else
     {
@@ -514,19 +495,13 @@ public class FormularMax4kController
   {
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        try
         {
-          try
-          {
-            view.toFront();
-          }
-          catch (Exception x)
-          {
-            LOGGER.trace("", x);
-          }
+          view.toFront();
+        } catch (Exception x)
+        {
+          LOGGER.trace("", x);
         }
       });
     }
@@ -679,7 +654,7 @@ public class FormularMax4kController
   {
     if (writeChangesTimer.isRunning())
     {
-      LOGGER.debug(L.m("Schreibe wartende Änderungen ins Dokument"));
+      LOGGER.debug("Schreibe wartende Änderungen ins Dokument");
       writeChangesTimer.stop();
       try
       {
@@ -700,7 +675,7 @@ public class FormularMax4kController
    */
   private ConfigThingy updateDocument(TextDocumentController documentController)
   {
-    LOGGER.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
+    LOGGER.debug("Übertrage Formularbeschreibung ins Dokument");
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<>();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     sectionModelList.updateDocument();
@@ -1237,16 +1212,19 @@ public class FormularMax4kController
     if (formControlCount > CRITICAL_NUMBER_OF_FORMCONTROLS
       && maxMemory < LOWEST_ALLOWED_HEAP_SIZE)
     {
-      LOGGER.info(L.m(
-        "Starten von FormularMax beim Bearbeiten von Dokument '%1' abgebrochen, da maximale Java Heap Size = %2 bytes und Anzahl FormControls = %3",
-        documentController.getFrameController().getTitle(), maxMemory, formControlCount));
+      LOGGER.info("Starten von FormularMax beim Bearbeiten von Dokument '{}' abgebrochen, "
+              + "da maximale Java Heap Size = {} bytes und Anzahl FormControls = {}",
+          documentController.getFrameController().getTitle(), maxMemory, formControlCount);
       JOptionPane.showMessageDialog(
         view,
-        L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
-          + "Bitte ändern Sie in Office Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->LibreOffice->Erweitert\".\n"
-          + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
-          + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
-          + "Danach ist ein Neustart von Office nötig."),
+          L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher"
+              + " zur Verfügung steht.\n" + "Bitte ändern Sie in Office Ihre Java-Einstellungen. Sie finden diese unter"
+              + "\"Extras->Optionen->LibreOffice->Erweitert\".\n"
+              + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, "
+              + "klicken auf den Button \"Parameter\",\n"
+              + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und "
+              + "klicken auf \"Zuweisen\".\n"
+              + "Danach ist ein Neustart von Office nötig."),
         L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
       DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, null);
       return false;

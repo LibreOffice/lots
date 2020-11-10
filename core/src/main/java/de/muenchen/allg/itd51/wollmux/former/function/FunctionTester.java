@@ -25,15 +25,14 @@ package de.muenchen.allg.itd51.wollmux.former.function;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -118,7 +117,7 @@ public class FunctionTester
   /**
    * Liste aller angezeigten {@link FunctionTester.ValueBox}es.
    */
-  private List<ValueBox> valueBoxes = new Vector<>();
+  private List<ValueBox> valueBoxes = new ArrayList<>();
 
   /**
    * Die Funktionsbibliothek, deren Funktionen für BIND zur Verfügung stehen.
@@ -239,14 +238,7 @@ public class FunctionTester
     hbox.add(Box.createHorizontalStrut(5));
 
     JButton butsi = new JButton("VALUE");
-    butsi.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        insertCode("VALUE \"" + getComboBoxValue(combo, "ERROR") + "\"");
-      }
-    });
+    butsi.addActionListener(e -> insertCode("VALUE \"" + getComboBoxValue(combo, "ERROR") + "\""));
 
     hbox.add(butsi);
 
@@ -412,33 +404,27 @@ public class FunctionTester
 
     evaluatePanel.add(hbox);
 
-    button.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        stringResult.setText("");
-        booleanResult.setText("");
+    button.addActionListener(e -> {
+      stringResult.setText("");
+      booleanResult.setText("");
 
-        try
-        {
-          String codeStr = codeArea.getText().trim();
-          if (codeStr.length() == 0) return;
-          ConfigThingy codeConf = new ConfigThingy("CAT", codeStr);
-          Function func =
-            FunctionFactory.parse(codeConf, funcLib, dialogLib, myContext);
-          String result = func.getString(myParameters);
-          if (result == FunctionLibrary.ERROR)
-            throw new Exception(L.m("Illegaler oder fehlender Parameter!"));
-          stringResult.setText(result);
-          stringResult.setCaretPosition(0);
-          booleanResult.setText("" + func.getBoolean(myParameters));
-        }
-        catch (Exception x)
-        {
-          stringResult.setText(x.getMessage());
-          stringResult.setCaretPosition(0);
-        }
+      try
+      {
+        String codeStr = codeArea.getText().trim();
+        if (codeStr.length() == 0)
+          return;
+        ConfigThingy codeConf = new ConfigThingy("CAT", codeStr);
+        Function func = FunctionFactory.parse(codeConf, funcLib, dialogLib, myContext);
+        String result = func.getString(myParameters);
+        if (result == FunctionLibrary.ERROR)
+          throw new Exception(L.m("Illegaler oder fehlender Parameter!"));
+        stringResult.setText(result);
+        stringResult.setCaretPosition(0);
+        booleanResult.setText("" + func.getBoolean(myParameters));
+      } catch (Exception x)
+      {
+        stringResult.setText(x.getMessage());
+        stringResult.setCaretPosition(0);
       }
     });
 
@@ -455,14 +441,7 @@ public class FunctionTester
   private JComponent makeCodeInsertionButton(String label, final String code)
   {
     JButton butsi = new JButton(label);
-    butsi.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        insertCode(code);
-      }
-    });
+    butsi.addActionListener(e -> insertCode(code));
 
     return butsi;
   }

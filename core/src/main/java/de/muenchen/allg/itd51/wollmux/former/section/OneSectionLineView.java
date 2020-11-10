@@ -24,8 +24,6 @@ package de.muenchen.allg.itd51.wollmux.former.section;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -174,14 +172,7 @@ public class OneSectionLineView extends LineView
   {
     final JCheckBox visiBox = new JCheckBox();
     visiBox.setSelected(model.isVisible());
-    visiBox.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        model.setVisible(visiBox.isSelected());
-      }
-    });
+    visiBox.addActionListener(e -> model.setVisible(visiBox.isSelected()));
     return visiBox;
   }
 

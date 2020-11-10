@@ -97,47 +97,44 @@ public class OOoDatasource extends Datasource
    *
    * Default ist Oracle-Syntax.
    *
-   * o *** ANSI ********* <doublequote symbol> ::= 2 consecutive double quote
-   * characters
+   * o *** ANSI ********* <doublequote symbol> ::= 2 consecutive double quote characters
    *
-   * (Lexical Elements, 135 Foundation) Ein delimited Identifier ist ein von "..."
-   * umschlossener Identifier. Im Identifier enthaltene Doublequotes werden durch
-   * <doublequote symbol> ersetzt. (Lexical Elements, 134 Foundation)
+   * (Lexical Elements, 135 Foundation) Ein delimited Identifier ist ein von "..." umschlossener
+   * Identifier. Im Identifier enthaltene Doublequotes werden durch <doublequote symbol> ersetzt.
+   * (Lexical Elements, 134 Foundation)
    *
-   * <quote symbol> ::= <quote><quote> (2 consecutive quote characters) (Lexical elements, 143 Foundation)
-  In einem <character string literal> werden einzelne <quote>s durch <quote symbol> ersetzt.(Lexical elements, 143 Foundation)
-
-   o**** Datensätze zu vorgegebener Schlüsselliste finden *********
-
-  SELECT * FROM "<id>" WHERE ("<colId>"='<colVal>' AND "<colId>"='<colVal>' AND ...) OR (...) OR ...;
-
-  In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
-
-  In <colVal> sind Quotes durch <quote symbol> ersetzt.
-
-  o ***** Datensätze finden, die bestimmte Kriterien erfüllen ********
-
-  8.5 <like predicate> (385 Foundation)
-  Der String hinter ESCAPE muss genau ein Zeichen lang sein. Ansonsten gibt es eine Exception (387 Foundation, 8.5 General Rules 3b))
-  _ und % sowie das ESCAPE-Zeichen selbst müssen im String-Ausdruck hinter LIKE escapet werden (durch Voranstellen des Escape-Zeichens). Andere Zeichen dürfen nicht escapet werden.
-
-  SELECT * FROM "<id>" WHERE (lower("<colId>") LIKE lower('<pattern>') ESCAPE '|') AND (...) AND ...;
-  In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
-  In <pattern> sind "_",  "%" und "|" ersetzt durch "|_", "|%" und "||".
-
-   ***** Alle Datensätze auslesen ******
-
-  SELECT * FROM "<id>";
-  In <id> sind Doublequotes durch <doublequote symbol> ersetzt.
-
-   **** Oracle *****
-  Wie ANSI
-   ****** MySQL *******
-  Wie ANSI, aber mit lcase() statt lower()
-   ****** PervasiveSQL *******
-  Wie ANSI, aber rechts vom LIKE dürfen nur einfache Konstanten (also kein lower oder lcase)
-  stehen. Außerdem wird "DATENBANK.TABELLE" nicht unterstützt. Nur "DATENBANK"."TABELLE",
-  DATENBANK."TABELLE" oder "TABELLE".
+   * <quote symbol> ::= <quote><quote> (2 consecutive quote characters) (Lexical elements, 143
+   * Foundation) In einem <character string literal> werden einzelne <quote>s durch <quote symbol>
+   * ersetzt. (Lexical elements, 143 Foundation)
+   *
+   * o**** Datensätze zu vorgegebener Schlüsselliste finden *********
+   *
+   * SELECT * FROM "<id>" WHERE ("<colId>"='<colVal>' AND "<colId>"='<colVal>' AND ...) OR (...) OR
+   * ...;
+   *
+   * In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
+   *
+   * In <colVal> sind Quotes durch <quote symbol> ersetzt.
+   *
+   * o ***** Datensätze finden, die bestimmte Kriterien erfüllen ********
+   *
+   * 8.5 <like predicate> (385 Foundation) Der String hinter ESCAPE muss genau ein Zeichen lang
+   * sein. Ansonsten gibt es eine Exception (387 Foundation, 8.5 General Rules 3b)) _ und % sowie
+   * das ESCAPE-Zeichen selbst müssen im String-Ausdruck hinter LIKE escapet werden (durch
+   * Voranstellen des Escape-Zeichens). Andere Zeichen dürfen nicht escapet werden.
+   *
+   * SELECT * FROM "<id>" WHERE (lower("<colId>") LIKE lower('<pattern>') ESCAPE '|') AND (...) AND
+   * ...; In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt. In <pattern>
+   * sind "_", "%" und "|" ersetzt durch "|_", "|%" und "||".
+   *****
+   * Alle Datensätze auslesen ******
+   *
+   * SELECT * FROM "<id>"; In <id> sind Doublequotes durch <doublequote symbol> ersetzt.
+   ****
+   * Oracle ***** Wie ANSI MySQL ******* Wie ANSI, aber mit lcase() statt lower() PervasiveSQL
+   * ******* Wie ANSI, aber rechts vom LIKE dürfen nur einfache Konstanten (also kein lower oder
+   * lcase) stehen. Außerdem wird "DATENBANK.TABELLE" nicht unterstützt. Nur "DATENBANK"."TABELLE",
+   * DATENBANK."TABELLE" oder "TABELLE".
    */
   private int sqlSyntax = SQL_SYNTAX_ANSI;
 
@@ -171,7 +168,7 @@ public class OOoDatasource extends Datasource
    */
   private String userName = "";
 
-  private static final String SQLSelectCommand = "SELECT * FROM ";
+  private static final String SQL_SELECT_COMMAND = "SELECT * FROM ";
 
   /**
    * Passwort für den Login bei der Datenbank.
@@ -217,8 +214,9 @@ public class OOoDatasource extends Datasource
     datasourceName = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
     oooDatasourceName = parseConfig(sourceDesc, "SOURCE", () -> L.m(
         "Datenquelle \"%1\": Name der OOo-Datenquelle muss als SOURCE angegeben werden", datasourceName));
-    oooTableName = parseConfig(sourceDesc, "TABLE", () -> L
-        .m("Datenquelle \"%1\": Name der Tabelle/Sicht innerhalb der OOo-Datenquelle muss als TABLE angegeben werden", datasourceName));
+    oooTableName = parseConfig(sourceDesc, "TABLE",
+        () -> L.m("Datenquelle \"%1\": Name der Tabelle/Sicht innerhalb der "
+            + "OOo-Datenquelle muss als TABLE angegeben werden", datasourceName));
 
     userName = sourceDesc.getString("USER", "");
     password = sourceDesc.getString("PASSWORD", "");
@@ -273,9 +271,8 @@ public class OOoDatasource extends Datasource
     }
     else
     {
-      LOGGER.debug(L.m(
-        "Schema der Datenquelle %1 nicht angegeben. Versuche, es von der Datenquelle zu erfragen.",
-        datasourceName));
+      LOGGER.debug("Schema der Datenquelle {} nicht angegeben. Versuche, es von der Datenquelle zu erfragen.",
+          datasourceName);
       try
       {
         XDataSource ds =
@@ -309,10 +306,8 @@ public class OOoDatasource extends Datasource
           }
           catch (Exception y)
           {
-            throw new ConfigurationErrorException(
-              L.m(
-                "Tabelle oder Abfrage \"%1\" existiert nicht in Datenquelle \"%2\" oder Fehler beim Bestimmen der Spalten ",
-                oooTableName, oooDatasourceName), y);
+            throw new ConfigurationErrorException(L.m("Tabelle oder Abfrage \"%1\" existiert nicht in Datenquelle "
+                + "\"%2\" oder Fehler beim Bestimmen der Spalten ", oooTableName, oooDatasourceName), y);
           }
         }
         Set<String> colNames = columns.keySet();
@@ -350,10 +345,8 @@ public class OOoDatasource extends Datasource
             }
             catch (Exception x)
             {
-              throw new ConfigurationErrorException(
-                L.m(
-                  "Datenquelle \"%1\": Keine Schluessel-Spalten definiert. Automatisches bestimmen der Schlüsselspalten nicht möglich",
-                  datasourceName), x);
+              throw new ConfigurationErrorException(L.m("Datenquelle \"%1\": Keine Schluessel-Spalten"
+                  + " definiert. Automatisches bestimmen der Schlüsselspalten nicht möglich", datasourceName), x);
             }
             // Test ob kein Schluessel vorhanden siehe weiter unten
           }
@@ -420,7 +413,7 @@ public class OOoDatasource extends Datasource
     }
 
     StringBuilder buffy =
-        new StringBuilder(SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
+        new StringBuilder(SQL_SELECT_COMMAND + sqlIdentifier(oooTableName) + " WHERE ");
 
     Iterator<String> iter = keys.iterator();
     boolean first = true;
@@ -458,7 +451,7 @@ public class OOoDatasource extends Datasource
     }
 
     StringBuilder buffy =
-        new StringBuilder(SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
+        new StringBuilder(SQL_SELECT_COMMAND + sqlIdentifier(oooTableName) + " WHERE ");
 
     Iterator<QueryPart> iter = query.iterator();
     boolean first = true;
@@ -501,7 +494,7 @@ public class OOoDatasource extends Datasource
   @Override
   public QueryResults getContents()
   {
-    return sqlQuery(SQLSelectCommand + sqlIdentifier(oooTableName) + ";");
+    return sqlQuery(SQL_SELECT_COMMAND + sqlIdentifier(oooTableName) + ";");
   }
 
   /**

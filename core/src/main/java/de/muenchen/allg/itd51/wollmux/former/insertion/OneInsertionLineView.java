@@ -132,16 +132,15 @@ public class OneInsertionLineView extends LineView
     }
     else
     {
-      final InsertionModel4InsertXValue model =
-        (InsertionModel4InsertXValue) this.model;
+      final InsertionModel4InsertXValue insertionModel = (InsertionModel4InsertXValue) this.model;
       idBox.setEditable(true);
-      idBox.setSelectedItem(model.getDataID());
+      idBox.setSelectedItem(insertionModel.getDataID());
       final JTextComponent tc =
         ((JTextComponent) idBox.getEditor().getEditorComponent());
       final Document comboDoc = tc.getDocument();
       final Color defaultBackground;
 
-      if(model.getSourceType()==0)
+      if(insertionModel.getSourceType()==0)
         defaultBackground = insertValueBackground;
       else
         defaultBackground = tc.getBackground();
@@ -157,7 +156,7 @@ public class OneInsertionLineView extends LineView
           ignoreAttributeChanged = true;
           try
           {
-            model.setDataID(comboDoc.getText(0, comboDoc.getLength()));
+            insertionModel.setDataID(comboDoc.getText(0, comboDoc.getLength()));
             tc.setBackground(defaultBackground);
           }
           catch (BadLocationException x)

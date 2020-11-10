@@ -86,16 +86,12 @@ public class PreferDatasource extends Datasource
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
-      throw new ConfigurationErrorException(
-        L.m(
-          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
-          name));
+      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
+          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name));
 
     if (source2 == null)
-      throw new ConfigurationErrorException(
-        L.m(
-          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
-          name, source2Name));
+      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
+          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source2Name));
 
     /*
      * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie

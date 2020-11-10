@@ -61,14 +61,18 @@ import de.muenchen.allg.util.UnoService;
 public class TextModule
 {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(TextModule.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TextModule.class);
 
   /**
    * Pattern, das insertFrag-Bookmarks matcht.
    */
   private static final Pattern INSERTFRAG_PATTERN =
     DocumentCommands.getPatternForCommand("insertFrag");
+
+  private TextModule()
+  {
+    // hide public constructor
+  }
 
   /**
    * Sucht ab der Stelle range rückwarts nach gültigen Textfragmentbezeichnern mit
@@ -103,7 +107,7 @@ public class TextModule
     // holt sich Textbausteine aus .conf und sammelt sie in umgekehrter
     // Reihenfolge in der LinkedList tbListe. Damit später definierte
     // Textbaustein Abschnitte immer Vorrang haben.
-    LinkedList<ConfigThingy> tbListe = new LinkedList<ConfigThingy>();
+    LinkedList<ConfigThingy> tbListe = new LinkedList<>();
     ConfigThingy tbConf = conf.query("Textbausteine");
     Iterator<ConfigThingy> iter = tbConf.iterator();
     while (iter.hasNext())
@@ -314,7 +318,6 @@ public class TextModule
       {
         String match = it.toString();
 
-        // if (identifierWithArgs.matches(match)) {
         if (first.matches(match))
         {
           try
@@ -323,8 +326,8 @@ public class TextModule
           }
           catch (java.lang.Exception e)
           {
-            LOGGER.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. ")
-              ,e);
+            LOGGER.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet "
+                + "wird gibt es nicht in MATCH. "), e);
           }
           return args;
         }
@@ -391,7 +394,7 @@ public class TextModule
 
     String bookmarkName = DocumentCommand.getCommandString(root);
 
-    LOGGER.trace(L.m("Erzeuge Bookmark: '%1'", bookmarkName));
+    LOGGER.trace("Erzeuge Bookmark: '{}'", bookmarkName);
 
     try
     {

@@ -25,7 +25,6 @@ package de.muenchen.allg.itd51.wollmux.former.function;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Interface zum Zugriff auf eine FunctionSelection.
@@ -34,18 +33,6 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  */
 public interface FunctionSelectionAccess
 {
-
-  /**
-   * Dieser spezielle Funktionsname signalisiert, dass keine Funktion ausgewählt ist.
-   */
-  public static final String NO_FUNCTION = L.m("<keine>");
-
-  /**
-   * Dieser spezielle Funktionsname signalisiert, dass der Benutzer die Funktion
-   * manuell eingegeben hat und sie direkt in dieser FunctionSelection gespeichert
-   * ist.
-   */
-  public static final String EXPERT_FUNCTION = L.m("<Experte>");
 
   /**
    * Liefert true gdw diese FunctionSelection eine Referenz auf eine benannte
@@ -73,8 +60,7 @@ public interface FunctionSelectionAccess
   public boolean hasSpecifiedParameters();
 
   /**
-   * Liefert den Namen der Funktion, falls es eine Referenz auf eine externe Funktion
-   * ist, oder {@link #NO_FUNCTION} bzw, {@link #EXPERT_FUNCTION}.
+   * Liefert den Namen der Funktion.
    */
   public String getFunctionName();
 
@@ -112,16 +98,13 @@ public interface FunctionSelectionAccess
   public void setParameterValue(String paramName, ParamValue paramValue);
 
   /**
-   * Ändert den Namen der Funktion auf functionName und die Liste der Namen ihrer
-   * Parameter auf paramNames.
+   * Ändert den Namen der Funktion auf functionName und die Liste der Namen ihrer Parameter auf
+   * paramNames.
    * 
    * @param functionName
-   *          hier können auch die Spezialnamen {@link #NO_FUNCTION} oder
-   *          {@link #EXPERT_FUNCTION} verwendet werden.
+   *          Neuer Name der Funktion.
    * @param paramNames
-   *          wird ignoriert, falls {@link #NO_FUNCTION} oder
-   *          {@link #EXPERT_FUNCTION} übergeben wird. Wird ansonsten kopiert, nicht
-   *          direkt als Referenz verwendet.
+   *          Neue Parameternamen werden kopiert, nicht direkt als Referenz verwendet.
    */
   public void setFunction(String functionName, String[] paramNames);
 
@@ -134,10 +117,8 @@ public interface FunctionSelectionAccess
   public ConfigThingy getExpertFunction();
 
   /**
-   * Schaltet den Typ dieser FunctionSelection auf {@link #EXPERT_FUNCTION} und setzt
-   * die zugehörige Funktionsdefinition auf conf. conf muss einen beliebigen
-   * Wurzelknoten haben, wie z.B. "PLAUSI", "AUTOFILL" o.ä. der noch keine
-   * Grundfunktion ist.
+   * Setzt die zugehörige Funktionsdefinition auf conf. conf muss einen beliebigen Wurzelknoten
+   * haben, wie z.B. "PLAUSI", "AUTOFILL" o.ä. der noch keine Grundfunktion ist.
    * 
    * @param funConf
    *          wird kopiert, nicht als Referenz übernommen.

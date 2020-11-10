@@ -28,7 +28,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -72,7 +71,9 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class ConfigEditor extends JFrame implements SearchListener
 {
-  private FormularMax4kController controller;
+  private static final long serialVersionUID = -3765690712489895132L;
+
+  private transient FormularMax4kController controller;
 
   private CollapsibleSectionPanel sectionPanel;
 
@@ -199,38 +200,23 @@ public class ConfigEditor extends JFrame implements SearchListener
     menu = new JMenu(L.m("Datei"));
 
     menuItem = new JMenuItem(L.m("Speichern"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
+    menuItem.addActionListener(e -> {
+      try
       {
-        try
-        {
-          ConfigThingy conf =
-            new ConfigThingy("", null, new StringReader(editor.getText()));
-          controller.initModelsAndViews(conf);
-          controller.documentNeedsUpdating();
-          dispose();
-        }
-        catch (Exception e1)
-        {
-          JOptionPane.showMessageDialog(ConfigEditor.this, e1.getMessage(),
-            L.m("Fehler beim Parsen der Formularbeschreibung"),
-            JOptionPane.WARNING_MESSAGE);
-        }
+        ConfigThingy conf = new ConfigThingy("", null, new StringReader(editor.getText()));
+        controller.initModelsAndViews(conf);
+        controller.documentNeedsUpdating();
+        dispose();
+      } catch (Exception e1)
+      {
+        JOptionPane.showMessageDialog(ConfigEditor.this, e1.getMessage(),
+            L.m("Fehler beim Parsen der Formularbeschreibung"), JOptionPane.WARNING_MESSAGE);
       }
     });
     menu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Abbrechen"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        dispose();
-      }
-    });
+    menuItem.addActionListener(e -> dispose());
     menu.add(menuItem);
 
     editorMenuBar.add(menu);
@@ -292,7 +278,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     switch (event.getType())
     {
       case MARK_ALL:
-        result = SearchEngine.markAll(editor, event.getSearchContext());
+        SearchEngine.markAll(editor, event.getSearchContext());
         break;
       case FIND:
         result = SearchEngine.find(editor, event.getSearchContext());
@@ -319,6 +305,8 @@ public class ConfigEditor extends JFrame implements SearchListener
 
   private class ShowFindDialogAction extends AbstractAction
   {
+    private static final long serialVersionUID = -2826790564466421965L;
+
     public ShowFindDialogAction()
     {
       super(L.m("Suchen..."));
@@ -339,6 +327,8 @@ public class ConfigEditor extends JFrame implements SearchListener
 
   private class ShowReplaceDialogAction extends AbstractAction
   {
+    private static final long serialVersionUID = -2109749012293037703L;
+
     public ShowReplaceDialogAction()
     {
       super(L.m("Ersetzen..."));
