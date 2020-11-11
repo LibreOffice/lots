@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.ActionEvent;
+import com.sun.star.awt.Selection;
 import com.sun.star.awt.SpinEvent;
 import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.XButton;
@@ -334,6 +335,10 @@ public class ContentBasedDirectiveDialog
         updateCount(count);
       } catch (NumberFormatException e)
       {
+        UNO.XTextComponent(event.Source).setText("0");
+        Selection selection = UNO.XTextComponent(event.Source).getSelection();
+        selection.Max = 1;
+        UNO.XTextComponent(event.Source).setSelection(selection);
         LOGGER.error("Keine Zahl", e);
       }
     }
