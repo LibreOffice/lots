@@ -164,7 +164,7 @@ public class OnMarkBlock extends WollMuxEvent
   private void deleteOrUpdateWithWarning(XTextCursor range, String highlightColor, String markChange,
       String bookmarkName, List<Bookmark> bookmarks)
   {
-    boolean allMatch = bookmarks.stream().allMatch(bookmark -> bookmark.getName().equalsIgnoreCase(bookmarkName));
+    boolean allMatch = bookmarks.stream().allMatch(bookmark -> bookmark.getName().startsWith(bookmarkName));
     if (allMatch)
     {
       bookmarks.forEach(this::deleteBookmark);
@@ -202,7 +202,7 @@ public class OnMarkBlock extends WollMuxEvent
   private void deleteOrUpdate(XTextCursor range, String highlightColor, String markChange, String bookmarkName,
       List<Bookmark> bookmarks)
   {
-    boolean allMatch = bookmarks.stream().allMatch(bookmark -> bookmark.getName().equalsIgnoreCase(bookmarkName));
+    boolean allMatch = bookmarks.stream().allMatch(bookmark -> bookmark.getName().startsWith(bookmarkName));
     bookmarks.forEach(this::deleteBookmark);
     if (allMatch)
     {
