@@ -64,7 +64,7 @@ public class ToOdtFile extends PrintFunction
       InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"), L.m(e.getMessage()));
     } catch (Exception ex)
     {
-      LOGGER.error("Fehler beim Aufräumen der temporären Dokumente", ex);
+      LOGGER.warn("Fehler beim Aufräumen der temporären Dokumente", ex);
     }
   }
 }
