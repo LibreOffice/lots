@@ -395,7 +395,9 @@ public class AllSectionLineViewsPanel implements View
 
     @Override
     public void itemRemoved(SectionModel model, int index)
-    {}
+    {
+      // nothing to do
+    }
 
   }
 
