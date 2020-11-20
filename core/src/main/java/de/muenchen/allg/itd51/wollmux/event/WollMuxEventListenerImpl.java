@@ -57,6 +57,7 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetWindowVisible;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextbausteinEinfuegen;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnImportFormularinhalt;
 
 /**
  * An event listener for all unspecified events.
@@ -459,5 +460,16 @@ public class WollMuxEventListenerImpl implements WollMuxEventListener
   {
     event.process();
   }
-
+  
+  /**
+   * Execute the event
+   *
+   * @param event
+   *          The event.
+   */
+  @Subscribe
+  public void onImportFormularinhalt(OnImportFormularinhalt event)
+  {
+    event.process();
+  }
 }
