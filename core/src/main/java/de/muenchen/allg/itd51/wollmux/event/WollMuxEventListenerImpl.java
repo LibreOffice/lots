@@ -25,6 +25,7 @@ package de.muenchen.allg.itd51.wollmux.event;
 import com.google.common.eventbus.Subscribe;
 
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAbout;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnActivateSidebar;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnAddDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseAndOpenExt;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCloseTextDocument;
@@ -443,6 +444,18 @@ public class WollMuxEventListenerImpl implements WollMuxEventListener
    */
   @Subscribe
   public void onUpdateInputFields(OnUpdateInputFields event)
+  {
+    event.process();
+  }
+
+  /**
+   * Execute the event
+   *
+   * @param event
+   *          The event.
+   */
+  @Subscribe
+  public void onActivateSidebar(OnActivateSidebar event)
   {
     event.process();
   }
