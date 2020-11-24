@@ -22,7 +22,6 @@
       <outputDirectory>.</outputDirectory>
       <includes>
         <include>*.xcu</include>
-        <!-- <include>*.rdb</include> -->
         <include>help/component*.txt</include>
         <include>icons/*</include>
         <include>image/*</include>
@@ -37,9 +36,6 @@
     <dependencySet>
       <outputDirectory>lib</outputDirectory>
       <useProjectArtifact>false</useProjectArtifact>
-      <excludes>
-        <exclude>org.libreoffice:*</exclude>
-      </excludes>
       <useStrictFiltering>true</useStrictFiltering>
     </dependencySet>
   </dependencySets>
