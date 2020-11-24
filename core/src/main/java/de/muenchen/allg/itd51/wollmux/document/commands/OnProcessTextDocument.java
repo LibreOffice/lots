@@ -26,11 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
-import com.sun.star.frame.XController2;
-import com.sun.star.ui.XDeck;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
@@ -38,11 +34,9 @@ import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventListener;
+import de.muenchen.allg.itd51.wollmux.event.handlers.OnActivateSidebar;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
-import de.muenchen.allg.itd51.wollmux.form.sidebar.FormSidebarController;
-import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarPanel;
-import de.muenchen.allg.util.UnoSidebar;
 
 /**
  * Processes text documents.
@@ -106,11 +100,11 @@ public class OnProcessTextDocument implements WollMuxEventListener
       LOGGER.error("", e);
     }
 
+    new OnActivateSidebar(documentController).emit();
+
     // notify listeners about processing finished
     new OnNotifyDocumentEventListener(null, WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED,
         documentController.getModel().doc).emit();
-
-    activateSidebar(documentController);
 
     notifyContextChanged(documentController);
   }
@@ -124,64 +118,6 @@ public class OnProcessTextDocument implements WollMuxEventListener
     } catch (java.lang.Exception e)
     {
       LOGGER.debug("", e);
-    }
-  }
-
-  private void activateSidebar(TextDocumentController documentController)
-  {
-    XController2 controller = UNO.XController2(documentController.getModel().doc.getCurrentController());
-    controller.getSidebar().showDecks(true);
-    controller.getSidebar().setVisible(true);
-    Thread activatePanel = new Thread(() -> {
-      try
-      {
-        int count = 0;
-        while (controller.getSidebar().getSidebar() == null && count < 10)
-        {
-          Thread.sleep(100);
-          count++;
-        }
-      } catch (InterruptedException e)
-      {
-        LOGGER.debug("Thread interrupted before sidebar decks are available", e);
-        Thread.currentThread().interrupt();
-      }
-      if (controller.getSidebar().getSidebar() != null)
-      {
-        if (documentController.getModel().isFormDocument())
-        {
-          this.activateSidebarPanel(controller, FormSidebarController.WM_FORM_GUI);
-          try
-          {
-            documentController.getFrameController().setDocumentZoom(
-                WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild().query("ZOOM"));
-          } catch (java.lang.Exception e)
-          {
-            // configuration for Fenster isn't mandatory
-          }
-        } else
-        {
-          this.activateSidebarPanel(controller, WollMuxSidebarPanel.WM_BAR);
-        }
-        controller.getSidebar().getSidebar().requestLayout();
-      }
-    });
-    activatePanel.setDaemon(true);
-    activatePanel.start();
-  }
-
-  private void activateSidebarPanel(XController2 controller, String deckName)
-  {
-    try
-    {
-      XDeck deck = UnoSidebar.getDeckByName(deckName, controller);
-      if (deck != null)
-      {
-        deck.activate(true);
-      }
-    } catch (UnoHelperException e)
-    {
-      LOGGER.trace("", e);
     }
   }
 
