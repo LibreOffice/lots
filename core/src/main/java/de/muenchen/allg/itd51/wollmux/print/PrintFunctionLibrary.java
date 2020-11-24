@@ -31,7 +31,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.muenchen.allg.itd51.wollmux.WollMuxClassLoader;
+import de.muenchen.allg.itd51.wollmux.ConfClassLoader;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
@@ -184,7 +184,7 @@ public class PrintFunctionLibrary
     public ExternalPrintFunction(String functionName, int order, ConfigThingy extConf)
     {
       super(functionName, order);
-      func = new ExternalFunction(extConf, WollMuxClassLoader.getClassLoader());
+      func = new ExternalFunction(extConf, ConfClassLoader.getClassLoader());
     }
 
     @Override
