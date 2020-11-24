@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 /**
  * Wird geworfen, wenn versucht wird, eine ID zu verwenden, die dem System nicht bekannt ist.
