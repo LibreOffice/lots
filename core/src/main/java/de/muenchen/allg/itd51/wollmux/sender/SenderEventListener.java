@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitialize;
@@ -47,6 +48,10 @@ public class SenderEventListener implements WollMuxEventListener
   public void onInitialize(OnInitialize event)
   {
     SenderService service = SenderService.getInstance();
+    if (WollMuxSingleton.getInstance().isNoConfig())
+    {
+      return;
+    }
     if (service.getPALEntries().length == 0)
     {
       long found = service.searchDefaultSender();
