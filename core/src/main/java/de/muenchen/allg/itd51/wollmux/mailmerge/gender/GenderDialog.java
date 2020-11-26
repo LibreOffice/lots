@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
+package de.muenchen.allg.itd51.wollmux.mailmerge.gender;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,18 +31,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.XButton;
-import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XContainerWindowProvider;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XDialog;
+import com.sun.star.awt.XDialog2;
+import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
+import com.sun.star.ui.dialogs.ExecutableDialogResults;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperRuntimeException;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.util.UnoComponent;
 
 /**
@@ -62,10 +63,11 @@ public class GenderDialog
    *
    * @param fieldNames
    *          The fields of the document.
-   * @param documentController
-   *          The controller of the document.
+   * @param currentValues
+   *          The current TRAFO for the mail merge field.
+   * @return {@link XDialog#execute()}.
    */
-  public static void startDialog(List<String> fieldNames, TextDocumentController documentController)
+  public static short startDialog(List<String> fieldNames, GenderTrafoModel currentValues)
   {
     HashSet<String> uniqueFieldNames = new HashSet<>(fieldNames);
     List<String> sortedNames = new ArrayList<>(uniqueFieldNames);
@@ -80,74 +82,42 @@ public class GenderDialog
       XWindow window = provider.createContainerWindow("vnd.sun.star.script:WollMux.gender_dialog?location=application",
           "", peer, null);
       XControlContainer controlContainer = UNO.XControlContainer(window);
-      XDialog dialog = UNO.XDialog(window);
+      XDialog2 dialog = UNO.XDialog2(window);
 
-      XComboBox cbAnrede = UNO.XComboBox(controlContainer.getControl("cbSerienbrieffeld"));
-      cbAnrede.addItems(fieldNames.toArray(new String[fieldNames.size()]), (short) 0);
+      XTextComponent field = UNO.XTextComponent(controlContainer.getControl("cbSerienbrieffeld"));
+      UNO.XComboBox(field).addItems(fieldNames.toArray(new String[sortedNames.size()]), (short) 0);
+      field.setText(currentValues.getField());
+      AbstractTextListener anredeListener = e -> currentValues.setField(UNO.XTextComponent(e.Source).getText());
+      field.addTextListener(anredeListener);
+
+      XTextComponent male = UNO.XTextComponent(controlContainer.getControl("txtMale"));
+      male.setText(currentValues.getMale());
+      AbstractTextListener maleListener = e -> currentValues.setMale(UNO.XTextComponent(e.Source).getText());
+      male.addTextListener(maleListener);
+
+      XTextComponent female = UNO.XTextComponent(controlContainer.getControl("txtFemale"));
+      female.setText(currentValues.getFemale());
+      AbstractTextListener femaleListener = e -> currentValues.setFemale(UNO.XTextComponent(e.Source).getText());
+      female.addTextListener(femaleListener);
+
+      XTextComponent other = UNO.XTextComponent(controlContainer.getControl("txtOthers"));
+      other.setText(currentValues.getOther());
+      AbstractTextListener otherListener = e -> currentValues.setOther(UNO.XTextComponent(e.Source).getText());
+      other.addTextListener(otherListener);
 
       XButton btnAbort = UNO.XButton(controlContainer.getControl("btnAbort"));
-      AbstractActionListener btnAbortActionListener = event -> dialog.endExecute();
+      AbstractActionListener btnAbortActionListener = event -> dialog.endDialog(ExecutableDialogResults.CANCEL);
       btnAbort.addActionListener(btnAbortActionListener);
 
       XButton btnOK = UNO.XButton(controlContainer.getControl("btnOK"));
-      AbstractActionListener btnOKActionListener = event -> {
-        ConfigThingy conf = generateGenderTrafoConf(
-            UNO.XTextComponent(controlContainer.getControl("cbSerienbrieffeld")).getText(),
-            UNO.XTextComponent(controlContainer.getControl("txtMale")).getText(),
-            UNO.XTextComponent(controlContainer.getControl("txtFemale")).getText(),
-            UNO.XTextComponent(controlContainer.getControl("txtOthers")).getText());
-        documentController.replaceSelectionWithTrafoField(conf, "Gender");
-        dialog.endExecute();
-      };
+      AbstractActionListener btnOKActionListener = event -> dialog.endDialog(ExecutableDialogResults.OK);
       btnOK.addActionListener(btnOKActionListener);
 
-      dialog.execute();
+      return dialog.execute();
     } catch (UnoHelperRuntimeException e)
     {
       LOGGER.error("", e);
+      return ExecutableDialogResults.CANCEL;
     }
-  }
-
-  /**
-   * Generate the gender field describtion in the form
-   * {@code BIND(FUNCTION "Gender" SET("Anrede", VALUE
-   * "<anredeFieldId>") SET("Falls_Anrede_HerrN", "<textHerr>") SET("Falls_Anrede_Frau",
-   * "<textFrau>") SET("Falls_sonstige_Anrede", "<textSonst>"))}
-   *
-   * @param anredeId
-   *          ID of the field to determine the gender.
-   * @param textHerr
-   *          Male text.
-   * @param textFrau
-   *          Female text.
-   * @param textSonst
-   *          Text if neither male nor female.
-   * @return A {@link ConfigThingy} describing the gender field.
-   */
-  private static ConfigThingy generateGenderTrafoConf(String anredeId, String textHerr, String textFrau,
-      String textSonst)
-  {
-    ConfigThingy conf = new ConfigThingy("Func");
-    ConfigThingy bind = new ConfigThingy("BIND");
-    conf.addChild(bind);
-    bind.add("FUNCTION").add("Gender");
-
-    ConfigThingy setAnrede = bind.add("SET");
-    setAnrede.add("Anrede");
-    setAnrede.add("VALUE").add(anredeId);
-
-    ConfigThingy setHerr = bind.add("SET");
-    setHerr.add("Falls_Anrede_HerrN");
-    setHerr.add(textHerr);
-
-    ConfigThingy setFrau = bind.add("SET");
-    setFrau.add("Falls_Anrede_Frau");
-    setFrau.add(textFrau);
-
-    ConfigThingy setSonst = bind.add("SET");
-    setSonst.add("Falls_sonstige_Anrede");
-    setSonst.add(textSonst);
-
-    return conf;
   }
 }
