@@ -79,6 +79,7 @@ import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.gender.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.mailmerge.gender.GenderTrafoModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ifthenelse.IfThenElseDialog;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ifthenelse.IfThenElseModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController;
 import de.muenchen.allg.itd51.wollmux.util.L;
@@ -509,15 +510,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       break;
 
     case 2:
-      datasourceModel.ifPresent(ds -> {
-        try
-        {
-          IfThenElseDialog.startDialog(new ArrayList<String>(ds.getColumnNames()), textDocumentController);
-        } catch (NoTableSelectedException ex)
-        {
-          LOGGER.debug("", ex);
-        }
-      });
+      addIfThenElseField();
       break;
 
     case 3:
@@ -539,6 +532,25 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     textDocumentController.collectNonWollMuxFormFields();
     updatePreviewFields();
     UNO.XTextComponent(event.Source).setText(UNO.XComboBox(event.Source).getItem((short) 0));
+  }
+
+  private void addIfThenElseField()
+  {
+    datasourceModel.ifPresent(ds -> {
+      try
+      {
+        IfThenElseModel model = new IfThenElseModel(null);
+        short result = new IfThenElseDialog(new ArrayList<String>(ds.getColumnNames()), model).execute();
+        if (result == ExecutableDialogResults.OK)
+        {
+          ConfigThingy resultConf = model.create();
+          textDocumentController.replaceSelectionWithTrafoField(resultConf, "Wenn...Dann...Sonst");
+        }
+      } catch (NoTableSelectedException ex)
+      {
+        LOGGER.debug("", ex);
+      }
+    });
   }
 
   private void addGenderField()
