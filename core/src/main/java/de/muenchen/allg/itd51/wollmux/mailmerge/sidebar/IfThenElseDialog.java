@@ -249,48 +249,48 @@ public class IfThenElseDialog
 
   private static void addNewCondition(XControlContainer controlContainer, List<String> randomImages)
   {
-      int randomNumber = rand.nextInt(randomImages.size());
+    int randomNumber = rand.nextInt(randomImages.size());
 
-      String randomImageFileName = randomImages.get(randomNumber);
-      XComboBox cbSerienbrieffeld = UNO.XComboBox(controlContainer.getControl(CONTROL_CBSERIENBRIEFFELD));
+    String randomImageFileName = randomImages.get(randomNumber);
+    XComboBox cbSerienbrieffeld = UNO.XComboBox(controlContainer.getControl(CONTROL_CBSERIENBRIEFFELD));
 
-      try
+    try
+    {
+      XMutableTreeNode ifNode = createIfNode(getTreeDataModel(controlContainer), cbSerienbrieffeld,
+          randomImageFileName);
+
+      // avoid duplicates
+      randomImages.remove(randomNumber);
+
+      // refill if empty
+      if (randomImages.isEmpty())
+        addNodeImages(randomImages);
+
+      XMutableTreeNode selectedNode = getSelectedNode(controlContainer);
+      if (selectedNode.getParent() != null) // Test ob RootNode
       {
-        XMutableTreeNode ifNode = createIfNode(getTreeDataModel(controlContainer), cbSerienbrieffeld,
-            randomImageFileName);
-
-        // avoid duplicates
-        randomImages.remove(randomNumber);
-
-        // refill if empty
-        if (randomImages.isEmpty())
-          addNodeImages(randomImages);
-
-        XMutableTreeNode selectedNode = getSelectedNode(controlContainer);
-        if (selectedNode.getParent() != null) // Test ob RootNode
+        String[] data = nodeDataValueToStringArray(selectedNode);
+        if (DANN.equals(data[0]) || SONST.equals(data[0]))
         {
-          String[] data = nodeDataValueToStringArray(selectedNode);
-          if (DANN.equals(data[0]) || SONST.equals(data[0]))
-          {
-            data[2] = "";
-            selectedNode.setDataValue(data);
-            selectedNode.setDisplayValue(data[0] + " " + data[2]);
-          }
+          data[2] = "";
+          selectedNode.setDataValue(data);
+          selectedNode.setDisplayValue(data[0] + " " + data[2]);
         }
-
-        selectedNode.appendChild(ifNode);
-        selectedNode.appendChild(createThenNode(getTreeDataModel(controlContainer), "", randomImageFileName));
-        selectedNode.appendChild(createElseNode(getTreeDataModel(controlContainer), "", randomImageFileName));
-        XTreeControl treeControl = UNO.XTreeControl(controlContainer.getControl(CONTROL_RESULTTREE));
-        treeControl.expandNode(selectedNode);
-        treeControl.select(ifNode);
-      } catch (com.sun.star.lang.IllegalArgumentException | ExpandVetoException | UnoHelperException e)
-      {
-        LOGGER.error("", e);
       }
 
-      UNO.XTextComponent(cbSerienbrieffeld).setText(cbSerienbrieffeld.getItem((short) 0));
-      UNO.XTextComponent(controlContainer.getControl(CONTROL_CONDITION)).setText("");
+      selectedNode.appendChild(ifNode);
+      selectedNode.appendChild(createThenNode(getTreeDataModel(controlContainer), "", randomImageFileName));
+      selectedNode.appendChild(createElseNode(getTreeDataModel(controlContainer), "", randomImageFileName));
+      XTreeControl treeControl = UNO.XTreeControl(controlContainer.getControl(CONTROL_RESULTTREE));
+      treeControl.expandNode(selectedNode);
+      treeControl.select(ifNode);
+    } catch (com.sun.star.lang.IllegalArgumentException | ExpandVetoException | UnoHelperException e)
+    {
+      LOGGER.error("", e);
+    }
+
+    UNO.XTextComponent(cbSerienbrieffeld).setText(cbSerienbrieffeld.getItem((short) 0));
+    UNO.XTextComponent(controlContainer.getControl(CONTROL_CONDITION)).setText("");
   }
 
   private static void compartorChanged(XControlContainer controlContainer, ItemEvent event)
