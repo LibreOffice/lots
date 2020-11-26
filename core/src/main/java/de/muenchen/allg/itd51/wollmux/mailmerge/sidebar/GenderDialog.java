@@ -37,12 +37,13 @@ import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XDialog;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperRuntimeException;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.util.UnoComponent;
 
 /**
  * Dialog for creating a gender field.
@@ -73,8 +74,8 @@ public class GenderDialog
     try
     {
       XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
-      XContainerWindowProvider provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
-          UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider", UNO.defaultContext));
+      XContainerWindowProvider provider = UNO.XContainerWindowProvider(
+          UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_CONTAINER_WINDOW_PROVIDER));
 
       XWindow window = provider.createContainerWindow("vnd.sun.star.script:WollMux.gender_dialog?location=application",
           "", peer, null);
@@ -101,7 +102,7 @@ public class GenderDialog
       btnOK.addActionListener(btnOKActionListener);
 
       dialog.execute();
-    } catch (com.sun.star.uno.Exception e)
+    } catch (UnoHelperRuntimeException e)
     {
       LOGGER.error("", e);
     }
