@@ -176,9 +176,18 @@ public class DatasourceSearchDialog implements Dialog
     this.data = new HashMap<>();
   }
 
+  /**
+   * In the context the data is stored. So if the context has no mapping for this type of dialog, a
+   * new entry is added. This data is used for all following calls with the same context.
+   */
   @Override
   public Dialog instanceFor(Map<Object, Object> context)
   {
+    if (!context.containsKey(this))
+    {
+      context.put(this, new HashMap<>());
+    }
+    this.data = (Map<String, String>) context.get(this);
     return this;
   }
 
