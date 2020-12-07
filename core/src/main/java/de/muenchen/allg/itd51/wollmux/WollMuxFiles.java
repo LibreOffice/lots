@@ -367,7 +367,7 @@ public class WollMuxFiles
    */
   public static ConfigThingy getWollmuxConf()
   {
-    if (wollmuxConf == null || wollmuxConf.count() == 0)
+    if (wollmuxConf == null)
       wollmuxConf = parseWollMuxConf(getWollMuxConfFile());
 
     return wollmuxConf;
