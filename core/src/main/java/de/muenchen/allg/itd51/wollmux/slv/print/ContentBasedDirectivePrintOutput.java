@@ -244,7 +244,10 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
   {
     if (isOriginal && punkt1 != null)
     {
-      hideTextRange(punkt1.getZifferOnly(), hide);
+      XTextCursor cursor = punkt1.getZifferOnly();
+      // The cursor includes the tab but this should not change visiblity
+      cursor.goLeft((short) 1, true);
+      hideTextRange(cursor, hide);
     }
   }
 
