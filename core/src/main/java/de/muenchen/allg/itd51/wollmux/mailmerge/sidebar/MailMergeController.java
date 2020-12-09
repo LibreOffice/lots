@@ -539,14 +539,20 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     datasourceModel.ifPresent(ds -> {
       try
       {
-        IfThenElseModel model = new IfThenElseModel(null);
+        ConfigThingy currentTrafo = textDocumentController.getModel().getFormFieldTrafoFromSelection();
+        IfThenElseModel model = new IfThenElseModel(currentTrafo);
         short result = new IfThenElseDialog(new ArrayList<String>(ds.getColumnNames()), model).execute();
         if (result == ExecutableDialogResults.OK)
         {
           ConfigThingy resultConf = model.create();
-          textDocumentController.replaceSelectionWithTrafoField(resultConf, "Wenn...Dann...Sonst");
+          if (model.getName() == null)
+          {
+            textDocumentController.replaceSelectionWithTrafoField(resultConf, "Wenn...Dann...Sonst");
+          } else {
+            textDocumentController.setTrafo(model.getName(), resultConf);
+          }
         }
-      } catch (NoTableSelectedException ex)
+      } catch (NoTableSelectedException | NodeNotFoundException ex)
       {
         LOGGER.debug("", ex);
       }
