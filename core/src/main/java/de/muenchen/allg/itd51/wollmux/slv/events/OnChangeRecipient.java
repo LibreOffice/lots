@@ -22,12 +22,12 @@
  */
 package de.muenchen.allg.itd51.wollmux.slv.events;
 
+import java.util.List;
+
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
-import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
@@ -41,6 +41,7 @@ public class OnChangeRecipient extends WollMuxEvent
 {
 
   private TextDocumentController documentController;
+  private ContentBasedDirectiveModel model;
 
   /**
    * Create this event.
@@ -51,106 +52,101 @@ public class OnChangeRecipient extends WollMuxEvent
   public OnChangeRecipient(TextDocumentController documentController)
   {
     this.documentController = documentController;
+    this.model = ContentBasedDirectiveModel.createModel(documentController);
   }
 
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    ContentBasedDirectiveModel.createModel(documentController);
     XTextCursor viewCursor = documentController.getModel().getViewCursor();
-    if (viewCursor != null)
+    if (viewCursor == null)
     {
-      XParagraphCursor cursor = UNO
-          .XParagraphCursor(viewCursor.getText().createTextCursorByRange(viewCursor));
-      XTextCursor createdZuleitung = null;
+      return;
+    }
 
-      boolean deletedAtLeastOne = removeAllZuleitungszeilen(cursor);
-      UnoCollection<XTextRange> paragraphs = UnoCollection.getCollection(cursor, XTextRange.class);
+    XParagraphCursor cursor = UNO.XParagraphCursor(viewCursor.getText().createTextCursorByRange(viewCursor));
+    cursor.gotoStartOfParagraph(true);
+    List<ContentBasedDirectiveItem> items = model.getItemsFor(cursor);
 
-      if (!deletedAtLeastOne && paragraphs != null)
+    // delete current items
+    boolean deletedAtLeastOne = false;
+    for (ContentBasedDirectiveItem item : items)
+    {
+      deletedAtLeastOne |= removeZuleitungszeile(item);
+    }
+
+    if (!deletedAtLeastOne)
+    {
+      XTextCursor createCursor = null;
+      for (ContentBasedDirectiveItem item : items)
       {
-        createdZuleitung = createRecipient(cursor, paragraphs);
+        if (items.size() > 1 && item.isCopy())
+        {
+          continue;
+        }
+        createCursor = createRecipient(item);
       }
-      if (createdZuleitung != null)
+      if (createCursor != null)
       {
-        viewCursor.gotoRange(createdZuleitung, false);
+        viewCursor.gotoRange(createCursor, false);
       }
     }
   }
 
   /**
-   * Iterate all paragraphs and make them a recipient line or content based directive with recipient
-   * line.
+   * Make the item a recipient line or content based directive with recipient line.
    *
-   * @param cursor
-   *          The current cursor.
-   * @param paragraphs
-   *          The paragraphs to iterate.
-   * @return
+   * @param item
+   *          The item.
+   * @return A newly created cursor for recipient lines of copies.
    */
-  private XTextCursor createRecipient(XParagraphCursor cursor, UnoCollection<XTextRange> paragraphs)
+  private XTextCursor createRecipient(ContentBasedDirectiveItem item)
   {
     XTextCursor createdZuleitung = null;
-    for (XTextRange paragraph : paragraphs)
+    if (item.isCopy())
     {
-      ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(paragraph);
-      if (item.isCopy())
+      XTextCursor paragraph = UNO.XTextCursor(item.getTextRange());
+      // Create recipient in new line
+      paragraph.getEnd().setString("\r");
+      createdZuleitung = UNO.XTextCursor(paragraph.getText().createTextCursorByRange(paragraph.getEnd()));
+      ContentBasedDirectiveItem newItem = new ContentBasedDirectiveItem(createdZuleitung);
+      if (createdZuleitung != null)
       {
-        if (cursor.isCollapsed()) // Ignore if range is selected
-        {
-          // Create recipient in new line
-          paragraph.getEnd().setString("\r");
-          createdZuleitung = UNO
-              .XTextCursor(paragraph.getText().createTextCursorByRange(paragraph.getEnd()));
-          ContentBasedDirectiveItem newItem = new ContentBasedDirectiveItem(createdZuleitung);
-          if (createdZuleitung != null)
-          {
-            createdZuleitung.goRight((short) 1, false);
-            newItem.formatRecipientLine();
-          }
-        }
+        newItem.formatRecipientLine();
+      }
+    } else
+    {
+      if (item.isItem())
+      {
+        item.formatVerfuegungspunktWithZuleitung();
       } else
       {
-        if (item.isItem())
-        {
-          item.formatVerfuegungspunktWithZuleitung();
-        } else
-        {
-          item.formatRecipientLine();
-        }
+        item.formatRecipientLine();
       }
     }
     return createdZuleitung;
   }
 
   /**
-   * Delete all recipient lines touched by the cursor.
+   * Delete the item if it's recipient line.
    *
-   * @param cursor
-   *          The cursor which may contain recipient lines.
+   * @param item
+   *          The item.
    *
    * @return true, if at least one has been deleted, false otherwise.
    */
-  private boolean removeAllZuleitungszeilen(XParagraphCursor cursor)
+  private boolean removeZuleitungszeile(ContentBasedDirectiveItem item)
   {
     boolean deletedAtLeastOne = false;
-    UnoCollection<XTextRange> paragraphs = UnoCollection.getCollection(cursor, XTextRange.class);
-    if (paragraphs != null)
+    if (item.isRecipientLine())
     {
-      for (XTextRange paragraph : paragraphs)
-      {
-        ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(paragraph);
-        if (item.isRecipientLine())
-        {
-          item.formatDefault();
-          deletedAtLeastOne = true;
-        } else if (item.isItemWithRecipient())
-        {
-          // Remove recipient from content based directive
-          item.formatItem();
-          deletedAtLeastOne = true;
-        }
-      }
+      item.formatDefault();
+      deletedAtLeastOne = true;
+    } else if (item.isItemWithRecipient())
+    {
+      // Remove recipient from content based directive
+      item.formatItem();
+      deletedAtLeastOne = true;
     }
     return deletedAtLeastOne;
   }

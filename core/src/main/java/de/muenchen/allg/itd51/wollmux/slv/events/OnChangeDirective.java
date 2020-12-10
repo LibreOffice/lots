@@ -22,12 +22,12 @@
  */
 package de.muenchen.allg.itd51.wollmux.slv.events;
 
+import java.util.List;
+
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
-import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
@@ -63,16 +63,19 @@ public class OnChangeDirective extends WollMuxEvent
     {
       XParagraphCursor cursor = UNO
           .XParagraphCursor(viewCursor.getText().createTextCursorByRange(viewCursor));
-      ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(cursor);
+      cursor.gotoStartOfParagraph(true);
+      List<ContentBasedDirectiveItem> items = model.getItemsFor(cursor);
 
       // delete current items
-      boolean deletedAtLeastOne = removeAllItems(cursor);
-
-      if (!deletedAtLeastOne)
+      boolean deletedAtLeastOne = false;
+      for (ContentBasedDirectiveItem item : items)
       {
-        cursor.collapseToStart();
-        cursor.gotoStartOfParagraph(false);
-        cursor.gotoEndOfParagraph(true);
+        deletedAtLeastOne |= removeItem(item);
+      }
+
+      if (!deletedAtLeastOne && !items.isEmpty())
+      {
+        ContentBasedDirectiveItem item = items.get(0);
         if (item.isRecipientLine())
         {
           item.formatVerfuegungspunktWithZuleitung();
@@ -84,39 +87,29 @@ public class OnChangeDirective extends WollMuxEvent
       }
 
       model.adoptNumbers();
-
-      viewCursor.gotoRange(cursor, false);
     }
   }
 
   /**
-   * Delete all content based directives touched by the cursor.
+   * Delete the item if it's a directive.
    *
-   * @param cursor
-   *          The cursor which may contain content based directives.
+   * @param item
+   *          The item.
    *
    * @return true, if at least one has been deleted, false otherwise.
    */
-  private boolean removeAllItems(XParagraphCursor cursor)
+  private boolean removeItem(ContentBasedDirectiveItem item)
   {
     boolean deletedAtLeastOne = false;
-    UnoCollection<XTextRange> paragraphs = UnoCollection.getCollection(cursor, XTextRange.class);
-    if (paragraphs != null)
+    boolean isVerfuegungspunktMitZuleitung = item.isItemWithRecipient();
+    if (item.isItem())
     {
-      for (XTextRange par : paragraphs)
-      {
-        ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(par);
-        boolean isVerfuegungspunktMitZuleitung = item.isItemWithRecipient();
-        if (item.isItem())
-        {
-          item.remove();
-          deletedAtLeastOne = true;
-        }
-        if (isVerfuegungspunktMitZuleitung)
-        {
-          item.formatRecipientLine();
-        }
-      }
+      item.remove();
+      deletedAtLeastOne = true;
+    }
+    if (isVerfuegungspunktMitZuleitung)
+    {
+      item.formatRecipientLine();
     }
     return deletedAtLeastOne;
   }
