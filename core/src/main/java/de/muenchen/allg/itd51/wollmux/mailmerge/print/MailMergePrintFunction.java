@@ -23,6 +23,8 @@
 package de.muenchen.allg.itd51.wollmux.mailmerge.print;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -122,8 +124,16 @@ public abstract class MailMergePrintFunction extends PrintFunction
    */
   public File createTempDocument(XPrintModel pmod, boolean isODT)
   {
-    File outputDir = new File(
-        pmod.getProp(PROP_TARGETDIR, System.getProperty("user.home") + "/Seriendruck").toString());
+    String uriPath;
+    try
+    {
+      URI uri = new URI(pmod.getProp(PROP_TARGETDIR, System.getProperty("user.home") + "/Seriendruck").toString());
+      uriPath = uri.getPath();
+    } catch (URISyntaxException e)
+    {
+      uriPath = System.getProperty("user.home") + "/Seriendruck";
+    }
+    File outputDir = new File(uriPath);
 
     @SuppressWarnings("unchecked")
     HashMap<String, String> dataset = new HashMap<>((HashMap<String, String>) pmod
