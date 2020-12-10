@@ -141,23 +141,21 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     String from = pmod.getProp(PROP_EMAIL_FROM, "").toString();
     if (!isMailAddress(from))
     {
-      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
-          L.m("Die Absenderadresse '%1' ist ungültig.", from));
+      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m("Die Absenderadresse '%1' ist ungültig.", from));
       pmod.cancel();
       return;
     }
 
     String fieldName = pmod.getProp(PROP_EMAIL_TO_FIELD_NAME, "").toString();
     @SuppressWarnings("unchecked")
-    HashMap<String, String> ds = new HashMap<>((HashMap<String, String>) pmod
-        .getProp(SetFormValue.PROP_DATASET_EXPORT, new HashMap<String, String>()));
+    HashMap<String, String> ds = new HashMap<>(
+        (HashMap<String, String>) pmod.getProp(SetFormValue.PROP_DATASET_EXPORT, new HashMap<String, String>()));
     String to = ds.get(fieldName);
     PrintModels.setStage(pmod, L.m("Sende an %1", to));
     if (!isMailAddress(to))
     {
-      boolean res = InfoDialog.showCancelModal("ungültige Empfängeradresse", L.m(
-          "Die Empfängeradresse '%1' ist ungültig!\n\nDiesen Datensatz überspringen und fortsetzen?",
-          to));
+      boolean res = InfoDialog.showCancelModal("ungültige Empfängeradresse",
+          L.m("Die Empfängeradresse '%1' ist ungültig!\n\nDiesen Datensatz überspringen und fortsetzen?", to));
       if (res)
       {
         pmod.cancel();
@@ -171,12 +169,14 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     try
     {
       EMailSender mail = new EMailSender();
-      mail.createNewMultipartMail(from, to, replaceMergeFieldInText(ds, subject),
-          replaceMergeFieldInText(ds, message));
+      mail.createNewMultipartMail(from, to, replaceMergeFieldInText(ds, subject), replaceMergeFieldInText(ds, message));
 
       MailServerSettings smtpSettings = getMailServerSettings(pmod, mail);
 
-      pmod.setPropertyValue(PROP_TARGETDIR, Files.createTempDirectory("MailMerge").toString());
+      if (pmod.getProp(PROP_TARGETDIR, null) == null)
+      {
+        pmod.setPropertyValue(PROP_TARGETDIR, Files.createTempDirectory("MailMerge").toString());
+      }
       File document = saveOutputFile(createTempDocument(pmod, isODT), pmod.getTextDocument());
 
       sendMail(mail, smtpSettings, document);
@@ -193,8 +193,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
       }
 
       @SuppressWarnings("unchecked")
-      List<String> reportRecipientList = (List<String>) pmod
-          .getPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST);
+      List<String> reportRecipientList = (List<String>) pmod.getPropertyValue(PROP_EMAIL_REPORT_RECIPIENT_LIST);
       int mailsSentCount = (int) pmod.getPropertyValue(PROP_EMAIL_REPORT_EMAILS_SENT_COUNT);
 
       if (reportRecipientList == null)
@@ -215,8 +214,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     } catch (MessagingException e)
     {
       LOGGER.error("Email versenden fehlgeschlagen", e);
-      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE,
-          L.m("Der Versand der E-Mail ist fehlgeschlagen."));
+      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m("Der Versand der E-Mail ist fehlgeschlagen."));
       pmod.cancel();
     } catch (Exception e)
     {
