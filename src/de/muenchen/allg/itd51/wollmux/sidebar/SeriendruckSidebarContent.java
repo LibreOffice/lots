@@ -37,6 +37,7 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
+import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
@@ -46,6 +47,10 @@ import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractCloseListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
+import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.AbstractNotifier;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.AdjustFields;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.CalcModel;
@@ -59,6 +64,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailmergeWizardController
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.SpecialField;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseModel;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -320,7 +326,7 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
           break;
 
         case 2:
-          new IfThenElseDialog(mailMerge.getDs().getColumnNames(), textDocumentController);
+        	addIfThenElseField(mailMerge.getDs().getColumnNames());
           break;
 
         case 3:
@@ -349,6 +355,29 @@ public class SeriendruckSidebarContent extends ComponentBase implements XToolPan
     hLayout2.addControl(UNO.XControl(specialBox), 6);
     vLayout.addLayout(hLayout2, 1);
     layout.addLayout(vLayout, 1);
+  }
+
+  private void addIfThenElseField(List<String> columnNames)
+  {
+      try
+      {
+        ConfigThingy currentTrafo = textDocumentController.getModel().getFormFieldTrafoFromSelection();
+        IfThenElseModel model = new IfThenElseModel(currentTrafo);
+        short result = new IfThenElseDialog(new ArrayList<String>(columnNames), model).execute();
+        if (result == ExecutableDialogResults.OK)
+        {
+          ConfigThingy resultConf = model.create();
+          if (model.getName() == null)
+          {
+            textDocumentController.replaceSelectionWithTrafoField(resultConf, "Wenn...Dann...Sonst");
+          } else {
+            textDocumentController.setTrafo(model.getName(), resultConf);
+          }
+        }
+      } catch (ConfigurationErrorException | UnavailableException ex)
+      {
+        LOGGER.debug("", ex);
+      }
   }
 
   private void addPrintControls()

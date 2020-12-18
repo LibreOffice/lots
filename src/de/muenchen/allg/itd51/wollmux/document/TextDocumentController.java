@@ -12,9 +12,16 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.star.accessibility.AccessibleEventObject;
+import com.sun.star.accessibility.XAccessibleEventListener;
+import com.sun.star.awt.EnhancedMouseEvent;
+import com.sun.star.awt.XEnhancedMouseClickHandler;
+import com.sun.star.awt.XExtendedToolkit;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.document.EventObject;
+import com.sun.star.document.XEventListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiServiceFactory;
@@ -22,8 +29,10 @@ import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
+import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.RuntimeException;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
@@ -496,6 +505,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       XTextContent f =
         UNO.XTextContent(UNO.XMultiServiceFactory(model.doc).createInstance(
           "com.sun.star.text.TextField.InputUser"));
+
       UNO.setProperty(f, "Content", userFieldName);
       if (hint != null) {
         UNO.setProperty(f, "Hint", hint);
