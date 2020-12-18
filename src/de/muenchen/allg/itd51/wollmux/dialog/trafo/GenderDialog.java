@@ -85,6 +85,10 @@ public class GenderDialog
   {
     try
     {
+      ConfigThingy currentTrafo = documentController.getModel().getFormFieldTrafoFromSelection();
+      
+      GenderTrafoModel genderModel = new GenderTrafoModel(currentTrafo);
+      
       XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
       XContainerWindowProvider provider = UnoRuntime.queryInterface(XContainerWindowProvider.class,
           UNO.xMCF.createInstanceWithContext("com.sun.star.awt.ContainerWindowProvider",
@@ -93,6 +97,11 @@ public class GenderDialog
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.gender_dialog?location=application", "", peer, null);
       controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
+      
+      UNO.XTextComponent(controlContainer.getControl("cbSerienbrieffeld")).setText(genderModel.getField());
+      UNO.XTextComponent(controlContainer.getControl("txtMale")).setText(genderModel.getMale());
+      UNO.XTextComponent(controlContainer.getControl("txtFemale")).setText(genderModel.getFemale());
+      UNO.XTextComponent(controlContainer.getControl("txtOthers")).setText(genderModel.getOther());
 
       XComboBox cbAnrede = UNO.XComboBox(controlContainer.getControl("cbSerienbrieffeld"));
       cbAnrede.addItems(fieldNames.toArray(new String[fieldNames.size()]), (short) 0);
