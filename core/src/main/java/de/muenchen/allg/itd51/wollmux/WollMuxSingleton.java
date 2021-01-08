@@ -109,7 +109,7 @@ public class WollMuxSingleton
     // init default context
     WollMuxFiles.determineDefaultContext();
 
-    WollMuxClassLoader.initClassLoader();
+    ConfClassLoader.initClassLoader(WollMuxFiles.getWollmuxConf().query("CLASSPATH", 1));
 
     LOGGER.debug("StartupWollMux");
     if (WollMuxFiles.getWollMuxConfFile() != null)

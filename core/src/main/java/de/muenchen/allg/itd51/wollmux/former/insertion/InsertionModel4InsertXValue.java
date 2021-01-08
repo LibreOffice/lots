@@ -40,7 +40,6 @@ import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.document.text.Bookmark;
-import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;

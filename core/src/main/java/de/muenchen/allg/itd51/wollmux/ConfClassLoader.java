@@ -22,6 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -29,6 +30,17 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.util.L;
+
+/**
+ * ClassLoader which uses the classpath defined in the WollMux configuration. It's implemented as a
+ * singleton.
+ *
+ * @see <a href=
+ *      "https://wollmux.org/18.2/Konfigurationsdatei_wollmux_conf.html#einbinden-referatseigener-pluginsclasspath">
+ *      wollmux.org</a>
+ */
 public class ConfClassLoader extends URLClassLoader
 {
 
@@ -51,7 +63,7 @@ public class ConfClassLoader extends URLClassLoader
       addBlacklisted(s);
     }
     whitelist = new ArrayList<>();
-    whitelist.add("com.sun.star.lib.loader"); // Ausnahme für Klassen in der Standardconfig
+    whitelist.add("com.sun.star.lib.loader"); // exception for classes in default configuration
   }
 
   @Override
@@ -60,11 +72,23 @@ public class ConfClassLoader extends URLClassLoader
     super.addURL(url);
   }
 
+  /**
+   * Black list a classpath entry.
+   *
+   * @param name
+   *          The classpath entry.
+   */
   public void addBlacklisted(String name)
   {
     blacklist.add(name);
   }
 
+  /**
+   * White list a classpath entry.
+   *
+   * @param name
+   *          The classpath entry.
+   */
   public void addWhitelisted(String name)
   {
     whitelist.add(name);
@@ -117,8 +141,55 @@ public class ConfClassLoader extends URLClassLoader
   }
 
   /**
-   * Liefert einen ClassLoader, der die in wollmux.conf gesetzten CLASSPATH-Direktiven
-   * berücksichtigt.
+   * Initialize the ClassLoader with the WollMux configuration.
+   *
+   * @param conf
+   *          The "CLASSPATH" section of the WollMux configuration.
+   */
+  public static void initClassLoader(ConfigThingy conf)
+  {
+    for (ConfigThingy classpathConf : conf)
+    {
+      for (ConfigThingy urlConf : classpathConf)
+      {
+        String urlStr = urlConf.toString();
+        if (!urlStr.endsWith("/") && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.')))
+        {
+          // If the URL has no file extension, add a slash to use it as directory
+          urlStr = urlStr + "/";
+        }
+        try
+        {
+          URL url = WollMuxFiles.makeURL(urlStr);
+          getClassLoader().addURL(url);
+        } catch (MalformedURLException e)
+        {
+          LOGGER.error(L.m("Fehlerhafte CLASSPATH-Angabe: \"%1\"", urlStr), e);
+        }
+      }
+    }
+
+    StringBuilder urllist = new StringBuilder();
+    URL[] urls = getClassLoader().getURLs();
+    for (int i = 0; i < urls.length; ++i)
+    {
+      urllist.append(urls[i].toExternalForm());
+      urllist.append("  ");
+    }
+
+    ConfigThingy confWhitelist = WollMuxFiles.getWollmuxConf().query("CPWHITELIST", 1);
+    for (ConfigThingy w : confWhitelist)
+    {
+      getClassLoader().addWhitelisted(w.toString());
+    }
+
+    LOGGER.debug("CLASSPATH={}", urllist);
+  }
+
+  /**
+   * Create an instance of this ClassLoader and return it.
+   *
+   * @return An instance of this class.
    */
   public static ConfClassLoader getClassLoader()
   {
