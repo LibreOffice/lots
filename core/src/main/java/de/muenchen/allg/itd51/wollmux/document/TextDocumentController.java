@@ -1594,6 +1594,48 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
   }
 
   /**
+   * Update a TRAFO definition. Subsequent calls to {@link #setFormFieldValue(String, String)} use
+   * the new definition.
+   *
+   * @param trafoName
+   *          The name of the TRAFO.
+   * @param trafoConf
+   *          A definition of function in the form "Name(FUNCTION_DEFINITION)", where Name is a
+   *          valid identifier and FUNCTION_DEFINITION a valid parameter for
+   *          {@link FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}. The
+   *          first child of FUNCTION_DEFINITION has to be a valid function name like "AND".
+   * @throws NodeNotFoundException
+   *           The TRAFO with this name can't be modified.
+   */
+  public synchronized void setTrafo(String trafoName, ConfigThingy trafoConf)
+      throws NodeNotFoundException
+  {
+    ConfigThingy func = model.getFormDescription().query(FORMULAR).query(FUNKTIONEN).query(trafoName, 2).getLastChild();
+
+    FunctionLibrary funcLib = getFunctionLibrary();
+    Function function = FunctionFactory.parseChildren(trafoConf, funcLib, getDialogLibrary(), getFunctionContext());
+    funcLib.add(trafoName, function);
+
+    // remove children of func, so that we can reset them later
+    for (Iterator<ConfigThingy> iter = func.iterator(); iter.hasNext();)
+    {
+      iter.next();
+      iter.remove();
+    }
+
+    for (ConfigThingy f : trafoConf)
+    {
+      func.addChild(new ConfigThingy(f));
+    }
+
+    storeCurrentFormDescription();
+
+    // The new function can depend on other IDs. So we have update the dependencies.
+    collectNonWollMuxFormFields();
+    updateAllFormFields();
+  }
+
+  /**
    * Add a new function with a generated name. Register it in the library so it can be used
    * immediatly.
    *

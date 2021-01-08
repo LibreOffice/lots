@@ -50,6 +50,7 @@ import com.sun.star.sdbc.XDataSource;
 import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.ui.XUIElement;
+import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.ui.dialogs.FilePicker;
 import com.sun.star.ui.dialogs.TemplateDescription;
 import com.sun.star.ui.dialogs.XFilePicker3;
@@ -75,6 +76,10 @@ import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DBDatasourceDialog;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModelListener;
+import de.muenchen.allg.itd51.wollmux.mailmerge.gender.GenderDialog;
+import de.muenchen.allg.itd51.wollmux.mailmerge.gender.GenderTrafoModel;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ifthenelse.IfThenElseDialog;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ifthenelse.IfThenElseModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController;
 import de.muenchen.allg.itd51.wollmux.util.L;
@@ -501,27 +506,11 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       break;
 
     case 1:
-      datasourceModel.ifPresent(ds -> {
-        try
-        {
-          GenderDialog.startDialog(new ArrayList<String>(ds.getColumnNames()), textDocumentController);
-        } catch (NoTableSelectedException ex)
-        {
-          LOGGER.debug("", ex);
-        }
-      });
+      addGenderField();
       break;
 
     case 2:
-      datasourceModel.ifPresent(ds -> {
-        try
-        {
-          IfThenElseDialog.startDialog(new ArrayList<String>(ds.getColumnNames()), textDocumentController);
-        } catch (NoTableSelectedException ex)
-        {
-          LOGGER.debug("", ex);
-        }
-      });
+      addIfThenElseField();
       break;
 
     case 3:
@@ -543,6 +532,57 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     textDocumentController.collectNonWollMuxFormFields();
     updatePreviewFields();
     UNO.XTextComponent(event.Source).setText(UNO.XComboBox(event.Source).getItem((short) 0));
+  }
+
+  private void addIfThenElseField()
+  {
+    datasourceModel.ifPresent(ds -> {
+      try
+      {
+        ConfigThingy currentTrafo = textDocumentController.getModel().getFormFieldTrafoFromSelection();
+        IfThenElseModel model = new IfThenElseModel(currentTrafo);
+        short result = new IfThenElseDialog(new ArrayList<String>(ds.getColumnNames()), model).execute();
+        if (result == ExecutableDialogResults.OK)
+        {
+          ConfigThingy resultConf = model.create();
+          if (model.getName() == null)
+          {
+            textDocumentController.replaceSelectionWithTrafoField(resultConf, "Wenn...Dann...Sonst");
+          } else {
+            textDocumentController.setTrafo(model.getName(), resultConf);
+          }
+        }
+      } catch (NoTableSelectedException | NodeNotFoundException ex)
+      {
+        LOGGER.debug("", ex);
+      }
+    });
+  }
+
+  private void addGenderField()
+  {
+    datasourceModel.ifPresent(ds -> {
+      ConfigThingy currentTrafo = textDocumentController.getModel().getFormFieldTrafoFromSelection();
+      try
+      {
+        GenderTrafoModel model = new GenderTrafoModel(currentTrafo);
+        short result = GenderDialog.startDialog(new ArrayList<String>(ds.getColumnNames()), model);
+        if (result == ExecutableDialogResults.OK)
+        {
+          ConfigThingy conf = model.generateGenderTrafoConf();
+          if (model.getFunctionName() == null)
+          {
+            textDocumentController.replaceSelectionWithTrafoField(conf, "Gender");
+          } else
+          {
+            textDocumentController.setTrafo(model.getFunctionName(), conf);
+          }
+        }
+      } catch (NoTableSelectedException | NodeNotFoundException ex)
+      {
+        LOGGER.debug("", ex);
+      }
+    });
   }
 
   /**
