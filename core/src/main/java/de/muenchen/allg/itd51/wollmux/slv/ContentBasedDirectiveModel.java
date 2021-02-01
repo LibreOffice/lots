@@ -187,6 +187,31 @@ public class ContentBasedDirectiveModel
   }
 
   /**
+   * Get all items selected by the cursor.
+   *
+   * @param cursor
+   *          The cursor.
+   * @return List of items.
+   */
+  public List<ContentBasedDirectiveItem> getItemsFor(XParagraphCursor cursor)
+  {
+    List<ContentBasedDirectiveItem> items = new ArrayList<>();
+    UnoCollection<XTextRange> paragraphs = UnoCollection.getCollection(cursor, XTextRange.class);
+    for (XTextRange paragraph : paragraphs)
+    {
+      if (paragraph == null)
+      {
+        continue;
+      }
+
+      ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(
+          paragraph.getText().createTextCursorByRange(paragraph));
+      items.add(item);
+    }
+    return items;
+  }
+
+  /**
    * Collect information about visible content based directives from the document.
    *
    * @return List of settings for each item.
@@ -276,39 +301,6 @@ public class ContentBasedDirectiveModel
       LOGGER.trace("No frame found", e);
     }
     return null;
-  }
-
-  /**
-   * Delete all copy lines touched by the item.
-   *
-   * @param item
-   *          The item containing some copy lines.
-   *
-   * @return true, if a copy was deleted, false otherwise.
-   */
-  public boolean removeAllCopies(ContentBasedDirectiveItem item)
-  {
-    boolean deletedAtLeastOne = false;
-    String fullText = "";
-    fullText = item.getFullLinesOfSelectedCopyLines();
-    UnoCollection<XTextRange> paragraphs = UnoCollection.getCollection(item.getTextRange(),
-        XTextRange.class);
-    if (paragraphs != null)
-    {
-      for (XTextRange par : paragraphs)
-      {
-        String str = Utils.getStringOfXTextRange(par);
-        ContentBasedDirectiveItem newItem = new ContentBasedDirectiveItem(par);
-
-        if (newItem.isCopy() && fullText.contains(str))
-        {
-          // reset existing item
-          newItem.remove();
-          deletedAtLeastOne = true;
-        }
-      }
-    }
-    return deletedAtLeastOne;
   }
 
   /**

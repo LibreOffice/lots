@@ -22,6 +22,8 @@
  */
 package de.muenchen.allg.itd51.wollmux.slv.events;
 
+import java.util.List;
+
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
 
@@ -61,17 +63,26 @@ public class OnChangeCopy extends WollMuxEvent
     {
       XParagraphCursor cursor = UNO
           .XParagraphCursor(viewCursor.getText().createTextCursorByRange(viewCursor));
-      ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(cursor);
+      cursor.gotoStartOfParagraph(true);
+      List<ContentBasedDirectiveItem> items = model.getItemsFor(cursor);
 
       // delete current items
-      boolean deletedAtLeastOne = model.removeAllCopies(item);
+      boolean deletedAtLeastOne = false;
+      for (ContentBasedDirectiveItem item : items)
+      {
+        deletedAtLeastOne |= removeCopy(item);
+      }
 
-      // create new copy of none was deleted.
+      // create new copy if none was deleted.
       if (!deletedAtLeastOne)
       {
+        cursor = UNO.XParagraphCursor(viewCursor.getText().createTextCursorByRange(viewCursor));
+        ContentBasedDirectiveItem item = new ContentBasedDirectiveItem(cursor);
         cursor.collapseToStart();
         if (item.isItem())
+        {
           cursor.gotoEndOfParagraph(false);
+        }
 
         int count = countItemsBefore(cursor) + 1;
         cursor.setString("\r" + ContentBasedDirectiveItem.copyString(count) + "\r");
@@ -83,12 +94,29 @@ public class OnChangeCopy extends WollMuxEvent
         cursor.gotoEndOfParagraph(true);
         item.formatCopy();
         cursor.gotoNextParagraph(false);
+        viewCursor.gotoRange(cursor, false);
       }
 
       model.adoptNumbers();
-
-      viewCursor.gotoRange(cursor, false);
     }
+  }
+
+  /**
+   * Delete the item if it's a copy.
+   *
+   * @param item
+   *          The item.
+   *
+   * @return true, if a copy was deleted, false otherwise.
+   */
+  private boolean removeCopy(ContentBasedDirectiveItem item)
+  {
+    if (item.isCopy())
+    {
+      item.remove();
+      return true;
+    }
+    return false;
   }
 
   /**

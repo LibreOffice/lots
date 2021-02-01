@@ -36,7 +36,6 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoProperty;
 
@@ -171,16 +170,21 @@ public class ContentBasedDirectiveItem
   public void formatNumber()
   {
     XTextCursor zifferOnly = getZifferOnly();
-    if (zifferOnly != null)
+    formatNumberInTextRange(zifferOnly);
+  }
+
+  private void formatNumberInTextRange(XTextRange numberRange)
+  {
+    if (numberRange != null)
     {
-      Utils.setProperty(zifferOnly,
+      Utils.setProperty(numberRange,
           UnoProperty.CHAR_STYLE_NAME,
           ContentBasedDirectiveModel.CHAR_STYLE_NAME_NUMBER);
 
       // Zeichen danach auf Standardformatierung setzen, damit der Text, der
       // danach geschrieben wird nicht auch obiges Zeichenformat besitzt:
       // ("Standard" gilt laut DevGuide auch in englischen Versionen)
-      Utils.setProperty(zifferOnly.getEnd(), UnoProperty.CHAR_STYLE_NAME, "Standard");
+      Utils.setProperty(numberRange.getEnd(), UnoProperty.CHAR_STYLE_NAME, "Standard");
     }
   }
 
@@ -297,28 +301,9 @@ public class ContentBasedDirectiveItem
         // Nummer neu anlegen, wenn sie noch gar nicht existierte
         zifferOnly = textRange.getText().createTextCursorByRange(textRange.getStart());
         zifferOnly.setString(numberStr);
-        formatNumber();
+        formatNumberInTextRange(zifferOnly);
       }
     }
-  }
-
-  /**
-   * Returns the content of lines associated with this item.
-   *
-   * @return The content.
-   */
-  public String getFullLinesOfSelectedCopyLines()
-  {
-    StringBuilder fullText = new StringBuilder("");
-    UnoCollection<XTextRange> texts = UnoCollection.getCollection(textRange, XTextRange.class);
-    if (texts != null)
-    {
-      for (XTextRange text : texts)
-      {
-        fullText.append(Utils.getStringOfXTextRange(text));
-      }
-    }
-    return fullText.toString();
   }
 
   /**
