@@ -214,8 +214,6 @@ public class PrintProgressBar
         currentValues.put(key, 0);
       }
     }
-
-    refresh();
   }
 
   /**
@@ -249,11 +247,16 @@ public class PrintProgressBar
     currentValues.put(key, value);
     refresh();
   }
+  
+  public HashMap<Object, Integer> getMaxValue()
+  {
+    return maxValues;
+  }
 
   /**
    * Update the progress bar and the message in the dialog.
    */
-  private void refresh()
+  public void refresh()
   {
     int allMax = 1;
     int allCurrent = 0;
@@ -283,6 +286,11 @@ public class PrintProgressBar
     if (showfms)
     {
       fromMaxString.append(")");
+    }
+
+    if (progressBar == null)
+    {
+      return;
     }
 
     progressBar.setRange(0, allMax);

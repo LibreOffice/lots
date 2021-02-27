@@ -33,6 +33,7 @@ import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
@@ -94,15 +95,14 @@ class SlavePrintModel extends WeakBase implements XPrintModel
     if (f != null)
     {
       XPrintModel pmod = new SlavePrintModel(master, idx + 1);
-      Thread t = f.printAsync(pmod);
       try
       {
-        t.join();
-      } catch (InterruptedException e)
+        f.print(pmod);
+      } catch (PrintException e)
       {
         PrintModels.LOGGER.error("", e);
-        Thread.currentThread().interrupt();
       }
+      
       master.setPrintProgressMaxValue(pmod, (short) 0);
     } else
     {

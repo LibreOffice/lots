@@ -55,7 +55,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 /**
  * Configures and performs a mail merge.
  */
-public class MailMergeRunner implements Runnable
+public class MailMergeRunner
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(MailMergeRunner.class);
 
@@ -87,7 +87,7 @@ public class MailMergeRunner implements Runnable
     setProperties(settings);
   }
 
-  @Override
+  
   public void run()
   {
     if (pmod.isCanceled())

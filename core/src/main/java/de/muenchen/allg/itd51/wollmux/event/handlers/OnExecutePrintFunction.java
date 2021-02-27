@@ -49,14 +49,7 @@ public class OnExecutePrintFunction extends WollMuxEvent
   protected void doit() throws WollMuxFehlerException
   {
     final XPrintModel pmod = PrintModels.createPrintModel(documentController, true);
-    new Thread()
-    {
-      @Override
-      public void run()
-      {
-        pmod.printWithProps();
-      }
-    }.start();
+    pmod.printWithProps();
   }
 
   @Override

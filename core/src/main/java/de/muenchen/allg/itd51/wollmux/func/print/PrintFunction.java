@@ -120,28 +120,6 @@ public abstract class PrintFunction implements Comparable<PrintFunction>
   }
 
   /**
-   * Execute this print function in a separate thread.
-   *
-   * @param printModel
-   *          The {@link XPrintModel} to print.
-   * @return The separate thread.
-   */
-  public Thread printAsync(XPrintModel printModel)
-  {
-    Thread t = new Thread(() -> {
-      try
-      {
-        print(printModel);
-      } catch (Exception ex)
-      {
-        LOGGER.error("Fehler beim Drucken", ex);
-      }
-    });
-    t.start();
-    return t;
-  }
-
-  /**
    * Do the purpose of this print function.
    *
    * @param printModel
