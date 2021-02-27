@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * Copyright (C) 2005 - 2021 Landeshauptstadt München
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -216,8 +216,8 @@ public class MailmergeWizardController implements XWizardController
     {
       try
       {
-	new Thread(new MailMergeRunner(textDocumentController, model, settings))
-	    .start();
+        MailMergeRunner runner = new MailMergeRunner(textDocumentController, model, settings);
+        runner.run();
       } catch (NoTableSelectedException e)
       {
         InfoDialog.showInfoModal("Seriendruck fehlgeschlagen", e.getMessage());

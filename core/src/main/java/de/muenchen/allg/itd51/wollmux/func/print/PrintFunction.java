@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * Copyright (C) 2005 - 2021 Landeshauptstadt München
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -117,28 +117,6 @@ public abstract class PrintFunction implements Comparable<PrintFunction>
     }
     PrintFunction other = (PrintFunction) obj;
     return Objects.equals(functionName, other.functionName) && order == other.order;
-  }
-
-  /**
-   * Execute this print function in a separate thread.
-   *
-   * @param printModel
-   *          The {@link XPrintModel} to print.
-   * @return The separate thread.
-   */
-  public Thread printAsync(XPrintModel printModel)
-  {
-    Thread t = new Thread(() -> {
-      try
-      {
-        print(printModel);
-      } catch (Exception ex)
-      {
-        LOGGER.error("Fehler beim Drucken", ex);
-      }
-    });
-    t.start();
-    return t;
   }
 
   /**
