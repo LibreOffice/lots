@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * Copyright (C) 2005 - 2021 Landeshauptstadt München
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -50,9 +50,9 @@ public abstract class OfficeTest
       options.add("--norestore");
       options.add("--nocrashreport");
       options.add("--nolockcheck");
-      Properties prop = new Properties();
-      prop.load(OfficeTest.class.getClassLoader().getResourceAsStream("libreoffice.properties"));
-      options.add("-env:UserInstallation=file://" + prop.getProperty("office.profile"));
+      //Properties prop = new Properties();
+      //prop.load(OfficeTest.class.getClassLoader().getResourceAsStream("libreoffice.properties"));
+      //options.add("-env:UserInstallation=file://" + prop.getProperty("office.profile"));
       UNO.init(options);
     } catch (Exception e)
     {

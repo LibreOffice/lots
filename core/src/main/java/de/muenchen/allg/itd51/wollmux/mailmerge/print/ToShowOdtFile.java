@@ -54,7 +54,8 @@ public class ToShowOdtFile extends PrintFunction
     if (result != null && result.getCurrentController() != null && result.getCurrentController().getFrame() != null
         && result.getCurrentController().getFrame().getContainerWindow() != null)
     {
-      //DocumentManager.getDocumentManager().addTextDocument(result); // Muss das Ergebnis Dokument (result von OOoBasedMailMerge ( doMailMerge -> Z 228: pmod.setPropertyValue(PrintFunction.PRINT_RESULT, result)) mit aufgenommen werden?
+      //DocumentManager.getDocumentManager().addTextDocument(result); // Muss es in doc manager aufgenommen werden wenn diese Methode beretis print result von OOoBasedMailMerge ( doMailMerge -> Z 228: pmod.setPropertyValue(PrintFunction.PRINT_RESULT, result)) erhält?
+      //dok wird schneller nach fertigstellung des sd angezeigt wenn auskommentiert.
       DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(result.getCurrentController().getFrame());
       result.getCurrentController().getFrame().getContainerWindow().setVisible(true);
       UNO.XTopWindow(result.getCurrentController().getFrame().getContainerWindow()).toFront();

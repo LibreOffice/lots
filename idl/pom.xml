@@ -12,7 +12,7 @@
   <name>WollMux Interfaces</name>
 
   <properties>
-    <libreoffice.sdk>${UNO_PATH}/../sdk</libreoffice.sdk>
+    <libreoffice.sdk>${UNO_PATH}\..\sdk</libreoffice.sdk>
   </properties>
 
   <build>

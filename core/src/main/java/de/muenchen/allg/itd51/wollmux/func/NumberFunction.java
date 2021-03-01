@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * Copyright (C) 2005 - 2021 Landeshauptstadt München
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -114,7 +114,7 @@ abstract class NumberFunction extends MultiFunction
      * fälschlicher weise "100.000" als 100 interpretieren, wenn die eingebende
      * Person 100000 gemeint hat.
      */
-    if (decimalPoint != '.') str = str.replace('.', 'ß');
+    if (decimalPoint != '.') str = str.replace('.', '!');
 
     return new BigDecimal(str.replace(decimalPoint, '.'));
   }
