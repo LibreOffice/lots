@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2020 Landeshauptstadt München
+ * Copyright (C) 2005 - 2021 Landeshauptstadt München
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -54,7 +54,7 @@ public class ToShowOdtFile extends PrintFunction
     if (result != null && result.getCurrentController() != null && result.getCurrentController().getFrame() != null
         && result.getCurrentController().getFrame().getContainerWindow() != null)
     {
-      DocumentManager.getDocumentManager().addTextDocument(result);
+      //DocumentManager.getDocumentManager().addTextDocument(result); // Muss das Ergebnis Dokument (result von OOoBasedMailMerge ( doMailMerge -> Z 228: pmod.setPropertyValue(PrintFunction.PRINT_RESULT, result)) mit aufgenommen werden?
       DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(result.getCurrentController().getFrame());
       result.getCurrentController().getFrame().getContainerWindow().setVisible(true);
       UNO.XTopWindow(result.getCurrentController().getFrame().getContainerWindow()).toFront();
