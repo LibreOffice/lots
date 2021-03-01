@@ -54,7 +54,6 @@ public class ToShowOdtFile extends PrintFunction
     if (result != null && result.getCurrentController() != null && result.getCurrentController().getFrame() != null
         && result.getCurrentController().getFrame().getContainerWindow() != null)
     {
-      DocumentManager.getDocumentManager().addTextDocument(result);
       DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(result.getCurrentController().getFrame());
       result.getCurrentController().getFrame().getContainerWindow().setVisible(true);
       UNO.XTopWindow(result.getCurrentController().getFrame().getContainerWindow()).toFront();
