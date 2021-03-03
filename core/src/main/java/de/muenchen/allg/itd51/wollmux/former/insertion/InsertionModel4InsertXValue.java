@@ -237,7 +237,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   @Override
-  public boolean updateDocument(
+  public String updateDocument(
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
     ConfigThingy conf = new ConfigThingy("WM");
@@ -292,7 +292,14 @@ public class InsertionModel4InsertXValue extends InsertionModel
     }
 
     String newBookmarkName = conf.stringRepresentation(false, '\'', true);
-    return bookmark.rename(newBookmarkName) != Bookmark.BROKEN;
+    
+    if (bookmark.rename(newBookmarkName) != Bookmark.BROKEN)    
+    {
+      return "";
+    } else
+    {
+      return Bookmark.BROKEN;
+    }
   }
 
   /**

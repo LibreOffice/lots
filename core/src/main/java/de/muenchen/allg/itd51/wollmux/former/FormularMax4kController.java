@@ -69,6 +69,7 @@ import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoList;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentTreeVisitor;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -88,6 +89,8 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXVal
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.util.L;
@@ -677,10 +680,32 @@ public class FormularMax4kController
   {
     LOGGER.debug("Übertrage Formularbeschreibung ins Dokument");
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<>();
-    insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
+
+    Set<String> renamedToUpdate = insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     sectionModelList.updateDocument();
+    
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
     documentController.setFormDescription(new ConfigThingy(conf));
+    documentController.getModel().setFormularConf(conf);
+    
+    renamedToUpdate.forEach(functionName -> {
+      ConfigThingy trafoConf = null;
+      try
+      {
+        trafoConf = this.getDocumentController().getModel().getFormDescription().query("Formular")
+            .query("Funktionen").query(functionName, 2).getLastChild();
+      } catch (NodeNotFoundException e)
+      {
+        LOGGER.error("", e);
+      }
+      
+      // parse function and update library
+      FunctionLibrary funcLib = documentController.getFunctionLibrary();
+      Function func = FunctionFactory.parseChildren(trafoConf, funcLib,
+          documentController.getDialogLibrary(), documentController.getFunctionContext());
+      funcLib.add(functionName, func);
+    });
+    
     return conf;
   }
 

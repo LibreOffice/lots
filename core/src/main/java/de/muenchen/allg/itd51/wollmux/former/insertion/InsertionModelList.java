@@ -44,6 +44,9 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -321,14 +324,21 @@ public class InsertionModelList implements Iterable<InsertionModel>
    *          Nach dem Aufruf von updateDocument() sind zu dieser Map also Einträge
    *          hinzugekommen für alle TRAFOs, die in den Einfügungen vorkommen.
    */
-  public void updateDocument(Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
+  public Set<String> updateDocument(Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
     List<InsertionModel> defunct = new ArrayList<>();
     Iterator<InsertionModel> iter = models.iterator();
+    FunctionLibrary funcLib = formularMax4000.getDocumentController().getFunctionLibrary();
+    Set<String> renamedFunctions = new HashSet<>();
     while (iter.hasNext())
     {
       InsertionModel model = iter.next();
-      if (!model.updateDocument(mapFunctionNameToConfigThingy)) defunct.add(model);
+      String newName = model.updateDocument(mapFunctionNameToConfigThingy);
+      if (!newName.isEmpty())
+      {
+        renamedFunctions.add(newName);
+        defunct.add(model);
+      }
     }
 
     iter = defunct.iterator();
@@ -336,6 +346,8 @@ public class InsertionModelList implements Iterable<InsertionModel>
     {
       remove(iter.next());
     }
+    
+    return renamedFunctions;
   }
 
   /**
