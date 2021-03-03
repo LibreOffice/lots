@@ -37,7 +37,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import javax.swing.JOptionPane;
-import javax.swing.Timer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,12 +166,6 @@ public class FormularMax4kController
   private List<BroadcastListener> broadcastListeners = new ArrayList<>();
 
   /**
-   * Wird bei jeder Änderung von Formularaspekten gestartet, um nach einer
-   * Verzögerung die Änderungen in das Dokument zu übertragen.
-   */
-  private Timer writeChangesTimer;
-
-  /**
    * Der Standard-Formulartitel, solange kein anderer gesetzt wird.
    */
   private static final String GENERATED_FORM_TITLE =
@@ -276,10 +269,26 @@ public class FormularMax4kController
     groupModelList = new GroupModelList(this);
     sectionModelList = new SectionModelList(this);
 
-    writeChangesTimer = new Timer(500, e -> updateDocument(FormularMax4kController.this.documentController));
-    writeChangesTimer.setCoalesce(true);
-    writeChangesTimer.setRepeats(false);
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        try
+        {
+          view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
 
+          view.setFrameSize();
+          view.setVisible(true);
+        } catch (Exception x)
+        {
+          LOGGER.error("", x);
+        }
+      });
+    }
+    catch (Exception x)
+    {
+      LOGGER.error("", x);
+    }
+    
     initModelsAndViews(documentController.getFormDescription());
 
     if (!testMemoryRequirements())
@@ -298,31 +307,6 @@ public class FormularMax4kController
   public void setAbortListener(ActionListener abortListener)
   {
     this.abortListener = abortListener;
-  }
-
-  public void run()
-  {
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(() -> {
-        try
-        {
-          view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
-
-          writeChangesTimer.stop();
-
-          view.setFrameSize();
-          view.setVisible(true);
-        } catch (Exception x)
-        {
-          LOGGER.error("", x);
-        }
-      });
-    }
-    catch (Exception x)
-    {
-      LOGGER.error("", x);
-    }
   }
 
   /**
@@ -383,7 +367,30 @@ public class FormularMax4kController
    */
   public void documentNeedsUpdating()
   {
-    writeChangesTimer.restart();
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        try
+        {
+          if (view != null)
+          {
+            view.setFrameSize();
+            return;
+          }
+          
+          view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
+          view.setVisible(true);
+          
+        } catch (Exception x)
+        {
+          LOGGER.error("", x);
+        }
+      });
+    }
+    catch (Exception x)
+    {
+      LOGGER.error("", x);
+    }
   }
 
   /**
@@ -606,7 +613,7 @@ public class FormularMax4kController
    */
   public void save()
   {
-    flushChanges();
+    updateDocument(documentController);
     UNO.dispatch(documentController.getModel().doc, ".uno:Save");
   }
 
@@ -615,13 +622,13 @@ public class FormularMax4kController
    */
   public void saveAs()
   {
-    flushChanges();
+    updateDocument(documentController);
     UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
 
   public void sendAsEmail() {
-	  flushChanges();
-	  UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
+    updateDocument(documentController);
+    UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
   }
 
   /**
@@ -629,7 +636,7 @@ public class FormularMax4kController
    */
   public void abort()
   {
-    flushChanges();
+    updateDocument(documentController);
 
     if (functionTester != null) functionTester.abort();
 
@@ -645,28 +652,6 @@ public class FormularMax4kController
     catch (Exception x)
     {
       LOGGER.trace("", x);
-    }
-  }
-
-
-  /**
-   * Ruft {@link #updateDocument(TextDocumentModel)} auf, falls noch Änderungen
-   * anstehen.
-   */
-  private void flushChanges()
-  {
-    if (writeChangesTimer.isRunning())
-    {
-      LOGGER.debug("Schreibe wartende Änderungen ins Dokument");
-      writeChangesTimer.stop();
-      try
-      {
-        updateDocument(documentController);
-      }
-      catch (Exception x)
-      {
-        LOGGER.error("", x);
-      }
     }
   }
 
@@ -687,6 +672,9 @@ public class FormularMax4kController
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
     documentController.setFormDescription(new ConfigThingy(conf));
     documentController.getModel().setFormularConf(conf);
+    documentController.storeCurrentFormDescription();
+    this.initModelsAndViews(conf);
+    this.documentNeedsUpdating();
     
     renamedToUpdate.forEach(functionName -> {
       ConfigThingy trafoConf = null;
