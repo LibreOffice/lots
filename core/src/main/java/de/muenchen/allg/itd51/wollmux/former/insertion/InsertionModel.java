@@ -93,7 +93,7 @@ public abstract class InsertionModel
    *         entsprechende Bookmark entfernt und dieses InsertionModel sollte nicht
    *         weiter verwendet werden.
    */
-  public abstract boolean updateDocument(
+  public abstract String updateDocument(
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy);
 
   /**

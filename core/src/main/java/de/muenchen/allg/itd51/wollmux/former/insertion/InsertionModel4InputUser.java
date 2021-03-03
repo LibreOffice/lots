@@ -42,6 +42,7 @@ import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.util.UnoProperty;
 import de.muenchen.allg.util.UnoService;
@@ -181,7 +182,7 @@ public class InsertionModel4InputUser extends InsertionModel
     {}
 
     XPropertySet master = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, doc));
-    UnoProperty.setProperty(master, UnoProperty.VALUE, Integer.valueOf(0));
+    UnoProperty.setProperty(master, UnoProperty.VALUE, Double.valueOf(0));
     UnoProperty.setProperty(master, UnoProperty.NAME, newName);
     UnoProperty.setProperty(master, UnoProperty.CONTENT, content);
 
@@ -211,7 +212,7 @@ public class InsertionModel4InputUser extends InsertionModel
   }
 
   @Override
-  public boolean updateDocument(
+  public String updateDocument(
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   { // TESTED
     ConfigThingy conf = new ConfigThingy("WM");
@@ -229,6 +230,8 @@ public class InsertionModel4InputUser extends InsertionModel
     // Falls eine externe Funktion referenziert wird, ohne dass irgendwelche
     // ihrer Parameter gebunden wurden, dann nehmen wir direkt den
     // Original-Funktionsnamen für das TRAFO-Attribut ...
+    String funcName = "";
+    
     if (trafo.isReference() && !trafo.hasSpecifiedParameters())
     {
       conf.add("FUNCTION").add(trafo.getFunctionName());
@@ -237,7 +240,6 @@ public class InsertionModel4InputUser extends InsertionModel
     // ... ansonsten müssen wir eine neue Funktion machen.
     {
       int count = 1;
-      String funcName;
       do
       {
         funcName =
@@ -248,16 +250,17 @@ public class InsertionModel4InputUser extends InsertionModel
       mapFunctionNameToConfigThingy.put(funcName, trafo.export(funcName));
     }
 
-    String newName = conf.stringRepresentation(false, '\'', false);
     try
     {
-      rename(newName);
-      return true;
+      rename(conf.stringRepresentation(false, '\'', false));
+      
+      return funcName;
     }
     catch (Exception x)
     {
       LOGGER.error("", x);
-      return false;
+      
+      return "";
     }
   }
 
