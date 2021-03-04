@@ -72,7 +72,6 @@ public class OnFormularMax4000Show extends WollMuxEvent
           GlobalFunctions.getInstance().getGlobalPrintFunctions());
       DocumentManager.getDocumentManager()
           .setCurrentFormularMax4000(documentController.getModel().doc, max);
-      max.run();
     }
   }
 

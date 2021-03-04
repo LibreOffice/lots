@@ -328,7 +328,6 @@ public class InsertionModelList implements Iterable<InsertionModel>
   {
     List<InsertionModel> defunct = new ArrayList<>();
     Iterator<InsertionModel> iter = models.iterator();
-    FunctionLibrary funcLib = formularMax4000.getDocumentController().getFunctionLibrary();
     Set<String> renamedFunctions = new HashSet<>();
     while (iter.hasNext())
     {
