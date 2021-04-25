@@ -636,8 +636,6 @@ public class FormularMax4kController
    */
   public void abort()
   {
-    updateDocument(documentController);
-
     if (functionTester != null) functionTester.abort();
 
     if (abortListener != null)
