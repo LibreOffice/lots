@@ -32,12 +32,11 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
-import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
-import de.muenchen.allg.itd51.wollmux.former.IDManager.IDChangeListener;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.ID.IDChangeListener;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -61,7 +60,7 @@ public class GroupModel
   /**
    * Die ID (=der Name) dieser Gruppe.
    */
-  private IDManager.ID id;
+  private ID id;
 
   /**
    * Die Sichtbarkeitsbedingung für diese Gruppe.
@@ -93,7 +92,7 @@ public class GroupModel
    * @param formularMax4000
    *          der {@link FormularMax4kController} zu dem diese Gruppe gehört.
    */
-  public GroupModel(IDManager.ID id, FunctionSelection condition,
+  public GroupModel(ID id, FunctionSelection condition,
       FormularMax4kController formularMax4000)
   {
     this.id = id;
@@ -154,7 +153,7 @@ public class GroupModel
     return new MyConditionAccess();
   }
 
-  public IDManager.ID getID()
+  public ID getID()
   {
     return id;
   }
@@ -176,7 +175,7 @@ public class GroupModel
         "'%1' ist keine syntaktisch korrekte ID für Sichtbarkeitsgruppen", newID));
     id.setID(newID);
     /*
-     * IDManager.ID ruft MyIDChangeListener.idHasChanged() auf, was wiederum die Listener auf diesem
+     * ID ruft MyIDChangeListener.idHasChanged() auf, was wiederum die Listener auf diesem
      * Model benachrichtigt.
      */
   }
@@ -230,7 +229,7 @@ public class GroupModel
      * @param attributeId
      *          eine der {@link GroupModel#ID_ATTR Attribut-ID-Konstanten}.
      * @param newValue
-     *          der neue Wert des Attributs. Die ID wird als {@link IDManager.ID}
+     *          der neue Wert des Attributs. Die ID wird als {@link ID}
      *          übergeben.
      */
     public void attributeChanged(GroupModel model, int attributeId, Object newValue);

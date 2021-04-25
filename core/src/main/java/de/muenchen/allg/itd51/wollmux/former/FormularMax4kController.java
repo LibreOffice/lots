@@ -86,6 +86,7 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.func.Function;
@@ -849,7 +850,7 @@ public class FormularMax4kController
         String groupName = sichtbarkeitsFunktion.getName();
         try
         {
-          IDManager.ID groupId =
+          ID groupId =
             getIDManager().getActiveID(NAMESPACE_GROUPS, groupName);
           FunctionSelection funcSel =
             visibilityFunctionSelectionProvider.getFunctionSelection(groupName);

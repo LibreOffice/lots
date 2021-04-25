@@ -51,8 +51,8 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
@@ -378,7 +378,7 @@ public class OneFormControlLineView extends LineView
    */
   private JComponent makeIdView()
   {
-    IDManager.ID id = model.getId();
+    ID id = model.getId();
     idTextfield = new JTextField((id == null) ? "" : id.toString(), ID_COLUMNS);
     idTextfield.setToolTipText("ID");
     final Color defaultBackground = idTextfield.getBackground();

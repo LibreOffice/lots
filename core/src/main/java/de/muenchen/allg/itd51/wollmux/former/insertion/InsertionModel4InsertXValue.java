@@ -43,10 +43,9 @@ import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
-import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -104,7 +103,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   /**
    * DB_SPALTE oder ID je nach {@link #sourceType}.
    */
-  private IDManager.ID dataId;
+  private ID dataId;
 
   /**
    * Liste von {@link InsertionModel.AutosepInfo} Objekten.
@@ -116,7 +115,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
    */
   private Bookmark bookmark;
 
-  private IDManager.IDChangeListener myIDChangeListener = new MyIDChangeListener();
+  private ID.IDChangeListener myIDChangeListener = new MyIDChangeListener();
 
   /**
    * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das bereits im
@@ -305,7 +304,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   /**
    * Liefert je nach Typ der Einfügung das DB_SPALTE oder ID Attribut.
    */
-  public IDManager.ID getDataID()
+  public ID getDataID()
   {
     return dataId;
   }
@@ -332,7 +331,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     if (newId.length() == 0) throw new UnknownIDException(L.m("Leere ID"));
     if (sourceType == FORM_TYPE)
     {
-      IDManager.ID newDataId =
+      ID newDataId =
         formularMax4000.getIDManager().getExistingID(
           FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, newId);
       if (newDataId == null) throw new UnknownIDException(newId);
@@ -398,7 +397,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     private String separator = " ";
   }
 
-  private class MyIDChangeListener implements IDManager.IDChangeListener
+  private class MyIDChangeListener implements ID.IDChangeListener
   {
     @Override
     public void idHasChanged(ID id)

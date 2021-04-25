@@ -44,6 +44,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -116,7 +117,7 @@ public class FormControlModel
   private String type;
 
   /** ID (null => keine ID). */
-  private IDManager.ID id = null;
+  private ID id = null;
 
   /** ACTION. */
   private String action = NO_ACTION;
@@ -296,13 +297,13 @@ public class FormControlModel
   }
 
   /**
-   * Liefert eine Menge, die {@link IDManager.ID} Objekte im Namensraum
+   * Liefert eine Menge, die {@link ID} Objekte im Namensraum
    * {@link FormularMax4000#NAMESPACE_GROUPS} für die String-Werte aller Kinder von
    * conf enthält.
    */
   private void parseGroups(ConfigThingy conf)
   {
-    HashSet<IDManager.ID> set = new HashSet<>(conf.count());
+    HashSet<ID> set = new HashSet<>(conf.count());
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
@@ -396,7 +397,7 @@ public class FormControlModel
     return formularMax4000;
   }
 
-  public IDManager.ID getId()
+  public ID getId()
   {
     return id;
   }
@@ -652,7 +653,7 @@ public class FormControlModel
   public void setId(final String id) throws DuplicateIDException,
       SyntaxErrorException
   {
-    IDManager.ID idO = getId();
+    ID idO = getId();
     if (id.length() == 0)
     {
       if (idO == null) return;
@@ -705,7 +706,7 @@ public class FormControlModel
     int count = 1;
     while (true)
     {
-      IDManager.ID inactiveId = idMan.getID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
+      ID inactiveId = idMan.getID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
       if (!inactiveId.isActive())
       {
         this.id = inactiveId;
@@ -944,7 +945,7 @@ public class FormControlModel
     if (groups.hasGroups())
     {
       ConfigThingy grps = conf.add("GROUPS");
-      for (IDManager.ID gid : groups)
+      for (ID gid : groups)
       {
         grps.add(gid.toString());
       }
