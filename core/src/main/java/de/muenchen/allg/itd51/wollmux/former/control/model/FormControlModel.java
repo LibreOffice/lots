@@ -132,7 +132,7 @@ public class FormControlModel
   private String url = "";
 
   /** FRAG_ID */
-  private String frag_id = "";
+  private String fragId = "";
 
   /** TIP. */
   private String tooltip = "";
@@ -194,6 +194,7 @@ public class FormControlModel
    * @param funcSelProv
    *          der {@link FunctionSelectionProvider}, der zu PLAUSI und AUTOFILL
    *          passende {@link FunctionSelection}s liefern kann.
+   * @param formularMax4000 instance of fmax4kcontroller.
    */
   public FormControlModel(ConfigThingy conf, FunctionSelectionProvider funcSelProv,
       FormularMax4kController formularMax4000)
@@ -269,7 +270,7 @@ public class FormControlModel
       else if (name.equals("AUTOFILL"))
         autofill = funcSelProv.getFunctionSelection(attr);
       else if (name.equals("FRAG_ID"))
-    	  frag_id = str;
+    	  fragId = str;
       else if (name.equals("URL"))
     	  url = str;
     }
@@ -417,7 +418,7 @@ public class FormControlModel
    */
   public boolean isTab()
   {
-    return type == TAB_TYPE;
+    return type.equals(TAB_TYPE);
   }
 
   /**
@@ -425,14 +426,14 @@ public class FormControlModel
    */
   public boolean isCombo()
   {
-    return type == COMBOBOX_TYPE;
+    return type.equals(COMBOBOX_TYPE);
   }
 
   /**
    * Liefert true gdw dieses FormControlModel einen Button darstellt.
    */
   public boolean isButton() {
-	  return type == BUTTON_TYPE;
+	  return type.equals(BUTTON_TYPE);
   }
 
   /**
@@ -440,7 +441,7 @@ public class FormControlModel
    */
   public boolean isTextArea()
   {
-    return type == TEXTAREA_TYPE;
+    return type.equals(BUTTON_TYPE);
   }
 
   /**
@@ -448,7 +449,7 @@ public class FormControlModel
    */
   public boolean isGlue()
   {
-    return type == GLUE_TYPE;
+    return type.equals(GLUE_TYPE);
   }
 
   /**
@@ -472,7 +473,7 @@ public class FormControlModel
    * Liefert die FRAG_ID dieses FormControlModels.
    */
   public String getFragID() {
-	  return this.frag_id;
+	  return this.fragId;
   }
 
   /**
@@ -816,8 +817,8 @@ public class FormControlModel
   /**
    * Setzt das FRAGID-Attribut.
    */
-  public void setFragID(String frag_id) {
-	  this.frag_id = frag_id;
+  public void setFragID(String fragId) {
+	  this.fragId = fragId;
   }
 
   /**
@@ -862,7 +863,7 @@ public class FormControlModel
    */
   public void setType(String type)
   {
-    if (this.type == TAB_TYPE) return; // Tabs bleiben Tabs.
+    if (this.type.equals(TAB_TYPE)) return; // Tabs bleiben Tabs.
 
     if (type.equals(TAB_TYPE))
       return; // Andere Elemente können keine Tabs werden
