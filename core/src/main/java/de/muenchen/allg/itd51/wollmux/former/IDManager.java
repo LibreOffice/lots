@@ -22,18 +22,13 @@
  */
 package de.muenchen.allg.itd51.wollmux.former;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import de.muenchen.allg.itd51.wollmux.former.model.ID;
-import de.muenchen.allg.itd51.wollmux.util.L;
+
 
 /**
  * verwaltet Objekte, die ID-Strings repräsentieren. Die ID-Objekte können an

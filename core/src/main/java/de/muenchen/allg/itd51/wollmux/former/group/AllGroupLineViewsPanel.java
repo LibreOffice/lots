@@ -46,6 +46,8 @@ import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel;
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;

@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.former.insertion;
+package de.muenchen.allg.itd51.wollmux.former.insertion.model;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -45,6 +45,7 @@ import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.former.insertion.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.util.L;
 

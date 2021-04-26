@@ -25,8 +25,9 @@ package de.muenchen.allg.itd51.wollmux.former.section;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 
-import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.group.OneGroupsProviderGroupsEditView;
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModelList;
+import de.muenchen.allg.itd51.wollmux.former.section.model.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 

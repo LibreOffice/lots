@@ -37,6 +37,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel;
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.former.model.ID.IDChangeListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;

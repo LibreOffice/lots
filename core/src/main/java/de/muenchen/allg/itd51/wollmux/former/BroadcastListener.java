@@ -38,28 +38,28 @@ public abstract class BroadcastListener
 {
   /**
    * getObject() ist ein
-   * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModel}.
+   * {@link de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel}.
    */
   public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
   {}
 
   /**
    * getObject() ist ein
-   * {@link de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel}.
+   * {@link de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel}.
    */
   public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
   {}
 
   /**
    * getObject() ist ein
-   * {@link de.muenchen.allg.itd51.wollmux.former.group.GroupModel}.
+   * {@link de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel}.
    */
   public void broadcastGroupModelSelection(BroadcastObjectSelection b)
   {}
 
   /**
    * getObject() ist ein
-   * {@link de.muenchen.allg.itd51.wollmux.former.section.SectionModel}.
+   * {@link de.muenchen.allg.itd51.wollmux.former.section.model.SectionModel}.
    */
   public void broadcastSectionModelSelection(BroadcastObjectSelection b)
   {}

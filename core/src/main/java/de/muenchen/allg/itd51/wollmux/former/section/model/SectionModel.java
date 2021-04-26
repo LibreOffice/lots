@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.former.section;
+package de.muenchen.allg.itd51.wollmux.former.section.model;
 
 import java.util.ArrayList;
 import java.util.HashSet;

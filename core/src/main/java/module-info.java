@@ -70,12 +70,17 @@ module wollmux
   exports de.muenchen.allg.itd51.wollmux.form.model;
   exports de.muenchen.allg.itd51.wollmux.form.sidebar;
   exports de.muenchen.allg.itd51.wollmux.former;
+  exports de.muenchen.allg.itd51.wollmux.former.model;
   exports de.muenchen.allg.itd51.wollmux.former.control;
+  exports de.muenchen.allg.itd51.wollmux.former.control.model;
   exports de.muenchen.allg.itd51.wollmux.former.document;
   exports de.muenchen.allg.itd51.wollmux.former.function;
   exports de.muenchen.allg.itd51.wollmux.former.group;
+  exports de.muenchen.allg.itd51.wollmux.former.group.model;
   exports de.muenchen.allg.itd51.wollmux.former.insertion;
+  exports de.muenchen.allg.itd51.wollmux.former.insertion.model;
   exports de.muenchen.allg.itd51.wollmux.former.section;
+  exports de.muenchen.allg.itd51.wollmux.former.section.model;
   exports de.muenchen.allg.itd51.wollmux.former.view;
   exports de.muenchen.allg.itd51.wollmux.func;
   exports de.muenchen.allg.itd51.wollmux.func.print;

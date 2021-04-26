@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.former;
 
 import java.util.Map;
 
-import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.model.ID;
 
 /**

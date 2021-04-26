@@ -46,6 +46,8 @@ import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel;
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel4InsertXValue;
 import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;

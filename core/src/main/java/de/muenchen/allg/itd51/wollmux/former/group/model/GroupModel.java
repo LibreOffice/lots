@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.former.group;
+package de.muenchen.allg.itd51.wollmux.former.group.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -161,7 +161,7 @@ public class GroupModel
   /**
    * Setzt newID als neuen Namen für diese Sichtbarkeitsgruppe und benachrichtigt
    * alle mittels
-   * {@link #addListener(de.muenchen.allg.itd51.wollmux.former.group.GroupModel.ModelChangeListener)}
+   * {@link #addListener(de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel.ModelChangeListener)}
    * registrierten Listener.
    *
    * @throws DuplicateIDException

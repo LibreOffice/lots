@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.former.insertion;
+package de.muenchen.allg.itd51.wollmux.former.insertion.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
