@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class ID
@@ -54,7 +53,7 @@ public class ID
     private boolean active = false;
 
     /**
-     * Liste von {@link WeakReference}s auf {@link IDManager.IDChangeListener}.
+     * Liste von {@link WeakReference}s auf {@link ID.IDChangeListener}.
      */
     private List<WeakReference<IDChangeListener>> listeners = new ArrayList<>();
 
@@ -145,7 +144,7 @@ public class ID
 
     /**
      * Ändert die String-ID dieses Objekts auf newID und benachrichtigt alle
-     * {@link IDManager.IDChangeListener}. Falls newID == {@link #getID()}, so
+     * {@link ID.IDChangeListener}. Falls newID == {@link #getID()}, so
      * passiert nichts, es werden keine Listener benachrichtigt und es gibt keine
      * Exception. ACHTUNG! Normalerweise darf diese Funktion nur von dem Objekt
      * aufgerufen werden, das sich mit dieser ID identifiziert, nicht von Objekten
@@ -225,10 +224,10 @@ public class ID
     }
     
     /**
-     * Ein IDChangeListener wird benachrichtigt, wenn sich ein {@link IDManager.ID}
+     * Ein IDChangeListener wird benachrichtigt, wenn sich ein {@link ID}
      * Objekt ändert.
      *
-     * @see IDManager.ID#addIDChangeListener(IDChangeListener)
+     * @see ID.addIDChangeListener(IDChangeListener)
      */
     public interface IDChangeListener
     {

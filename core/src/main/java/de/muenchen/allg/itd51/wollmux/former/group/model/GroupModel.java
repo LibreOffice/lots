@@ -137,7 +137,7 @@ public class GroupModel
 
   /**
    * Liefert immer true. Diese Funktion existiert nur, damit der entsprechende Code
-   * in {@link AllGroupFuncViewsPanel} analog zu den anderen Panels gehalten werden
+   * in AllGroupFuncViewsPanel analog zu den anderen Panels gehalten werden
    * kann.
    */
   public boolean hasFunc()

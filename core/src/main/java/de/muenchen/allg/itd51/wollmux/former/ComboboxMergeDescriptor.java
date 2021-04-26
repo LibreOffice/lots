@@ -40,7 +40,7 @@ public class ComboboxMergeDescriptor
   private FormControlModel combo;
 
   /**
-   * Eine {@link Map}, deren Schlüssel die {@link IDManager.ID}s der Checkboxen
+   * Eine {@link Map}, deren Schlüssel die {@link ID}s der Checkboxen
    * sind, die verschmolzen wurden, wobei jede dieser IDs auf einen String gemappt
    * wird, der den ComboBox-Wert beschreibt, den auszuwählen dem Aktivieren der alten
    * Checkbox entspricht.

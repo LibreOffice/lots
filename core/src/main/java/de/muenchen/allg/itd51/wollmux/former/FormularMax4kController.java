@@ -651,7 +651,8 @@ public class FormularMax4kController
       return true;
     
     JOptionPane.showMessageDialog(view,
-        L.m("Das Dokument wurde nicht als Vorlage (.ott) geöffnet, Änderungen im FormularMax werden nicht gespeichert.\nUm Änderungen vorzunehmen, das Dokument bitte als Vorlage öffnen."),
+        L.m("Das Dokument wurde nicht als Vorlage (.ott) geöffnet, Änderungen im FormularMax werden nicht gespeichert."
+            + "\nUm Änderungen vorzunehmen, das Dokument bitte als Vorlage öffnen."),
         L.m("Achtung"), JOptionPane.OK_OPTION);
     
     return false;

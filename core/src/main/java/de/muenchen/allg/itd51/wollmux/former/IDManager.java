@@ -43,11 +43,11 @@ public class IDManager
   private Map<Object, HashMap<String, ID>> mapNamespace2mapString2ID = new HashMap<>();
 
   /**
-   * Liefert ein {@link IDManager.ID}-Objekt zur String-ID id im Namensraum
+   * Liefert ein {@link ID}-Objekt zur String-ID id im Namensraum
    * namespace. Falls dieser Manager zu dieser String-ID noch kein Objekt hatte, wird
    * ein neues angelegt, ansonsten das bereits existierende zurückgeliefert. Wird ein
    * neues ID-Objekt angelegt, so ist dieses inaktiv (siehe
-   * {@link IDManager.ID#isActive()}). Diese Funktion darf also nur von Aufrufern
+   * {@link ID#isActive()}). Diese Funktion darf also nur von Aufrufern
    * verwendet werden, die die ID als Referenz auf ein anderes Objekt benötigen.
    * Aufrufer, die sich selbst mit der ID identifizieren wollen müssen
    * {@link #getActiveID(Object, String)} verwenden.
@@ -85,7 +85,7 @@ public class IDManager
 
   /**
    * Falls im angegebenen namespace bereits ein ID Objekt für die String-ID id
-   * existiert und dieses {@link IDManager.ID#isActive()} aktiv ist, so wird eine
+   * existiert und dieses {@link ID#isActive()} aktiv ist, so wird eine
    * {@link DuplicateIDException} geworfen, ansonsten wird das existierende ID Objekt
    * aktiviert oder (falls noch keins existierte) ein aktiviertes ID Objekt neu
    * angelegt und dann zurückgeliefert. Diese Funktion ist dafür vorgesehen, von
@@ -104,7 +104,7 @@ public class IDManager
   }
 
   /**
-   * Liefert eine {@link Collection} mit allen {@link IDManager.ID} Objekten, die im
+   * Liefert eine {@link Collection} mit allen {@link ID} Objekten, die im
    * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection
    * darf nicht geändert oder gespeichert werden, da sie direkt eine interne
    * Datenstruktur ist!
@@ -119,7 +119,7 @@ public class IDManager
   }
 
   /**
-   * Liefert eine sortierte {@link Collection} mit allen {@link IDManager.ID} Objekten, die im
+   * Liefert eine sortierte {@link Collection} mit allen {@link ID} Objekten, die im
    * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection
    * darf nicht geändert oder gespeichert werden, da sie direkt eine interne
    * Datenstruktur ist!
