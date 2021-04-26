@@ -39,11 +39,11 @@ import de.muenchen.allg.itd51.wollmux.document.nodes.Container;
 import de.muenchen.allg.itd51.wollmux.document.nodes.DropdownFormControl;
 import de.muenchen.allg.itd51.wollmux.document.nodes.FormControl;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
-import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
-import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel;
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel4InsertXValue;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class ScanVisitor implements DocumentTreeVisitor

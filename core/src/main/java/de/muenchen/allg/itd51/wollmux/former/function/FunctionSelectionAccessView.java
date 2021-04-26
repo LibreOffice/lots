@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -391,7 +392,7 @@ public class FunctionSelectionAccessView implements View
             {
               // "[" und "]" entfernen
               String idStr = newValue.substring(1, newValue.length() - 1);
-              IDManager.ID id = idManager.getExistingID(namespace, idStr);
+              ID id = idManager.getExistingID(namespace, idStr);
               if (id != null && id.isActive())
               {
                 funcSel.setParameterValue(paramName, ParamValue.field(id));
@@ -455,10 +456,10 @@ public class FunctionSelectionAccessView implements View
     combo.addItem(UNSPECIFIED_ITEM);
     combo.setSelectedIndex(0);
     boolean found = currentValue.equals(UNSPECIFIED_ITEM);
-    Iterator<IDManager.ID> iter = idManager.getAllIDs(namespace).iterator();
+    Iterator<ID> iter = idManager.getAllIDs(namespace).iterator();
     while (iter.hasNext())
     {
-      IDManager.ID id = iter.next();
+      ID id = iter.next();
       if (id.isActive())
       {
         String brackId = "[" + id.toString() + "]";

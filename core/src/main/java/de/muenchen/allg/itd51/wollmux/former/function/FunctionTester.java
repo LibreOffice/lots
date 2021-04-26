@@ -61,6 +61,7 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -270,10 +271,10 @@ public class FunctionTester
     String currentValue = getComboBoxValue(combo, "");
     combo.removeAllItems();
     boolean found = false;
-    Iterator<IDManager.ID> iter = idManager.getAllIDsSorted(namespace).iterator();
+    Iterator<ID> iter = idManager.getAllIDsSorted(namespace).iterator();
     while (iter.hasNext())
     {
-      IDManager.ID id = iter.next();
+      ID id = iter.next();
       if (id.isActive())
       {
         String idStr = id.toString();

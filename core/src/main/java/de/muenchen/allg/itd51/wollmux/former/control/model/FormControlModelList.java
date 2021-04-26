@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.former.control;
+package de.muenchen.allg.itd51.wollmux.former.control.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 
 /**
  * Verwaltet eine Liste von FormControlModels.
@@ -141,7 +141,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
     while (iter.hasNext())
     {
       FormControlModel model = iter.next();
-      IDManager.ID id = model.getId();
+      ID id = model.getId();
       if (id != null && id.toString().startsWith(str))
       {
         if (count == 0) ++count;

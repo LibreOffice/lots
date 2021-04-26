@@ -23,6 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.former.control;
 
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccessView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;

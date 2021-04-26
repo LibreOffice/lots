@@ -35,7 +35,7 @@ abstract class NumberFunction extends MultiFunction
 {
   protected char decimalPoint = '.';
 
-  public NumberFunction(ConfigThingy conf, FunctionLibrary funcLib,
+  protected NumberFunction(ConfigThingy conf, FunctionLibrary funcLib,
       DialogLibrary dialogLib, Map<Object, Object> context)
   {
     super(conf, funcLib, dialogLib, context);
@@ -89,7 +89,7 @@ abstract class NumberFunction extends MultiFunction
     {
       Function func = iter.next();
       String str = func.getString(parameters);
-      if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
+      if (str.equals(FunctionLibrary.ERROR)) return FunctionLibrary.ERROR;
       try
       {
         BigDecimal num = makeBigDecimal(str);

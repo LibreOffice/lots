@@ -22,7 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.function;
 
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 
 /**
  * Repräsentiert einen vom Benutzer konfigurierten Parameter für eine Funktion.
@@ -57,14 +57,14 @@ public class ParamValue
   /**
    * Falls {@link #type} == {@link #FIELD}, dann speichert dies die ID.
    */
-  private IDManager.ID fieldId = null;
+  private ID fieldId = null;
 
   /**
    * Der Typ dieses Parameter-Wertes.
    */
   private ParamValueType type;
 
-  private ParamValue(ParamValueType type, String str, IDManager.ID fieldId)
+  private ParamValue(ParamValueType type, String str, ID fieldId)
   {
     this.type = type;
     this.literal = str;
@@ -132,7 +132,7 @@ public class ParamValue
   /**
    * Liefert einen ParamValue der eine Referenz auf das Feld mit ID id darstellt.
    */
-  public static ParamValue field(IDManager.ID id)
+  public static ParamValue field(ID id)
   {
     return new ParamValue(ParamValueType.FIELD, "", id);
   }

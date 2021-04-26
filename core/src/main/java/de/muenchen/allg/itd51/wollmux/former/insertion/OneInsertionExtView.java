@@ -25,6 +25,7 @@ package de.muenchen.allg.itd51.wollmux.former.insertion;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;

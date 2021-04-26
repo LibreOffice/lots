@@ -57,6 +57,8 @@ import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
+import de.muenchen.allg.itd51.wollmux.former.section.model.SectionModel;
+import de.muenchen.allg.itd51.wollmux.former.section.model.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.util.L;

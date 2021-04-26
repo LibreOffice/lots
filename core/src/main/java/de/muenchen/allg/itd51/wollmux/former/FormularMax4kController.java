@@ -74,20 +74,21 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentTreeVisitor;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommands;
-import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
-import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.document.ScanVisitor;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionTester;
-import de.muenchen.allg.itd51.wollmux.former.group.GroupModel;
-import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
-import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
-import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
-import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
-import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
-import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
-import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel;
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModelList;
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel;
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel4InputUser;
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel4InsertXValue;
+import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModelList;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.section.model.SectionModel;
+import de.muenchen.allg.itd51.wollmux.former.section.model.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -302,7 +303,10 @@ public class FormularMax4kController
       myXSelectionChangedListener = new MyXSelectionChangedListener();
       selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
     }
-}
+    
+    showOpenedAsTemplateWarning();
+    
+  }
 
   public void setAbortListener(ActionListener abortListener)
   {
@@ -613,6 +617,11 @@ public class FormularMax4kController
    */
   public void save()
   {
+    if (!showOpenedAsTemplateWarning())
+    {
+      return;
+    }
+    
     updateDocument(documentController);
     UNO.dispatch(documentController.getModel().doc, ".uno:Save");
   }
@@ -622,6 +631,11 @@ public class FormularMax4kController
    */
   public void saveAs()
   {
+    if (!showOpenedAsTemplateWarning())
+    {
+      return;
+    }
+    
     updateDocument(documentController);
     UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
@@ -630,14 +644,25 @@ public class FormularMax4kController
     updateDocument(documentController);
     UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
   }
+  
+  private boolean showOpenedAsTemplateWarning()
+  {
+    if (documentController.getModel().isTemplate())
+      return true;
+    
+    JOptionPane.showMessageDialog(view,
+        L.m("Das Dokument wurde nicht als Vorlage (.ott) geöffnet, Änderungen im FormularMax werden nicht gespeichert."
+            + "\nUm Änderungen vorzunehmen, das Dokument bitte als Vorlage öffnen."),
+        L.m("Achtung"), JOptionPane.OK_OPTION);
+    
+    return false;
+  }
 
   /**
    * Implementiert die gleichnamige ACTION.
    */
   public void abort()
   {
-    updateDocument(documentController);
-
     if (functionTester != null) functionTester.abort();
 
     if (abortListener != null)
@@ -851,7 +876,7 @@ public class FormularMax4kController
         String groupName = sichtbarkeitsFunktion.getName();
         try
         {
-          IDManager.ID groupId =
+          ID groupId =
             getIDManager().getActiveID(NAMESPACE_GROUPS, groupName);
           FunctionSelection funcSel =
             visibilityFunctionSelectionProvider.getFunctionSelection(groupName);

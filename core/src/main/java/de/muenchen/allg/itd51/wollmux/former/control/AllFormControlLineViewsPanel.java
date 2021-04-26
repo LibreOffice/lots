@@ -52,18 +52,19 @@ import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
-import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
-import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemListener;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModelList;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModelList.ItemListener;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Hält in einem Panel FormControlModelLineViews für alle
- * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModel} einer
- * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList}.
+ * {@link de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel} einer
+ * {@link de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModelList}.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -493,7 +494,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       }
       else
       {
-        IDManager.ID id = model.getId();
+        ID id = model.getId();
         if (id == null)
         {
           LOGGER.info("FM4000: Beim Aufruf von Checkbox->Combobox ist eine Checkbox ohne ID selektiert");

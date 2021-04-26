@@ -20,7 +20,7 @@
  * limitations under the Licence.
  * #L%
  */
-package de.muenchen.allg.itd51.wollmux.former.insertion;
+package de.muenchen.allg.itd51.wollmux.former.insertion.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,12 +41,10 @@ import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
-import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
+import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
-import de.muenchen.allg.itd51.wollmux.func.Function;
-import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.former.insertion.UnknownIDException;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -152,7 +150,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
   public void mergeCheckboxesIntoCombobox(ComboboxMergeDescriptor desc)
   {
     FormControlModel combo = desc.getCombo();
-    IDManager.ID comboIdd = combo.getId();
+    ID comboIdd = combo.getId();
     if (comboIdd == null)
     {
       LOGGER.error("Programmfehler: Durch Merge erstellte ComboBox hat keine ID bekommen");
@@ -209,7 +207,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
    */
   public void fixComboboxInsertions(FormControlModel combo)
   {
-    IDManager.ID comboId = combo.getId();
+    ID comboId = combo.getId();
     if (comboId == null) return;
     Collection<String> items = combo.getItems();
     Collection<String> unusedItems = new HashSet<>(items);

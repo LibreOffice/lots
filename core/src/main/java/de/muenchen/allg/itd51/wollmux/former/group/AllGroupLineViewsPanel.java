@@ -44,9 +44,11 @@ import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel;
+import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModelList;
+import de.muenchen.allg.itd51.wollmux.former.model.ID;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.util.L;
@@ -159,7 +161,7 @@ public class AllGroupLineViewsPanel implements View
   private void createNewGroup()
   {
     int num = 1;
-    IDManager.ID id;
+    ID id;
     while (true)
     {
       try
@@ -254,7 +256,7 @@ public class AllGroupLineViewsPanel implements View
        * Inaktivieren reicht nicht, um Namenskollisionen zu verhindern. Deswegen
        * benennen wir die ID einfach um in einen zufälligen String.
        */
-      IDManager.ID id = model.getID();
+      ID id = model.getID();
       while (true)
       {
         try
