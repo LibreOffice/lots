@@ -643,7 +643,6 @@ public class FormularMax4kController
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
 
-    view.close();
 
     try
     {
@@ -653,6 +652,22 @@ public class FormularMax4kController
     {
       LOGGER.trace("", x);
     }
+    
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        try
+        {
+          view.close();
+        } catch (Exception x)
+        {
+          LOGGER.trace("", x);
+        }
+      });
+    }
+    catch (Exception x)
+    {}
+
   }
 
   /**
