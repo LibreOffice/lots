@@ -330,35 +330,6 @@ public class AllSectionLineViewsPanel implements View
   }
 
   /**
-   * Entfernt view aus diesem Container (falls dort vorhanden).
-   */
-  private void removeItem(OneSectionLineView view)
-  {
-    int index = views.indexOf(view);
-    if (index < 0) return;
-    views.remove(index);
-    mainPanel.remove(view.getComponent());
-    mainPanel.validate();
-    selection.remove(index);
-    selection.fixup(index, -1, views.size() - 1);
-  }
-
-  /**
-   * Hebt die Selektion aller Elemente auf.
-   */
-  private void clearSelection()
-  {
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
-    {
-      Integer I = iter.next();
-      OneSectionLineView view = views.get(I.intValue());
-      view.unmark();
-    }
-    selection.clear();
-  }
-
-  /**
    * Löscht alle ausgewählten Elemente.
    */
   private void deleteSelectedElements()
@@ -411,10 +382,24 @@ public class AllSectionLineViewsPanel implements View
     {
       removeItem((OneSectionLineView) view);
     }
+    
+    /**
+     * Entfernt view aus diesem Container (falls dort vorhanden).
+     */
+    private void removeItem(OneSectionLineView view)
+    {
+      int index = views.indexOf(view);
+      if (index < 0) return;
+      views.remove(index);
+      mainPanel.remove(view.getComponent());
+      mainPanel.validate();
+      selection.remove(index);
+      selection.fixup(index, -1, views.size() - 1);
+    }
 
   }
 
-  private class MyBroadcastListener extends BroadcastListener
+  private class MyBroadcastListener implements BroadcastListener
   {
     @Override
     public void broadcastSectionModelSelection(BroadcastObjectSelection b)
@@ -461,6 +446,21 @@ public class AllSectionLineViewsPanel implements View
           selection.add(index);
         }
       }
+    }
+    
+    /**
+     * Hebt die Selektion aller Elemente auf.
+     */
+    private void clearSelection()
+    {
+      Iterator<Integer> iter = selection.iterator();
+      while (iter.hasNext())
+      {
+        Integer i = iter.next();
+        OneSectionLineView view = views.get(i.intValue());
+        view.unmark();
+      }
+      selection.clear();
     }
   }
 }

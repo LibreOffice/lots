@@ -121,7 +121,7 @@ public class RightPanel implements View
     return myPanel;
   }
 
-  private class MyBroadcastListener extends BroadcastListener
+  private class MyBroadcastListener implements BroadcastListener
   {
     @Override
     public void broadcastAllInsertionsViewSelected()

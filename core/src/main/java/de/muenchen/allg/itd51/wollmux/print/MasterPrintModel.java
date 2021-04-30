@@ -51,6 +51,7 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnCollectNonWollMuxFormFieldsViaPrintModel;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetVisibleState;
+import de.muenchen.allg.itd51.wollmux.func.print.PrintException;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.print.PageRange.PageRangeType;
@@ -102,7 +103,7 @@ class MasterPrintModel implements XPrintModel
   /**
    * Flag indicating cancellation of print.
    */
-  private boolean[] isCanceled = new boolean[] { false };
+  private boolean isCanceled;
 
   /**
    * Dialog for showing the print progress.
@@ -176,32 +177,22 @@ class MasterPrintModel implements XPrintModel
   @Override
   public void printWithProps()
   {
-    if (isCanceled())
-      return;
-
     PrintFunction f = getPrintFunction(0);
     if (f != null)
     {
       XPrintModel pmod = new SlavePrintModel(this, 0);
-      Thread t = f.printAsync(pmod);
       try
       {
-        t.join();
-      } catch (InterruptedException e)
+        f.print(pmod);
+      } catch (PrintException e)
       {
         PrintModels.LOGGER.error("", e);
-        Thread.currentThread().interrupt();
       }
+
     } else
     {
-      setPropertySynchronized(PROP_FINAL_SHOW_COPIES_SPINNER, Boolean.TRUE);
+      setProperty(PROP_FINAL_SHOW_COPIES_SPINNER, Boolean.TRUE);
       finalPrint();
-    }
-
-    if (printProgressBar != null)
-    {
-      printProgressBar.dispose();
-      printProgressBar = null;
     }
   }
 
@@ -227,9 +218,9 @@ class MasterPrintModel implements XPrintModel
         return;
       }
 
-      setPropertySynchronized(PROP_FINAL_COPY_COUNT, ppd.getKey());
-      setPropertySynchronized(PROP_FINAL_PAGE_RANGE, ppd.getValue());
-      setPropertySynchronized(PROP_FINAL_NO_PARAMS_DIALOG, Boolean.TRUE);
+      setProperty(PROP_FINAL_COPY_COUNT, ppd.getKey());
+      setProperty(PROP_FINAL_PAGE_RANGE, ppd.getValue());
+      setProperty(PROP_FINAL_NO_PARAMS_DIALOG, Boolean.TRUE);
     }
 
     Short copyCount = (Short) getProperty(PROP_FINAL_COPY_COUNT);
@@ -296,12 +287,9 @@ class MasterPrintModel implements XPrintModel
     return false;
   }
 
-  private void setPropertySynchronized(String prop, Object o)
+  private void setProperty(String prop, Object o)
   {
-    synchronized (props)
-    {
-      props.put(prop, o);
-    }
+      props.put(prop, o); 
   }
 
   public void setStage(String stage)
@@ -311,10 +299,7 @@ class MasterPrintModel implements XPrintModel
 
   private Object getProperty(String prop)
   {
-    synchronized (props)
-    {
       return props.get(prop);
-    }
   }
 
   @Override
@@ -349,10 +334,9 @@ class MasterPrintModel implements XPrintModel
   public XPropertySetInfo getPropertySetInfo()
   {
     final HashSet<String> propsKeySet;
-    synchronized (props)
-    {
+   
       propsKeySet = new HashSet<>(props.keySet());
-    }
+    
 
     return new XPropertySetInfo()
     {
@@ -395,7 +379,7 @@ class MasterPrintModel implements XPrintModel
   public void setPropertyValue(String arg0, Object arg1)
       throws UnknownPropertyException, PropertyVetoException, WrappedTargetException
   {
-    setPropertySynchronized(arg0, arg1);
+    setProperty(arg0, arg1);
   }
 
   @Override
@@ -467,19 +451,13 @@ class MasterPrintModel implements XPrintModel
   @Override
   public boolean isCanceled()
   {
-    synchronized (isCanceled)
-    {
-      return isCanceled[0];
-    }
+      return isCanceled; 
   }
 
   @Override
   public void cancel()
   {
-    synchronized (isCanceled)
-    {
-      isCanceled[0] = true;
-    }
+      isCanceled = true;
   }
 
   @Override
@@ -524,8 +502,18 @@ class MasterPrintModel implements XPrintModel
    */
   void setPrintProgressValue(Object key, short value)
   {
-    if (printProgressBar != null)
-      printProgressBar.setValue(key, value);
+    if (printProgressBar == null)
+    {
+      return;
+    }
+    
+    printProgressBar.setValue(key, value);
+    
+    if (printProgressBar.getMaxValue().get(key) == value)
+    {
+      printProgressBar.dispose();
+      printProgressBar = null;
+    }
   }
 
   @Override

@@ -38,6 +38,7 @@ import de.muenchen.allg.itd51.wollmux.document.TextRange;
 import de.muenchen.allg.itd51.wollmux.document.nodes.Container;
 import de.muenchen.allg.itd51.wollmux.document.nodes.DropdownFormControl;
 import de.muenchen.allg.itd51.wollmux.document.nodes.FormControl;
+import de.muenchen.allg.itd51.wollmux.former.FormMaxConstants;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -196,7 +197,7 @@ public class ScanVisitor implements DocumentTreeVisitor
     if (insertions.isEmpty())
     {
       FormControlModel model = registerFormControl(control, text);
-      if (model != null && model.getType() == FormControlModel.CHECKBOX_TYPE)
+      if (model != null && model.getType().equals(FormControlModel.CHECKBOX_TYPE))
         fixupCheckbox = model;
     }
 
@@ -328,7 +329,7 @@ public class ScanVisitor implements DocumentTreeVisitor
     model = FormControlModel.createCheckbox(label, id, formularMax4000);
     if (control.getString().equalsIgnoreCase("true"))
     {
-      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+      ConfigThingy autofill = new ConfigThingy(FormMaxConstants.AUTOFILL);
       autofill.add("true");
       model.setAutofill(formularMax4000.getFunctionSelectionProvider().getFunctionSelection(autofill));
     }
@@ -372,7 +373,7 @@ public class ScanVisitor implements DocumentTreeVisitor
     String preset = unicodeTrim(control.getString());
     if (preset.length() > 0)
     {
-      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+      ConfigThingy autofill = new ConfigThingy(FormMaxConstants.AUTOFILL);
       autofill.add(preset);
       model.setAutofill(formularMax4000.getFunctionSelectionProvider().getFunctionSelection(autofill));
     }
@@ -400,7 +401,7 @@ public class ScanVisitor implements DocumentTreeVisitor
     String preset = unicodeTrim(control.getString());
     if (preset.length() > 0)
     {
-      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+      ConfigThingy autofill = new ConfigThingy(FormMaxConstants.AUTOFILL);
       autofill.add(preset);
       model.setAutofill(formularMax4000.getFunctionSelectionProvider().getFunctionSelection(autofill));
     }

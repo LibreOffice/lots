@@ -42,7 +42,7 @@ import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.util.UnoProperty;
 
@@ -144,7 +144,7 @@ public class SectionModel
       {
         ConfigThingy conf = new ConfigThingy("GROUPS", m.group(2)); // GROUPS-GROUPS-(...)
         conf = conf.getFirstChild(); // der eigentliche "GROUPS" Knoten
-        HashSet<ID> set = new HashSet<>(conf.count());
+        HashSet<IdModel> set = new HashSet<>(conf.count());
         Iterator<ConfigThingy> iter = conf.iterator();
         while (iter.hasNext())
         {
@@ -309,7 +309,7 @@ public class SectionModel
       StringBuilder buffy = new StringBuilder(sectionNamePrefix);
       buffy.append(' ');
       ConfigThingy grps = new ConfigThingy("GROUPS");
-      for (ID gid : groups)
+      for (IdModel gid : groups)
       {
         grps.add(gid.toString());
       }

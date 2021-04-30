@@ -185,11 +185,6 @@ public class OneSectionLineView extends LineView
     return model;
   }
 
-  private void nameChangedDueToExternalReasons(String newName)
-  {
-    nameBox.setText(newName);
-  }
-
   private class MyModelChangeListener implements SectionModel.ModelChangeListener
   {
     @Override
@@ -205,6 +200,11 @@ public class OneSectionLineView extends LineView
       {
         nameChangedDueToExternalReasons(newValue.toString());
       }
+    }
+    
+    private void nameChangedDueToExternalReasons(String newName)
+    {
+      nameBox.setText(newName);
     }
   }
 

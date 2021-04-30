@@ -25,7 +25,7 @@ package de.muenchen.allg.itd51.wollmux.former;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 
 /**
  * Enthält Informationen über eine erfolgte verschmelzung mehrerer Checkboxen zu
@@ -40,12 +40,12 @@ public class ComboboxMergeDescriptor
   private FormControlModel combo;
 
   /**
-   * Eine {@link Map}, deren Schlüssel die {@link ID}s der Checkboxen
+   * Eine {@link Map}, deren Schlüssel die {@link IdModel}s der Checkboxen
    * sind, die verschmolzen wurden, wobei jede dieser IDs auf einen String gemappt
    * wird, der den ComboBox-Wert beschreibt, den auszuwählen dem Aktivieren der alten
    * Checkbox entspricht.
    */
-  private Map<ID, String> mapCheckboxId2ComboboxEntry;
+  private Map<IdModel, String> mapCheckboxId2ComboboxEntry;
 
   /**
    * New ComboboxMergeDescriptor.
@@ -55,7 +55,7 @@ public class ComboboxMergeDescriptor
    * @param mapCheckboxId2ComboboxEntry
    *          List of merged checkboxes.
    */
-  public ComboboxMergeDescriptor(FormControlModel combo, Map<ID, String> mapCheckboxId2ComboboxEntry)
+  public ComboboxMergeDescriptor(FormControlModel combo, Map<IdModel, String> mapCheckboxId2ComboboxEntry)
   {
     this.combo = combo;
     this.mapCheckboxId2ComboboxEntry = mapCheckboxId2ComboboxEntry;
@@ -66,7 +66,7 @@ public class ComboboxMergeDescriptor
     return combo;
   }
 
-  public Map<ID, String> getMapCheckboxId2ComboboxEntry()
+  public Map<IdModel, String> getMapCheckboxId2ComboboxEntry()
   {
     return mapCheckboxId2ComboboxEntry;
   }

@@ -48,7 +48,7 @@ import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel4InsertXValue;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
@@ -204,11 +204,6 @@ public class OneInsertionLineView extends LineView
     return model;
   }
 
-  private void idChangedDueToExternalReasons(ID newId)
-  {
-    idBox.setSelectedItem(newId.toString());
-  }
-
   private class MyModelChangeListener implements InsertionModel.ModelChangeListener
   {
     @Override
@@ -223,8 +218,13 @@ public class OneInsertionLineView extends LineView
     {
       if (!ignoreAttributeChanged && attributeId == InsertionModel4InsertXValue.ID_ATTR)
       {
-        idChangedDueToExternalReasons((ID) newValue);
+        idChangedDueToExternalReasons((IdModel) newValue);
       }
+    }
+    
+    private void idChangedDueToExternalReasons(IdModel newId)
+    {
+      idBox.setSelectedItem(newId.toString());
     }
   }
 

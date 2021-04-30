@@ -91,7 +91,7 @@ public class AllGroupFuncViewsPanel extends OnDemandCardView
     }
   }
 
-  private class MyBroadcastListener extends BroadcastListener
+  private class MyBroadcastListener implements BroadcastListener
   {
     @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)

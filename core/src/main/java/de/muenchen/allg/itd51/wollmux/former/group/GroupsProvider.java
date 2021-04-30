@@ -31,16 +31,16 @@ import java.util.List;
 import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 
 /**
  * Ein Ding, das GROUPS über ihre IDs referenziert.
  *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
-public class GroupsProvider implements Iterable<ID>
+public class GroupsProvider implements Iterable<IdModel>
 {
-  private Set<ID> groups = new HashSet<>();
+  private Set<IdModel> groups = new HashSet<>();
 
   /**
    * Wer wird alles benachrichtigt, wenn Gruppen hinzukommen oder entfernt werden.
@@ -65,11 +65,11 @@ public class GroupsProvider implements Iterable<ID>
    * Liefert die Menge der GROUPS-Werte dieses FormControlModels. Die gelieferte
    * Liste ist keine Referenz auf die interne Datenstruktur. Hinzufügen und Löschen
    * von Einträgen muss über
-   * {@link #addGroup(de.muenchen.allg.itd51.wollmux.former.ID)} bzw.
-   * {@link #removeGroup(de.muenchen.allg.itd51.wollmux.former.ID)}
+   * {@link #addGroup(de.muenchen.allg.itd51.wollmux.former.IdModel)} bzw.
+   * {@link #removeGroup(de.muenchen.allg.itd51.wollmux.former.IdModel)}
    * erfolgen.
    */
-  public Set<ID> getGroups()
+  public Set<IdModel> getGroups()
   {
     return new HashSet<>(groups);
   }
@@ -77,7 +77,7 @@ public class GroupsProvider implements Iterable<ID>
   /**
    * Fügt id zu den GROUPS hinzu, falls noch nicht enthalten.
    */
-  public void addGroup(ID id)
+  public void addGroup(IdModel id)
   {
     if (!groups.contains(id))
     {
@@ -92,7 +92,7 @@ public class GroupsProvider implements Iterable<ID>
    * Entfernt id aus GROUPS, falls dort enthalten.
    *
    */
-  public void removeGroup(ID id)
+  public void removeGroup(IdModel id)
   {
     if (groups.remove(id)) groupHasBeenRemoved(id);
     // ACHTUNG! Die remove()-Methode von MyIterator muss mit removeGroup()
@@ -100,9 +100,9 @@ public class GroupsProvider implements Iterable<ID>
   }
 
   /**
-   * Wird von {@link #removeGroup(ID)} und {@link MyIterator#remove()} aufgerufen.
+   * Wird von {@link #removeGroup(IdModel)} und {@link MyIterator#remove()} aufgerufen.
    */
-  private void groupHasBeenRemoved(ID id)
+  private void groupHasBeenRemoved(IdModel id)
   {
     notifyListeners(id, true);
     formularMax4000.documentNeedsUpdating();
@@ -113,7 +113,7 @@ public class GroupsProvider implements Iterable<ID>
    * nicht aufgefordert, das Dokument zu updaten. Diese Methode sollte nur zur
    * Initialisierung des Objekts vor der Verwendung aufgerufen werden.
    */
-  public void initGroups(Set<ID> groups)
+  public void initGroups(Set<IdModel> groups)
   {
     this.groups = groups;
   }
@@ -152,7 +152,7 @@ public class GroupsProvider implements Iterable<ID>
    * Benachrichtigt alle {@link GroupsChangedListener}, dass id hinzugefügt
    * (remove==false) oder entfernt (remove==true) wurde.
    */
-  private void notifyListeners(ID id, boolean remove)
+  private void notifyListeners(IdModel id, boolean remove)
   {
     Iterator<WeakReference<GroupsChangedListener>> iter = listeners.iterator();
     while (iter.hasNext())
@@ -173,22 +173,22 @@ public class GroupsProvider implements Iterable<ID>
 
   public interface GroupsChangedListener
   {
-    public void groupAdded(ID groupID);
+    public void groupAdded(IdModel groupID);
 
-    public void groupRemoved(ID groupID);
+    public void groupRemoved(IdModel groupID);
   }
 
   @Override
-  public Iterator<ID> iterator()
+  public Iterator<IdModel> iterator()
   {
     return new MyIterator();
   }
 
-  private class MyIterator implements Iterator<ID>
+  private class MyIterator implements Iterator<IdModel>
   {
-    private Iterator<ID> iter;
+    private Iterator<IdModel> iter;
 
-    private ID lastReturnedID;
+    private IdModel lastReturnedID;
 
     public MyIterator()
     {
@@ -202,7 +202,7 @@ public class GroupsProvider implements Iterable<ID>
     }
 
     @Override
-    public ID next()
+    public IdModel next()
     {
       lastReturnedID = iter.next();
       return lastReturnedID;

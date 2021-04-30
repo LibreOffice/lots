@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -100,7 +100,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
-  private final static int TF_BORDER = 4;
+  private static final int TF_BORDER = 4;
 
   /**
    * Das Panel, das alle Elemente dieser View enthält.
@@ -392,7 +392,7 @@ public class FunctionSelectionAccessView implements View
             {
               // "[" und "]" entfernen
               String idStr = newValue.substring(1, newValue.length() - 1);
-              ID id = idManager.getExistingID(namespace, idStr);
+              IdModel id = idManager.getExistingID(namespace, idStr);
               if (id != null && id.isActive())
               {
                 funcSel.setParameterValue(paramName, ParamValue.field(id));
@@ -407,7 +407,6 @@ public class FunctionSelectionAccessView implements View
         catch (BadLocationException x)
         {
           LOGGER.error("", x);
-          return;
         }
       }
 
@@ -456,10 +455,10 @@ public class FunctionSelectionAccessView implements View
     combo.addItem(UNSPECIFIED_ITEM);
     combo.setSelectedIndex(0);
     boolean found = currentValue.equals(UNSPECIFIED_ITEM);
-    Iterator<ID> iter = idManager.getAllIDs(namespace).iterator();
+    Iterator<IdModel> iter = idManager.getAllIDs(namespace).iterator();
     while (iter.hasNext())
     {
-      ID id = iter.next();
+      IdModel id = iter.next();
       if (id.isActive())
       {
         String brackId = "[" + id.toString() + "]";
@@ -490,9 +489,9 @@ public class FunctionSelectionAccessView implements View
   {
     functionSelectorBox = new JComboBox<>();
     int selectedIndex = 0;
-    int none_index = functionSelectorBox.getItemCount();
+    int noneIndex = functionSelectorBox.getItemCount();
     functionSelectorBox.addItem(NONE_ITEM);
-    int string_index = functionSelectorBox.getItemCount();
+    int stringIndex = functionSelectorBox.getItemCount();
     functionSelectorBox.addItem(STRING_ITEM);
     Iterator<String> iter = funcLib.getFunctionNames().iterator();
     int i = functionSelectorBox.getItemCount();
@@ -505,14 +504,14 @@ public class FunctionSelectionAccessView implements View
       functionSelectorBox.addItem(funcName);
       ++i;
     }
-    int expert_index = functionSelectorBox.getItemCount();
+    int expertIndex = functionSelectorBox.getItemCount();
     functionSelectorBox.addItem(EXPERT_ITEM);
 
     if (funcSel.isNone())
-      selectedIndex = none_index;
+      selectedIndex = noneIndex;
     else if (funcSel.isExpert())
     {
-      selectedIndex = expert_index;
+      selectedIndex = expertIndex;
       try
       {
         ConfigThingy expertFun = funcSel.getExpertFunction();
@@ -523,7 +522,7 @@ public class FunctionSelectionAccessView implements View
         // STRING_ITEM gewählt anstatt EXPERT_ITEM.
         if (expertFun.count() == 0
           || (expertFun.count() == 1 && expertFun.getFirstChild().count() == 0))
-          selectedIndex = string_index;
+          selectedIndex = stringIndex;
       }
       catch (NodeNotFoundException x)
       {

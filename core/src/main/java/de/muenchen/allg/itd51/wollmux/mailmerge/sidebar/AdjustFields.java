@@ -249,7 +249,7 @@ public class AdjustFields
       FieldSubstitution subst = new FieldSubstitution();
       for (Pair<String, Boolean> ce : getContent(entry.getValue()))
       {
-        if (ce.getValue())
+        if (Boolean.TRUE.equals(ce.getValue()))
         {
           subst.addField(ce.getKey());
         } else

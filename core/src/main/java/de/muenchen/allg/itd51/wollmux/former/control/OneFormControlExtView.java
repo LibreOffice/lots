@@ -26,6 +26,7 @@ import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 
+import de.muenchen.allg.itd51.wollmux.former.FormMaxConstants;
 import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.group.OneGroupsProviderGroupsEditView;
 import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModelList;
@@ -129,7 +130,7 @@ public class OneFormControlExtView implements LazyView
   private void initPanel()
   {
     autofillView = new OneFormControlAutofillEditView(model, funcLib, null);
-    myTabbedPane.addTab("AUTOFILL", autofillView.getComponent());
+    myTabbedPane.addTab(FormMaxConstants.AUTOFILL, autofillView.getComponent());
     plausiView = new OneFormControlPlausiEditView(model, funcLib, null);
     myTabbedPane.addTab("PLAUSI", plausiView.getComponent());
     groupsView =

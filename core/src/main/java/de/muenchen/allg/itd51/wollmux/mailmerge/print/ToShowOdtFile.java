@@ -27,7 +27,6 @@ import com.sun.star.text.XTextDocument;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
@@ -54,7 +53,6 @@ public class ToShowOdtFile extends PrintFunction
     if (result != null && result.getCurrentController() != null && result.getCurrentController().getFrame() != null
         && result.getCurrentController().getFrame().getContainerWindow() != null)
     {
-      DocumentManager.getDocumentManager().addTextDocument(result);
       DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(result.getCurrentController().getFrame());
       result.getCurrentController().getFrame().getContainerWindow().setVisible(true);
       UNO.XTopWindow(result.getCurrentController().getFrame().getContainerWindow()).toFront();
