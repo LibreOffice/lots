@@ -86,7 +86,7 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel4InsertXValue;
 import de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModelList;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.former.section.model.SectionModel;
 import de.muenchen.allg.itd51.wollmux.former.section.model.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.func.Function;
@@ -171,7 +171,7 @@ public class FormularMax4kController
    */
   private static final String GENERATED_FORM_TITLE =
     L.m("Generiert durch FormularMax 4000");
-
+  
   /**
    * Der Titel des Formulars.
    */
@@ -352,11 +352,6 @@ public class FormularMax4kController
     }
   }
 
-  public Object getFormTitle()
-  {
-    return formTitle;
-  }
-
   /**
    * Wird von {@link FormControlModel#setItems(String[])} auf model aufgerufen.
    */
@@ -520,7 +515,9 @@ public class FormularMax4kController
       });
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
   }
 
 
@@ -560,12 +557,12 @@ public class FormularMax4kController
     {
       if (conf == null)
       {
-        conf = new ConfigThingy("Buttons", confUrl);
+        conf = new ConfigThingy(FormMaxConstants.BUTTONS, confUrl);
       }
 
       // damit ich parseGrandchildren() verwenden kann muss ich noch einen
       // Großelternknoten hinzufügen.
-      conf = conf.query("Buttons", 0, 0);
+      conf = conf.query(FormMaxConstants.BUTTONS, 0, 0);
 
       parseGrandchildren(conf, index, false);
       documentNeedsUpdating();
@@ -691,7 +688,9 @@ public class FormularMax4kController
       });
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
 
   }
 
@@ -720,8 +719,8 @@ public class FormularMax4kController
       ConfigThingy trafoConf = null;
       try
       {
-        trafoConf = this.getDocumentController().getModel().getFormDescription().query("Formular")
-            .query("Funktionen").query(functionName, 2).getLastChild();
+        trafoConf = this.getDocumentController().getModel().getFormDescription().query(FormMaxConstants.FORMULAR)
+            .query(FormMaxConstants.FUNKTIONEN).query(functionName, 2).getLastChild();
       } catch (NodeNotFoundException e)
       {
         LOGGER.error("", e);
@@ -751,8 +750,8 @@ public class FormularMax4kController
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
     ConfigThingy conf = new ConfigThingy("WM");
-    ConfigThingy form = conf.add("Formular");
-    form.add("TITLE").add(formTitle);
+    ConfigThingy form = conf.add(FormMaxConstants.FORMULAR);
+    form.add(FormMaxConstants.TITLE).add(formTitle);
     if (plausiMarkerColor != null)
       form.add("PLAUSI_MARKER_COLOR").add(plausiMarkerColor);
     form.addChild(formControlModelList.export());
@@ -766,7 +765,7 @@ public class FormularMax4kController
     }
     if (!mapFunctionNameToConfigThingy.isEmpty())
     {
-      ConfigThingy funcs = form.add("Funktionen");
+      ConfigThingy funcs = form.add(FormMaxConstants.FUNKTIONEN);
       Iterator<ConfigThingy> iter =
         mapFunctionNameToConfigThingy.values().iterator();
       while (iter.hasNext())
@@ -789,7 +788,7 @@ public class FormularMax4kController
     parseGlobalFormInfo(formDescription);
 
     ConfigThingy fensterAbschnitte =
-      formDescription.query("Formular").query("Fenster");
+      formDescription.query(FormMaxConstants.FORMULAR).query("Fenster");
     Iterator<ConfigThingy> fensterAbschnittIterator = fensterAbschnitte.iterator();
     while (fensterAbschnittIterator.hasNext())
     {
@@ -862,7 +861,7 @@ public class FormularMax4kController
 
     groupModelList.clear();
     ConfigThingy visibilityConf =
-      formDescription.query("Formular").query("Sichtbarkeit");
+      formDescription.query(FormMaxConstants.FORMULAR).query(FormMaxConstants.SICHTBARKEIT);
     Iterator<ConfigThingy> sichtbarkeitsAbschnittIterator =
       visibilityConf.iterator();
     while (sichtbarkeitsAbschnittIterator.hasNext())
@@ -876,7 +875,7 @@ public class FormularMax4kController
         String groupName = sichtbarkeitsFunktion.getName();
         try
         {
-          ID groupId =
+          IdModel groupId =
             getIDManager().getActiveID(NAMESPACE_GROUPS, groupName);
           FunctionSelection funcSel =
             visibilityFunctionSelectionProvider.getFunctionSelection(groupName);
@@ -914,13 +913,13 @@ public class FormularMax4kController
    */
   private void parseGlobalFormInfo(ConfigThingy conf)
   {
-    ConfigThingy tempConf = conf.query("Formular").query("TITLE");
+    ConfigThingy tempConf = conf.query(FormMaxConstants.FORMULAR).query(FormMaxConstants.TITLE);
 
     if (tempConf.count() > 0)
     {
       formTitle = tempConf.toString();
     }
-    tempConf = conf.query("Formular").query("PLAUSI_MARKER_COLOR");
+    tempConf = conf.query(FormMaxConstants.FORMULAR).query("PLAUSI_MARKER_COLOR");
 
     if (tempConf.count() > 0)
     {
@@ -928,27 +927,9 @@ public class FormularMax4kController
     }
 
     funktionsDialogeAbschnitteConf =
-      conf.query("Formular").query("Funktionsdialoge", 2);
-    tempConf = conf.query("Formular").query("Funktionen");
+      conf.query(FormMaxConstants.FORMULAR).query("Funktionsdialoge", 2);
+    tempConf = conf.query(FormMaxConstants.FORMULAR).query(FormMaxConstants.FUNKTIONEN);
 
-    if (tempConf.count() >= 1)
-    {
-      try
-      {
-        tempConf = tempConf.getFirstChild();
-      }
-      catch (Exception x)
-      {}
-    }
-    else
-    {
-      tempConf = new ConfigThingy("Funktionen");
-    }
-    functionSelectionProvider =
-      new FunctionSelectionProvider(functionLibrary, tempConf, getIDManager(),
-        NAMESPACE_FORMCONTROLMODEL);
-
-    tempConf = conf.query("Formular").query("Sichtbarkeit");
     if (tempConf.count() >= 1)
     {
       try
@@ -962,7 +943,27 @@ public class FormularMax4kController
     }
     else
     {
-      tempConf = new ConfigThingy("Sichtbarkeit");
+      tempConf = new ConfigThingy(FormMaxConstants.FUNKTIONEN);
+    }
+    functionSelectionProvider =
+      new FunctionSelectionProvider(functionLibrary, tempConf, getIDManager(),
+        NAMESPACE_FORMCONTROLMODEL);
+
+    tempConf = conf.query(FormMaxConstants.FORMULAR).query(FormMaxConstants.SICHTBARKEIT);
+    if (tempConf.count() >= 1)
+    {
+      try
+      {
+        tempConf = tempConf.getFirstChild();
+      }
+      catch (Exception x)
+      {
+        LOGGER.trace("", x);
+      }
+    }
+    else
+    {
+      tempConf = new ConfigThingy(FormMaxConstants.SICHTBARKEIT);
     }
     visibilityFunctionSelectionProvider =
       new FunctionSelectionProvider(null, tempConf, getIDManager(),
@@ -994,7 +995,7 @@ public class FormularMax4kController
       ConfigThingy attr = iter.next();
       String name = attr.getName();
       String str = attr.toString();
-      if (name.equals("TITLE"))
+      if (name.equals(FormMaxConstants.TITLE))
       {
         label = str;
       }
@@ -1020,14 +1021,14 @@ public class FormularMax4kController
     if (idx >= 0)
     {
       formControlModelList.add(tab, idx++);
-      idx += parseGrandchildren(conf.query("Eingabefelder"), idx, true);
-      parseGrandchildren(conf.query("Buttons"), idx, false);
+      idx += parseGrandchildren(conf.query(FormMaxConstants.INPUT_FIELDS), idx, true);
+      parseGrandchildren(conf.query(FormMaxConstants.BUTTONS), idx, false);
     }
     else
     {
       formControlModelList.add(tab);
-      parseGrandchildren(conf.query("Eingabefelder"), -1, true);
-      parseGrandchildren(conf.query("Buttons"), -1, false);
+      parseGrandchildren(conf.query(FormMaxConstants.INPUT_FIELDS), -1, true);
+      parseGrandchildren(conf.query(FormMaxConstants.BUTTONS), -1, false);
     }
 
     documentNeedsUpdating();
@@ -1088,20 +1089,7 @@ public class FormularMax4kController
   {
     try
     {
-      XDocumentProperties info =
-        UNO.XDocumentPropertiesSupplier(documentController.getModel().doc).getDocumentProperties();
-      try
-      {
-        String title = ((String) UnoProperty.getProperty(info, UnoProperty.TITLE)).trim();
-        if (formTitle == GENERATED_FORM_TITLE && title.length() > 0)
-        {
-          formTitle = title;
-        }
-      }
-      catch (Exception x)
-      {
-        LOGGER.trace("", x);
-      }
+      formTitle = getTitle();
       DocumentTreeVisitor visitor = new ScanVisitor(this);
       visitor.visit(documentController.getModel().doc);
     }
@@ -1111,6 +1099,30 @@ public class FormularMax4kController
     }
 
     documentNeedsUpdating();
+  }
+  
+  public String getTitle()
+  {
+    XDocumentProperties info =
+      UNO.XDocumentPropertiesSupplier(documentController.getModel().doc).getDocumentProperties();
+    
+    String title = "";
+    
+    try
+    {
+      title = ((String) UnoProperty.getProperty(info, UnoProperty.TITLE)).trim();
+      
+      if (formTitle.equals(GENERATED_FORM_TITLE) && title.length() > 0)
+      {
+        return title;
+      }
+    }
+    catch (Exception x)
+    {
+      LOGGER.trace("", x);
+    }
+    
+    return title;
   }
 
   /**
@@ -1193,8 +1205,6 @@ public class FormularMax4kController
         XNamed bookmark = null;
         try
         {
-          // boolean isStart = ((Boolean)UNO.getProperty(textportion,
-          // "IsStart")).booleanValue();
           bookmark = UNO.XNamed(UnoProperty.getProperty(textportion, UnoProperty.BOOKMARK));
           names.add(bookmark.getName());
         }
@@ -1203,7 +1213,7 @@ public class FormularMax4kController
           LOGGER.error("", x);
         }
       }
-      else if ("TextField".equals(type)) // String const first b/c type may be null
+      else if ("TextField".equals(type))
       {
         XDependentTextField textField = null;
         try

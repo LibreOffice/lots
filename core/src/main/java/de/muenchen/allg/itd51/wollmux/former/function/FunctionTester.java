@@ -61,7 +61,7 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.former.Common;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -271,10 +271,10 @@ public class FunctionTester
     String currentValue = getComboBoxValue(combo, "");
     combo.removeAllItems();
     boolean found = false;
-    Iterator<ID> iter = idManager.getAllIDsSorted(namespace).iterator();
+    Iterator<IdModel> iter = idManager.getAllIDsSorted(namespace).iterator();
     while (iter.hasNext())
     {
-      ID id = iter.next();
+      IdModel id = iter.next();
       if (id.isActive())
       {
         String idStr = id.toString();
@@ -417,7 +417,7 @@ public class FunctionTester
         ConfigThingy codeConf = new ConfigThingy("CAT", codeStr);
         Function func = FunctionFactory.parse(codeConf, funcLib, dialogLib, myContext);
         String result = func.getString(myParameters);
-        if (result == FunctionLibrary.ERROR)
+        if (result.equals(FunctionLibrary.ERROR))
           throw new Exception(L.m("Illegaler oder fehlender Parameter!"));
         stringResult.setText(result);
         stringResult.setCaretPosition(0);

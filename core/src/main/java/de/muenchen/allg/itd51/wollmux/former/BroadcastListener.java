@@ -34,70 +34,70 @@ import java.util.Set;
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public abstract class BroadcastListener
+public interface BroadcastListener
 {
   /**
    * getObject() ist ein
    * {@link de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel}.
    */
-  public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
+  public default void broadcastFormControlModelSelection(BroadcastObjectSelection b)
   {}
 
   /**
    * getObject() ist ein
    * {@link de.muenchen.allg.itd51.wollmux.former.insertion.model.InsertionModel}.
    */
-  public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
+  public default void broadcastInsertionModelSelection(BroadcastObjectSelection b)
   {}
 
   /**
    * getObject() ist ein
    * {@link de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel}.
    */
-  public void broadcastGroupModelSelection(BroadcastObjectSelection b)
+  public default void broadcastGroupModelSelection(BroadcastObjectSelection b)
   {}
 
   /**
    * getObject() ist ein
    * {@link de.muenchen.allg.itd51.wollmux.former.section.model.SectionModel}.
    */
-  public void broadcastSectionModelSelection(BroadcastObjectSelection b)
+  public default void broadcastSectionModelSelection(BroadcastObjectSelection b)
   {}
 
   /**
    * Eine View die Views aller InsertionModel enthält wurde ausgewählt.
    */
-  public void broadcastAllInsertionsViewSelected()
+  public default void broadcastAllInsertionsViewSelected()
   {}
 
   /**
    * Eine View die Views aller FormControlModels enthält wurde ausgewählt.
    */
-  public void broadcastAllFormControlsViewSelected()
+  public default void broadcastAllFormControlsViewSelected()
   {}
 
   /**
    * Eine View die Views aller GroupModels enthält wurde ausgewählt.
    */
-  public void broadcastAllGroupsViewSelected()
+  public default void broadcastAllGroupsViewSelected()
   {}
 
   /**
    * Eine View die Views aller SectionModels enthält wurde ausgewählt.
    */
-  public void broadcastAllSectionsViewSelected()
+  public default void broadcastAllSectionsViewSelected()
   {}
 
   /**
    * Eine Menge von Bookmarks wurde ausgewählt.
    */
-  public void broadcastBookmarkSelection(Set<String> bookmarkNames)
+  public default void broadcastBookmarkSelection(Set<String> bookmarkNames)
   {}
 
   /**
    * Der {@link ViewVisibilityDescriptor} hat sich geändert.
    */
-  public void broadcastViewVisibilitySettings(ViewVisibilityDescriptor desc)
+  public default void broadcastViewVisibilitySettings(ViewVisibilityDescriptor desc)
   {
   }
 }

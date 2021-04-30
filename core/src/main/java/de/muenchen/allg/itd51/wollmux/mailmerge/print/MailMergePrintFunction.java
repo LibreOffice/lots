@@ -70,7 +70,7 @@ public abstract class MailMergePrintFunction extends PrintFunction
    * @param order
    *          The order of the print function.
    */
-  public MailMergePrintFunction(String functionName, int order)
+  protected MailMergePrintFunction(String functionName, int order)
   {
     super(functionName, order);
   }

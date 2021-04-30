@@ -541,7 +541,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       {
         ConfigThingy currentTrafo = textDocumentController.getModel().getFormFieldTrafoFromSelection();
         IfThenElseModel model = new IfThenElseModel(currentTrafo);
-        short result = new IfThenElseDialog(new ArrayList<String>(ds.getColumnNames()), model).execute();
+        short result = new IfThenElseDialog(new ArrayList<>(ds.getColumnNames()), model).execute();
         if (result == ExecutableDialogResults.OK)
         {
           ConfigThingy resultConf = model.create();
@@ -566,7 +566,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       try
       {
         GenderTrafoModel model = new GenderTrafoModel(currentTrafo);
-        short result = GenderDialog.startDialog(new ArrayList<String>(ds.getColumnNames()), model);
+        short result = GenderDialog.startDialog(new ArrayList<>(ds.getColumnNames()), model);
         if (result == ExecutableDialogResults.OK)
         {
           ConfigThingy conf = model.generateGenderTrafoConf();

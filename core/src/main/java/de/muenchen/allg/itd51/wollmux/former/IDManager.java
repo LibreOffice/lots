@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 
 
 /**
@@ -40,14 +40,14 @@ import de.muenchen.allg.itd51.wollmux.former.model.ID;
  */
 public class IDManager
 {
-  private Map<Object, HashMap<String, ID>> mapNamespace2mapString2ID = new HashMap<>();
+  private Map<Object, HashMap<String, IdModel>> mapNamespace2mapString2ID = new HashMap<>();
 
   /**
-   * Liefert ein {@link ID}-Objekt zur String-ID id im Namensraum
+   * Liefert ein {@link IdModel}-Objekt zur String-ID id im Namensraum
    * namespace. Falls dieser Manager zu dieser String-ID noch kein Objekt hatte, wird
    * ein neues angelegt, ansonsten das bereits existierende zurückgeliefert. Wird ein
    * neues ID-Objekt angelegt, so ist dieses inaktiv (siehe
-   * {@link ID#isActive()}). Diese Funktion darf also nur von Aufrufern
+   * {@link IdModel#isActive()}). Diese Funktion darf also nur von Aufrufern
    * verwendet werden, die die ID als Referenz auf ein anderes Objekt benötigen.
    * Aufrufer, die sich selbst mit der ID identifizieren wollen müssen
    * {@link #getActiveID(Object, String)} verwenden.
@@ -55,15 +55,15 @@ public class IDManager
    * @param namespace
    *          ein beliebiger Identifikator für den gewünschten Namensraum.
    */
-  public ID getID(Object namespace, String id)
+  public IdModel getID(Object namespace, String id)
   {
     if (!mapNamespace2mapString2ID.containsKey(namespace))
-      mapNamespace2mapString2ID.put(namespace, new HashMap<String, ID>());
+      mapNamespace2mapString2ID.put(namespace, new HashMap<>());
 
-    Map<String, ID> mapString2ID = mapNamespace2mapString2ID.get(namespace);
+    Map<String, IdModel> mapString2ID = mapNamespace2mapString2ID.get(namespace);
 
     if (!mapString2ID.containsKey(id))
-      mapString2ID.put(id, new ID(mapString2ID, id));
+      mapString2ID.put(id, new IdModel(mapString2ID, id));
 
     return mapString2ID.get(id);
   }
@@ -72,11 +72,11 @@ public class IDManager
    * Falls dieser Manager im Namensraum namespace ein Objekt mit String-ID id hat, so
    * wird dieses zurückgeliefert, ansonsten null.
    */
-  public ID getExistingID(Object namespace, String id)
+  public IdModel getExistingID(Object namespace, String id)
   {
     if (!mapNamespace2mapString2ID.containsKey(namespace)) return null;
 
-    Map<String, ID> mapString2ID = mapNamespace2mapString2ID.get(namespace);
+    Map<String, IdModel> mapString2ID = mapNamespace2mapString2ID.get(namespace);
 
     if (!mapString2ID.containsKey(id)) return null;
 
@@ -85,7 +85,7 @@ public class IDManager
 
   /**
    * Falls im angegebenen namespace bereits ein ID Objekt für die String-ID id
-   * existiert und dieses {@link ID#isActive()} aktiv ist, so wird eine
+   * existiert und dieses {@link IdModel#isActive()} aktiv ist, so wird eine
    * {@link DuplicateIDException} geworfen, ansonsten wird das existierende ID Objekt
    * aktiviert oder (falls noch keins existierte) ein aktiviertes ID Objekt neu
    * angelegt und dann zurückgeliefert. Diese Funktion ist dafür vorgesehen, von
@@ -96,40 +96,40 @@ public class IDManager
    * @param namespace
    *          ein beliebiger Identifikator für den gewünschten Namensraum.
    */
-  public ID getActiveID(Object namespace, String id) throws DuplicateIDException
+  public IdModel getActiveID(Object namespace, String id) throws DuplicateIDException
   {
-    ID idO = getID(namespace, id);
+    IdModel idO = getID(namespace, id);
     idO.activate();
     return idO;
   }
 
   /**
-   * Liefert eine {@link Collection} mit allen {@link ID} Objekten, die im
+   * Liefert eine {@link Collection} mit allen {@link IdModel} Objekten, die im
    * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection
    * darf nicht geändert oder gespeichert werden, da sie direkt eine interne
    * Datenstruktur ist!
    */
-  public Collection<ID> getAllIDs(Object namespace)
+  public Collection<IdModel> getAllIDs(Object namespace)
   {
     if (!mapNamespace2mapString2ID.containsKey(namespace))
       return new ArrayList<>();
 
-    Map<String, ID> mapString2ID = mapNamespace2mapString2ID.get(namespace);
+    Map<String, IdModel> mapString2ID = mapNamespace2mapString2ID.get(namespace);
     return mapString2ID.values();
   }
 
   /**
-   * Liefert eine sortierte {@link Collection} mit allen {@link ID} Objekten, die im
+   * Liefert eine sortierte {@link Collection} mit allen {@link IdModel} Objekten, die im
    * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection
    * darf nicht geändert oder gespeichert werden, da sie direkt eine interne
    * Datenstruktur ist!
    */
-  public Collection<ID> getAllIDsSorted(Object namespace)
+  public Collection<IdModel> getAllIDsSorted(Object namespace)
   {
     if (!mapNamespace2mapString2ID.containsKey(namespace))
       return new ArrayList<>();
 
-    Map<String, ID> mapString2ID = new TreeMap<>(mapNamespace2mapString2ID.get(namespace));
+    Map<String, IdModel> mapString2ID = new TreeMap<>(mapNamespace2mapString2ID.get(namespace));
 
     return mapString2ID.values();
   }

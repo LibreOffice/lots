@@ -155,7 +155,7 @@ public class FormularMax4kView extends JFrame
     menuItem = new JMenuItem(L.m("Formulartitel setzen"));
     menuItem.addActionListener(e -> {
       String newTitle = JOptionPane.showInputDialog(FormularMax4kView.this, L.m("Bitte Formulartitel eingeben"),
-          controller.getFormTitle());
+          controller.getTitle());
 
       if (newTitle != null && !newTitle.isEmpty())
       {

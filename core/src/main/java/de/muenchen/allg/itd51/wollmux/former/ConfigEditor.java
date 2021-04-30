@@ -58,8 +58,8 @@ import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.TextEditorPane;
-import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.TokenTypes;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
@@ -82,10 +82,6 @@ public class ConfigEditor extends JFrame implements SearchListener
   private FindDialog findDialog;
 
   private ReplaceDialog replaceDialog;
-
-  private FindToolBar findToolBar;
-
-  private ReplaceToolBar replaceToolBar;
 
   public ConfigEditor(String title, FormularMax4kController controller)
       throws HeadlessException
@@ -144,10 +140,10 @@ public class ConfigEditor extends JFrame implements SearchListener
     editor.setFont(font);
 
     SyntaxScheme syntax = editor.getSyntaxScheme();
-    syntax.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).foreground = Color.BLUE;
-    syntax.getStyle(Token.LITERAL_CHAR).foreground = Color.BLUE;
-    syntax.getStyle(Token.SEPARATOR).foreground = Color.DARK_GRAY;
-    syntax.getStyle(Token.RESERVED_WORD).font = font;
+    syntax.getStyle(TokenTypes.LITERAL_STRING_DOUBLE_QUOTE).foreground = Color.BLUE;
+    syntax.getStyle(TokenTypes.LITERAL_CHAR).foreground = Color.BLUE;
+    syntax.getStyle(TokenTypes.SEPARATOR).foreground = Color.DARK_GRAY;
+    syntax.getStyle(TokenTypes.RESERVED_WORD).font = font;
 
     RTextScrollPane scrollPane = new RTextScrollPane(editor);
 
@@ -179,9 +175,10 @@ public class ConfigEditor extends JFrame implements SearchListener
     SearchContext context = findDialog.getSearchContext();
     replaceDialog.setSearchContext(context);
 
-    findToolBar = new FindToolBar(this);
+    FindToolBar findToolBar = new FindToolBar(this);
     findToolBar.setSearchContext(context);
-    replaceToolBar = new ReplaceToolBar(this);
+    
+    ReplaceToolBar replaceToolBar = new ReplaceToolBar(this);
     replaceToolBar.setSearchContext(context);
 
     KeyStroke keyStroke =
@@ -254,7 +251,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     provider.addCompletion(new BasicCompletion(provider, "LABEL"));
     provider.addCompletion(new BasicCompletion(provider, "TYPE"));
     provider.addCompletion(new BasicCompletion(provider, "READONLY"));
-    provider.addCompletion(new BasicCompletion(provider, "AUTOFILL"));
+    provider.addCompletion(new BasicCompletion(provider, FormMaxConstants.AUTOFILL));
     provider.addCompletion(new BasicCompletion(provider, "DIALOG"));
     provider.addCompletion(new BasicCompletion(provider, "ID"));
     provider.addCompletion(new BasicCompletion(provider, "HOTKEY"));

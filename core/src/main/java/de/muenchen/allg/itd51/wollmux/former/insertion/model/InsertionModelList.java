@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.insertion.UnknownIDException;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -150,7 +150,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
   public void mergeCheckboxesIntoCombobox(ComboboxMergeDescriptor desc)
   {
     FormControlModel combo = desc.getCombo();
-    ID comboIdd = combo.getId();
+    IdModel comboIdd = combo.getId();
     if (comboIdd == null)
     {
       LOGGER.error("Programmfehler: Durch Merge erstellte ComboBox hat keine ID bekommen");
@@ -183,6 +183,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
       catch (ClassCastException x)
       {
         // skip this InsertionModel since it can't refer to a checkbox
+        LOGGER.debug("", x);
       }
     }
   }
@@ -196,7 +197,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
     ConfigThingy trafoConf = new ConfigThingy("TRAFO");
     ConfigThingy matchConf = trafoConf.add("MATCH");
     matchConf.add("VALUE").add(COMBO_PARAM_ID);
-    matchConf.add(re_escape(comboValue));
+    matchConf.add(doRegex(comboValue));
     FunctionSelectionAccess trafo = model.getTrafoAccess();
     trafo.setExpertFunction(trafoConf);
   }
@@ -207,7 +208,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
    */
   public void fixComboboxInsertions(FormControlModel combo)
   {
-    ID comboId = combo.getId();
+    IdModel comboId = combo.getId();
     if (comboId == null) return;
     Collection<String> items = combo.getItems();
     Collection<String> unusedItems = new HashSet<>(items);
@@ -287,7 +288,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
    * Liefert einen regulären Ausdruck, der genau den String str matcht (aber ohne ^
    * und $).
    */
-  private String re_escape(String str)
+  private String doRegex(String str)
   {
     StringBuilder buffy = new StringBuilder();
     for (int i = 0; i < str.length(); ++i)
@@ -397,7 +398,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
     public void itemRemoved(InsertionModel model, int index);
   }
 
-  private class MyBroadcastListener extends BroadcastListener
+  private class MyBroadcastListener implements BroadcastListener
   {
     boolean insertionViewsSelected = false;
 
@@ -415,7 +416,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
 
     @Override
     public void broadcastBookmarkSelection(Set<String> bookmarkNames)
-    { // TESTED
+    {
       if (!insertionViewsSelected) return;
       boolean clearSelection = true;
       Iterator<InsertionModel> iter = models.iterator();

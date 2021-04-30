@@ -27,7 +27,6 @@ import com.sun.star.text.XTextDocument;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.util.L;

@@ -57,7 +57,7 @@ import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModelList.ItemListener;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
@@ -251,7 +251,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     return myPanel;
   }
 
-  // TESTED
   @Override
   public void itemAdded(FormControlModel model, int index)
   {
@@ -264,7 +263,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       new OneFormControlLineView(model, this, formularMax4000);
     ofclView.setViewVisibilityDescriptor(visibilityDescriptor);
 
-    boolean isTab = (model.getType() == FormControlModel.TAB_TYPE);
+    boolean isTab = (model.getType().equals(FormControlModel.TAB_TYPE));
     JComponent tab = firstTab;
     int tabIndex = 0;
     int gridY = 0;
@@ -368,9 +367,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
   }
 
   @Override
-  public void viewShouldBeRemoved(View _view)
-  { // TESTED
-    OneFormControlLineView view = (OneFormControlLineView) _view;
+  public void viewShouldBeRemoved(View viewToRemove)
+  {
+    OneFormControlLineView view = (OneFormControlLineView) viewToRemove;
     int index = getDescriptorIndexOf(view);
     if (index < 0) return;
 
@@ -409,22 +408,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       // Kein fixupSelectionIndices(0, -1) nötig, weil die itemSwapped() Events schon
       // dafür sorgen
     }
-  }
-
-  /**
-   * Hebt die Selektion aller Elemente auf.
-   */
-  private void clearSelection()
-  {
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
-    {
-      Integer I = iter.next();
-      OneFormControlLineView view =
-        ((ViewDescriptor) viewDescriptors.get(I.intValue())).view;
-      view.unmark();
-    }
-    selection.clear();
   }
 
   /**
@@ -478,7 +461,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
    */
   public ComboboxMergeDescriptor mergeCheckboxesIntoCombobox()
   {
-    Map<ID, String> mapCheckboxId2ComboboxEntry = new HashMap<>();
+    Map<IdModel, String> mapCheckboxId2ComboboxEntry = new HashMap<>();
     int count = 0;
     ArrayList<String> itemList = new ArrayList<>();
     Iterator<Integer> iter = selection.iterator();
@@ -487,14 +470,14 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       int idx = iter.next().intValue();
       OneFormControlLineView view = ((ViewDescriptor) viewDescriptors.get(idx)).view;
       FormControlModel model = view.getModel();
-      if (model.getType() != FormControlModel.CHECKBOX_TYPE)
+      if (!model.getType().equals(FormControlModel.CHECKBOX_TYPE))
       {
         LOGGER.info("FM4000: Beim Aufruf von Checkbox->Combobox ist ein Element selektiert, das keine Checkbox ist");
         return null;
       }
       else
       {
-        ID id = model.getId();
+        IdModel id = model.getId();
         if (id == null)
         {
           LOGGER.info("FM4000: Beim Aufruf von Checkbox->Combobox ist eine Checkbox ohne ID selektiert");
@@ -647,7 +630,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     selection.swap(index1, index2);
   }
 
-  private class MyBroadcastListener extends BroadcastListener
+  private class MyBroadcastListener implements BroadcastListener
   {
     private AllFormControlLineViewsPanel panel;
 
@@ -658,7 +641,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
 
     @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
-    { // TESTED
+    {
       if (b.getClearSelection()) clearSelection();
       FormControlModel model = (FormControlModel) b.getObject();
 
@@ -700,7 +683,6 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
           selection.add(index);
         }
       }
-
     }
 
     @Override
@@ -720,6 +702,22 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
         ViewDescriptor viewDescriptor = (ViewDescriptor) iter.next();
         viewDescriptor.view.setViewVisibilityDescriptor(newDesc);
       }
+    }
+    
+    /**
+     * Hebt die Selektion aller Elemente auf.
+     */
+    private void clearSelection()
+    {
+      Iterator<Integer> iter = selection.iterator();
+      while (iter.hasNext())
+      {
+        Integer i = iter.next();
+        OneFormControlLineView view =
+          ((ViewDescriptor) viewDescriptors.get(i.intValue())).view;
+        view.unmark();
+      }
+      selection.clear();
     }
   }
 

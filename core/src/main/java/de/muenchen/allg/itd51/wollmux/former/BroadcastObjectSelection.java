@@ -61,7 +61,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
    * @param clearSelection
    *          true =&gt; Selektion erst ganz löschen vor an/abwählen von myObject.
    */
-  public BroadcastObjectSelection(Object model, int state, boolean clearSelection)
+  protected BroadcastObjectSelection(Object model, int state, boolean clearSelection)
   {
     this.myObject = model;
     this.state = state;

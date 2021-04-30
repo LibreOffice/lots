@@ -172,35 +172,6 @@ public class AllInsertionLineViewsPanel implements View
   }
 
   /**
-   * Entfernt view aus diesem Container (falls dort vorhanden).
-   */
-  private void removeItem(OneInsertionLineView view)
-  {
-    int index = views.indexOf(view);
-    if (index < 0) return;
-    views.remove(index);
-    mainPanel.remove(view.getComponent());
-    mainPanel.validate();
-    selection.remove(index);
-    selection.fixup(index, -1, views.size() - 1);
-  }
-
-  /**
-   * Hebt die Selektion aller Elemente auf.
-   */
-  private void clearSelection()
-  {
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
-    {
-      Integer i = iter.next();
-      OneInsertionLineView view = views.get(i.intValue());
-      view.unmark();
-    }
-    selection.clear();
-  }
-
-  /**
    * Löscht die WollMux-Bookmarks um alle ausgewählten Elemente. Da es damit keine
    * Einfügestellen mehr sind, werden die entsprechenden LineViews ebenfalls
    * entfernt.
@@ -264,10 +235,24 @@ public class AllInsertionLineViewsPanel implements View
     {
       removeItem((OneInsertionLineView) view);
     }
+    
+    /**
+     * Entfernt view aus diesem Container (falls dort vorhanden).
+     */
+    private void removeItem(OneInsertionLineView view)
+    {
+      int index = views.indexOf(view);
+      if (index < 0) return;
+      views.remove(index);
+      mainPanel.remove(view.getComponent());
+      mainPanel.validate();
+      selection.remove(index);
+      selection.fixup(index, -1, views.size() - 1);
+    }
 
   }
 
-  private class MyBroadcastListener extends BroadcastListener
+  private class MyBroadcastListener implements BroadcastListener
   {
     @Override
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
@@ -321,6 +306,21 @@ public class AllInsertionLineViewsPanel implements View
           selection.add(index);
         }
       }
+    }
+    
+    /**
+     * Hebt die Selektion aller Elemente auf.
+     */
+    private void clearSelection()
+    {
+      Iterator<Integer> iter = selection.iterator();
+      while (iter.hasNext())
+      {
+        Integer i = iter.next();
+        OneInsertionLineView view = views.get(i.intValue());
+        view.unmark();
+      }
+      selection.clear();
     }
   }
 

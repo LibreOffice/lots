@@ -39,8 +39,8 @@ import javax.swing.event.ListSelectionListener;
 
 import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel;
 import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModelList;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
-import de.muenchen.allg.itd51.wollmux.former.model.ID.IDChangeListener;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel.IDChangeListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
@@ -59,12 +59,12 @@ public class OneGroupsProviderGroupsEditView implements View
    * Die Liste mit allen Gruppen aus {@link #groupModelList}, wobei die Gruppen aus
    * {@link #groupsProvider} selektiert sind.
    */
-  private JList<ID> myList;
+  private JList<IdModel> myList;
 
   /**
    * Das {@link ListModel} zu {@link #myList}.
    */
-  private DefaultListModel<ID> listModel;
+  private DefaultListModel<IdModel> listModel;
 
   /**
    * Wessen Gruppen werden angezeigt und bearbeitet.
@@ -108,20 +108,20 @@ public class OneGroupsProviderGroupsEditView implements View
 
     for (GroupModel model : groupModelList)
     {
-      ID id = model.getID();
+      IdModel id = model.getID();
       listModel.addElement(id);
       id.addIDChangeListener(myListener);
     }
 
-    for (ID id : groupsProvider)
+    for (IdModel id : groupsProvider)
     {
       if (!listModel.contains(id)) listModel.addElement(id);
     }
 
-    Set<ID> selected = groupsProvider.getGroups();
+    Set<IdModel> selected = groupsProvider.getGroups();
     int[] indices = new int[selected.size()];
     int i = 0;
-    for (ID id : selected)
+    for (IdModel id : selected)
     {
       indices[i++] = listModel.indexOf(id);
     }
@@ -160,7 +160,7 @@ public class OneGroupsProviderGroupsEditView implements View
     {
       if (recursion) return;
       recursion = true;
-      ID id = model.getID();
+      IdModel id = model.getID();
       if (!listModel.contains(id)) listModel.addElement(id);
       recursion = false;
     }
@@ -174,7 +174,7 @@ public class OneGroupsProviderGroupsEditView implements View
     {
       if (recursion) return;
       recursion = true;
-      ID groupID = model.getID();
+      IdModel groupID = model.getID();
       listModel.removeElement(groupID);
       groupsProvider.removeGroup(groupID);
       recursion = false;
@@ -185,7 +185,7 @@ public class OneGroupsProviderGroupsEditView implements View
      * hinzugefügt.
      */
     @Override
-    public void groupAdded(ID groupID)
+    public void groupAdded(IdModel groupID)
     {
       if (recursion) return;
       recursion = true;
@@ -200,7 +200,7 @@ public class OneGroupsProviderGroupsEditView implements View
      * Gruppe entfernt.
      */
     @Override
-    public void groupRemoved(ID groupID)
+    public void groupRemoved(IdModel groupID)
     {
       if (recursion) return;
       recursion = true;
@@ -220,14 +220,14 @@ public class OneGroupsProviderGroupsEditView implements View
       if (e.getValueIsAdjusting()) return;
       recursion = true;
 
-      List<ID> selected = myList.getSelectedValuesList();
-      Iterator<ID> iter = groupsProvider.iterator();
+      List<IdModel> selected = myList.getSelectedValuesList();
+      Iterator<IdModel> iter = groupsProvider.iterator();
       while (iter.hasNext())
       {
-        ID id = iter.next();
+        IdModel id = iter.next();
         found: do
         {
-          for (ID id2 : selected)
+          for (IdModel id2 : selected)
           {
             if (id2.equals(id)) break found;
           }
@@ -240,7 +240,7 @@ public class OneGroupsProviderGroupsEditView implements View
       {
         for (GroupModel model : groupModelList)
         {
-          ID id = model.getID();
+          IdModel id = model.getID();
           if (o.equals(id)) groupsProvider.addGroup(id);
         }
       }
@@ -253,7 +253,7 @@ public class OneGroupsProviderGroupsEditView implements View
      * geändert.
      */
     @Override
-    public void idHasChanged(ID id)
+    public void idHasChanged(IdModel id)
     {
       // nothing to do
     }
