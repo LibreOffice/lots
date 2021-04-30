@@ -578,7 +578,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     {
       if (!model.getIdToTextFieldFormFields().containsKey(id))
       {
-        model.getIdToTextFieldFormFields().put(id, new ArrayList<FormField>());
+        model.getIdToTextFieldFormFields().put(id, new ArrayList<>());
       }
 
       List<FormField> formFields = model.getIdToTextFieldFormFields().get(id);
@@ -625,7 +625,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       if (id != null && id.length() > 0)
       {
         if (!model.getIdToTextFieldFormFields().containsKey(id))
-          model.getIdToTextFieldFormFields().put(id, new ArrayList<FormField>());
+          model.getIdToTextFieldFormFields().put(id, new ArrayList<>());
 
         List<FormField> formFields = model.getIdToTextFieldFormFields().get(id);
         formFields.add(f);
@@ -989,7 +989,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
       // publish form field
       if (!model.getIdToTextFieldFormFields().containsKey(fieldId))
       {
-        model.getIdToTextFieldFormFields().put(fieldId, new ArrayList<FormField>());
+        model.getIdToTextFieldFormFields().put(fieldId, new ArrayList<>());
       }
       List<FormField> formFields = model.getIdToTextFieldFormFields().get(fieldId);
       formFields.add(FormFieldFactory.createDatabaseFormField(model.doc, field));

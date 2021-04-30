@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.beans.NamedValue;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.NoSuchElementException;
 import com.sun.star.frame.XModel;
 import com.sun.star.frame.XStorable;
 import com.sun.star.io.IOException;
@@ -110,7 +109,7 @@ import de.muenchen.allg.util.UnoService;
 public class OOoBasedMailMerge implements AutoCloseable
 {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(OOoBasedMailMerge.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OOoBasedMailMerge.class);
 
   private static final String SEP = ":";
 
@@ -457,9 +456,6 @@ public class OOoBasedMailMerge implements AutoCloseable
           {
             bookmark.getAnchor().getText().removeTextContent(bookmark);
           }
-        } catch (NoSuchElementException e)
-        {
-          continue;
         } catch (Exception e)
         {
           LOGGER.error("", e);

@@ -91,7 +91,7 @@ public class WollMuxDocument implements XWollMuxDocument
   @Override
   public void updateFormGUI()
   {
-    // TODO remove this unused method.
+    // not used.
   }
 
   @Override

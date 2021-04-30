@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.former.FormMaxConstants;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -235,7 +236,7 @@ public class UIElementConfig
       }
     }
     plausi = controlConf.query("PLAUSI");
-    autofill = controlConf.query("AUTOFILL");
+    autofill = controlConf.query(FormMaxConstants.AUTOFILL);
     for (ConfigThingy groupsConf : controlConf.query("GROUPS"))
     {
       for (ConfigThingy groupConf : groupsConf)

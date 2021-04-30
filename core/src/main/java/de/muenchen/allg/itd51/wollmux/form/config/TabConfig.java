@@ -28,6 +28,7 @@ import java.util.List;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
+import de.muenchen.allg.itd51.wollmux.former.FormMaxConstants;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 
 /**
@@ -81,7 +82,7 @@ public class TabConfig
   public TabConfig(ConfigThingy tabConf) throws FormModelException
   {
     id = tabConf.getName();
-    title = tabConf.getString("TITLE", "");
+    title = tabConf.getString(FormMaxConstants.TITLE, "");
     closeAction = tabConf.getString("CLOSEACTION", "abort");
     tip = tabConf.getString("TIP", "");
     String hotkeyString = tabConf.getString("HOTKEY", "");
@@ -93,7 +94,7 @@ public class TabConfig
 
     try
     {
-      ConfigThingy inputFields = tabConf.query("Eingabefelder");
+      ConfigThingy inputFields = tabConf.query(FormMaxConstants.INPUT_FIELDS);
       for (ConfigThingy fields : inputFields)
       {
         for (ConfigThingy controlConf : fields)
@@ -102,7 +103,7 @@ public class TabConfig
         }
       }
 
-      ConfigThingy buttonConf = tabConf.query("Buttons");
+      ConfigThingy buttonConf = tabConf.query(FormMaxConstants.BUTTONS);
       for (ConfigThingy fields : buttonConf)
       {
         for (ConfigThingy controlConf : fields)

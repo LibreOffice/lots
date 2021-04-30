@@ -123,7 +123,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
    * @param order
    *          The order of the print function.
    */
-  public PrintToEmail(String functionName, int order)
+  protected PrintToEmail(String functionName, int order)
   {
     super(functionName, order);
   }

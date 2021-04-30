@@ -37,6 +37,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
@@ -51,6 +52,8 @@ public class InsertionModel4InputUser extends InsertionModel
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(InsertionModel4InputUser.class);
+  
+  private static final String FUNCTION = "FUNCTION";
 
   /**
    * Name of the variable whose value is edited by the InputUser field. This is a
@@ -86,7 +89,7 @@ public class InsertionModel4InputUser extends InsertionModel
   public InsertionModel4InputUser(Object textField, XTextDocument doc,
       FunctionSelectionProvider funcSelections, FormularMax4kController formularMax4000)
       throws SyntaxErrorException
-  { // TESTED
+  {
     this.formularMax4000 = formularMax4000;
     this.doc = doc;
     try
@@ -112,7 +115,7 @@ public class InsertionModel4InputUser extends InsertionModel
       throw new SyntaxErrorException(x);
     }
 
-    ConfigThingy trafoConf = conf.query("FUNCTION");
+    ConfigThingy trafoConf = conf.query(FUNCTION);
     if (trafoConf.count() != 1)
       throw new SyntaxErrorException();
     else
@@ -136,17 +139,22 @@ public class InsertionModel4InputUser extends InsertionModel
       textField.getAnchor().setString("");
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
+    
     try
     {
       getFieldMaster().dispose();
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
   }
 
   private XComponent getFieldMaster() throws NoSuchElementException
-  { // TESTED
+  {
     String fieldMasterName = "com.sun.star.text.fieldmaster.User." + name;
     try
     {
@@ -167,7 +175,7 @@ public class InsertionModel4InputUser extends InsertionModel
    * @throws Exception
    *           falls was schief geht.
    */
-  private void rename(String newName) throws Exception
+  private void rename(String newName)
   {
     // The following is important to avoid nuking the field master
     if (name.equals(newName)) return;
@@ -178,17 +186,29 @@ public class InsertionModel4InputUser extends InsertionModel
       content = UnoProperty.getProperty(getFieldMaster(), UnoProperty.CONTENT).toString();
     }
     catch (Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
 
     XPropertySet master = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, doc));
-    UnoProperty.setProperty(master, UnoProperty.VALUE, Double.valueOf(0));
-    UnoProperty.setProperty(master, UnoProperty.NAME, newName);
-    UnoProperty.setProperty(master, UnoProperty.CONTENT, content);
-
-    UnoProperty.setProperty(textField, UnoProperty.CONTENT, newName);
+    
+    try
+    {
+      UnoProperty.setProperty(master, UnoProperty.VALUE, Double.valueOf(0));
+      UnoProperty.setProperty(master, UnoProperty.NAME, newName);
+      UnoProperty.setProperty(master, UnoProperty.CONTENT, content);
+      UnoProperty.setProperty(textField, UnoProperty.CONTENT, newName);
+    } catch (UnoHelperException e)
+    {
+      LOGGER.trace("", e);
+    }
+   
     try
     {
       getFieldMaster().dispose(); // clean up old field master
+    } catch (NoSuchElementException e)
+    {
+      LOGGER.trace("", e);
     }
     finally
     {
@@ -198,7 +218,7 @@ public class InsertionModel4InputUser extends InsertionModel
 
   @Override
   public void selectWithViewCursor()
-  { // TESTED
+  {
     try
     {
       XTextRange anchor = textField.getAnchor();
@@ -207,13 +227,15 @@ public class InsertionModel4InputUser extends InsertionModel
         cursor, false);
     }
     catch (java.lang.Exception x)
-    {}
+    {
+      LOGGER.trace("", x);
+    }
   }
 
   @Override
   public String updateDocument(
       Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
-  { // TESTED
+  {
     ConfigThingy conf = new ConfigThingy("WM");
 
     if (trafo.isNone())
@@ -223,7 +245,9 @@ public class InsertionModel4InputUser extends InsertionModel
         trafo.setExpertFunction(new ConfigThingy("TRAFO", "\"\""));
       }
       catch (Exception x)
-      {}
+      {
+        LOGGER.trace("", x);
+      }
     }
 
     // Falls eine externe Funktion referenziert wird, ohne dass irgendwelche
@@ -233,7 +257,7 @@ public class InsertionModel4InputUser extends InsertionModel
     
     if (trafo.isReference() && !trafo.hasSpecifiedParameters())
     {
-      conf.add("FUNCTION").add(trafo.getFunctionName());
+      conf.add(FUNCTION).add(trafo.getFunctionName());
     }
     else
     // ... ansonsten müssen wir eine neue Funktion machen.
@@ -245,7 +269,7 @@ public class InsertionModel4InputUser extends InsertionModel
           FM4000AUTO_GENERATED_TRAFO + (count++) + "_" + System.currentTimeMillis();
       } while (mapFunctionNameToConfigThingy.containsKey(funcName));
 
-      conf.add("FUNCTION").add(funcName);
+      conf.add(FUNCTION).add(funcName);
       mapFunctionNameToConfigThingy.put(funcName, trafo.export(funcName));
     }
 

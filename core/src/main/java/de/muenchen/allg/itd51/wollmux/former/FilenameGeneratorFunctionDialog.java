@@ -40,6 +40,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -48,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
@@ -59,6 +60,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
   private static final Logger LOGGER = LoggerFactory
       .getLogger(FilenameGeneratorFunctionDialog.class);
 
+  private static final String FILENAME = "Filename";
 
   private transient TextDocumentController documentController;
   private transient AdjustorFunction func;
@@ -121,16 +123,16 @@ public class FilenameGeneratorFunctionDialog extends JDialog
       tt.setContent(TextComponentTags.CAT_VALUE_SYNTAX, func.cat);
     }
     
-    Collection<ID> idsCol = idManager.getAllIDs(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
+    Collection<IdModel> idsCol = idManager.getAllIDs(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
     List<String> ids = new ArrayList<>();
-    for (ID id : idsCol)
+    for (IdModel id : idsCol)
       ids.add(id.getID());
     JPotentiallyOverlongPopupMenuButton insertFieldButton =
       new JPotentiallyOverlongPopupMenuButton(L.m("ID"),
         TextComponentTags.makeInsertFieldActions(ids, tt));
     insertFieldButton.setFocusable(false);
     Box hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Dateiname"), JLabel.LEFT));
+    hbox.add(new JLabel(L.m("Dateiname"), SwingConstants.LEFT));
     hbox.add(Box.createHorizontalGlue());
     hbox.add(insertFieldButton);
     vbox.add(hbox);
@@ -143,7 +145,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     {
       Function f = documentController.getFunctionLibrary().get(fName);
       if (f != null && f.parameters().length == 1
-        && f.parameters()[0].equals("Filename"))
+        && f.parameters()[0].equals(FILENAME))
       {
         if (functionName != null && functionName.equals(fName))
           sel = adjustFuncs.size();
@@ -235,7 +237,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     if (n == null || !n.getName().equals("SET") || n.count() != 2) return null;
     Iterator<ConfigThingy> setIter = n.iterator();
     n = setIter.next();
-    if (n == null || !n.getName().equals("Filename") || n.count() != 0) return null;
+    if (n == null || !n.getName().equals(FILENAME) || n.count() != 0) return null;
     n = setIter.next();
     if (n == null || !n.getName().equals("CAT") || !isCatFuncOk(n)) return null;
     return new AdjustorFunction(n, bindFunctionName);
@@ -266,7 +268,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
       function.add(adjustFuncCombo.getSelectedItem().toString());
       bindFunc.addChild(function);
       ConfigThingy set = new ConfigThingy("SET");
-      set.add("Filename");
+      set.add(FILENAME);
       set.addChild(catFunc);
       bindFunc.addChild(set);
       return bindFunc;

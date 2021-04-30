@@ -91,7 +91,7 @@ public class PrintFunctionDialog extends JDialog
   private void createGui()
   {
     final JList<String> printFunctionCurrentList =
-        new JList<>(new Vector<String>(documentController.getModel().getPrintFunctions()));
+        new JList<>(new Vector<>(documentController.getModel().getPrintFunctions()));
       JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
       printFunctionEditorContentPanel.add(printFunctionCurrentList,
         BorderLayout.CENTER);
@@ -107,13 +107,13 @@ public class PrintFunctionDialog extends JDialog
         {
           documentController.removePrintFunction("" + o);
         }
-        printFunctionCurrentList.setListData(new Vector<String>(documentController.getModel().getPrintFunctions()));
+        printFunctionCurrentList.setListData(new Vector<>(documentController.getModel().getPrintFunctions()));
       };
 
       ActionListener addFunc = e -> {
         String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
         documentController.addPrintFunction(newFunctionName);
-        printFunctionCurrentList.setListData(new Vector<String>(documentController.getModel().getPrintFunctions()));
+        printFunctionCurrentList.setListData(new Vector<>(documentController.getModel().getPrintFunctions()));
       };
 
       JButton wegDamit = new JButton(L.m("Entfernen"));

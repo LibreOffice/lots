@@ -40,7 +40,7 @@ public abstract class IfThenElseBaseModel
   /**
    * Initialize the basic fields.
    */
-  public IfThenElseBaseModel()
+  protected IfThenElseBaseModel()
   {
     id = UUID.randomUUID().toString();
     value = "";

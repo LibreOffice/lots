@@ -35,8 +35,8 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
-import de.muenchen.allg.itd51.wollmux.former.model.ID.IDChangeListener;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel.IDChangeListener;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -60,7 +60,7 @@ public class GroupModel
   /**
    * Die ID (=der Name) dieser Gruppe.
    */
-  private ID id;
+  private IdModel id;
 
   /**
    * Die Sichtbarkeitsbedingung für diese Gruppe.
@@ -92,7 +92,7 @@ public class GroupModel
    * @param formularMax4000
    *          der {@link FormularMax4kController} zu dem diese Gruppe gehört.
    */
-  public GroupModel(ID id, FunctionSelection condition,
+  public GroupModel(IdModel id, FunctionSelection condition,
       FormularMax4kController formularMax4000)
   {
     this.id = id;
@@ -153,7 +153,7 @@ public class GroupModel
     return new MyConditionAccess();
   }
 
-  public ID getID()
+  public IdModel getID()
   {
     return id;
   }
@@ -229,7 +229,7 @@ public class GroupModel
      * @param attributeId
      *          eine der {@link GroupModel#ID_ATTR Attribut-ID-Konstanten}.
      * @param newValue
-     *          der neue Wert des Attributs. Die ID wird als {@link ID}
+     *          der neue Wert des Attributs. Die ID wird als {@link IdModel}
      *          übergeben.
      */
     public void attributeChanged(GroupModel model, int attributeId, Object newValue);
@@ -244,7 +244,7 @@ public class GroupModel
   private class MyIDChangeListener implements IDChangeListener
   {
     @Override
-    public void idHasChanged(ID id)
+    public void idHasChanged(IdModel id)
     {
       notifyListeners(ID_ATTR, id);
     }

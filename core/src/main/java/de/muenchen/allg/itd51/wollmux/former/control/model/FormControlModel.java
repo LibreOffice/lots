@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
+import de.muenchen.allg.itd51.wollmux.former.FormMaxConstants;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -44,7 +45,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
@@ -117,7 +118,7 @@ public class FormControlModel
   private String type;
 
   /** ID (null => keine ID). */
-  private ID id = null;
+  private IdModel id = null;
 
   /** ACTION. */
   private String action = NO_ACTION;
@@ -267,7 +268,7 @@ public class FormControlModel
         parseGroups(attr);
       else if (name.equals("PLAUSI"))
         plausiConf = attr;
-      else if (name.equals("AUTOFILL"))
+      else if (name.equals(FormMaxConstants.AUTOFILL))
         autofill = funcSelProv.getFunctionSelection(attr);
       else if (name.equals("FRAG_ID"))
     	  fragId = str;
@@ -298,13 +299,13 @@ public class FormControlModel
   }
 
   /**
-   * Liefert eine Menge, die {@link ID} Objekte im Namensraum
+   * Liefert eine Menge, die {@link IdModel} Objekte im Namensraum
    * {@link FormularMax4000#NAMESPACE_GROUPS} für die String-Werte aller Kinder von
    * conf enthält.
    */
   private void parseGroups(ConfigThingy conf)
   {
-    HashSet<ID> set = new HashSet<>(conf.count());
+    HashSet<IdModel> set = new HashSet<>(conf.count());
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
@@ -361,7 +362,7 @@ public class FormControlModel
   public static FormControlModel createLabel(String label, String id,
       FormularMax4kController formularMax4000)
   {
-    return new FormControlModel(label, LABEL_TYPE, "ID", formularMax4000);
+    return new FormControlModel(label, LABEL_TYPE, id, formularMax4000);
   }
 
   /**
@@ -398,7 +399,7 @@ public class FormControlModel
     return formularMax4000;
   }
 
-  public ID getId()
+  public IdModel getId()
   {
     return id;
   }
@@ -654,7 +655,7 @@ public class FormControlModel
   public void setId(final String id) throws DuplicateIDException,
       SyntaxErrorException
   {
-    ID idO = getId();
+    IdModel idO = getId();
     if (id.length() == 0)
     {
       if (idO == null) return;
@@ -707,7 +708,7 @@ public class FormControlModel
     int count = 1;
     while (true)
     {
-      ID inactiveId = idMan.getID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
+      IdModel inactiveId = idMan.getID(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, idStr2);
       if (!inactiveId.isActive())
       {
         this.id = inactiveId;
@@ -946,13 +947,13 @@ public class FormControlModel
     if (groups.hasGroups())
     {
       ConfigThingy grps = conf.add("GROUPS");
-      for (ID gid : groups)
+      for (IdModel gid : groups)
       {
         grps.add(gid.toString());
       }
     }
 
-    if (!autofill.isNone()) conf.addChild(autofill.export("AUTOFILL"));
+    if (!autofill.isNone()) conf.addChild(autofill.export(FormMaxConstants.AUTOFILL));
 
     String idStr = null;
     if (getId() != null)

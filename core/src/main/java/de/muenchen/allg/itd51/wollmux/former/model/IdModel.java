@@ -30,7 +30,7 @@ import java.util.Map;
 import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
-public class ID
+public class IdModel
 {
     /**
      * Die String-ID, die dieses Objekt repräsentiert.
@@ -42,7 +42,7 @@ public class ID
      * verwendet, um Kollisionen zu überprüfen und das Mapping anzupassen, wenn der
      * ID-String dieses Objekts geändert wird.
      */
-    private Map<String, ID> mapString2ID;
+    private Map<String, IdModel> mapString2ID;
 
     /**
      * true bedeutet, dass irgendwo ein Objekt tatsächlich verwendet wird, das sich
@@ -53,14 +53,14 @@ public class ID
     private boolean active = false;
 
     /**
-     * Liste von {@link WeakReference}s auf {@link ID.IDChangeListener}.
+     * Liste von {@link WeakReference}s auf {@link IdModel.IDChangeListener}.
      */
     private List<WeakReference<IDChangeListener>> listeners = new ArrayList<>();
 
     /**
      * Erstellt ein neues ID Objekt, das inaktiv (siehe {@link #isActive()} ist.
      */
-    public ID(Map<String, ID> mapString2ID, String id)
+    public IdModel(Map<String, IdModel> mapString2ID, String id)
     {
       this.id = id;
       this.mapString2ID = mapString2ID;
@@ -118,7 +118,7 @@ public class ID
         }
       }
       
-      listeners.add(new WeakReference<IDChangeListener>(listen));
+      listeners.add(new WeakReference<>(listen));
     }
 
     /**
@@ -144,7 +144,7 @@ public class ID
 
     /**
      * Ändert die String-ID dieses Objekts auf newID und benachrichtigt alle
-     * {@link ID.IDChangeListener}. Falls newID == {@link #getID()}, so
+     * {@link IdModel.IDChangeListener}. Falls newID == {@link #getID()}, so
      * passiert nichts, es werden keine Listener benachrichtigt und es gibt keine
      * Exception. ACHTUNG! Normalerweise darf diese Funktion nur von dem Objekt
      * aufgerufen werden, das sich mit dieser ID identifiziert, nicht von Objekten
@@ -224,13 +224,13 @@ public class ID
     }
     
     /**
-     * Ein IDChangeListener wird benachrichtigt, wenn sich ein {@link ID}
+     * Ein IDChangeListener wird benachrichtigt, wenn sich ein {@link IdModel}
      * Objekt ändert.
      *
      * @see ID.addIDChangeListener(IDChangeListener)
      */
     public interface IDChangeListener
     {
-      public void idHasChanged(ID id);
+      public void idHasChanged(IdModel id);
     }
 }

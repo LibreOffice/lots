@@ -38,6 +38,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
@@ -48,7 +51,7 @@ import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModel;
 import de.muenchen.allg.itd51.wollmux.former.group.model.GroupModelList;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.util.L;
@@ -60,10 +63,13 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  */
 public class AllGroupLineViewsPanel implements View
 {
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(AllGroupLineViewsPanel.class);
+  
   /**
    * Rand um Buttons (in Pixeln).
    */
-  private final static int BUTTON_BORDER = 2;
+  private static final int BUTTON_BORDER = 2;
 
   /**
    * Der {@link FormularMax4000} zu dem diese View gehört.
@@ -161,7 +167,7 @@ public class AllGroupLineViewsPanel implements View
   private void createNewGroup()
   {
     int num = 1;
-    ID id;
+    IdModel id;
     while (true)
     {
       try
@@ -203,35 +209,7 @@ public class AllGroupLineViewsPanel implements View
     scrollPane.validate();
   }
 
-  /**
-   * Entfernt view aus diesem Container (falls dort vorhanden).
-   */
-  private void removeItem(OneGroupLineView view)
-  {
-    int index = views.indexOf(view);
-    if (index < 0) return;
-    views.remove(index);
-    mainPanel.remove(view.getComponent());
-    mainPanel.validate();
-    selection.remove(index);
-    selection.fixup(index, -1, views.size() - 1);
-  }
-
-  /**
-   * Hebt die Selektion aller Elemente auf.
-   */
-  private void clearSelection()
-  {
-    Iterator<Integer> iter = selection.iterator();
-    while (iter.hasNext())
-    {
-      Integer I = iter.next();
-      OneGroupLineView view = views.get(I.intValue());
-      view.unmark();
-    }
-    selection.clear();
-  }
-
+ 
   /**
    * Löscht alle ausgewählten Elemente.
    */
@@ -256,7 +234,7 @@ public class AllGroupLineViewsPanel implements View
        * Inaktivieren reicht nicht, um Namenskollisionen zu verhindern. Deswegen
        * benennen wir die ID einfach um in einen zufälligen String.
        */
-      ID id = model.getID();
+      IdModel id = model.getID();
       while (true)
       {
         try
@@ -266,7 +244,7 @@ public class AllGroupLineViewsPanel implements View
         }
         catch (DuplicateIDException x)
         {
-          continue;
+          LOGGER.trace("", x);
         }
       }
     }
@@ -297,16 +275,28 @@ public class AllGroupLineViewsPanel implements View
 
   private class MyViewChangeListener implements ViewChangeListener
   {
-
     @Override
     public void viewShouldBeRemoved(View view)
     {
       removeItem((OneGroupLineView) view);
     }
-
+    
+    /**
+     * Entfernt view aus diesem Container (falls dort vorhanden).
+     */
+    private void removeItem(OneGroupLineView view)
+    {
+      int index = views.indexOf(view);
+      if (index < 0) return;
+      views.remove(index);
+      mainPanel.remove(view.getComponent());
+      mainPanel.validate();
+      selection.remove(index);
+      selection.fixup(index, -1, views.size() - 1);
+    }
   }
 
-  private class MyBroadcastListener extends BroadcastListener
+  private class MyBroadcastListener implements BroadcastListener
   {
     @Override
     public void broadcastGroupModelSelection(BroadcastObjectSelection b)
@@ -350,4 +340,20 @@ public class AllGroupLineViewsPanel implements View
         }
       }
   }
+
+    /**
+     * Hebt die Selektion aller Elemente auf.
+     */
+    private void clearSelection()
+    {
+      Iterator<Integer> iter = selection.iterator();
+      while (iter.hasNext())
+      {
+        Integer i = iter.next();
+        OneGroupLineView view = views.get(i.intValue());
+        view.unmark();
+      }
+      selection.clear();
+    }
+
 }}

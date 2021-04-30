@@ -46,8 +46,7 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.insertion.UnknownIDException;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
-import de.muenchen.allg.itd51.wollmux.util.L;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 
 /**
  * Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.
@@ -92,6 +91,8 @@ public class InsertionModel4InsertXValue extends InsertionModel
    * aus dem Formular kommen (insertFormValue).
    */
   private static final int FORM_TYPE = 1;
+  
+  private static final String TRAFO_FUNCTION = "TRAFO";
 
   /**
    * Gibt an, um woher die Einfügung ihre Daten bezieht.
@@ -104,7 +105,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   /**
    * DB_SPALTE oder ID je nach {@link #sourceType}.
    */
-  private ID dataId;
+  private IdModel dataId;
 
   /**
    * Liste von {@link InsertionModel.AutosepInfo} Objekten.
@@ -116,7 +117,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
    */
   private Bookmark bookmark;
 
-  private ID.IDChangeListener myIDChangeListener = new MyIDChangeListener();
+  private IdModel.IDChangeListener myIDChangeListener = new MyIDChangeListener();
 
   /**
    * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das bereits im
@@ -189,7 +190,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     else
       throw new SyntaxErrorException();
 
-    ConfigThingy trafoConf = conf.query("TRAFO");
+    ConfigThingy trafoConf = conf.query(TRAFO_FUNCTION);
     if (trafoConf.count() == 0)
       this.trafo = new FunctionSelection();
     else
@@ -259,7 +260,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
       // Original-Funktionsnamen für das TRAFO-Attribut ...
       if (trafo.isReference() && !trafo.hasSpecifiedParameters())
       {
-        conf.add("TRAFO").add(trafo.getFunctionName());
+        conf.add(TRAFO_FUNCTION).add(trafo.getFunctionName());
       }
       else
       // ... ansonsten müssen wir eine neue Funktion machen.
@@ -273,7 +274,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
               + System.currentTimeMillis();
         } while (mapFunctionNameToConfigThingy.containsKey(funcName));
 
-        conf.add("TRAFO").add(funcName);
+        conf.add(TRAFO_FUNCTION).add(funcName);
         mapFunctionNameToConfigThingy.put(funcName, trafo.export(funcName));
       }
     }
@@ -293,7 +294,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
 
     String newBookmarkName = conf.stringRepresentation(false, '\'', true);
     
-    if (bookmark.rename(newBookmarkName) != Bookmark.BROKEN)    
+    if (!bookmark.rename(newBookmarkName).equals(Bookmark.BROKEN))    
     {
       return "";
     } else
@@ -305,7 +306,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   /**
    * Liefert je nach Typ der Einfügung das DB_SPALTE oder ID Attribut.
    */
-  public ID getDataID()
+  public IdModel getDataID()
   {
     return dataId;
   }
@@ -329,13 +330,25 @@ public class InsertionModel4InsertXValue extends InsertionModel
   public void setDataID(String newId) throws UnknownIDException
   {
     if (newId.equals(dataId.toString())) return;
-    if (newId.length() == 0) throw new UnknownIDException(L.m("Leere ID"));
+    
+    if (newId.length() == 0)
+    {
+        LOGGER.trace("Leere ID");
+        throw new UnknownIDException();
+    }
+    
     if (sourceType == FORM_TYPE)
     {
-      ID newDataId =
+      IdModel newDataId =
         formularMax4000.getIDManager().getExistingID(
           FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, newId);
-      if (newDataId == null) throw new UnknownIDException(newId);
+      
+      if (newDataId == null)
+      {
+        LOGGER.trace("newDataID is NULL.");
+        throw new UnknownIDException();
+      }
+    
       dataId.removeIDChangeListener(myIDChangeListener);
       dataId = newDataId;
       dataId.addIDChangeListener(myIDChangeListener);
@@ -398,10 +411,10 @@ public class InsertionModel4InsertXValue extends InsertionModel
     private String separator = " ";
   }
 
-  private class MyIDChangeListener implements ID.IDChangeListener
+  private class MyIDChangeListener implements IdModel.IDChangeListener
   {
     @Override
-    public void idHasChanged(ID id)
+    public void idHasChanged(IdModel id)
     {
       if (id != dataId)
       {

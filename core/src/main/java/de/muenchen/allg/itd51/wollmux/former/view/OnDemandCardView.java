@@ -96,7 +96,7 @@ public abstract class OnDemandCardView implements View
     }
   }
 
-  public OnDemandCardView(String label)
+  protected OnDemandCardView(String label)
   {
     cards = new CardLayout();
     myPanel = new JPanel(cards);
@@ -129,32 +129,6 @@ public abstract class OnDemandCardView implements View
     mapModel2ViewDescriptor.put(model, new ViewCardIdPair(view, cardId));
     myPanel.add(view.getComponent(), cardId);
     myPanel.validate();
-  }
-
-  /**
-   * Entfernt view aus diesem Container (falls dort vorhanden). DIESE FUNKTION IST
-   * PRIVATE UND MUSS AUCH NICHT PROTECTED SEIN. DAS ENTFERNEN VON VIEWS HANDHABT DIE
-   * OnDemandCardView selbstständig über {@link MyViewChangeListener}.
-   */
-  private void removeItem(View view)
-  {
-    Iterator<Map.Entry<Object, ViewCardIdPair>> iter =
-      mapModel2ViewDescriptor.entrySet().iterator();
-    while (iter.hasNext())
-    {
-      Map.Entry<Object, ViewCardIdPair> entry = iter.next();
-      ViewCardIdPair pair = entry.getValue();
-      if (pair.view == view)
-      {
-        iter.remove();
-        myPanel.remove(view.getComponent());
-        myPanel.validate();
-        if (currentModel != null && getCardIdFor(currentModel).equals(pair.cardId))
-          showEmpty();
-
-        return;
-      }
-    }
   }
 
   /**
@@ -261,6 +235,31 @@ public abstract class OnDemandCardView implements View
       removeItem(view);
     }
 
+    /**
+     * Entfernt view aus diesem Container (falls dort vorhanden). DIESE FUNKTION IST
+     * PRIVATE UND MUSS AUCH NICHT PROTECTED SEIN. DAS ENTFERNEN VON VIEWS HANDHABT DIE
+     * OnDemandCardView selbstständig über {@link MyViewChangeListener}.
+     */
+    private void removeItem(View view)
+    {
+      Iterator<Map.Entry<Object, ViewCardIdPair>> iter =
+        mapModel2ViewDescriptor.entrySet().iterator();
+      while (iter.hasNext())
+      {
+        Map.Entry<Object, ViewCardIdPair> entry = iter.next();
+        ViewCardIdPair pair = entry.getValue();
+        if (pair.view == view)
+        {
+          iter.remove();
+          myPanel.remove(view.getComponent());
+          myPanel.validate();
+          if (currentModel != null && getCardIdFor(currentModel).equals(pair.cardId))
+            showEmpty();
+
+          return;
+        }
+      }
+    }
   }
 
 }

@@ -31,8 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.former.FormMaxConstants;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
-import de.muenchen.allg.itd51.wollmux.former.model.ID;
+import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 
 /**
  * Verwaltet eine Liste von FormControlModels.
@@ -122,7 +123,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
   {
     int index = models.indexOf(model);
     if (index < 0) return;
-    boolean isTab = model.getType() == FormControlModel.TAB_TYPE;
+    boolean isTab = model.getType().equals(FormControlModel.TAB_TYPE);
     models.remove(model);
     model.hasBeenRemoved();
     if (isTab) enforceMaxModelsPerTab();
@@ -141,7 +142,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
     while (iter.hasNext())
     {
       FormControlModel model = iter.next();
-      ID id = model.getId();
+      IdModel id = model.getId();
       if (id != null && id.toString().startsWith(str))
       {
         if (count == 0) ++count;
@@ -288,16 +289,16 @@ public class FormControlModelList implements Iterable<FormControlModel>
     while (iter.hasNext())
     {
       FormControlModel model = iter.next();
-      if (phase == 0 && model.getType() == FormControlModel.TAB_TYPE)
+      if (phase == 0 && model.getType().equals(FormControlModel.TAB_TYPE))
         currentTab = model;
-      else if (phase > 0 && model.getType() == FormControlModel.TAB_TYPE)
+      else if (phase > 0 && model.getType().equals(FormControlModel.TAB_TYPE))
       {
         if (phase == 1) conf.addChild(makeGlue());
         currentTab = model;
         conf = export;
         phase = 0;
       }
-      else if (phase == 0 && model.getType() == FormControlModel.BUTTON_TYPE)
+      else if (phase == 0 && model.getType().equals(FormControlModel.BUTTON_TYPE))
       {
         tabConf = outputTab(currentTab, export);
 
@@ -308,54 +309,54 @@ public class FormControlModelList implements Iterable<FormControlModel>
          * expliziten Button-Knoten in den Knoten "Eingabefelder" exportiert.
          */
         if(model.getAction().equals("openExt") || model.getAction().equals("openTemplate")) {
-          conf = tabConf.add("Eingabefelder");
+          conf = tabConf.add(FormMaxConstants.INPUT_FIELDS);
         }
         else {
-          conf = tabConf.add("Buttons");
+          conf = tabConf.add(FormMaxConstants.BUTTONS);
         }
 
         conf.addChild(model.export());
         phase = 2;
       }
-      else if (phase == 1 && model.getType() == FormControlModel.BUTTON_TYPE)
+      else if (phase == 1 && model.getType().equals(FormControlModel.BUTTON_TYPE))
       {
         if(!model.getAction().equals("openExt") && !model.getAction().equals("openTemplate"))
         {
           conf.addChild(makeGlue());
-          conf = tabConf.add("Buttons");
+          conf = tabConf.add(FormMaxConstants.BUTTONS);
         }
 
         conf.addChild(model.export());
         phase = 2;
       }
-      else if (phase == 2 && model.getType() == FormControlModel.BUTTON_TYPE)
+      else if (phase == 2 && model.getType().equals(FormControlModel.BUTTON_TYPE))
       {
 	  if(!model.getAction().equals("openExt")
 	      && !model.getAction().equals("openTemplate")
-	      && tabConf.query("Buttons") != null
-	      && tabConf.query("Buttons").count() < 1) {
+	      && tabConf.query(FormMaxConstants.BUTTONS) != null
+	      && tabConf.query(FormMaxConstants.BUTTONS).count() < 1) {
 
-	    conf = tabConf.add("Buttons");
+	    conf = tabConf.add(FormMaxConstants.BUTTONS);
 	  }
 
 	conf.addChild(model.export());
       }
-      else if (phase == 2 && model.getType() != FormControlModel.BUTTON_TYPE
-        && model.getType() != FormControlModel.GLUE_TYPE
-        && model.getType() != FormControlModel.SEPARATOR_TYPE
+      else if (phase == 2 && !model.getType().equals(FormControlModel.BUTTON_TYPE)
+        && !model.getType().equals(FormControlModel.GLUE_TYPE)
+        && !model.getType().equals(FormControlModel.SEPARATOR_TYPE)
         && model.getType().equals("tab"))
       {
         id = makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
         currentTab = FormControlModel.createTab(id, id, formularMax4000);
         tabConf = outputTab(currentTab, export);
-        conf = tabConf.add("Eingabefelder");
+        conf = tabConf.add(FormMaxConstants.INPUT_FIELDS);
         conf.addChild(model.export());
         phase = 1;
       }
       else if (phase == 0)
       {
         tabConf = outputTab(currentTab, export);
-        conf = tabConf.add("Eingabefelder");
+        conf = tabConf.add(FormMaxConstants.INPUT_FIELDS);
         conf.addChild(model.export());
         phase = 1;
       }
