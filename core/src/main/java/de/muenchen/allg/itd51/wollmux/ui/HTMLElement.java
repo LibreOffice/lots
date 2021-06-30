@@ -76,10 +76,40 @@ public class HTMLElement
       Object o = attributes.getAttribute(CSS.Attribute.FONT_SIZE);
       if (o != null)
       {
-        fontDescriptor.Height = Short.valueOf(o.toString().replaceAll("pt", ""));
+        try
+        {
+          fontDescriptor.Height = Short.valueOf(o.toString().replaceAll("pt", ""));
+        } catch (NumberFormatException ex)
+        {
+          LOGGER.info("parsing font height failed due number format exception, trying to parse string %s", o.toString());
+          short fontSize = parseFontSizeString(o.toString());
+          LOGGER.info("parsed %s to %i pt", o.toString(), fontSize);
+          fontDescriptor.Height = fontSize;
+        }
       }
     }
     return fontDescriptor;
+  }
+  
+  private short parseFontSizeString(String value)
+  {
+    switch (value)
+    {
+      case "x-small" : 
+        return 7;
+      case "small" :
+        return 10;
+      case "medium" : 
+        return 12;
+      case "large":
+        return 14;
+      case "x-large":
+        return 18;
+      case "xx-large":
+        return 24;
+      default:
+        return 12;
+    }
   }
 
   public int getRGBColor()
