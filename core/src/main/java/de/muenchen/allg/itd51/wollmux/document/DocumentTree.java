@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,20 +35,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.XControlModel;
+import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.drawing.XControlShape;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.table.XCell;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextFramesSupplier;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextTable;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoIterator;
 import de.muenchen.allg.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
@@ -101,30 +101,32 @@ public class DocumentTree
     /*
      * Zuerst enumerieren wir den Inhalt des Body Texts
      */
-    UnoCollection<XTextRange> textRanges = UnoCollection.getCollection(doc.getText(), XTextRange.class);
-    if (textRanges == null)
+    XEnumerationAccess enuAccess = UNO.XEnumerationAccess(doc.getText());
+    if (enuAccess == null)
     {
       return;
     }
     List<Node> nodes = new ArrayList<>();
-    handleParagraphEnumeration(textRanges, nodes, doc);
+    XEnumeration enu = enuAccess.createEnumeration();
+    handleParagraphEnumeration(enu, nodes, doc);
+
     topLevelNodes.add(new ContainerNode(nodes));
 
     /*
      * Jetzt kommen die Frames dran.
      */
     XTextFramesSupplier supp = UNO.XTextFramesSupplier(doc);
-    UnoDictionary<XTextFrame> frames = UnoDictionary.create(supp.getTextFrames(), XTextFrame.class);
-    Set<String> names = frames.keySet();
-    if (!names.isEmpty())
+    XNameAccess access = supp.getTextFrames();
+    String[] names = access.getElementNames();
+    if (names.length > 0)
     {
-      nodes = new ArrayList<>(names.size());
-      for (String name :  names)
+      nodes = new Vector<>(names.length);
+      for (int i = 0; i < names.length; ++i)
       {
-        XTextFrame frame;
+        Object frame;
         try
         {
-          frame = frames.get(name);
+          frame = access.getByName(names[i]);
         }
         catch (Exception x)
         {
@@ -132,9 +134,9 @@ public class DocumentTree
           continue;
         }
 
-        UnoCollection<XTextRange> ranges = UnoCollection.getCollection(frame, XTextRange.class);
+        enu = UNO.XEnumerationAccess(frame).createEnumeration();
         List<Node> childNodes = new ArrayList<>();
-        handleParagraphEnumeration(ranges, childNodes, doc);
+        handleParagraphEnumeration(enu, childNodes, doc);
 
         nodes.add(new ContainerNode(childNodes));
       }
@@ -157,21 +159,31 @@ public class DocumentTree
    * @param doc
    *          das Dokument in dem die Absätze liegen.
    */
-  private void handleParagraphEnumeration(UnoCollection<XTextRange> textRanges,
-      List<Node> nodes,
+  private void handleParagraphEnumeration(XEnumeration enu, List<Node> nodes,
       XTextDocument doc)
   {
-    for (XTextRange range : textRanges)
+    XEnumerationAccess enuAccess;
+    while (enu.hasMoreElements())
     {
-      UnoCollection<XTextRange> portions = UnoCollection.getCollection(range, XTextRange.class);
-      if (portions != null) // ist wohl ein SwXParagraph
+      Object ele;
+      try
       {
-        handleParagraph(portions, nodes, doc);
+        ele = enu.nextElement();
+      }
+      catch (Exception x)
+      {
+        LOGGER.trace("", x);
+        continue;
+      }
+      enuAccess = UNO.XEnumerationAccess(ele);
+      if (enuAccess != null) // ist wohl ein SwXParagraph
+      {
+        handleParagraph(enuAccess, nodes, doc);
       }
       else
       // unterstützt nicht XEnumerationAccess, ist wohl SwXTextTable
       {
-        XTextTable table = UNO.XTextTable(range);
+        XTextTable table = UNO.XTextTable(ele);
         if (table != null)
         {
           handleTextTable(table, nodes, doc);
@@ -196,7 +208,8 @@ public class DocumentTree
     {
       XCell cell = table.getCellByName(cellNames[i]);
       List<Node> cellContents = new ArrayList<>();
-      handleParagraphEnumeration(UnoCollection.getCollection(cell, XTextRange.class), cellContents, doc);
+      handleParagraphEnumeration(UNO.XEnumerationAccess(cell).createEnumeration(),
+        cellContents, doc);
       cells.add(new ContainerNode(cellContents));
     }
 
@@ -210,7 +223,7 @@ public class DocumentTree
    * @param doc
    *          das Dokument das den Absatz enthält.
    */
-  private void handleParagraph(UnoCollection<XTextRange> paragraph, Collection<Node> nodes,
+  private void handleParagraph(XEnumerationAccess paragraph, Collection<Node> nodes,
       XTextDocument doc)
   {
     List<Node> textPortions = new ArrayList<>();
@@ -218,9 +231,22 @@ public class DocumentTree
     /*
      * enumeriere alle TextPortions des Paragraphs
      */
-    for (XTextRange textPortion : paragraph)
+    XEnumeration textPortionEnu = paragraph.createEnumeration();
+    while (textPortionEnu.hasMoreElements())
     {
-      String textPortionType = (String) Utils.getProperty(textPortion, UnoProperty.TEXT_PROTION_TYPE);
+      Object textPortion;
+      try
+      {
+        textPortion = textPortionEnu.nextElement();
+      }
+      catch (Exception x)
+      {
+        LOGGER.trace("", x);
+        continue;
+      }
+
+      String textPortionType =
+          (String) Utils.getProperty(textPortion, "TextPortionType");
       if ("Bookmark".equals(textPortionType))
       {
         handleBookmark(textPortion, textPortions, doc);
