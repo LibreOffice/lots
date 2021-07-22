@@ -73,7 +73,7 @@ public class ShowDocument extends PrintFunction
         picker.appendFilter(filterName, "*.pdf");
         picker.appendFilter("Alle Dateien", "*");
         picker.setCurrentFilter(filterName);
-        short res = picker.execute();
+        short res = picker.execute(); // thread gets disposed when running in debug mode, no issues with built oxt.
         if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
         {
           String[] files = picker.getFiles();

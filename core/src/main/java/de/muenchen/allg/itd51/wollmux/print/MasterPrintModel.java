@@ -305,9 +305,7 @@ class MasterPrintModel implements XPrintModel
   @Override
   public void setFormValue(String id, String value)
   {
-    SyncActionListener s = new SyncActionListener();
-    new OnSetFormValue(documentController.getModel().doc, id, value, s).emit();
-    s.synchronize();
+    new OnSetFormValue(documentController.getModel().doc, id, value, null).emit();
   }
 
   @Override
@@ -325,9 +323,7 @@ class MasterPrintModel implements XPrintModel
   @Override
   public void collectNonWollMuxFormFields()
   {
-    SyncActionListener s = new SyncActionListener();
-    new OnCollectNonWollMuxFormFieldsViaPrintModel(documentController, s).emit();
-    s.synchronize();
+    new OnCollectNonWollMuxFormFieldsViaPrintModel(documentController, null).emit();
   }
 
   @Override
@@ -435,17 +431,13 @@ class MasterPrintModel implements XPrintModel
   @Override
   public void setPrintBlocksProps(String blockName, boolean visible, boolean showHighlightColor)
   {
-    SyncActionListener s = new SyncActionListener();
-    new OnSetPrintBlocksPropsViaPrintModel(documentController, blockName, visible, showHighlightColor, s).emit();
-    s.synchronize();
+    new OnSetPrintBlocksPropsViaPrintModel(documentController, blockName, visible, showHighlightColor, null).emit();
   }
 
   @Override
   public void setGroupVisible(String groupID, boolean visible)
   {
-    SyncActionListener s = new SyncActionListener();
-    new OnSetVisibleState(documentController, groupID, visible, s).emit();
-    s.synchronize();
+    new OnSetVisibleState(documentController, groupID, visible, null).emit();
   }
 
   @Override
