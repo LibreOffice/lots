@@ -148,6 +148,7 @@ public class FormularMax4kView extends JFrame
     JMenuItem menuItem = new JMenuItem(L.m("Formularfelder aus Vorlage einlesen"));
     menuItem.addActionListener(e -> {
       controller.scan();
+      controller.updateDocument();
       setFrameSize();
     });
     menu.add(menuItem);
