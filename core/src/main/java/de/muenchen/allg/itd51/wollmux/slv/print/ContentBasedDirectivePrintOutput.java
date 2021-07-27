@@ -29,6 +29,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.chaosfirebolt.converter.RomanInteger;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
@@ -248,7 +249,13 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
       // The cursor includes the tab but this should not change visiblity
       if (cursor != null)
       {
-        cursor.goLeft((short) 1, true);
+        // 'I./t' or 'I.' ('I.' without tab is used left of recipient frame in some cases), so
+        // only goLeft(1) to exclude tab.
+        if (cursor.getString().contains("\t"))
+        { 
+          cursor.goLeft((short) 1, true);
+        }
+
         hideTextRange(cursor, hide);
       }
     }
