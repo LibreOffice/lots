@@ -47,6 +47,7 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.IndexOutOfBoundsException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.sheet.XCellRangesQuery;
 import com.sun.star.sheet.XSheetCellRanges;
@@ -433,9 +434,9 @@ public class CalcModel implements DatasourceModel
             int startColumn = columnIndexes.first();
             int endColumn = columnIndexes.last();
             XCellRange range = UNO.XCellRange(sheet).getCellRangeByPosition(startColumn, startRow,
-                endColumn, endRow);
+                endColumn, endRow);            
             Object[][] cellData = UNO.XCellRangeData(range).getDataArray();
-            readRowData(cellData);
+            readRowData(cellData, range);
           }
         }
       } catch (Exception e)
@@ -451,8 +452,9 @@ public class CalcModel implements DatasourceModel
    *
    * @param cellData
    *          The data of the whole sheet..
+   * @throws IndexOutOfBoundsException 
    */
-  private void readRowData(Object[][] cellData)
+  private void readRowData(Object[][] cellData, XCellRange range) throws IndexOutOfBoundsException
   {
     List<Integer> rows = new ArrayList<>(rowIndexes);
     for (int record = 0; record < rowIndexes.size(); record++)
@@ -462,7 +464,7 @@ public class CalcModel implements DatasourceModel
       {
         if (columnIndexes.contains(j + columnIndexes.first()))
         {
-          String column = parseValue(cellData[rows.get(0)][j]);
+          String column = UNO.XTextRange(range.getCellByPosition(j, rows.get(0))).getString();
           column = CharMatcher.breakingWhitespace().replaceFrom(column, " ");
           // first row contains the header
           if (record == 0)
@@ -470,40 +472,10 @@ public class CalcModel implements DatasourceModel
             mapColumnNameToCalcColumnName.put(column, getCalcColumnNameForColumnIndex(j + 1));
           } else
           {
-            data.put(record, column, parseValue(cellData[row][j]));
+            String value = UNO.XTextRange(range.getCellByPosition(j, row)).getString();
+            data.put(record, column, value);
           }
         }
-      }
-    }
-  }
-
-  /**
-   * Parse the value from the calc file. Integers are given as doubles but we don't want the decimal
-   * part if it's an integer so we have to do some casting.
-   *
-   * @param value
-   *          The value.
-   */
-  private String parseValue(Object value)
-  {
-    if (value instanceof String)
-    {
-      return (String) value;
-    } else
-    {
-      try
-      {
-        double doubleValue = (double) value;
-        if (DoubleMath.isMathematicalInteger(doubleValue))
-        {
-          return Integer.toString((int) doubleValue);
-        } else
-        {
-          return Double.toString(doubleValue);
-        }
-      } catch (NumberFormatException ex)
-      {
-        return "";
       }
     }
   }
