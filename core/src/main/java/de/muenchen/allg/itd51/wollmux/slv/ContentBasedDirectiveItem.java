@@ -233,6 +233,7 @@ public class ContentBasedDirectiveItem
     int start = text.indexOf(text.trim());
     if (index < 0)
     {
+      LOGGER.debug("getZifferOnly(): index < 0, cursor returns NULL.");
       return null;
     } else
     {

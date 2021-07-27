@@ -74,9 +74,7 @@ public class WollMuxDocument implements XWollMuxDocument
   @Override
   public void setFormValue(String id, String value)
   {
-    SyncActionListener s = new SyncActionListener();
-    new OnSetFormValue(doc, id, value, s).emit();
-    s.synchronize();
+    new OnSetFormValue(doc, id, value, null).emit();
   }
 
   @Override
@@ -99,9 +97,7 @@ public class WollMuxDocument implements XWollMuxDocument
   {
     Map<String, String> m = new HashMap<>(mapDbSpalteToValue);
     mapDbSpalteToValue.clear();
-    SyncActionListener s = new SyncActionListener();
-    new OnSetInsertValues(doc, m, s).emit();
-    s.synchronize();
+    new OnSetInsertValues(doc, m, null).emit();
   }
 
   @Override

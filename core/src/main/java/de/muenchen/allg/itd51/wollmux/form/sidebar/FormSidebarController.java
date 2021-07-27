@@ -319,9 +319,11 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
    */
   private void setValue(String id, String value)
   {
+    LOGGER.info("FormSidebarController:setValue() id {} value {}", id, value);
+    LOGGER.info("FormSidebarController:setValue() processUIElementEvents {}", processUIElementEvents);
     if (processUIElementEvents)
     {
-      processUIElementEvents = false;
+      //processUIElementEvents = false;
       noProcessValueChangedEvents.add(id);
       formController.setValue(id, value, null);
       noProcessValueChangedEvents.remove(id);

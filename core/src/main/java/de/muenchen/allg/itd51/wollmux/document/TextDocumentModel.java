@@ -377,11 +377,6 @@ public class TextDocumentModel
     this.persistentData = persistentData;
   }
 
-  public ConfigThingy getFormularConf()
-  {
-    return formularConf;
-  }
-
   public void setFormularConf(ConfigThingy formularConf)
   {
     this.formularConf = formularConf;

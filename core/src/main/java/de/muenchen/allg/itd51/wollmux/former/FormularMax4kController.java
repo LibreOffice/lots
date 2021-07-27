@@ -474,7 +474,7 @@ public class FormularMax4kController
     ConfigEditor editor = new ConfigEditor("Config Editor", this);
 
     editor.setVisible(true);
-    editor.setText(updateDocument(documentController).stringRepresentation());
+    editor.setText(updateDocument().stringRepresentation());
     editor.addWindowListener(new WindowAdapter()
     {
       @Override
@@ -619,7 +619,7 @@ public class FormularMax4kController
       return;
     }
     
-    updateDocument(documentController);
+    updateDocument();
     UNO.dispatch(documentController.getModel().doc, ".uno:Save");
   }
 
@@ -633,12 +633,12 @@ public class FormularMax4kController
       return;
     }
     
-    updateDocument(documentController);
+    updateDocument();
     UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
 
   public void sendAsEmail() {
-    updateDocument(documentController);
+    updateDocument();
     UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
   }
   
@@ -702,8 +702,14 @@ public class FormularMax4kController
    *
    * @return die aktualisierte Formularbeschreibung
    */
-  private ConfigThingy updateDocument(TextDocumentController documentController)
+  public ConfigThingy updateDocument()
   {
+    if (documentController == null)
+    {
+      LOGGER.error("documentController is NULL. returning.");
+      return new ConfigThingy("");
+    }
+    
     LOGGER.debug("Übertrage Formularbeschreibung ins Dokument");
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<>();
 
@@ -716,7 +722,7 @@ public class FormularMax4kController
     documentController.storeCurrentFormDescription();
     this.initModelsAndViews(conf);
     this.documentNeedsUpdating();
-    
+
     renamedToUpdate.forEach(functionName -> {
       ConfigThingy trafoConf = null;
       try
