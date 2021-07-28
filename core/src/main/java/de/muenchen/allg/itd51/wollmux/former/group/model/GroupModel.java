@@ -124,7 +124,6 @@ public class GroupModel
       ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -210,7 +209,6 @@ public class GroupModel
       ModelChangeListener listener = iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -297,28 +295,24 @@ public class GroupModel
     public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       condition.setParameterValues(mapNameToParamValue);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setFunction(String functionName, String[] paramNames)
     {
       condition.setFunction(functionName, paramNames);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setExpertFunction(ConfigThingy funConf)
     {
       condition.setExpertFunction(funConf);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setParameterValue(String paramName, ParamValue paramValue)
     {
       condition.setParameterValue(paramName, paramValue);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override

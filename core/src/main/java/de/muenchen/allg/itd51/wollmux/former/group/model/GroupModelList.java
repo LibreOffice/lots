@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 
 /**
  * Verwaltet eine Liste von GroupModels
@@ -49,19 +48,11 @@ public class GroupModelList implements Iterable<GroupModel>
   private List<ItemListener> listeners = new ArrayList<>(1);
 
   /**
-   * Der FormularMax4000 zu dem diese GroupModelList gehört.
-   */
-  private FormularMax4kController formularMax4000;
-
-  /**
    * Erzeugt eine neue GroupModelList.
-   *
-   * @param formularMax4000
-   *          der FormularMax4000 zu dem diese Liste gehört.
    */
-  public GroupModelList(FormularMax4kController formularMax4000)
+  public GroupModelList()
   {
-    this.formularMax4000 = formularMax4000;
+    // not used.
   }
 
   /**
@@ -167,7 +158,6 @@ public class GroupModelList implements Iterable<GroupModel>
       else
         listener.itemAdded(model, index);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**

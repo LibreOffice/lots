@@ -69,7 +69,6 @@ import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoList;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentTreeVisitor;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
@@ -237,25 +236,6 @@ public class FormularMax4kController
    */
   private FunctionTester functionTester = null;
 
-  /**
-   * Zahl von Formularsteuerelementen in einem Formular, ab der es in Zusammenhang
-   * mit einer maximaler Heap Size der JVM, die kleiner ist als
-   * {@link #LOWEST_ALLOWED_HEAP_SIZE}, zu Speicherplatzproblemen kommen kann.
-   *
-   * Der Wert 5000 wurde vollkommen willkürlich gewählt und ist wahrscheinlich zu
-   * hoch. Wir warten auf den ersten Bugreport mit einem {@link OutOfMemoryError} und
-   * legen den Wert dann anhand des realen Falles neu fest.
-   */
-  private static final int CRITICAL_NUMBER_OF_FORMCONTROLS = 5000;
-
-  /**
-   * Mindestgröße der maximalen Heap Size der JVM (in Bytes). Sollte die maximale
-   * Heap Size der JVM kleiner als dieser Wert sein, kann es bei Formularen mit mehr
-   * Formularsteuerelementen als {@link #CRITICAL_NUMBER_OF_FORMCONTROLS} zu
-   * Speicherplatzproblemen kommen.
-   */
-  private static final long LOWEST_ALLOWED_HEAP_SIZE = 70000000;
-
   public FormularMax4kController(TextDocumentController documentController,
       ActionListener abortListener, FunctionLibrary funcLib,
       PrintFunctionLibrary printFuncLib)
@@ -267,7 +247,7 @@ public class FormularMax4kController
 
     formControlModelList = new FormControlModelList(this);
     insertionModelList = new InsertionModelList(this);
-    groupModelList = new GroupModelList(this);
+    groupModelList = new GroupModelList();
     sectionModelList = new SectionModelList(this);
 
     try
@@ -276,6 +256,7 @@ public class FormularMax4kController
         try
         {
           view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
+          initModelsAndViews(documentController.getFormDescription());
 
           view.setFrameSize();
           view.setVisible(true);
@@ -290,13 +271,6 @@ public class FormularMax4kController
       LOGGER.error("", x);
     }
     
-    initModelsAndViews(documentController.getFormDescription());
-
-    if (!testMemoryRequirements())
-    {
-      return;
-    }
-
     selectionSupplier = getSelectionSupplier();
     if(selectionSupplier != null)
     {
@@ -348,7 +322,7 @@ public class FormularMax4kController
     if (newTitle != null)
     {
       formTitle = newTitle;
-      documentNeedsUpdating();
+      updateDocument();
     }
   }
 
@@ -358,38 +332,6 @@ public class FormularMax4kController
   public void comboBoxItemsHaveChanged(FormControlModel model)
   {
     insertionModelList.fixComboboxInsertions(model);
-  }
-
-  /**
-   * Wird bei jeder Änderung einer internen Datenstruktur aufgerufen, die ein Updaten
-   * des Dokuments erforderlich macht um persistent zu werden.
-   */
-  public void documentNeedsUpdating()
-  {
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(() -> {
-        try
-        {
-          if (view != null)
-          {
-            view.setFrameSize();
-            return;
-          }
-          
-          view = new FormularMax4kView("FormularMax 4000", FormularMax4kController.this);
-          view.setVisible(true);
-          
-        } catch (Exception x)
-        {
-          LOGGER.error("", x);
-        }
-      });
-    }
-    catch (Exception x)
-    {
-      LOGGER.error("", x);
-    }
   }
 
   /**
@@ -537,7 +479,7 @@ public class FormularMax4kController
         tabConf = new ConfigThingy("Empfaengerauswahl", tabConfUrl);
       }
       parseTab(tabConf, 0);
-      documentNeedsUpdating();
+      updateDocument();
     }
     catch (Exception x)
     {
@@ -565,7 +507,7 @@ public class FormularMax4kController
       conf = conf.query(FormMaxConstants.BUTTONS, 0, 0);
 
       parseGrandchildren(conf, index, false);
-      documentNeedsUpdating();
+      updateDocument();
     }
     catch (Exception x)
     {
@@ -700,7 +642,8 @@ public class FormularMax4kController
    * Speichert die aktuelle Formularbeschreibung im Dokument und aktualisiert
    * Bookmarks etc.
    *
-   * @return die aktualisierte Formularbeschreibung
+   * Wird bei jeder Änderung einer internen Datenstruktur aufgerufen, die ein Updaten
+   * des Dokuments erforderlich macht um persistent zu werden.
    */
   public ConfigThingy updateDocument()
   {
@@ -714,14 +657,12 @@ public class FormularMax4kController
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<>();
 
     Set<String> renamedToUpdate = insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
-    sectionModelList.updateDocument();
+    sectionModelList.updateDocumentSections();
     
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
     documentController.setFormDescription(new ConfigThingy(conf));
     documentController.getModel().setFormularConf(conf);
     documentController.storeCurrentFormDescription();
-    this.initModelsAndViews(conf);
-    this.documentNeedsUpdating();
 
     renamedToUpdate.forEach(functionName -> {
       ConfigThingy trafoConf = null;
@@ -1038,8 +979,6 @@ public class FormularMax4kController
       parseGrandchildren(conf.query(FormMaxConstants.INPUT_FIELDS), -1, true);
       parseGrandchildren(conf.query(FormMaxConstants.BUTTONS), -1, false);
     }
-
-    documentNeedsUpdating();
   }
 
   /**
@@ -1084,8 +1023,6 @@ public class FormularMax4kController
       --count;
     }
 
-    documentNeedsUpdating();
-
     return count;
   }
 
@@ -1105,8 +1042,6 @@ public class FormularMax4kController
     {
       LOGGER.error(L.m("Fehler während des Scan-Vorgangs"), x);
     }
-
-    documentNeedsUpdating();
   }
   
   public String getTitle()
@@ -1269,39 +1204,6 @@ public class FormularMax4kController
       }
     }
     return false;
-  }
-
-  private boolean testMemoryRequirements()
-  {
-    // Zuerst überprüfen wir, ob das Formular eine kritische Anzahl an FormControls
-    // sowie eine niedrige Einstellung für die Java Heap Size hat, die zu
-    // OutOfMemoryErrors führen könnte. Wenn ja, wird eine entsprechende Meldung
-    // ausgegeben, dass der Benutzer seine Java-Einstellungen ändern soll und
-    // der FormularMax wird nicht gestartet.
-    int formControlCount = documentController.getFormDescription().query("TYPE", 6, 6).count();
-    long maxMemory = Runtime.getRuntime().maxMemory();
-    if (formControlCount > CRITICAL_NUMBER_OF_FORMCONTROLS
-      && maxMemory < LOWEST_ALLOWED_HEAP_SIZE)
-    {
-      LOGGER.info("Starten von FormularMax beim Bearbeiten von Dokument '{}' abgebrochen, "
-              + "da maximale Java Heap Size = {} bytes und Anzahl FormControls = {}",
-          documentController.getFrameController().getTitle(), maxMemory, formControlCount);
-      JOptionPane.showMessageDialog(
-        view,
-          L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher"
-              + " zur Verfügung steht.\n" + "Bitte ändern Sie in Office Ihre Java-Einstellungen. Sie finden diese unter"
-              + "\"Extras->Optionen->LibreOffice->Erweitert\".\n"
-              + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, "
-              + "klicken auf den Button \"Parameter\",\n"
-              + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und "
-              + "klicken auf \"Zuweisen\".\n"
-              + "Danach ist ein Neustart von Office nötig."),
-        L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
-      DocumentManager.getDocumentManager().setCurrentFormularMax4000(documentController.getModel().doc, null);
-      return false;
-    }
-
-    return true;
   }
 
   private class MyXSelectionChangedListener implements XSelectionChangeListener

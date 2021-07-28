@@ -109,14 +109,14 @@ public class SectionModelList implements Iterable<SectionModel>
    * Liste gelöscht. Das Ausführen dieser Funktion triggert also potentiell einige
    * Listener.
    */
-  public void updateDocument()
+  public void updateDocumentSections()
   {
     List<SectionModel> defunct = new ArrayList<>();
     Iterator<SectionModel> iter = models.iterator();
     while (iter.hasNext())
     {
       SectionModel model = iter.next();
-      if (!model.updateDocument()) defunct.add(model);
+      if (!model.updateDocumentSection()) defunct.add(model);
     }
 
     iter = defunct.iterator();

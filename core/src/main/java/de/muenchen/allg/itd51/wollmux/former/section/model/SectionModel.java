@@ -132,7 +132,7 @@ public class SectionModel
    */
   private void parseName(String name)
   {
-    this.groups = new GroupsProvider(formularMax4000);
+    this.groups = new GroupsProvider();
     sectionNameComplete = name;
     sectionNamePrefix = name;
     Matcher m = SECTION_NAME_PATTERN.matcher(name);
@@ -188,7 +188,6 @@ public class SectionModel
   {
     sectionNamePrefix = name;
     notifyListeners(NAME_ATTR, name);
-    // formularMax4000.documentNeedsUpdating(); ist bereits in notifyListeners()
   }
 
   /**
@@ -215,7 +214,7 @@ public class SectionModel
    * @return false, wenn beim Update etwas schief geht (typischerweise weil der
    *         Benutzer den Bereich hinterrücks gelöscht oder umbenannt hat)
    */
-  public boolean updateDocument()
+  public boolean updateDocumentSection()
   {
     try
     {
@@ -342,7 +341,7 @@ public class SectionModel
       ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
-    formularMax4000.documentNeedsUpdating();
+    formularMax4000.updateDocument();
   }
 
   /**
@@ -357,7 +356,6 @@ public class SectionModel
       ModelChangeListener listener = iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
