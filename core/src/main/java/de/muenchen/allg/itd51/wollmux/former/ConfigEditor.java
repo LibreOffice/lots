@@ -202,7 +202,7 @@ public class ConfigEditor extends JFrame implements SearchListener
       {
         ConfigThingy conf = new ConfigThingy("", null, new StringReader(editor.getText()));
         controller.initModelsAndViews(conf);
-        controller.documentNeedsUpdating();
+        controller.updateDocument();
         dispose();
       } catch (Exception e1)
       {

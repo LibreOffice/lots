@@ -420,7 +420,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
       ItemListener listener = iter.next();
       listener.itemAdded(model, index);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -435,7 +434,6 @@ public class FormControlModelList implements Iterable<FormControlModel>
       ItemListener listener = iter.next();
       listener.itemSwapped(index1, index2);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**

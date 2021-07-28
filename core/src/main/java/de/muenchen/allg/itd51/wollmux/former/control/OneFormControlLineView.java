@@ -576,7 +576,6 @@ public class OneFormControlLineView extends LineView
         model.setExt("");
         model.setFragID(fragIDTextField.getText());
         model.setAction(OPEN_TEMPLATE);
-        formularMax4000.documentNeedsUpdating();
       }
     });
 
@@ -588,7 +587,6 @@ public class OneFormControlLineView extends LineView
         model.setFragID(""); // prevents writing in config thingy export
         model.setUrl(urlTextField.getText());
         model.setAction(OPEN_EXT);
-        formularMax4000.documentNeedsUpdating();
       }
     });
 
@@ -600,7 +598,6 @@ public class OneFormControlLineView extends LineView
 	model.setFragID(""); // prevents writing in config thingy export
 	model.setExt(extTextField.getText());
         model.setAction(OPEN_EXT);
-	formularMax4000.documentNeedsUpdating();
       }
     });
 
