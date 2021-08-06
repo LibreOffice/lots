@@ -362,7 +362,6 @@ public class InsertionModel4InsertXValue extends InsertionModel
       dataId.addIDChangeListener(myIDChangeListener);
     }
     notifyListeners(ID_ATTR, dataId);
-    // formularMax4000.documentNeedsUpdating(); ist bereits in notifyListeners
   }
 
   @Override
@@ -422,7 +421,6 @@ public class InsertionModel4InsertXValue extends InsertionModel
         return;
       }
       notifyListeners(ID_ATTR, dataId);
-      // formularMax4000.documentNeedsUpdating(); ist bereits in notifyListeners
     }
   }
 

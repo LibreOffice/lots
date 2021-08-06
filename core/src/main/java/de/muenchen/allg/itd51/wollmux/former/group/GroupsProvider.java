@@ -48,17 +48,12 @@ public class GroupsProvider implements Iterable<IdModel>
   private List<WeakReference<GroupsChangedListener>> listeners = new ArrayList<>();
 
   /**
-   * Der heilige Meister, den wir anbeten.
-   */
-  private FormularMax4kController formularMax4000;
-
-  /**
-   * Erzeugt einen neuen GroupsProvider, der {@link FormularMax4kController#documentNeedsUpdating()}
+   * Erzeugt einen neuen GroupsProvider, der {@link FormularMax4kController#updateDocument()}
    * aufruft, wenn etwas an seiner Liste geändert wird.
    */
-  public GroupsProvider(FormularMax4kController formularMax4000)
+  public GroupsProvider()
   {
-    this.formularMax4000 = formularMax4000;
+    // not used.
   }
 
   /**
@@ -83,7 +78,6 @@ public class GroupsProvider implements Iterable<IdModel>
     {
       groups.add(id);
       notifyListeners(id, false);
-      formularMax4000.documentNeedsUpdating();
     }
 
   }
@@ -105,7 +99,6 @@ public class GroupsProvider implements Iterable<IdModel>
   private void groupHasBeenRemoved(IdModel id)
   {
     notifyListeners(id, true);
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**

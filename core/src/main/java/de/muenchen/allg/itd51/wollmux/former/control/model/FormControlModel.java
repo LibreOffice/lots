@@ -201,7 +201,7 @@ public class FormControlModel
       FormularMax4kController formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
-    this.groups = new GroupsProvider(formularMax4000);
+    this.groups = new GroupsProvider();
     label = L.m("Steuerelement");
     type = TEXTFIELD_TYPE;
     String idStr = "";
@@ -329,7 +329,7 @@ public class FormControlModel
     this.label = label;
     this.type = type;
     this.formularMax4000 = formularMax4000;
-    this.groups = new GroupsProvider(formularMax4000);
+    this.groups = new GroupsProvider();
     makeInactiveID(id);
   }
 
@@ -598,7 +598,6 @@ public class FormControlModel
   public void setAutofill(FunctionSelection funcSel)
   {
     autofill = funcSel;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -641,7 +640,6 @@ public class FormControlModel
   {
     if (action.length() == 0) action = NO_ACTION;
     this.action = action;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -767,7 +765,6 @@ public class FormControlModel
   public void setTooltip(String tooltip)
   {
     this.tooltip = tooltip;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -776,7 +773,6 @@ public class FormControlModel
   public void setHotkey(char hotkey)
   {
     this.hotkey = hotkey;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -785,7 +781,6 @@ public class FormControlModel
   public void setReadonly(boolean readonly)
   {
     this.readonly = readonly;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -794,7 +789,6 @@ public class FormControlModel
   public void setWrap(boolean wrap)
   {
     this.wrap = wrap;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -803,7 +797,6 @@ public class FormControlModel
   public void setEditable(boolean editable)
   {
     this.editable = editable;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -812,7 +805,6 @@ public class FormControlModel
   public void setLines(int lines)
   {
     this.lines = lines;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -844,7 +836,6 @@ public class FormControlModel
   public void setMinsize(int minsize)
   {
     this.minsize = minsize;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -853,7 +844,6 @@ public class FormControlModel
   public void setMaxsize(int maxsize)
   {
     this.maxsize = maxsize;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -889,7 +879,6 @@ public class FormControlModel
     else
       this.type = UNKNOWN_TYPE;
     notifyListeners(TYPE_ATTR, this.type);
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -900,7 +889,7 @@ public class FormControlModel
     this.items.clear();
     for (int i = 0; i < items.length; ++i)
       this.items.add(items[i]);
-    formularMax4000.documentNeedsUpdating();
+    
     formularMax4000.comboBoxItemsHaveChanged(this);
   }
 
@@ -974,8 +963,6 @@ public class FormControlModel
     {
       listener.attributeChanged(this, attributeId, newValue);
     }
-
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -1000,7 +987,6 @@ public class FormControlModel
       ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -1100,28 +1086,24 @@ public class FormControlModel
     public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       sel.setParameterValues(mapNameToParamValue);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setFunction(String functionName, String[] paramNames)
     {
       sel.setFunction(functionName, paramNames);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setExpertFunction(ConfigThingy funConf)
     {
       sel.setExpertFunction(funConf);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setParameterValue(String paramName, ParamValue paramValue)
     {
       sel.setParameterValue(paramName, paramValue);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override

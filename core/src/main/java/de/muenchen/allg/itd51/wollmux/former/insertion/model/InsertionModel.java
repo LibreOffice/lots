@@ -114,7 +114,6 @@ public abstract class InsertionModel
   public void setTrafo(FunctionSelection trafo)
   {
     this.trafo = trafo;
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -154,7 +153,6 @@ public abstract class InsertionModel
       ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -170,7 +168,6 @@ public abstract class InsertionModel
       ModelChangeListener listener = iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
-    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -220,28 +217,24 @@ public abstract class InsertionModel
     public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       trafo.setParameterValues(mapNameToParamValue);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setFunction(String functionName, String[] paramNames)
     {
       trafo.setFunction(functionName, paramNames);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setExpertFunction(ConfigThingy funConf)
     {
       trafo.setExpertFunction(funConf);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override
     public void setParameterValue(String paramName, ParamValue paramValue)
     {
       trafo.setParameterValue(paramName, paramValue);
-      formularMax4000.documentNeedsUpdating();
     }
 
     @Override

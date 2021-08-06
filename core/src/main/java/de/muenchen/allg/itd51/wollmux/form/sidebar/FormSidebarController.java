@@ -323,11 +323,9 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     LOGGER.info("FormSidebarController:setValue() processUIElementEvents {}", processUIElementEvents);
     if (processUIElementEvents)
     {
-      //processUIElementEvents = false;
       noProcessValueChangedEvents.add(id);
       formController.setValue(id, value, null);
       noProcessValueChangedEvents.remove(id);
-      processUIElementEvents = true;
     }
   }
 
