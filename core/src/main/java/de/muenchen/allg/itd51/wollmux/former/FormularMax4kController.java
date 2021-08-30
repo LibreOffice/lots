@@ -277,10 +277,7 @@ public class FormularMax4kController
       myXSelectionChangedListener = new MyXSelectionChangedListener();
       selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
     }
-    
-    showOpenedAsTemplateWarning();
-    
-  }
+}
 
   public void setAbortListener(ActionListener abortListener)
   {
@@ -556,11 +553,6 @@ public class FormularMax4kController
    */
   public void save()
   {
-    if (!showOpenedAsTemplateWarning())
-    {
-      return;
-    }
-    
     updateDocument();
     UNO.dispatch(documentController.getModel().doc, ".uno:Save");
   }
@@ -570,11 +562,6 @@ public class FormularMax4kController
    */
   public void saveAs()
   {
-    if (!showOpenedAsTemplateWarning())
-    {
-      return;
-    }
-    
     updateDocument();
     UNO.dispatch(documentController.getModel().doc, ".uno:SaveAs");
   }
@@ -582,19 +569,6 @@ public class FormularMax4kController
   public void sendAsEmail() {
     updateDocument();
     UNO.dispatch(documentController.getModel().doc, ".uno:SendMail");
-  }
-  
-  private boolean showOpenedAsTemplateWarning()
-  {
-    if (documentController.getModel().isTemplate())
-      return true;
-    
-    JOptionPane.showMessageDialog(view,
-        L.m("Das Dokument wurde nicht als Vorlage (.ott) geöffnet, Änderungen im FormularMax werden nicht gespeichert."
-            + "\nUm Änderungen vorzunehmen, das Dokument bitte als Vorlage öffnen."),
-        L.m("Achtung"), JOptionPane.OK_OPTION);
-    
-    return false;
   }
 
   /**
