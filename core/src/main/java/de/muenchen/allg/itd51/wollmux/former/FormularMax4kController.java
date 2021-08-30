@@ -588,8 +588,6 @@ public class FormularMax4kController
   {
     if (documentController.getModel().isTemplate())
       return true;
-    if (documentController.getModel().isTemplateTemplate())
-      return true;
     
     JOptionPane.showMessageDialog(view,
         L.m("Das Dokument wurde nicht als Vorlage (.ott) geöffnet, Änderungen im FormularMax werden nicht gespeichert."
