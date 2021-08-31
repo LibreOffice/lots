@@ -190,14 +190,6 @@ public class TextDocumentModel
   private volatile boolean isTemplate;
 
   /**
-   * True if this document is a template but should not be treated as template.
-   *
-   * Documents which have set the type "templateTemplate" aren't treated as templates.
-   *
-   */
-  private volatile boolean isTemplateTemplate;
-
-  /**
    * True if this document should be treated as if it has a form.
    */
   private volatile boolean isFormDocument;
@@ -290,11 +282,8 @@ public class TextDocumentModel
 
     this.isTemplate = !hasURL();
     this.isFormDocument = false;
-    this.isTemplateTemplate = false;
 
     setType(setTypeData);
-    if(this.isTemplate == false)
-      this.isTemplate = hasOtt();
   }
 
   /**
@@ -420,11 +409,6 @@ public class TextDocumentModel
   public boolean isTemplate()
   {
     return isTemplate;
-  }
-
-  public boolean isTemplateTemplate()
-  {
-    return isTemplateTemplate;
   }
 
   public boolean isFormDocument()
@@ -708,38 +692,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Get the extension of the document
-   *
-   * @return The extension of the document.
-   */
-  public static String getExtension(String fileName) {
-    char ch;
-    int len;
-    if(fileName==null ||
-            (len = fileName.length())==0 ||
-            (ch = fileName.charAt(len-1))=='/' || ch=='\\' || //in the case of a directory
-             ch=='.' ) //in the case of . or ..
-        return "";
-    int dotInd = fileName.lastIndexOf('.'),
-        sepInd = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'));
-    if( dotInd<=sepInd )
-        return "";
-    else
-        return fileName.substring(dotInd+1).toLowerCase();
-  }
-
-  /**
-   * Is the document ending with .ott?
-   *
-   * @return True if the document has an URL ending with .ott. This means that the
-   *         document is a template.
-   */
-  public synchronized boolean hasOtt()
-  {
-    return doc.getURL() != null && !doc.getURL().isEmpty() && getExtension(doc.getURL()).equals("ott");
-  }
-
-  /**
    * Has the document a form description with a form GUI?
    *
    * @return True if the document has a form description with a defined form GUI, false otherwise.
@@ -773,11 +725,9 @@ public class TextDocumentModel
     if ("normalTemplate".equalsIgnoreCase(typeStr))
     {
       isTemplate = true;
-      isTemplateTemplate = false;
     } else if ("templateTemplate".equalsIgnoreCase(typeStr))
     {
       isTemplate = false;
-      isTemplateTemplate = true;
     } else if ("formDocument".equalsIgnoreCase(typeStr))
     {
       isFormDocument = true;
