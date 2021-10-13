@@ -33,6 +33,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
