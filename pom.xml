@@ -3,7 +3,7 @@
 
   <groupId>de.muenchen</groupId>
   <artifactId>wollmux-parent</artifactId>
-  <version>18.2.7</version>
+  <version>18.2.8-SNAPSHOT</version>
   <name>WollMux Parent</name>
   <packaging>pom</packaging>
 
@@ -28,7 +28,7 @@
 
   <scm>
     <developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
-    <tag>RELEASE_18.2.7</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
