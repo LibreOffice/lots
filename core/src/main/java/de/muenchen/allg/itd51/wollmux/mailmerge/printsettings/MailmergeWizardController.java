@@ -216,8 +216,8 @@ public class MailmergeWizardController implements XWizardController
     {
       try
       {
-        MailMergeRunner runner = new MailMergeRunner(textDocumentController, model, settings);
-        runner.run();
+	new Thread(new MailMergeRunner(textDocumentController, model, settings))
+	    .start();
       } catch (NoTableSelectedException e)
       {
         InfoDialog.showInfoModal("Seriendruck fehlgeschlagen", e.getMessage());

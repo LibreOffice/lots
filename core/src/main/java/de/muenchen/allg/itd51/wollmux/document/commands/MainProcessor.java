@@ -127,10 +127,8 @@ class MainProcessor extends AbstractExecutor
     }
     else
     {
-      XTextCursor cursor = cmd.getTextCursor();
-      String text = cmd.getLeftSeparator() + value + cmd.getRightSeparator();
-      cmd.getAnchor().getStart().setString(text);
-      cursor.setString("");
+      cmd.setTextRangeString(cmd.getLeftSeparator() + value
+          + cmd.getRightSeparator());
     }
 
     cmd.markDone(false);

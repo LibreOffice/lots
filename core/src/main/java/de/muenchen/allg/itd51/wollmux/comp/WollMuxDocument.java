@@ -33,6 +33,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
@@ -80,7 +81,9 @@ public class WollMuxDocument implements XWollMuxDocument
   @Override
   public void setFormValue(String id, String value)
   {
-    new OnSetFormValue(doc, id, value, null).emit();
+    SyncActionListener s = new SyncActionListener();
+    new OnSetFormValue(doc, id, value, s).emit();
+    s.synchronize();
   }
 
   @Override
@@ -125,7 +128,9 @@ public class WollMuxDocument implements XWollMuxDocument
   {
     Map<String, String> m = new HashMap<>(mapDbSpalteToValue);
     mapDbSpalteToValue.clear();
-    new OnSetInsertValues(doc, m, null).emit();
+    SyncActionListener s = new SyncActionListener();
+    new OnSetInsertValues(doc, m, s).emit();
+    s.synchronize();
   }
 
   @Override
