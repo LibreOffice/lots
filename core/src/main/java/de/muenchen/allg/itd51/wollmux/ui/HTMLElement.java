@@ -78,7 +78,7 @@ public class HTMLElement
       {
         try
         {
-          fontDescriptor.Height = Short.valueOf(o.toString().replaceAll("pt", ""));
+          fontDescriptor.Height = Short.valueOf(o.toString().replaceAll("pt", "").replaceAll(" ", ""));
         } catch (NumberFormatException ex)
         {
           LOGGER.info("parsing font height failed due number format exception, trying to parse string %s", o.toString());
