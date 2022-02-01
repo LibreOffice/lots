@@ -69,8 +69,6 @@ import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
-import de.muenchen.allg.itd51.wollmux.form.model.FormValueChangedListener;
-import de.muenchen.allg.itd51.wollmux.form.model.VisibilityChangedListener;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -85,7 +83,7 @@ import de.muenchen.allg.util.UnoService;
 /**
  * Controller of the document.
  */
-public class TextDocumentController implements FormValueChangedListener, VisibilityChangedListener
+public class TextDocumentController
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TextDocumentController.class);
@@ -1828,27 +1826,10 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
     if (formModel == null)
     {
       formModel = new FormModel(getFormConfig(), getFunctionContext(), getFunctionLibrary(), getDialogLibrary(),
-          getIDToPresetValue());
+          getIDToPresetValue(), this);
       boolean modified = model.isDocumentModified();
       model.setDocumentModifiable(false);
-      formModel.notifyWithCurrentValues(new FormValueChangedListener()
-      {
-
-        @Override
-        public void valueChanged(String id, String value)
-        {
-          addFormFieldValue(id, value);
-        }
-
-        @Override
-        public void statusChanged(String id, boolean okay)
-        {
-          // nothing to do
-        }
-      });
       formModel.notifyWithCurrentVisibilites(this::setVisibleState);
-      formModel.addFormModelChangedListener(this, false);
-      formModel.addVisibilityChangedListener(this, false);
       model.setDocumentModified(modified);
       model.setDocumentModifiable(true);
     }
@@ -1949,15 +1930,12 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param value
    *          The new value of the form field.
    */
-  @Override
-  public void valueChanged(String id, String value)
-  {
+  public void setValueChanged(String id, String value) {
     if (!id.isEmpty())
     {
       new OnFormValueChanged(this, id, value).emit();
     }
   }
-
   /**
    * Set the visibility of a group.
    *
@@ -1966,15 +1944,9 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param visible
    *          True if the group should be visible, false otherwise.
    */
-  @Override
-  public void visibilityChanged(String groupId, boolean visible)
+  public void setVisibilityChanged(String groupId, boolean visible)
   {
     new OnSetVisibleState(this, groupId, visible, null).emit();
   }
-
-  @Override
-  public void statusChanged(String id, boolean okay)
-  {
-    // nothing to do here, only for form gui.
-  }
+  
 }

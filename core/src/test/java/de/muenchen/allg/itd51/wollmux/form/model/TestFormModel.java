@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
@@ -36,48 +37,40 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sun.star.text.XTextDocument;
+
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
 
 /**
  * Test für das Formular-Model.
  *
  * @author Daniel Sikeler
  */
-public class TestFormModel
+public class TestFormModel extends OfficeTest
 {
   private final String frameTitle = "libreoffice";
 
   private static ConfigThingy conf;
   private static Dialog dialog;
-  private FormValueChangedListener valueListener = new FormValueChangedListener()
-  {
-    @Override
-    public void valueChanged(String id, String value)
-    {
-    }
 
-    @Override
-    public void statusChanged(String id, boolean okay)
-    {
-    }
-  };
-  private VisibilityChangedListener visibilityListener = new VisibilityChangedListener()
-  {
-    @Override
-    public void visibilityChanged(String id, boolean visible)
-    {
-    }
-  };
-
+  private XTextDocument doc;
   private FormModel model;
 
   @BeforeAll
@@ -127,7 +120,7 @@ public class TestFormModel
   }
 
   @BeforeEach
-  public void setUp() throws FormModelException
+  public void setUp() throws FormModelException, UnoHelperException
   {
     Map<String, String> presetValues = new HashMap<>();
     presetValues.put("EmpfaengerZeile6", "zeile6");
@@ -136,13 +129,16 @@ public class TestFormModel
     DialogLibrary dialogLib = new DialogLibrary();
     dialogLib.add("Empfaengerauswahl", dialog);
     FormConfig config = new FormConfig(conf, frameTitle);
-    model = new FormModel(config, functionContext, funcLib, dialogLib, presetValues);
-    model.addFormModelChangedListener(valueListener, true);
-    model.addVisibilityChangedListener(visibilityListener, true);
+    URL file = TestFormModel.class.getResource("FormGuiTest.odt");
+    doc = UNO.XTextDocument(loadComponent(file.toString(), false, true));
+    TextDocumentController txtController = new TextDocumentController(
+        new TextDocumentModel(doc, DocumentManager.createPersistentDataContainer(doc)),
+        GlobalFunctions.getInstance().getGlobalFunctions(), GlobalFunctions.getInstance().getFunctionDialogs());
+    model = new FormModel(config, functionContext, funcLib, dialogLib, presetValues, txtController);
   }
 
   @Test
-  public void testInit() throws FormModelException
+  void testInit() throws FormModelException
   {
     assertEquals("zeile6", model.getValue("EmpfaengerZeile6"),
         "Falscher gesetzter Wert für EmpfaengerZeile6");
@@ -154,7 +150,7 @@ public class TestFormModel
   }
 
   @Test
-  public void testAutofill() throws FormModelException
+  void testAutofill() throws FormModelException
   {
     model.setDialogAutofills("Empfaengerauswahl");
     assertEquals("zeile1", model.getValue("EmpfaengerZeile1"),
@@ -174,7 +170,7 @@ public class TestFormModel
   }
 
   @Test
-  public void testPlausi() throws FormModelException
+  void testPlausi() throws FormModelException
   {
     String field = "SGVorname";
     model.setValue(field, "test");
@@ -186,7 +182,7 @@ public class TestFormModel
   }
 
   @Test
-  public void testVisibility() throws FormModelException
+  void testVisibility() throws FormModelException
   {
     assertTrue(model.getGroup("AbtretungNotOK").isVisible(), "AbtretungNotOK");
     assertFalse(model.getGroup("AbtretungOK").isVisible(), "AbtretungOK");
@@ -204,6 +200,12 @@ public class TestFormModel
     model.setValue("AbtLohn", "");
     assertFalse(model.getGroup("AbtLohn").isVisible(), "AbtLohn");
     assertFalse(c.isVisible(), "Control is visible");
+  }
+
+  @AfterEach
+  public void tearDown() throws Exception
+  {
+    UNO.XCloseable(doc).close(false);
   }
 
 }

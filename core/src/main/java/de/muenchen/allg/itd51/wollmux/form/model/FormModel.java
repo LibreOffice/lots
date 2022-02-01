@@ -36,9 +36,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.VisibilityGroupConfig;
+import de.muenchen.allg.itd51.wollmux.form.sidebar.FormSidebarController;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.Values;
 import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
@@ -83,14 +85,14 @@ public class FormModel
   private Map<String, List<Control>> mapDialogNameToListOfControlsWithDependingAutofill = new HashMap<>();
 
   /**
-   * All listeners which have to be notified if a form value or state changes.
+   * Instance of TextDocumentController.
    */
-  private List<FormValueChangedListener> listener = new ArrayList<>();
-
+  private TextDocumentController txtDocController;
+  
   /**
-   * All listener which have to be notified if a visibility has changed.
+   * Instance of FormSidebarController.
    */
-  private List<VisibilityChangedListener> vListener = new ArrayList<>(1);
+  private FormSidebarController formSidebarController;
 
   /**
    * A new form model.
@@ -108,11 +110,12 @@ public class FormModel
    */
   @SuppressWarnings("squid:S3776")
   public FormModel(FormConfig conf, Map<Object, Object> functionContext, FunctionLibrary funcLib,
-      DialogLibrary dialogLib, Map<String, String> presetValues)
+      DialogLibrary dialogLib, Map<String, String> presetValues, TextDocumentController txtDocController)
   {
     this.functionContext = functionContext;
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;
+    this.txtDocController = txtDocController;
 
     for (VisibilityGroupConfig config : conf.getVisibilities())
     {
@@ -167,7 +170,12 @@ public class FormModel
     for (VisibilityGroup group : visiblities.values())
     {
       storeDepsForVisibility(group);
-    }
+    } 
+  }
+  
+  public void setFormSidebarController(FormSidebarController formSidebarController)
+  {
+    this.formSidebarController = formSidebarController;
   }
 
   public DialogLibrary getDialogLib()
@@ -208,6 +216,27 @@ public class FormModel
   {
     return formControls.get(controlId);
   }
+  
+  /**
+   * List of Form Controls.
+   * 
+   * @return All form controls from the container.
+   */
+  public Map<String, Control> getFormControls()
+  {
+    return formControls;
+  }
+  
+  public void updateFormControlsVisibility()
+  {
+    for (Map.Entry<String, Control> entry : this.getFormControls().entrySet())
+    {
+      for (VisibilityGroup vs: entry.getValue().getGroups())
+      {
+        formSidebarController.visibilityChanged(vs.getGroupId(), vs.isVisible());
+      }
+    }
+  }
 
   /**
    * Set the value of a control and notify the listeners. All depending controls are updated. For
@@ -237,22 +266,22 @@ public class FormModel
         Control control = formControls.get(changedEntries.getKey());
         control.setValue(changedEntries.getValue());
         control.setOkay(newValues);
-        for (FormValueChangedListener l : listener)
-        {
-          l.valueChanged(control.getId(), control.getValue());
-          l.statusChanged(control.getId(), control.isOkay());
-        }
+        formSidebarController.valueChanged(control.getId(), control.getValue());
+        formSidebarController.statusChanged(control.getId(), control.isOkay());
+        txtDocController.setValueChanged(control.getId(), control.getValue());
         modifiedGroups.addAll(control.getDependingGroups());
       }
       modifiedGroups.forEach(g -> g.computeVisibility(newValues));
 
-      for (VisibilityChangedListener l : vListener)
-      {
         for (VisibilityGroup g : modifiedGroups)
         {
-          l.visibilityChanged(g.getGroupId(), g.isVisible());
+          if (txtDocController != null && formSidebarController != null) {
+            //update vis. in doc
+            txtDocController.setVisibilityChanged(g.getGroupId(), g.isVisible());
+            //update vis in form-ui
+            formSidebarController.visibilityChanged(g.getGroupId(), g.isVisible());
+          }
         }
-      }
     }
   }
 
@@ -457,23 +486,6 @@ public class FormModel
   }
 
   /**
-   * Add a {@link FormValueChangedListener} to the model.
-   *
-   * @param l
-   *          The listener.
-   * @param notify
-   *          If true the listener is notified with the current values and states.
-   */
-  public void addFormModelChangedListener(FormValueChangedListener l, boolean notify)
-  {
-    this.listener.add(l);
-    if (notify)
-    {
-      notifyWithCurrentValues(l);
-    }
-  }
-
-  /**
    * Notifies the listener with the current values and states.
    *
    * @param l
@@ -496,23 +508,6 @@ public class FormModel
         break;
       }
     });
-  }
-
-  /**
-   * Add a {@link VisibilityChangedListener} to the model.
-   *
-   * @param l
-   *          The listener.
-   * @param notify
-   *          If true the listener is notified with the current visibility states.
-   */
-  public void addVisibilityChangedListener(VisibilityChangedListener l, boolean notify)
-  {
-    this.vListener.add(l);
-    if (notify)
-    {
-      notifyWithCurrentVisibilites(l);
-    }
   }
 
   /**

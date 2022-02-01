@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +48,10 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
 import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
@@ -56,8 +59,6 @@ import de.muenchen.allg.itd51.wollmux.form.control.FormController;
 import de.muenchen.allg.itd51.wollmux.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
-import de.muenchen.allg.itd51.wollmux.form.model.FormValueChangedListener;
-import de.muenchen.allg.itd51.wollmux.form.model.VisibilityChangedListener;
 import de.muenchen.allg.itd51.wollmux.form.model.VisibilityGroup;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.util.UnoProperty;
@@ -65,7 +66,7 @@ import de.muenchen.allg.util.UnoProperty;
 /**
  * The controller of the form sidebar.
  */
-public class FormSidebarController implements VisibilityChangedListener, FormValueChangedListener
+public class FormSidebarController
 {
   private static final Logger LOGGER = LoggerFactory.getLogger(FormSidebarController.class);
 
@@ -135,7 +136,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
       processUIElementEvents = true;
     }
   };
-
+  
   /**
    * Create a new controller and the gui of the form.
    *
@@ -150,19 +151,22 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
    */
   public FormSidebarController(String resourceUrl, XComponentContext context, XWindow xWindow, XModel model)
   {
+    XTextDocument doc = UNO.XTextDocument(model);
+    
     this.formSidebarPanel = new FormSidebarPanel(context, xWindow, resourceUrl, this);
 
-    XTextDocument doc = UNO.XTextDocument(model);
     if (DocumentManager.hasTextDocumentController(doc))
     {
       isUnregistered = true;
-      onTextDocumentControllerInitialized(
-          new OnTextDocumentControllerInitialized(DocumentManager.getTextDocumentController(doc)));
+      TextDocumentController txtDocController = DocumentManager.getTextDocumentController(doc);
+      initController(txtDocController);
+      
     } else
     {
       isUnregistered = false;
       WollMuxEventHandler.getInstance().registerListener(this);
     }
+    
   }
 
   public FormSidebarPanel getFormSidebarPanel()
@@ -184,25 +188,51 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   @Subscribe
   public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
   {
-    documentController = event.getTextDocumentController();
-
+    TextDocumentController docController = event.getTextDocumentController();
+    
+    if (docController == null)
+    {
+      LOGGER.debug("DocController is null.");
+    }
+    
+    initController(docController);
+  }
+  
+  private void initController(TextDocumentController documentController)
+  {
     if (documentController == null)
     {
       LOGGER.trace("{} notify(): documentController is NULL.", this.getClass().getSimpleName());
       return;
     }
+    
+    this.documentController = documentController;
 
-    if (documentController.getModel().isFormDocument())
+    if (this.documentController.getModel().getFormDescription().count() == 1)
     {
       try
       {
-        this.formController = documentController.getFormController();
-        formConfig = documentController.getFormConfig();
-        formModel = documentController.getFormModel();
-
+        this.formController = this.documentController.getFormController();
+        formConfig = this.documentController.getFormConfig();
+        formModel = this.documentController.getFormModel();
+        formModel.setFormSidebarController(this);
         formSidebarPanel.createTabControl(formConfig, formModel);
-        formModel.addFormModelChangedListener(this, true);
-        formModel.addVisibilityChangedListener(this, true);
+        this.setFormularwerte();
+        DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
+            documentController, WollMuxFiles.isDebugMode());
+
+        try
+        {
+          dci.executeTemplateCommands();
+          dci.scanGlobalDocumentCommands();
+          dci.scanInsertFormValueCommands();
+        } catch (Exception e)
+        {
+          LOGGER.debug("", e);
+        }
+        
+        formModel.updateFormControlsVisibility();
+        
         processUIElementEvents = true;
       } catch (FormModelException e)
       {
@@ -212,6 +242,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
     {
       formSidebarPanel.createTabControl(null, null);
     }
+    
     unregisterListener();
   }
 
@@ -319,8 +350,8 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
    */
   private void setValue(String id, String value)
   {
-    LOGGER.info("FormSidebarController:setValue() id {} value {}", id, value);
-    LOGGER.info("FormSidebarController:setValue() processUIElementEvents {}", processUIElementEvents);
+    LOGGER.trace("FormSidebarController:setValue() id {} value {}", id, value);
+    LOGGER.trace("FormSidebarController:setValue() processUIElementEvents {}", processUIElementEvents);
     if (processUIElementEvents)
     {
       noProcessValueChangedEvents.add(id);
@@ -422,7 +453,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   /**
    * Sets control's text if value changed. Can be called by a dependency to another control.
    */
-  @Override
   public void valueChanged(String id, String value)
   {
     if (!noProcessValueChangedEvents.contains(id))
@@ -436,7 +466,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   /**
    * Get notifications if current textfield's value is valid. Colorize if not.
    */
-  @Override
   public void statusChanged(String id, boolean okay)
   {
     formSidebarPanel.setBackgroundColor(id, okay, formConfig.getPlausiMarkerColor().getRGB() & ~0xFF000000);
@@ -445,17 +474,35 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   /**
    * Hide / Show form controls by its new visibility changed status.
    */
-  @Override
   public void visibilityChanged(String groupId, boolean visible)
   {
     Collection<Control> controls = formModel.getControlsByGroupId(groupId);
-
+    
+    if (controls.isEmpty())
+    {
+      LOGGER.debug("visibility groups are empty");
+    }
+    
     for (Control control : controls)
     {
       String controlId = control.getId();
       formSidebarPanel.setVisible(controlId, control.getGroups().stream().allMatch(VisibilityGroup::isVisible));
     }
+    
     formSidebarPanel.paint();
   }
-
+  
+  public void setFormularwerte()
+  {
+    Map<String,String> formFieldValues = documentController.getFormFieldValues();
+    
+    processUIElementEvents = true;
+    
+    for (Map.Entry<String, String> entry: formFieldValues.entrySet())
+    {
+      valueChanged(entry.getKey(), entry.getValue());
+    }
+    
+    processUIElementEvents = false;
+  }
 }

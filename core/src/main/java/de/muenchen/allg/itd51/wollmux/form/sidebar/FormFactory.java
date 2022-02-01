@@ -50,7 +50,7 @@ public class FormFactory extends AbstractSidebarFactory
   {
     super(SERVICE_NAME, context);
   }
-
+  
   @Override
   public XUIElement createUIElement(String resourceUrl, PropertyValue[] arguments)
       throws NoSuchElementException
@@ -74,7 +74,6 @@ public class FormFactory extends AbstractSidebarFactory
       }
     }
 
-    FormSidebarController formSidebarController = new FormSidebarController(resourceUrl, context, parentWindow, model);
-    return formSidebarController.getFormSidebarPanel();
+    return new FormSidebarController(resourceUrl, context, parentWindow, model).getFormSidebarPanel();
   }
 }
