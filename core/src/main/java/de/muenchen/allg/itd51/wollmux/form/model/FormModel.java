@@ -107,6 +107,8 @@ public class FormModel
    *          The dialog library.
    * @param presetValues
    *          The values already set in the document.
+   * @param txtDocController
+   *          Instance of TextDocumentController.
    */
   @SuppressWarnings("squid:S3776")
   public FormModel(FormConfig conf, Map<Object, Object> functionContext, FunctionLibrary funcLib,
@@ -147,7 +149,12 @@ public class FormModel
     this.initControls(presetValues);
   }
   
-  public void initControls(Map<String, String> presetValues)
+  /**
+   * Init Controls autofills, trafos and visibilites.
+   * 
+   * @param presetValues
+   */
+  private void initControls(Map<String, String> presetValues)
   {
     // Initialize controls with preset values or AUTOFILL function
     SimpleMap values = idToValue();
@@ -232,6 +239,9 @@ public class FormModel
     return formControls;
   }
   
+  /**
+   * Update visibilites in form ui.
+   */
   public void updateFormControlsVisibility()
   {
     for (Map.Entry<String, Control> entry : this.getFormControls().entrySet())
@@ -239,7 +249,7 @@ public class FormModel
       for (VisibilityGroup vs: entry.getValue().getGroups())
       {
         //notifiy form gui ui
-        formSidebarController.visibilityChanged(vs.getGroupId(), vs.isVisible());
+        formSidebarController.visibilityChanged(vs.getGroupId());
       }
     }
   }
@@ -285,7 +295,7 @@ public class FormModel
             //update vis. in doc
             txtDocController.setVisibilityChanged(g.getGroupId(), g.isVisible());
             //update vis in form-ui
-            formSidebarController.visibilityChanged(g.getGroupId(), g.isVisible());
+            formSidebarController.visibilityChanged(g.getGroupId());
           }
         }
     }

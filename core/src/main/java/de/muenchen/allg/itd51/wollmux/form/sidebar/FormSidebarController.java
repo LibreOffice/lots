@@ -467,6 +467,11 @@ public class FormSidebarController
 
   /**
    * Sets control's text if value changed. Can be called by a dependency to another control.
+   * 
+   * @param id
+   *        Control Id.
+   * @param value
+   *        value to set.       
    */
   public void setFormUiValue(String id, String value)
   {
@@ -480,6 +485,11 @@ public class FormSidebarController
 
   /**
    * Get notifications if current textfield's value is valid. Colorize if not.
+   * 
+   * @param id
+   *        Control Id.
+   * @param okay
+   *        set okay.
    */
   public void setControlBackground(String id, boolean okay)
   {
@@ -488,8 +498,11 @@ public class FormSidebarController
 
   /**
    * Hide / Show form controls by its new visibility changed status.
+   * 
+   * @param groupId
+   *        The group Id which visibility should be changed.
    */
-  public void visibilityChanged(String groupId, boolean visible)
+  public void visibilityChanged(String groupId)
   {
     Collection<Control> controls = formModel.getControlsByGroupId(groupId);
     
@@ -507,6 +520,9 @@ public class FormSidebarController
     formSidebarPanel.paint();
   }
   
+  /**
+   * Sets preset Values (Formularwerte) in form ui.
+   */
   public void setFormularwerte()
   {
     Map<String,String> formFieldValues = documentController.getFormFieldValues();
@@ -521,6 +537,11 @@ public class FormSidebarController
     processUIElementEvents = false;
   }
   
+  /**
+   * updates and sets all form control values in form ui.
+   * 
+   * @param formControls
+   */
   public void updateFormUiValues(Map<String,Control> formControls)
   {
     for (String control : formControls.keySet())
