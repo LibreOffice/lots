@@ -1089,7 +1089,7 @@ public class TextDocumentController
    * @param visible
    *          If true shows the elements, otherwise hides the elements.
    */
-  public synchronized void setVisibleState(String groupId, boolean visible)
+  public void setVisibleState(String groupId, boolean visible)
   {
     try
     {

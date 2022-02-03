@@ -103,7 +103,7 @@ public class DocumentManager
    * Fügt compo den gemanageten Objekten hinzu, wobei die für Textdokumente
    * relevanten Informationen hinterlegt werden.
    */
-  public synchronized void addTextDocument(XTextDocument compo)
+  public void addTextDocument(XTextDocument compo)
   {
     TextDocumentInfo docInfo = new TextDocumentInfo(compo);
     info.put(new HashableComponent(compo), docInfo);

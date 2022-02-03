@@ -544,7 +544,22 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
    */
   public void setText(String id, String text)
   {
+    Pair<XControl, XControl> controlPair = controls.get(id);
+    
+    if (controlPair == null)
+    {
+      LOGGER.debug("controlPair ist null. id: {}", id);
+      return;
+    }
+    
     XControl control = controls.get(id).getRight();
+    
+    if (control == null)
+    {
+      LOGGER.debug("control ist null. id: {}", id);
+      return;
+    }
+    
     if (UNO.XTextComponent(control) != null)
     {
       UNO.XTextComponent(control).setText(text);

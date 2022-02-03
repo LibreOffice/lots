@@ -144,6 +144,11 @@ public class FormModel
       storeDepsForFormField(control);
     }
 
+    this.initControls(presetValues);
+  }
+  
+  public void initControls(Map<String, String> presetValues)
+  {
     // Initialize controls with preset values or AUTOFILL function
     SimpleMap values = idToValue();
     for (Control control : formControls.values())
@@ -233,6 +238,7 @@ public class FormModel
     {
       for (VisibilityGroup vs: entry.getValue().getGroups())
       {
+        //notifiy form gui ui
         formSidebarController.visibilityChanged(vs.getGroupId(), vs.isVisible());
       }
     }
@@ -266,8 +272,8 @@ public class FormModel
         Control control = formControls.get(changedEntries.getKey());
         control.setValue(changedEntries.getValue());
         control.setOkay(newValues);
-        formSidebarController.valueChanged(control.getId(), control.getValue());
-        formSidebarController.statusChanged(control.getId(), control.isOkay());
+        formSidebarController.setFormUiValue(control.getId(), control.getValue());
+        formSidebarController.setControlBackground(control.getId(), control.isOkay());
         txtDocController.setValueChanged(control.getId(), control.getValue());
         modifiedGroups.addAll(control.getDependingGroups());
       }

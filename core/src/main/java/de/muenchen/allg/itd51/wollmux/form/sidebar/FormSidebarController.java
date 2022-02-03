@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +50,10 @@ import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.db.ThingyDatasource;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.PersistentDataContainer.DataID;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
@@ -60,6 +63,7 @@ import de.muenchen.allg.itd51.wollmux.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.form.model.VisibilityGroup;
+import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.util.UnoProperty;
 
@@ -217,21 +221,14 @@ public class FormSidebarController
         formModel = this.documentController.getFormModel();
         formModel.setFormSidebarController(this);
         formSidebarPanel.createTabControl(formConfig, formModel);
-        this.setFormularwerte();
-        DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
-            documentController, WollMuxFiles.isDebugMode());
-
-        try
-        {
-          dci.executeTemplateCommands();
-          dci.scanGlobalDocumentCommands();
-          dci.scanInsertFormValueCommands();
-        } catch (Exception e)
-        {
-          LOGGER.debug("", e);
-        }
         
+        this.scanExecCommands();
+        this.setFormularwerte();
+
         formModel.updateFormControlsVisibility();
+       
+        Map<String,Control> formFieldValues = formModel.getFormControls();
+        this.updateFormUiValues(formFieldValues);
         
         processUIElementEvents = true;
       } catch (FormModelException e)
@@ -244,6 +241,22 @@ public class FormSidebarController
     }
     
     unregisterListener();
+  }
+  
+  private void scanExecCommands()
+  {
+    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
+        documentController, WollMuxFiles.isDebugMode());
+
+    try
+    {
+      dci.executeTemplateCommands();
+      dci.scanGlobalDocumentCommands();
+      dci.scanInsertFormValueCommands();
+    } catch (Exception e)
+    {
+      LOGGER.debug("", e);
+    }
   }
 
   /**
@@ -272,7 +285,7 @@ public class FormSidebarController
       String id = (String) UnoProperty.getProperty(checkBox.getModel(), UnoProperty.DEFAULT_CONTROL);
       short state = (short) UnoProperty.getProperty(checkBox.getModel(), UnoProperty.STATE);
       String stateToString = state == 0 ? "false" : "true";
-      setValue(id, stateToString);
+      setDocFormModelValue(id, stateToString);
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
@@ -292,7 +305,7 @@ public class FormSidebarController
       XControl listBox = UNO.XControl(event.Source);
       String id = (String) UnoProperty.getProperty(listBox.getModel(), UnoProperty.DEFAULT_CONTROL);
       String text = UNO.XListBox(listBox).getSelectedItem();
-      setValue(id, text);
+      setDocFormModelValue(id, text);
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
@@ -312,7 +325,7 @@ public class FormSidebarController
       XControl comboBox = UNO.XControl(event.Source);
       String id = (String) UnoProperty.getProperty(comboBox.getModel(), UnoProperty.DEFAULT_CONTROL);
       String text = (String) UnoProperty.getProperty(comboBox.getModel(), UnoProperty.TEXT);
-      setValue(id, text);
+      setDocFormModelValue(id, text);
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
@@ -332,7 +345,7 @@ public class FormSidebarController
       XControl txtField = UNO.XControl(event.Source);
       String id = (String) UnoProperty.getProperty(txtField.getModel(), UnoProperty.DEFAULT_CONTROL);
       String text = (String) UnoProperty.getProperty(txtField.getModel(), UnoProperty.TEXT);
-      setValue(id, text);
+      setDocFormModelValue(id, text);
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
@@ -348,15 +361,17 @@ public class FormSidebarController
    * @param value
    *          THe new value of the field.
    */
-  private void setValue(String id, String value)
+  private void setDocFormModelValue(String id, String value)
   {
     LOGGER.trace("FormSidebarController:setValue() id {} value {}", id, value);
     LOGGER.trace("FormSidebarController:setValue() processUIElementEvents {}", processUIElementEvents);
     if (processUIElementEvents)
     {
+      processUIElementEvents = false;
       noProcessValueChangedEvents.add(id);
       formController.setValue(id, value, null);
       noProcessValueChangedEvents.remove(id);
+      processUIElementEvents = true;
     }
   }
 
@@ -453,7 +468,7 @@ public class FormSidebarController
   /**
    * Sets control's text if value changed. Can be called by a dependency to another control.
    */
-  public void valueChanged(String id, String value)
+  public void setFormUiValue(String id, String value)
   {
     if (!noProcessValueChangedEvents.contains(id))
     {
@@ -466,7 +481,7 @@ public class FormSidebarController
   /**
    * Get notifications if current textfield's value is valid. Colorize if not.
    */
-  public void statusChanged(String id, boolean okay)
+  public void setControlBackground(String id, boolean okay)
   {
     formSidebarPanel.setBackgroundColor(id, okay, formConfig.getPlausiMarkerColor().getRGB() & ~0xFF000000);
   }
@@ -500,9 +515,18 @@ public class FormSidebarController
     
     for (Map.Entry<String, String> entry: formFieldValues.entrySet())
     {
-      valueChanged(entry.getKey(), entry.getValue());
+      setFormUiValue(entry.getKey(), entry.getValue());
     }
     
     processUIElementEvents = false;
+  }
+  
+  public void updateFormUiValues(Map<String,Control> formControls)
+  {
+    for (String control : formControls.keySet())
+    {
+      Control ctrl = formModel.getControl(control);
+      setFormUiValue(ctrl.getId(), ctrl.getValue());
+    }
   }
 }
