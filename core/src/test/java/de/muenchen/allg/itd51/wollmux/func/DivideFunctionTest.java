@@ -45,26 +45,26 @@ public class DivideFunctionTest
     Function divisor = new StringLiteralFunction("30");
     Function f = new DivideFunction(divident, divisor, 1, 3);
     assertEquals(0, f.parameters().length);
-    assertEquals(nf.format(0.333), f.getString(null));
+    assertEquals(nf.format(0.333), f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new DivideFunction(divident, null, 1, 2);
-    assertEquals(nf.format(10.0), f.getString(null));
+    assertEquals(nf.format(10.0), f.getResult(null));
 
     f = new DivideFunction(divident, new StringLiteralFunction(FunctionLibrary.ERROR), 1, 2);
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
 
     f = new DivideFunction(new StringLiteralFunction(FunctionLibrary.ERROR), divisor, 1, 2);
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
 
     f = new DivideFunction(divident, new StringLiteralFunction("0"), 1, 2);
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
 
     f = new DivideFunction(new StringLiteralFunction("0"), divisor, 0, 2);
-    assertEquals("0", f.getString(null));
+    assertEquals("0", f.getResult(null));
   }
 
 }

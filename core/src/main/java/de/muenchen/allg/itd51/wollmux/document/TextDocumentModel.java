@@ -175,7 +175,7 @@ public class TextDocumentModel
   /**
    * Cache of fragment URLS of an openTemplate command.
    */
-  private volatile String[] fragUrls;
+  private String[] fragUrls;
 
   /**
    * True if this document is a template or should be treated as template.
@@ -197,12 +197,12 @@ public class TextDocumentModel
   /**
    * The print functions specified for the document.
    */
-  private volatile Set<String> printFunctions;
+  private Set<String> printFunctions;
 
   /**
    * The form description or null if not yet read.
    */
-  private volatile ConfigThingy formularConf;
+  private ConfigThingy formularConf;
 
   /**
    * Mapping from field id to form value.
@@ -217,7 +217,7 @@ public class TextDocumentModel
   /**
    * The document commands.
    */
-  private volatile DocumentCommands documentCommands;
+  private DocumentCommands documentCommands;
 
   /**
    * Mapping from visibility group names to their visibility state.
@@ -232,7 +232,7 @@ public class TextDocumentModel
   /**
    * Null or the configuration of a mail merge.
    */
-  private volatile ConfigThingy mailmergeConf;
+  private ConfigThingy mailmergeConf;
 
   /**
    * Has the version info been updated?
@@ -390,7 +390,7 @@ public class TextDocumentModel
     return documentCommands;
   }
 
-  public synchronized void setIDToFormFields(Map<String, List<FormField>> idToFormFields)
+  public void setIDToFormFields(Map<String, List<FormField>> idToFormFields)
   {
     this.idToFormFields = idToFormFields;
   }
@@ -551,7 +551,7 @@ public class TextDocumentModel
     String data = new String(Files.readAllBytes(file.toPath()));
     parseFormValues(data);
   }
-
+  
   /**
    * Parses the string as {@link ConfigThingy} of the form "WM(FormularWerte(...))" and adds the
    * values to {@link #formFieldValues}.
@@ -559,7 +559,7 @@ public class TextDocumentModel
    * @param werteStr
    *          The string defining the form values. If null nothing is done.
    */
-  private void parseFormValues(String werteStr)
+  public void parseFormValues(String werteStr)
   {
     if (werteStr == null)
     {
@@ -695,7 +695,7 @@ public class TextDocumentModel
    *
    * @return True if the document has a form description with a defined form GUI, false otherwise.
    */
-  public synchronized boolean hasFormGUIWindow()
+  public boolean hasFormGUIWindow()
   {
     try
     {
@@ -842,7 +842,7 @@ public class TextDocumentModel
    *
    * @return A set of field IDs.
    */
-  public synchronized Set<String> getAllFieldIDs()
+  public Set<String> getAllFieldIDs()
   {
     HashSet<String> ids = new HashSet<>();
     ids.addAll(idToFormFields.keySet());
@@ -908,7 +908,7 @@ public class TextDocumentModel
    *
    * @return The form description.
    */
-  public synchronized ConfigThingy getFormDescription()
+  public ConfigThingy getFormDescription()
   {
     if (formularConf == null)
     {
@@ -984,7 +984,7 @@ public class TextDocumentModel
    * @param fieldId
    *          The ID of the field to focus.
    */
-  public synchronized void focusFormField(String fieldId)
+  public void focusFormField(String fieldId)
   {
     FormField field;
     List<FormField> formFields = getIdToTextFieldFormFields().get(fieldId);
@@ -1512,7 +1512,7 @@ public class TextDocumentModel
    *          Don't collect information about the fields with an ID in this set.
    * @return Array of information per field ordered alphabetically.
    */
-  public synchronized ReferencedFieldID[] getReferencedFieldIDsThatAreNotInSchema(Set<String> blacklist)
+  public ReferencedFieldID[] getReferencedFieldIDsThatAreNotInSchema(Set<String> blacklist)
   {
     ArrayList<ReferencedFieldID> list = new ArrayList<>();
 

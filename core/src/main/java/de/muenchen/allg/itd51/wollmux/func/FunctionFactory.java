@@ -468,7 +468,7 @@ public class FunctionFactory
     reFun = parse(iter.next(), funcLib, dialogLib, context);
     repFun = parse(iter.next(), funcLib, dialogLib, context);
 
-    String regex = reFun.getString(new Values.None());
+    String regex = reFun.getResult(new Values.None());
     Pattern p;
     try
     {
@@ -515,7 +515,7 @@ public class FunctionFactory
         "Index-Argument von %1 muss \"<NichtNegativeGanzeZahl>\" sein",
         conf.getName()));
 
-    String regex = reFun.getString(new Values.None());
+    String regex = reFun.getResult(new Values.None());
     Pattern p;
     try
     {
@@ -546,7 +546,7 @@ public class FunctionFactory
           L.m("Funktion vom Typ \"MATCH\" erfordert genau 2 Parameter, nicht %1", conf.count()), x);
     }
 
-    String regex = reFun.getString(new Values.None());
+    String regex = reFun.getResult(new Values.None());
     Pattern p;
     try
     {
@@ -575,7 +575,7 @@ public class FunctionFactory
           conf.count()), e);
     }
 
-    return new ValueFunction(valueNameFun.getString(new Values.None()));
+    return new ValueFunction(valueNameFun.getResult(new Values.None()));
   }
 
   private static Function parseDIVIDE(ConfigThingy conf, FunctionLibrary funcLib,

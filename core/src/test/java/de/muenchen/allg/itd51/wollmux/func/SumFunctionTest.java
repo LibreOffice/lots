@@ -47,14 +47,14 @@ public class SumFunctionTest
 
     Function f = new SumFunction(new ConfigThingy("SUM", "\"1\" \"2\""), funcLib, dialogLib, context);
     assertEquals(0, f.parameters().length);
-    assertEquals("3", f.getString(null));
+    assertEquals("3", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new SumFunction(new ConfigThingy("SUM", "\"test\" \"2\""), funcLib, dialogLib, context);
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
   }
 
 }

@@ -42,22 +42,22 @@ public class SplitFunctionTest
     Pattern p = Pattern.compile("b");
     Function f = new SplitFunction(input, p, 0);
     assertEquals(0, f.parameters().length);
-    assertEquals("a", f.getString(null));
+    assertEquals("a", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new SplitFunction(new StringLiteralFunction(FunctionLibrary.ERROR), p, 0);
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
 
     f = new SplitFunction(input, p, -1);
     assertEquals(0, f.parameters().length);
-    assertEquals("", f.getString(null));
+    assertEquals("", f.getResult(null));
 
     f = new SplitFunction(input, p, 10);
     assertEquals(0, f.parameters().length);
-    assertEquals("", f.getString(null));
+    assertEquals("", f.getResult(null));
   }
 
 }

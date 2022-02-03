@@ -73,27 +73,24 @@ public class OnProcessTextDocument implements WollMuxEventListener
       // configuration for Fenster isn't mandatory
     }
 
-    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
-        documentController, WollMuxFiles.isDebugMode());
+    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController, WollMuxFiles.isDebugMode());
 
     try
     {
       // scan global document commands
       dci.scanGlobalDocumentCommands();
 
-      int actions = documentController.evaluateDocumentActions(GlobalFunctions
-          .getInstance().getDocumentActionFunctions().iterator());
+      int actions = documentController
+          .evaluateDocumentActions(GlobalFunctions.getInstance().getDocumentActionFunctions().iterator());
 
       // if it is a template execute the commands
-      if ((actions < 0 && documentController.getModel().isTemplate())
-          || (actions == Integer.MAX_VALUE))
+      if ((actions < 0 && documentController.getModel().isTemplate()) || (actions == Integer.MAX_VALUE))
       {
         dci.executeTemplateCommands();
 
         // there can be new commands now
         dci.scanGlobalDocumentCommands();
       }
-      dci.scanInsertFormValueCommands();
 
     } catch (java.lang.Exception e)
     {

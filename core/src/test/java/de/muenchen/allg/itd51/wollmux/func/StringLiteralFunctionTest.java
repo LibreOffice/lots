@@ -39,7 +39,7 @@ public class StringLiteralFunctionTest
   {
     Function f = new StringLiteralFunction("test");
     assertEquals(0, f.parameters().length);
-    assertEquals("test", f.getString(null));
+    assertEquals("test", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);

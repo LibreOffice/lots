@@ -89,7 +89,7 @@ public class OnActivateSidebar extends WollMuxEvent
     try
     {
       XDeck deck = UnoSidebar.getDeckByName(deckName, controller);
-      if (deck != null)
+      if (deck != null && !deck.isActive())
       {
         deck.activate(true);
       }

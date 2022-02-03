@@ -43,17 +43,17 @@ public class ReplaceFunctionTest
     Function replace = new StringLiteralFunction("def");
     Function f = new ReplaceFunction(input, p, replace);
     assertEquals(0, f.parameters().length);
-    assertEquals("def", f.getString(null));
+    assertEquals("def", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new ReplaceFunction(new StringLiteralFunction(FunctionLibrary.ERROR), p, replace);
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
 
     f = new ReplaceFunction(input, p, new StringLiteralFunction(FunctionLibrary.ERROR));
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
   }
 
 }

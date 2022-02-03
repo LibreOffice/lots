@@ -54,21 +54,21 @@ public class BindFunctionTest
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
     assertFalse(f.getBoolean(null));
-    assertEquals("value", f.getString(null));
+    assertEquals("value", f.getResult(null));
 
     f = new BindFunction(new ValueFunction("test"), new ConfigThingy("", ""), funcLib, dialogLib, context);
     Values.SimpleMap values = new Values.SimpleMap();
     values.put("test", "value2");
     assertEquals(1, f.parameters().length);
     assertFalse(f.getBoolean(values));
-    assertEquals("value2", f.getString(values));
+    assertEquals("value2", f.getResult(values));
 
     f = new BindFunction(new ValueFunction("test"), new ConfigThingy("", "SET(\"test\" VALUE(\"test2\"))"), funcLib,
         dialogLib, context);
     values = new Values.SimpleMap();
     values.put("test2", FunctionLibrary.ERROR);
     assertFalse(f.getBoolean(values));
-    assertEquals(FunctionLibrary.ERROR, f.getString(values));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(values));
 
     assertThrows(ConfigurationErrorException.class, () -> new BindFunction(new ValueFunction("test"),
         new ConfigThingy("", "SET(\"test\" \"value\") SET(\"test\" \"value\")"), funcLib, dialogLib, context));

@@ -43,14 +43,14 @@ public class CatFunction extends MultiFunction
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     Iterator<Function> iter = subFunction.iterator();
     StringBuilder res = new StringBuilder();
     while (iter.hasNext())
     {
       Function func = iter.next();
-      String str = func.getString(parameters);
+      String str = func.getResult(parameters);
       if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       res.append(str);
     }

@@ -43,13 +43,13 @@ public class OrFunction extends MultiFunction
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     Iterator<Function> iter = subFunction.iterator();
     while (iter.hasNext())
     {
       Function func = iter.next();
-      String str = func.getString(parameters);
+      String str = func.getResult(parameters);
       if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       if (str.equalsIgnoreCase("true")) return "true";
     }

@@ -128,7 +128,7 @@ public abstract class MultiFunction implements Function
   @Override
   public boolean getBoolean(Values parameters)
   {
-    return getString(parameters).equalsIgnoreCase("true");
+    return getResult(parameters).equalsIgnoreCase("true");
   }
 
   @Override

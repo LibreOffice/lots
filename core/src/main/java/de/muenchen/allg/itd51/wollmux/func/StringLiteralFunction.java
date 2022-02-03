@@ -51,7 +51,7 @@ public class StringLiteralFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     return literal;
   }

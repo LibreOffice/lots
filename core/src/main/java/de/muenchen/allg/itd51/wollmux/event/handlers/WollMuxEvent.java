@@ -91,6 +91,7 @@ public abstract class WollMuxEvent
      */
     if (t.getCause() instanceof RuntimeException)
     {
+      LOGGER.error("", t);
       return;
     }
 

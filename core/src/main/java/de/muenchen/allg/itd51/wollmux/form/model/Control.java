@@ -282,7 +282,7 @@ public class Control
   public String computeValue(SimpleMap values)
   {
     if (autofill.isPresent())
-      return autofill.get().getString(values);
+      return autofill.get().getResult(values);
     else if (type == UIElementType.COMBOBOX && !options.isEmpty())
       return options.get(0);
     else

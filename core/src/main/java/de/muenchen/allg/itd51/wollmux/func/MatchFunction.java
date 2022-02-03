@@ -38,9 +38,9 @@ public class MatchFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
-    String str = input.getString(parameters);
+    String str = input.getResult(parameters);
     if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
     if (pattern.matcher(str).matches()) return "true";
     return "false";
@@ -61,6 +61,6 @@ public class MatchFunction implements Function
   @Override
   public boolean getBoolean(Values parameters)
   {
-    return getString(parameters).equalsIgnoreCase("true");
+    return getResult(parameters).equalsIgnoreCase("true");
   }
 }

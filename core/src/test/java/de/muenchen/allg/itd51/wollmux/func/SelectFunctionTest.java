@@ -51,7 +51,7 @@ public class SelectFunctionTest
         new ConfigThingy("SELECT", "IF(\"true\" THEN \"1\") IF(\"true\" THEN \"2\") ELSE \"3\" ONERROR \"error\""),
         funcLib, dialogLib, context);
     assertEquals(0, f.parameters().length);
-    assertEquals("1", f.getString(null));
+    assertEquals("1", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
@@ -60,22 +60,22 @@ public class SelectFunctionTest
     f = new SelectFunction(
         new ConfigThingy("SELECT", "IF(\"false\" THEN \"1\") IF(\"true\" THEN \"2\") ELSE \"3\" ONERROR \"error\""),
         funcLib, dialogLib, context);
-    assertEquals("2", f.getString(null));
+    assertEquals("2", f.getResult(null));
 
     f = new SelectFunction(
         new ConfigThingy("SELECT", "IF(\"false\" THEN \"1\") IF(\"false\" THEN \"2\") ELSE \"3\" ONERROR \"error\""),
         funcLib, dialogLib, context);
-    assertEquals("3", f.getString(null));
+    assertEquals("3", f.getResult(null));
 
     f = new SelectFunction(List.of(new StringLiteralFunction(FunctionLibrary.ERROR)));
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
 
     SelectFunction sf = new SelectFunction(List.of(new StringLiteralFunction(FunctionLibrary.ERROR)));
     sf.handleParam(new ConfigThingy("ONERROR", "\"error\""), funcLib, dialogLib, context);
-    assertEquals("error", sf.getString(null));
+    assertEquals("error", sf.getResult(null));
 
     f = new SelectFunction(Collections.emptyList());
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
   }
 
 }

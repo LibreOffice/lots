@@ -41,14 +41,14 @@ public class MatchFunctionTest
     Pattern p = Pattern.compile("abc");
     Function f = new MatchFunction(input, p);
     assertEquals(0, f.parameters().length);
-    assertEquals("true", f.getString(null));
+    assertEquals("true", f.getResult(null));
     assertTrue(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new MatchFunction(new StringLiteralFunction(FunctionLibrary.ERROR), p);
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
   }
 
 }

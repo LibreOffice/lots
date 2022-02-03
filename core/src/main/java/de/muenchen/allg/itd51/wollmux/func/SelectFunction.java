@@ -75,14 +75,14 @@ public class SelectFunction extends MultiFunction
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     Iterator<Function> iter = subFunction.iterator();
     String result = FunctionLibrary.ERROR;
     while (iter.hasNext())
     {
       Function func = iter.next();
-      String str = func.getString(parameters);
+      String str = func.getResult(parameters);
       if (str != FunctionLibrary.ERROR)
       {
         result = str;
@@ -90,7 +90,7 @@ public class SelectFunction extends MultiFunction
       }
       else if (onErrorFunction != null)
       {
-        return onErrorFunction.getString(parameters);
+        return onErrorFunction.getResult(parameters);
       }
     }
     return result;

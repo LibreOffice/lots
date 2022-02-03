@@ -111,10 +111,10 @@ public class BindFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     TranslatedValues trans = new TranslatedValues(parameters);
-    String res = func.getString(trans);
+    String res = func.getResult(trans);
     if (trans.hasError) return FunctionLibrary.ERROR;
     return res;
   }
@@ -165,7 +165,7 @@ public class BindFunction implements Function
       Function setFunc = mapParamNameToSetFunction.get(id);
       if (setFunc != null)
       {
-        String res = setFunc.getString(values);
+        String res = setFunc.getResult(values);
         if (res == FunctionLibrary.ERROR)
         {
           hasError = true;
@@ -182,7 +182,7 @@ public class BindFunction implements Function
       Function setFunc = mapParamNameToSetFunction.get(id);
       if (setFunc != null)
       {
-        String res = setFunc.getString(values);
+        String res = setFunc.getResult(values);
         if (res == FunctionLibrary.ERROR)
         {
           hasError = true;

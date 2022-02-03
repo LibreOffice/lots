@@ -46,7 +46,7 @@ public class ValueFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     if (!parameters.hasValue(params[0])) return FunctionLibrary.ERROR;
     return parameters.getString(params[0]);
@@ -55,6 +55,6 @@ public class ValueFunction implements Function
   @Override
   public boolean getBoolean(Values parameters)
   {
-    return getString(parameters).equalsIgnoreCase("true");
+    return getResult(parameters).equalsIgnoreCase("true");
   }
 }

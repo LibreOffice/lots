@@ -42,17 +42,17 @@ public class StrCmpFunction extends MultiFunction
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     Iterator<Function> iter = subFunction.iterator();
     Function func = iter.next();
-    String compare = func.getString(parameters);
+    String compare = func.getResult(parameters);
     if (compare == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
     int prevCompare = 0;
     while (iter.hasNext())
     {
       func = iter.next();
-      String str = func.getString(parameters);
+      String str = func.getResult(parameters);
       if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       int res = Integer.signum(compare.compareTo(str));
       if (res * prevCompare < 0) return "0";

@@ -36,9 +36,9 @@ public class LengthFunction extends CatFunction
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
-    String res = super.getString(parameters);
+    String res = super.getResult(parameters);
     if (res == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
     return "" + res.length();
   }

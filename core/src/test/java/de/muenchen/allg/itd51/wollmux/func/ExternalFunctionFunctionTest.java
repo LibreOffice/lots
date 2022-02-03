@@ -42,7 +42,7 @@ public class ExternalFunctionFunctionTest
     Function f = new ExternalFunctionFunction(new ConfigThingy("",
         "URL \"java:de.muenchen.allg.itd51.wollmux.func.ExternalFunctionFunctionTest.extMethod\""));
     assertEquals(0, f.parameters().length);
-    assertEquals("extMethod", f.getString(null));
+    assertEquals("extMethod", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
@@ -50,7 +50,7 @@ public class ExternalFunctionFunctionTest
 
     f = new ExternalFunctionFunction(new ConfigThingy("",
         "URL \"java:de.muenchen.allg.itd51.wollmux.func.ExternalFunctionFunctionTest.extMethod2\""));
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
   }
 
   public static String extMethod()

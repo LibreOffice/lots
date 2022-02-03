@@ -125,7 +125,7 @@ public class NumberCompareFunction extends NumberFunction
     prevCompare = 0;
     if (marginFun != null)
     {
-      String str = marginFun.getString(parameters);
+      String str = marginFun.getResult(parameters);
       if (str == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
       try
       {

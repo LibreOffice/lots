@@ -49,7 +49,7 @@ public class IsErrorFunctionTest
 
     Function f = new IsErrorFunction(true, new ConfigThingy("", "\"test\""), funcLib, dialogLib, context);
     assertEquals(0, f.parameters().length);
-    assertEquals("false", f.getString(null));
+    assertEquals("false", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
@@ -58,7 +58,7 @@ public class IsErrorFunctionTest
     f = new IsErrorFunction(false, new ConfigThingy("", String.format("\"%s\"", FunctionLibrary.ERROR)), funcLib,
         dialogLib, context);
     assertEquals(0, f.parameters().length);
-    assertEquals("true", f.getString(null));
+    assertEquals("true", f.getResult(null));
     assertTrue(f.getBoolean(null));
 
     assertThrows(ConfigurationErrorException.class,
