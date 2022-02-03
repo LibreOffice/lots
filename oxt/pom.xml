@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.muenchen</groupId>
     <artifactId>wollmux-parent</artifactId>
-    <version>18.2.9</version>
+    <version>18.2.10-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
