@@ -84,7 +84,7 @@ public class ColumnTransformerTest
       }
       
       @Override
-      public String getString(Values parameters)
+      public String getResult(Values parameters)
       {
         assertFalse(parameters.hasValue("unknwon"));
         assertTrue(parameters.hasValue("column"));

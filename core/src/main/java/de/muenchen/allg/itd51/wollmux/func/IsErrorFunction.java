@@ -64,9 +64,9 @@ public class IsErrorFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
-    String str = func.getString(parameters);
+    String str = func.getResult(parameters);
     if (isError(str))
       return "true";
     else
@@ -76,7 +76,7 @@ public class IsErrorFunction implements Function
   @Override
   public boolean getBoolean(Values parameters)
   {
-    String str = func.getString(parameters);
+    String str = func.getResult(parameters);
     return isError(str);
   }
 

@@ -43,18 +43,18 @@ public class IfFunctionTest
     Function el = new StringLiteralFunction("else");
     Function f = new IfFunction(cond1, then, el);
     assertEquals(0, f.parameters().length);
-    assertEquals("then", f.getString(null));
+    assertEquals("then", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new IfFunction(cond2, then, el);
-    assertEquals("else", f.getString(null));
+    assertEquals("else", f.getResult(null));
     assertFalse(f.getBoolean(null));
 
     f = new IfFunction(new StringLiteralFunction(FunctionLibrary.ERROR), then, el);
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
     assertFalse(f.getBoolean(null));
   }
 

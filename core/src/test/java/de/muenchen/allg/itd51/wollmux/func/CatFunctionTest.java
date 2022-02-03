@@ -45,14 +45,14 @@ public class CatFunctionTest
     Function f = new CatFunction(new ConfigThingy("CAT", "\"ABC\" \"DEF\""), new FunctionLibrary(), new DialogLibrary(),
         new HashMap<>());
     assertEquals(0, f.parameters().length);
-    assertEquals("ABCDEF", f.getString(null));
+    assertEquals("ABCDEF", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new CatFunction(List.of(new StringLiteralFunction(FunctionLibrary.ERROR)));
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
   }
 
 }

@@ -59,41 +59,41 @@ public class NumberCompareFunctionTest
             context));
     ncf.handleParam(new ConfigThingy("MARGIN", "\"" + zeroPointOne + "\""), funcLib, dialogLib, context);
     assertEquals(0, ncf.parameters().length);
-    assertEquals("true", ncf.getString(null));
+    assertEquals("true", ncf.getResult(null));
     assertTrue(ncf.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     ncf.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
     ncf.handleParam(new ConfigThingy("MARGIN", "\"test\""), funcLib, dialogLib, context);
-    assertEquals(FunctionLibrary.ERROR, ncf.getString(null));
+    assertEquals(FunctionLibrary.ERROR, ncf.getResult(null));
 
     NumberCompareFunction f = new NumberCompareFunction(Integer.MAX_VALUE, Integer.MAX_VALUE, null,
         new ConfigThingy("NUMCMP", "\"1\" \"" + zeroPointNine + "\" \"2\""), funcLib, dialogLib, context);
     f.handleParam(new ConfigThingy("MARGIN", "\"" + zeroPointOne + "\""), funcLib, dialogLib, context);
-    assertEquals("-1", f.getString(null));
+    assertEquals("-1", f.getResult(null));
 
     f = new NumberCompareFunction(Integer.MAX_VALUE, Integer.MAX_VALUE, null,
         new ConfigThingy("NUMCMP", "\"2\" \"1\" \"2\""), funcLib, dialogLib, context);
     dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
-    assertEquals("1", f.getString(null));
+    assertEquals("1", f.getResult(null));
 
     f = new NumberCompareFunction(Integer.MAX_VALUE, Integer.MAX_VALUE, null,
         new ConfigThingy("NUMCMP", "\"2\" \"1\" \"3\""), funcLib, dialogLib, context);
-    assertEquals("0", f.getString(null));
+    assertEquals("0", f.getResult(null));
 
     f = new NumberCompareFunction(Integer.MAX_VALUE, Integer.MAX_VALUE, "result",
         new ConfigThingy("NUMCMP", "\"2\" \"2\" \"2\""), funcLib, dialogLib, context);
-    assertEquals("result", f.getString(null));
+    assertEquals("result", f.getResult(null));
 
     f = new NumberCompareFunction(1, Integer.MAX_VALUE, null, new ConfigThingy("NUMCMP", "\"2\" \"1\" \"0\""), funcLib,
         dialogLib, context);
-    assertEquals("false", f.getString(null));
+    assertEquals("false", f.getResult(null));
 
     f = new NumberCompareFunction(Integer.MAX_VALUE, 1, null, new ConfigThingy("NUMCMP", "\"2\" \"1\" \"0\""), funcLib,
         dialogLib, context);
-    assertEquals("false", f.getString(null));
+    assertEquals("false", f.getResult(null));
 
     assertThrows(ConfigurationErrorException.class, () -> new NumberCompareFunction(Integer.MAX_VALUE,
         Integer.MAX_VALUE, null, new ConfigThingy("NUMCMP", "\"1\""), funcLib, dialogLib, context));

@@ -45,18 +45,18 @@ public class NotFunctionTest
     Function f = new NotFunction(new ConfigThingy("NOT", "\"false\""), new FunctionLibrary(), new DialogLibrary(),
         new HashMap<>());
     assertEquals(0, f.parameters().length);
-    assertEquals("true", f.getString(null));
+    assertEquals("true", f.getResult(null));
     assertTrue(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new NotFunction(List.of(new StringLiteralFunction("true")));
-    assertEquals("false", f.getString(null));
+    assertEquals("false", f.getResult(null));
     assertFalse(f.getBoolean(null));
 
     f = new NotFunction(List.of(new StringLiteralFunction(FunctionLibrary.ERROR)));
-    assertEquals(FunctionLibrary.ERROR, f.getString(null));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(null));
   }
 
 }

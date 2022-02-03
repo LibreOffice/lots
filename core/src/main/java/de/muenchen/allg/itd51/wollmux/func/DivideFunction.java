@@ -74,7 +74,7 @@ public class DivideFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   { // TESTED
     char decimalPoint;
     try
@@ -87,11 +87,11 @@ public class DivideFunction implements Function
       decimalPoint = '.';
     }
 
-    String dividend = dividendFunction.getString(parameters);
+    String dividend = dividendFunction.getResult(parameters);
     if (dividend == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
 
     String divisor = "1";
-    if (divisorFunction != null) divisor = divisorFunction.getString(parameters);
+    if (divisorFunction != null) divisor = divisorFunction.getResult(parameters);
     if (divisor == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
 
     /*

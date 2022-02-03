@@ -37,7 +37,7 @@ public class AlwaysTrueFunctionTest
   {
     Function f = new AlwaysTrueFunction();
     assertEquals(0, f.parameters().length);
-    assertEquals("true", f.getString(null));
+    assertEquals("true", f.getResult(null));
     assertTrue(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);

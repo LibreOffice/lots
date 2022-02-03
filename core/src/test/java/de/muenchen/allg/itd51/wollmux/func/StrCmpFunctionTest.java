@@ -48,20 +48,20 @@ public class StrCmpFunctionTest
 
     Function f = new StrCmpFunction(new ConfigThingy("STRCMP", "\"a\" \"a\" \"a\""), funcLib, dialogLib, context);
     assertEquals(0, f.parameters().length);
-    assertEquals("true", f.getString(null));
+    assertEquals("true", f.getResult(null));
     assertTrue(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());
 
     f = new StrCmpFunction(new ConfigThingy("STRCMP", "\"a\" \"a\" \"z\""), funcLib, dialogLib, context);
-    assertEquals("-1", f.getString(null));
+    assertEquals("-1", f.getResult(null));
 
     f = new StrCmpFunction(new ConfigThingy("STRCMP", "\"z\" \"a\" \"z\""), funcLib, dialogLib, context);
-    assertEquals("1", f.getString(null));
+    assertEquals("1", f.getResult(null));
 
     f = new StrCmpFunction(new ConfigThingy("STRCMP", "\"m\" \"a\" \"z\""), funcLib, dialogLib, context);
-    assertEquals("0", f.getString(null));
+    assertEquals("0", f.getResult(null));
 
     assertThrows(ConfigurationErrorException.class,
         () -> new StrCmpFunction(new ConfigThingy("STRCMP", "\"a\""), funcLib, dialogLib, context));

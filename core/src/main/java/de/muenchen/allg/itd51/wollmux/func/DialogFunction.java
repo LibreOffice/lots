@@ -58,7 +58,7 @@ public class DialogFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     Object data = dialog.getData(dataName);
     if (data == null) return FunctionLibrary.ERROR;
@@ -68,6 +68,6 @@ public class DialogFunction implements Function
   @Override
   public boolean getBoolean(Values parameters)
   {
-    return getString(parameters).equalsIgnoreCase("true");
+    return getResult(parameters).equalsIgnoreCase("true");
   }
 }

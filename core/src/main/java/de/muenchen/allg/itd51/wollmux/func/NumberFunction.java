@@ -80,7 +80,7 @@ abstract class NumberFunction extends MultiFunction
   protected abstract String computationResult();
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     String result = initComputation(parameters);
     if (result != null) return result;
@@ -88,7 +88,7 @@ abstract class NumberFunction extends MultiFunction
     while (iter.hasNext())
     {
       Function func = iter.next();
-      String str = func.getString(parameters);
+      String str = func.getResult(parameters);
       if (str.equals(FunctionLibrary.ERROR)) return FunctionLibrary.ERROR;
       try
       {

@@ -134,7 +134,7 @@ public class ColumnTransformer
     if (func == null) {
       return ds.get(columnName);
     }
-    return func.getString(new DatasetValues(ds));
+    return func.getResult(new DatasetValues(ds));
   }
 
   /**

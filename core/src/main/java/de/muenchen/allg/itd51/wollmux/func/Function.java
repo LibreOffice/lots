@@ -51,7 +51,7 @@ public interface Function
    * @param parameters sollte zu jedem der von {@link #parameters()} gelieferten
    *        Namen einen String-Wert enthalten.
    */
-  public String getString(Values parameters);
+  public String getResult(Values parameters);
 
    /**
    * Ruft die Funktion mit Argumenten aus parameters auf und liefert das

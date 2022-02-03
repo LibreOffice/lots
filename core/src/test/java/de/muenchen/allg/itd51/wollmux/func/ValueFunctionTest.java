@@ -41,9 +41,9 @@ public class ValueFunctionTest
     assertEquals(1, f.parameters().length);
     Values.SimpleMap v = new Values.SimpleMap();
     v.put("test", "a");
-    assertEquals("a", f.getString(v));
+    assertEquals("a", f.getResult(v));
     assertFalse(f.getBoolean(v));
-    assertEquals(FunctionLibrary.ERROR, f.getString(new Values.None()));
+    assertEquals(FunctionLibrary.ERROR, f.getResult(new Values.None()));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);
     assertTrue(dialogFunctions.isEmpty());

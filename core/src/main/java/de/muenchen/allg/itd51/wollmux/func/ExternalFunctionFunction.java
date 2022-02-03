@@ -57,7 +57,7 @@ public class ExternalFunctionFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     try
     {
@@ -77,6 +77,6 @@ public class ExternalFunctionFunction implements Function
   @Override
   public boolean getBoolean(Values parameters)
   {
-    return getString(parameters).equalsIgnoreCase("true");
+    return getResult(parameters).equalsIgnoreCase("true");
   }
 }

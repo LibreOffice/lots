@@ -463,7 +463,7 @@ public class TextDocumentController
     while (funcs.hasNext())
     {
       Function f = funcs.next();
-      String res = f.getString(values);
+      String res = f.getResult(values);
       if (res.length() > 0)
       {
         if ("noaction".equals(res))
@@ -788,7 +788,7 @@ public class TextDocumentController
         String[] pars = func.parameters();
         for (int i = 0; i < pars.length; i++)
           args.put(pars[i], value);
-        transformed = func.getString(args);
+        transformed = func.getResult(args);
       } else
       {
         transformed = L.m("<FEHLER: TRAFO '%1' nicht definiert>", trafoName);
@@ -817,7 +817,7 @@ public class TextDocumentController
       String[] pars = func.parameters();
       for (int i = 0; i < pars.length; i++)
         args.put(pars[i], mapIdToValues.get(pars[i]));
-      return func.getString(args);
+      return func.getResult(args);
     } else
     {
       LOGGER.error("Die TRAFO '{}' ist nicht definiert.", trafoName);

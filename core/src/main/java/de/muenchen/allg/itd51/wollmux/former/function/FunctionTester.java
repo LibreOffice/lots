@@ -416,7 +416,7 @@ public class FunctionTester
           return;
         ConfigThingy codeConf = new ConfigThingy("CAT", codeStr);
         Function func = FunctionFactory.parse(codeConf, funcLib, dialogLib, myContext);
-        String result = func.getString(myParameters);
+        String result = func.getResult(myParameters);
         if (result.equals(FunctionLibrary.ERROR))
           throw new Exception(L.m("Illegaler oder fehlender Parameter!"));
         stringResult.setText(result);

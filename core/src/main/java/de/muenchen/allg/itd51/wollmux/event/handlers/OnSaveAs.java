@@ -123,7 +123,7 @@ public class OnSaveAs extends WollMuxEvent
         value = "";
       values.put(par, value);
     }
-    String filename = func.getString(values);
+    String filename = func.getResult(values);
     File f = new File(filename);
     if (f.isAbsolute())
       return f;

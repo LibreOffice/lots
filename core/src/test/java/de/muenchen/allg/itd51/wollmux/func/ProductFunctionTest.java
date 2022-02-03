@@ -44,7 +44,7 @@ public class ProductFunctionTest
     Function f = new ProductFunction(new ConfigThingy("PRODUCT", "\"5\" \"2\""), new FunctionLibrary(),
         new DialogLibrary(), new HashMap<>());
     assertEquals(0, f.parameters().length);
-    assertEquals("10", f.getString(null));
+    assertEquals("10", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);

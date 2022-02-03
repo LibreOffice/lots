@@ -50,10 +50,10 @@ public class ReplaceFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
-    String str = input.getString(parameters);
-    String repStr = replace.getString(parameters);
+    String str = input.getResult(parameters);
+    String repStr = replace.getResult(parameters);
     if (str == FunctionLibrary.ERROR || repStr == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
     return pattern.matcher(str).replaceAll(repStr);
   }
@@ -74,6 +74,6 @@ public class ReplaceFunction implements Function
   @Override
   public boolean getBoolean(Values parameters)
   {
-    return getString(parameters).equalsIgnoreCase("true");
+    return getResult(parameters).equalsIgnoreCase("true");
   }
 }

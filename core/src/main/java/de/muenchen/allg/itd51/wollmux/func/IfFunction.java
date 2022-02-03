@@ -65,20 +65,20 @@ public class IfFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
-    String condition = ifFunction.getString(parameters);
+    String condition = ifFunction.getResult(parameters);
     if (condition == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
     if (condition.equalsIgnoreCase("true"))
-      return thenFunction.getString(parameters);
+      return thenFunction.getResult(parameters);
     else
-      return elseFunction.getString(parameters);
+      return elseFunction.getResult(parameters);
   }
 
   @Override
   public boolean getBoolean(Values parameters)
   {
-    String condition = ifFunction.getString(parameters);
+    String condition = ifFunction.getResult(parameters);
     if (condition == FunctionLibrary.ERROR) return false;
     if (condition.equalsIgnoreCase("true"))
       return thenFunction.getBoolean(parameters);

@@ -363,7 +363,7 @@ public class FormModel
     for (Control c : mapDialogNameToListOfControlsWithDependingAutofill.get(dialogName))
     {
       c.getAutofill()
-          .ifPresent(autofill -> setValue(c.getId(), autofill.getString(idToValue())));
+          .ifPresent(autofill -> setValue(c.getId(), autofill.getResult(idToValue())));
     }
   }
 

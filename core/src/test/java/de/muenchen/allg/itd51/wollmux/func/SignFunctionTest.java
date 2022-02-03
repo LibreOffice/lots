@@ -44,7 +44,7 @@ public class SignFunctionTest
     Function f = new SignFunction(new ConfigThingy("SIGN", "\"1\""), new FunctionLibrary(), new DialogLibrary(),
         new HashMap<>());
     assertEquals(0, f.parameters().length);
-    assertEquals("1", f.getString(null));
+    assertEquals("1", f.getResult(null));
     assertFalse(f.getBoolean(null));
     Collection<String> dialogFunctions = new ArrayList<>();
     f.getFunctionDialogReferences(dialogFunctions);

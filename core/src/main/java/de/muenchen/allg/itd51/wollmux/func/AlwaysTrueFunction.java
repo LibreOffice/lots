@@ -41,7 +41,7 @@ public class AlwaysTrueFunction implements Function
   }
 
   @Override
-  public String getString(Values parameters)
+  public String getResult(Values parameters)
   {
     return "true";
   }
