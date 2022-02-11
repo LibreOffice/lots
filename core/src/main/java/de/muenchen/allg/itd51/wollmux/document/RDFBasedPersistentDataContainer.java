@@ -40,6 +40,7 @@ import com.sun.star.rdf.XURI;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.afid.UnoIterator;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
@@ -309,6 +310,28 @@ public class RDFBasedPersistentDataContainer implements
   {
     try
     {
+      XNamedGraph g = getWollMuxDatenGraph();
+      if(g==null)
+      {
+        //Workaround, der Fehler liegt in libreoffice:
+        //Wollmuxdaten werden im Dokument durch Einfügen von RTF-formatiertem Text gelöscht.
+        //Daher werden die Wollmuxdaten neu aufgebaut
+        xDMA = UNO.XDocumentMetadataAccess(doc);
+        if (xDMA == null) {
+          throw new RDFMetadataNotSupportedException();
+        }
+        xRepos = xDMA.getRDFRepository();
+        wollmuxDatenURI = URI.create(UNO.defaultContext, WOLLMUX_DATEN_URI_STR);
+        getOrCreateWollMuxDatenGraph();
+
+        TextDocumentController documentController = DocumentManager.getTextDocumentController(doc);
+        setData(DataID.SETTYPE, "formDocument");
+        setData(DataID.TOUCH_WOLLMUXVERSION, WollMuxSingleton.getVersion());
+        setData(DataID.TOUCH_OOOVERSION, UNO.getOOoVersion());
+        setData(DataID.FORMULARWERTE, documentController.getFormFieldValuesString());
+        documentController.storeCurrentFormDescription();
+      }
+
       xDMA.storeMetadataToStorage(UNO.XStorageBasedDocument(doc).getDocumentStorage());
     }
     catch (Exception e)
