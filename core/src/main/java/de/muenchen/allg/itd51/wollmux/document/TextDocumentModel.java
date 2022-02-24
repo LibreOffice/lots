@@ -271,6 +271,7 @@ public class TextDocumentModel
     // parse document commands without changing modified state
     boolean modified = isDocumentModified();
     this.documentCommands = new DocumentCommands(UNO.XBookmarksSupplier(doc));
+    documentCommands.update();
     setDocumentModified(modified);
 
     // read persistent data
