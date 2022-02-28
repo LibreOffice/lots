@@ -229,6 +229,7 @@ public class FormSidebarController
        
         Map<String,Control> formFieldValues = formModel.getFormControls();
         this.updateFormUiValues(formFieldValues);
+        this.initFormularwerteBackgroundColor(formFieldValues);
         
         processUIElementEvents = true;
       } catch (FormModelException e)
@@ -537,6 +538,19 @@ public class FormSidebarController
     processUIElementEvents = false;
   }
   
+  /**
+   * Sets background Colors in form ui.
+   */
+  public void initFormularwerteBackgroundColor(Map<String,Control> formControls)
+  {
+    for (String control : formControls.keySet())
+    {
+      Control ctrl = formModel.getControl(control);
+      if(!ctrl.isOkay())
+        setControlBackground(ctrl.getId(), ctrl.isOkay());
+    }
+  }
+
   /**
    * updates and sets all form control values in form ui.
    * 
