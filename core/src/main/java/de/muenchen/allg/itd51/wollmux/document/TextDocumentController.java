@@ -1456,7 +1456,7 @@ public class TextDocumentController
    *
    * @return A ConfigThingy-String of the values.
    */
-  private String getFormFieldValuesString()
+  public String getFormFieldValuesString()
   {
     ConfigThingy werte = new ConfigThingy("WM");
     ConfigThingy formwerte = new ConfigThingy("Formularwerte");
