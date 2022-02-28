@@ -698,6 +698,13 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   public void setBackgroundColor(String id, boolean okay, int color)
   {
     XControl control = controls.get(id).getRight();
+    
+    if (control == null)
+    {
+      LOGGER.debug("control ist null. id: {}", id);
+      return;
+    }
+
     try
     {
       if (okay)
