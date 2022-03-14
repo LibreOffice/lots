@@ -439,7 +439,7 @@ public class TextDocumentController
   public synchronized void addFormFieldValue(String id, String value)
   {
     setFormFieldValue(id, value);
-    updateFormFields(id);
+    updateDocumentFormFields(id);
   }
 
   /**
@@ -993,7 +993,7 @@ public class TextDocumentController
       formFields.add(FormFieldFactory.createDatabaseFormField(model.doc, field));
 
       // update field view
-      updateFormFields(fieldId);
+      updateDocumentFormFields(fieldId);
     } catch (java.lang.Exception e)
     {
       LOGGER.error("", e);
@@ -1059,7 +1059,7 @@ public class TextDocumentController
    * @param fieldId
    *          The id of the field to update.
    */
-  public void updateFormFields(String fieldId)
+  public void updateDocumentFormFields(String fieldId)
   {
     if (formFieldPreviewMode)
     {
@@ -1174,7 +1174,7 @@ public class TextDocumentController
   {
     for (String fieldId : model.getAllFieldIDs())
     {
-      updateFormFields(fieldId);
+      updateDocumentFormFields(fieldId);
     }
   }
 
@@ -1421,7 +1421,7 @@ public class TextDocumentController
 
   /**
    * Set a new value for a form field and store the persistend data. The new value is visible after
-   * a call of {@link #updateFormFields(String)}.
+   * a call of {@link #updateDocumentFormFields(String)}.
    *
    * If simulation has beeen startet with {@link #startSimulation()}, the persistend data isn't
    * modified.
@@ -1549,7 +1549,7 @@ public class TextDocumentController
           {
             setFormFieldValue(fieldId, "");
           }
-          updateFormFields(fieldId);
+          updateDocumentFormFields(fieldId);
         }
 
         cleanupGarbageOfUnreferencedAutofunctions();
