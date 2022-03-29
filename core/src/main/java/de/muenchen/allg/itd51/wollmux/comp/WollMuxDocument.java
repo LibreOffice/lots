@@ -22,6 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.comp;
 
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,12 +35,17 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.document.WMCommandsFailedException;
+import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnManagePrintFunction;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetInsertValues;
+import de.muenchen.allg.itd51.wollmux.form.model.Control;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.interfaces.XWollMuxDocument;
 
@@ -114,13 +120,27 @@ public class WollMuxDocument implements XWollMuxDocument
       return;
     }
 
+    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
+        documentController, WollMuxFiles.isDebugMode());
+
     try
     {
+      dci.executeTemplateCommands();
+      dci.scanGlobalDocumentCommands();
+      dci.scanInsertFormValueCommands();
+
       documentController.getFormModel();
-    } catch (FormModelException ex)
+      
+      Map<String,String> formFieldValues = documentController.getFormFieldValues();
+
+      for (Map.Entry<String, String> entry: formFieldValues.entrySet())
+      {
+        documentController.updateDocumentFormFields(entry.getKey());
+      }
+    } catch (WMCommandsFailedException | FormModelException e)
     {
-      LOGGER.error("", ex);
-    }
+      LOGGER.error("", e);
+    }    
   }
 
   @Override

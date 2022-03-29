@@ -872,7 +872,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       {
 	if (ele.isField())
 	{
-	  textDocumentController.updateFormFields(ele.getValue());
+	  textDocumentController.updateDocumentFormFields(ele.getValue());
 	}
       }
     }
