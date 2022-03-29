@@ -492,9 +492,9 @@ public class FormSidebarController
    * @param okay
    *        set okay.
    */
-  public void setControlBackground(String id, boolean okay)
+  public void setControlBackground(String id, boolean okay, boolean init)
   {
-    formSidebarPanel.setBackgroundColor(id, okay, formConfig.getPlausiMarkerColor().getRGB() & ~0xFF000000);
+    formSidebarPanel.setBackgroundColor(id, okay, formConfig.getPlausiMarkerColor().getRGB() & ~0xFF000000, init);
   }
 
   /**
@@ -547,7 +547,7 @@ public class FormSidebarController
     {
       Control ctrl = formModel.getControl(control);
       if(!ctrl.isOkay())
-        setControlBackground(ctrl.getId(), ctrl.isOkay());
+        setControlBackground(ctrl.getId(), ctrl.isOkay(), true);
     }
   }
 

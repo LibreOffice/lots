@@ -283,7 +283,7 @@ public class FormModel
         control.setValue(changedEntries.getValue());
         control.setOkay(newValues);
         formSidebarController.setFormUiValue(control.getId(), control.getValue());
-        formSidebarController.setControlBackground(control.getId(), control.isOkay());
+        formSidebarController.setControlBackground(control.getId(), control.isOkay(), false);
         txtDocController.setValueChanged(control.getId(), control.getValue());
         modifiedGroups.addAll(control.getDependingGroups());
       }

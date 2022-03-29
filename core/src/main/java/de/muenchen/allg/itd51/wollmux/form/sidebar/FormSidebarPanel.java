@@ -695,9 +695,10 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
    * @param color
    *          The background color to set if okay is false.
    */
-  public void setBackgroundColor(String id, boolean okay, int color)
+  public void setBackgroundColor(String id, boolean okay, int color, boolean init)
   {
     XControl control = controls.get(id).getRight();
+    XControl controlleft = controls.get(id).getLeft();
     
     if (control == null)
     {
@@ -716,6 +717,8 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       } else
       {
         UnoProperty.setProperty(control.getModel(), UnoProperty.BACKGROUND_COLOR, color);
+        if(!init)
+          UNO.XWindow(controlleft).setFocus();
       }
     } catch (UnoHelperException e)
     {
