@@ -705,8 +705,11 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       return;
     }
 
+    boolean isListbox = (UNO.XListBox(control) != null);
     try
     {
+      if(isListbox)
+        UnoProperty.setProperty(control.getModel(), "NativeWidgetLook", Boolean.FALSE);
       if (okay)
       {
         UnoProperty.setPropertyToDefault(control.getModel(), UnoProperty.BACKGROUND_COLOR);
