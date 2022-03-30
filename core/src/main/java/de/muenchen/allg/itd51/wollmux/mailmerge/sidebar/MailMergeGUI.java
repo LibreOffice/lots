@@ -415,7 +415,7 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     SortedMap<String, Object> props = new TreeMap<>();
     props.put("Dropdown", true);
     mailmergeBox = UNO.XComboBox(GuiFactory.createCombobox(xMCF, context, "", controller::addMailMergeField,
-        new Rectangle(0, 0, 80, 32), props));
+        null, new Rectangle(0, 0, 80, 32), props));
     UNO.XWindow(mailmergeBox).setEnable(false);
     mailMergeField = new MailMergeField(mailmergeBox);
     controlContainer.addControl("mailmergeBox", UNO.XControl(mailmergeBox));
@@ -430,7 +430,7 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     props = new TreeMap<>();
     props.put("Dropdown", true);
     specialBox = UNO.XComboBox(
-        GuiFactory.createCombobox(xMCF, context, "", controller::addSpecialField, new Rectangle(0, 0, 80, 32), props));
+        GuiFactory.createCombobox(xMCF, context, "", controller::addSpecialField, null, new Rectangle(0, 0, 80, 32), props));
     UNO.XWindow(specialBox).setEnable(false);
     SpecialField.addItems(specialBox);
     controlContainer.addControl("specialBox", UNO.XControl(specialBox));
