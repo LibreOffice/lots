@@ -523,8 +523,9 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     propsComboBox.put(UnoProperty.BORDER, (short) 2);
     propsComboBox.put(UnoProperty.HELP_TEXT, control.getTip());
     XControl xControl = GuiFactory.createCombobox(xMCF, context, "", formSidebarController::comboBoxChanged,
-        new Rectangle(0, 0, 100, 20), propsComboBox);
+        formSidebarController::textChanged, new Rectangle(0, 0, 100, 20), propsComboBox);
     UNO.XWindow(xControl).addFocusListener(formSidebarController.getFocusListener());
+
     if (!control.getOptions().isEmpty())
     {
       String[] cmbValues = new String[control.getOptions().size()];
