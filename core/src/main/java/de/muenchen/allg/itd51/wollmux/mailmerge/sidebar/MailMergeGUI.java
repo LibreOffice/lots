@@ -121,13 +121,12 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
       public void windowShown(EventObject event)
       {
         ConnectionModel.addOpenCalcWindows();
-        controller.showPreviewFiedls(false);
       }
 
       @Override
       public void windowHidden(EventObject event)
       {
-        controller.showPreviewFiedls(true);
+        //
       }
     };
     parentWindow.addWindowListener(windowAdapter);

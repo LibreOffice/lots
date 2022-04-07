@@ -174,7 +174,6 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
         LOGGER.debug("initialized");
         openDatasourceFromLastStoredSettings(
             textDocumentController.getModel().getMailmergeConfig());
-        showPreviewFiedls(false);
         unregisterListener();
       }
     }
