@@ -177,6 +177,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
         LOGGER.debug("initialized");
         openDatasourceFromLastStoredSettings(
             textDocumentController.getModel().getMailmergeConfig());
+        textDocumentController.setFormFieldsPreviewMode(false);
         unregisterListener();
       }
     }
@@ -188,7 +189,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     boolean isPreview = previewModel.isPreview();
     gui.updatePreview(isPreview, previewModel.getPreviewNumber());
     textDocumentController.collectNonWollMuxFormFields();
-    showPreviewFiedls(isPreview);
+    textDocumentController.setFormFieldsPreviewMode(isPreview);
     updatePreviewFields();
   }
 
@@ -225,17 +226,6 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
   public void dispose()
   {
     unregisterListener();
-  }
-
-  /**
-   * Changes the document to show the field names or their content.
-   *
-   * @param hide
-   *          If true, the content is shown, otherwise the names.
-   */
-  public void showPreviewFiedls(boolean hide)
-  {
-    textDocumentController.setFormFieldsPreviewMode(hide);
   }
 
   /**
@@ -657,6 +647,10 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     datasourceChanged();
   }
 
+  public void setPreviewMode(boolean isPreview)
+  {
+    textDocumentController.setFormFieldsPreviewMode(isPreview);
+  }
   /**
    * Set the fields in the document to the content of the data source.
    */

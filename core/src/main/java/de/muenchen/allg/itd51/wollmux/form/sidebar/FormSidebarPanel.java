@@ -50,6 +50,7 @@ import com.sun.star.awt.XWindow2;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tab.XTabPage;
 import com.sun.star.awt.tab.XTabPageContainer;
+import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
@@ -130,7 +131,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     this.formSidebarController = formSidebarController;
 
     parentWindow.addWindowListener(new AbstractWindowListener()
-    {
+    {      
       @Override
       public void windowResized(WindowEvent e)
       {

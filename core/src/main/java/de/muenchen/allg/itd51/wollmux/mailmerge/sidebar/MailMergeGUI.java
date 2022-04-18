@@ -25,7 +25,6 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.Selection;
@@ -120,6 +119,7 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
       @Override
       public void windowShown(EventObject event)
       {
+        controller.setPreviewMode(false);
         ConnectionModel.addOpenCalcWindows();
       }
 
