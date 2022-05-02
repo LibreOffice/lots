@@ -604,9 +604,15 @@ public class ContentBasedDirectiveModel
   public boolean isItemVisible(ContentBasedDirectiveItem item)
   {
     // text has CharHidden property
-    if ((boolean) Utils.getProperty(item.getTextRange(), UnoProperty.CHAR_HIDDEN))
+    try
     {
-      return false;
+      if ((boolean) Utils.getProperty(item.getTextRange(), UnoProperty.CHAR_HIDDEN))
+      {
+        return false;
+      }
+    } catch (ClassCastException ex)
+    {
+      LOGGER.error("", ex);
     }
 
     // check if range is in an invisible section
