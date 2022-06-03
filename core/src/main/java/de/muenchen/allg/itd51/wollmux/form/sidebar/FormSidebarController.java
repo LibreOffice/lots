@@ -458,10 +458,10 @@ public class FormSidebarController
         formController.close();
         break;
       case "nextTab":
-        formSidebarPanel.nextTab();
+        formSidebarPanel.nextTab(formModel);
         break;
       case "prevTab":
-        formSidebarPanel.previousTab();
+        formSidebarPanel.previousTab(formModel);
         break;
       case "funcDialog":
         String dialogName = formControl.getDialog();
@@ -607,5 +607,13 @@ public class FormSidebarController
       Control ctrl = formModel.getControl(control);
       setFormUiValue(ctrl.getId(), ctrl.getValue());
     }
+  }
+
+  /**
+   * updates status of tab.
+   */
+  public void checkTabIsOk()
+  {
+    formSidebarPanel.checkTabIsOk(formModel);
   }
 }

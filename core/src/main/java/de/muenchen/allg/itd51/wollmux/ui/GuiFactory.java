@@ -130,7 +130,8 @@ public class GuiFactory
     XControl buttonCtrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_EDIT, props, size);
 
     XTextComponent txt = UNO.XTextComponent(buttonCtrl);
-    txt.addTextListener(textListener);
+    if(textListener!=null)
+      txt.addTextListener(textListener);
     txt.setText(text);
     return buttonCtrl;
   }
@@ -353,7 +354,7 @@ public class GuiFactory
       String tabTitle, short tabId, int scrollHeight)
   {
     XTabPageModel tabPageModel = model.createTabPage(tabId); // 0 is not valid
-    tabPageModel.setTitle(tabTitle);
+    tabPageModel.setTitle(tabId + ". " + tabTitle);
     if (scrollHeight > 0)
     {
       try

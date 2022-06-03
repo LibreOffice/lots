@@ -50,7 +50,8 @@ import com.sun.star.awt.XWindow2;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.awt.tab.XTabPage;
 import com.sun.star.awt.tab.XTabPageContainer;
-import com.sun.star.lang.EventObject;
+import com.sun.star.awt.tab.XTabPageModel;
+import com.sun.star.deployment.PackageInformationProvider;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.ui.LayoutSize;
 import com.sun.star.ui.XSidebarPanel;
@@ -78,6 +79,7 @@ import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.TabLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
+import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
 
@@ -94,10 +96,16 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   private XComponentContext context;
   private XMultiComponentFactory xMCF;
   private Map<Control, Short> buttons = new HashMap<>();
+  private Map<Short, String> buttons_nextTab = new HashMap<>();
   private XTabPageContainer tabControlContainer;
   private FormSidebarController formSidebarController;
   private Map<String, Pair<XControl, XControl>> controls = new HashMap<>();
   private boolean tabChanged = true;
+  private Map<Short, VerticalLayout> verticalLayoutPerTab = new HashMap<>();
+  private Map<Layout, String> Layout2ControlId = new HashMap<>();
+
+  private static final String IMAGE_LOCATION = PackageInformationProvider.get(UNO.defaultContext)
+      .getPackageLocation(Utils.getWollMuxProperties().getProperty("extension.id")) + "/image/";
 
   /**
    * Creates a new form panel.
@@ -192,12 +200,12 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
             element.getText(), tabId, 1000);
         XTabPage xTabPage = tabControlContainer.getTabPageByID(tabId);
         XControlContainer tabPageControlContainer = UNO.XControlContainer(xTabPage);
-        Layout controlsVLayout = new VerticalLayout(5, 5, 0, 15, 6);
+        VerticalLayout controlsVLayout = new VerticalLayout(5, 5, 0, 15, 6);
 
         if (i > 0)
         {
           addTabSwitcher("backward", tabs.get(i - 1), s -> {
-            previousTab();
+            previousTab(model);
             s.reduce((f, se) -> se).ifPresent(XWindow::setFocus);
           }, tabPageControlContainer, controlsVLayout);
         }
@@ -207,14 +215,16 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         if (i < tabs.size() - 1)
         {
           addTabSwitcher("forward", tabs.get(i + 1), s -> {
-            nextTab();
+            nextTab(model);
             s.findFirst().ifPresent(XWindow::setFocus);
           }, tabPageControlContainer, controlsVLayout);
         }
 
         tabLayouts.add(controlsVLayout);
         addButtonsToLayout(tab, model, controlContainer, buttonLayout, tabId);
+        verticalLayoutPerTab.put(tabId, controlsVLayout);
 
+        checkTabIsOk(tabId, model);
         tabId++;
       }
 
@@ -260,6 +270,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       } else
       {
         layout.addLayout(controlLayout, 1);
+        Layout2ControlId.put(controlLayout, control.getId());
       }
     });
   }
@@ -347,6 +358,10 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         {
           buttons.put(model.getControl(control.getId()), tabId);
           tabButtonLayout.addLayout(controlLayout, 1);
+          if(control.getAction().equals("nextTab"))
+          {
+            buttons_nextTab.put(tabId, control.getId());
+          }
         }
       }
     }
@@ -620,7 +635,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   /**
    * Activate the previous tab.
    */
-  public void previousTab()
+  public void previousTab(FormModel model)
   {
     if (tabChanged)
     {
@@ -640,6 +655,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       {
         tabControlContainer.setActiveTabPageID(tabControlContainer.getTabPageCount());
       }
+      checkTabIsOk(tabControlContainer.getActiveTabPageID(), model);
       tabChanged = true;
     }
   }
@@ -647,7 +663,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   /**
    * Activate the next tab.
    */
-  public void nextTab()
+  public void nextTab(FormModel model)
   {
     if (tabChanged)
     {
@@ -662,6 +678,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       {
         tabControlContainer.setActiveTabPageID(next);
       }
+      checkTabIsOk(tabControlContainer.getActiveTabPageID(), model);
       tabChanged = true;
     }
   }
@@ -726,5 +743,56 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     {
       LOGGER.debug("", e);
     }
+  }
+
+  public void checkTabIsOk(FormModel model)
+  {
+    if (tabControlContainer != null)
+    {
+      checkTabIsOk(tabControlContainer.getActiveTabPageID(), model);
+    }
+  }
+
+  public void checkTabIsOk(short tab, FormModel model)
+  {
+    if (tabControlContainer != null)
+    {
+      VerticalLayout controlsVLayout = verticalLayoutPerTab.get(tab);
+      List<Layout> visibleLayouts = controlsVLayout.getVisibleLayouts();
+      XTabPageModel pageModel = UNO.XTabPageModel(UNO.XControl(tabControlContainer.getTabPageByID(tab)).getModel());
+      if(pageModel==null)
+        return;
+
+      boolean isOkay = true;
+      for (Layout l : visibleLayouts)
+      {
+        if(Layout2ControlId.containsKey(l))
+        {
+          String controlId = Layout2ControlId.get(l);
+          Control ctrl = model.getControl(controlId);
+          if(!ctrl.isOkay())
+            isOkay = false;
+        }
+      }
+      if(isOkay)
+      {
+        pageModel.setImageURL(IMAGE_LOCATION + "if.png");
+      }
+      else
+      {
+        pageModel.setImageURL(IMAGE_LOCATION + "red.png");
+      }
+      if(buttons_nextTab.containsKey(tab))
+      {
+        String buttonId = buttons_nextTab.get(tab);
+        XWindow window = UNO.XWindow(controls.get(buttonId).getRight());
+        Control ctrl = model.getControl(buttonId);
+        if (window != null)
+        {
+          window.setEnable(isOkay && ctrl.isOkay());
+        }
+      }
+    }
+
   }
 }
