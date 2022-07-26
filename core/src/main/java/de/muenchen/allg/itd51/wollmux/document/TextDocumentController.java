@@ -934,7 +934,7 @@ public class TextDocumentController
   }
 
   /**
-   * Calls {@link #insertMailMergeField(String, XTextRange) with the current cursor position.
+   * Calls {@link #insertMailMergeField(String, XTextRange)} with the current cursor position.
    *
    * @param fieldId
    *          The column name of the data base on which this field depends
