@@ -17,7 +17,7 @@
     <wollmux.test.conf.release>v18.1.0/wollmux-config-18.1.0.tar.gz</wollmux.test.conf.release>
     <wollmux.test.conf>${project.build.directory}/config/.wollmux/wollmux.conf</wollmux.test.conf>
     <office.user.profile>${project.build.directory}/office</office.user.profile>
-    <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
+    <maven.javadoc.failOnWarnings>false</maven.javadoc.failOnWarnings>
   </properties>
 
   <modules>
