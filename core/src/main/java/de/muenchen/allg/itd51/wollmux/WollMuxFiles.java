@@ -737,8 +737,6 @@ public class WollMuxFiles
    * @param spaces
    *          Indent for children.
    * @return String representation of the node.
-   * @throws Exception
-   *           Can't access the configuration node.
    */
   public static String dumpNode(Object element, String spaces)
   {

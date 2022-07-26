@@ -76,10 +76,10 @@ public abstract class MailMergePrintFunction extends PrintFunction
   }
 
   /**
-   * Replaces all occurrences of <code>{{<tag>}}</code> with the value specified in the data set.
+   * Replaces all occurrences of <code>&lt;tag&gt;</code> with the value specified in the data set.
    *
    * @param dataset
-   *          Map of key-value pairs, where the key is <code><tag></code>.
+   *          Map of key-value pairs, where the key is <code>&lt;tag&gt;</code>.
    * @param text
    *          Text, which contains tags to be replaced.
    * @return Text where all occurrences are replaced, if there exists a record in data set.
@@ -100,7 +100,7 @@ public abstract class MailMergePrintFunction extends PrintFunction
   }
 
   /**
-   * Creates a <code><tag></code>, which can be replaced by
+   * Creates a <code>&lt;tag&gt;</code>, which can be replaced by
    * {@link #replaceMergeFieldInText(Map, String)}.
    *
    * @param mergeField
