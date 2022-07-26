@@ -437,7 +437,7 @@ public class OOoBasedMailMerge implements AutoCloseable
   }
 
   /**
-   * Remove all bookmarks from the document.
+   * Remove all bookmarks from the document except for ones that hide the content.
    * 
    * @param tmpDoc
    *          The document.
@@ -454,7 +454,11 @@ public class OOoBasedMailMerge implements AutoCloseable
         {
           if (bookmark != null)
           {
-            bookmark.getAnchor().getText().removeTextContent(bookmark);
+            final XPropertySet xBookmarkProps = UnoRuntime.queryInterface(XPropertySet.class, bookmark);
+            if (!((Boolean) xBookmarkProps.getPropertyValue("BookmarkHidden")))
+            {
+              bookmark.getAnchor().getText().removeTextContent(bookmark);
+            }
           }
         } catch (Exception e)
         {
