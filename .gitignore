@@ -13,3 +13,5 @@ release.properties
 /target/
 **/.settings/org.sonarlint.eclipse.core.prefs
 **/bin
+dist/
+.settings
