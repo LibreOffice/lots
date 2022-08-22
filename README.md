@@ -36,7 +36,7 @@ Afterwards the property `UNO_PATH` has to be set in the maven settings.
 ```
 * `<UNO_PATH>` is the folder, where the LibreOffice executable is located (eg. /opt/libreoffice/program)
 
-Perform the following commands to download the sources and build the LibreOffice extension. Special dependencies of WollMux are hosted at [Bintray](https://bintray.com/wollmux/WollMux), which is already configured as maven repository in pom.xml
+Perform the following commands to download the sources and build the LibreOffice extension.
 
 ```
 git clone https://github.com/WollMux/WollMux.git

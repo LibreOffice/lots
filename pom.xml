@@ -10,7 +10,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>11</maven.compiler.release>
-    <libreoffice.version>6.4.5-lhm1700</libreoffice.version>
+    <libreoffice.version>7.4.0</libreoffice.version>
     <wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
     <wollmux.oxt.name>WollMux</wollmux.oxt.name>
     <wollmux.test.conf.url>https://github.com/WollMux/wollmux-config/releases/download/</wollmux.test.conf.url>
@@ -30,17 +30,6 @@
     <developerConnection>scm:git:https://github.com/WollMux/WollMux.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
-
-  <repositories>
-    <repository>
-      <id>wollmux</id>
-      <name>wollmux-libs</name>
-      <url>https://dl.bintray.com/wollmux/WollMux</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
 
   <build>
     <pluginManagement>
