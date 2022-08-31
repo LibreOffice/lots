@@ -63,7 +63,7 @@ public class PrintWizardPage extends AbstractXWizardPage
     name = UNO.XTextComponent(container.getControl("name"));
     name.setText(model.getCurrentPrinterName());
     change = UNO.XButton(container.getControl("change"));
-    AbstractDispatchResultListener listener = event -> name.setText(model.getCurrentPrinterName());
+    AbstractDispatchResultListener listener = event -> {name.setText(model.getCurrentPrinterName());window.setFocus();};
     AbstractActionListener changeListener = event -> model.configurePrinter(listener);
     change.addActionListener(changeListener);
   }
