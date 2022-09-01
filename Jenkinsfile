@@ -8,6 +8,14 @@ pipeline {
   options {
     disableConcurrentBuilds()
   }
+
+  tools {
+    jdk 'Java11'
+  }
+
+  environment {
+    UNO_PATH = '/opt/libreoffice6.4/program/'
+  }
 	
   stages {
     stage('Build') {
@@ -17,45 +25,72 @@ pipeline {
           mavenLocalRepo: '.repo',
           mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
           publisherStrategy: 'EXPLICIT') {
-          sh "mvn clean package"
+          sh "mvn -DskipTests -DdryRun clean package"
         }
       }
     }
+
+    stage('Junit') {
+      steps {
+        withMaven(
+          maven: 'mvn',
+          mavenLocalRepo: '.repo',
+          mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
+          publisherStrategy: 'EXPLICIT') {
+          sh "mvn -Dmaven.javadoc.skip=true -DdryRun test verify"
+        }
+      }
+    }
+
     stage('Quality Gate') {
       steps {
         script {
-          if (GIT_BRANCH == 'master' || GIT_BRANCH == 'WollMux_18.1') {
+          if (GIT_BRANCH == 'master' || GIT_BRANCH ==~ 'WollMux_[0-9]*.[0-9]*') {
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',
               mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
               publisherStrategy: 'EXPLICIT') {
               withSonarQubeEnv('SonarQube') {
-                sh "mvn $SONAR_MAVEN_GOAL \
-                  -Dsonar.host.url=$SONAR_HOST_URL \
-                  -Dsonar.branch.name=${GIT_BRANCH}"
+              sh "mvn $SONAR_MAVEN_GOAL \
+                -Dsonar.projectKey=de.muenchen:wollmux \
+                -Dsonar.branch.name=${GIT_BRANCH} \
+                -Dsonar.java.source=11 \
+                -Dsonar.java.target=11 \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
               }
             }
           } else {
+            archiveArtifacts artifacts: 'oxt/target/WollMux.oxt'
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',
               mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
               publisherStrategy: 'EXPLICIT') {
-	          withSonarQubeEnv('SonarQube') {
-	            sh "mvn $SONAR_MAVEN_GOAL \
-	              -Dsonar.host.url=$SONAR_HOST_URL \
-	              -Dsonar.branch.name=${GIT_BRANCH} \
-	              -Dsonar.branch.target=${env.CHANGE_TARGET} "
-	          }
+              withSonarQubeEnv('SonarQube') {
+              sh "mvn $SONAR_MAVEN_GOAL \
+                -Dsonar.projectKey=de.muenchen:wollmux \
+                -Dsonar.branch.name=${GIT_BRANCH} \
+                -Dsonar.branch.target=${env.CHANGE_TARGET} \
+                -Dsonar.java.source=11 \
+                -Dsonar.java.target=11 \
+                -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml \
+                -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
+              }
             }
             timeout(time: 1, unit: 'HOURS') {
-             waitForQualityGate abortPipeline: true
+              waitForQualityGate abortPipeline: true
             }
-            archiveArtifacts artifacts: 'dist/WollMux.oxt', onlyIfSuccessful: true
           }
         }
       }
+    }
+  }
+
+  post {
+    cleanup {
+      cleanWs()
     }
   }
 }

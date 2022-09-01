@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="slv_count" dlg:left="161" dlg:top="99" dlg:width="252" dlg:height="145" dlg:closeable="true" dlg:moveable="true" dlg:title="Sachleitende Verfügungen drucken">
+ <dlg:styles>
+  <dlg:style dlg:style-id="0" dlg:font-weight="150"/>
+ </dlg:styles>
+ <dlg:bulletinboard>
+  <dlg:fixedline dlg:id="FixedLine1" dlg:tab-index="1" dlg:left="4" dlg:top="5" dlg:width="1" dlg:height="100" dlg:align="vertical"/>
+  <dlg:fixedline dlg:id="FixedLine2" dlg:tab-index="2" dlg:left="4" dlg:top="5" dlg:width="235" dlg:height="1"/>
+  <dlg:fixedline dlg:id="FixedLine3" dlg:tab-index="3" dlg:left="140" dlg:top="5" dlg:width="1" dlg:height="100" dlg:align="vertical"/>
+  <dlg:fixedline dlg:id="FixedLine4" dlg:tab-index="4" dlg:left="4" dlg:top="20" dlg:width="235" dlg:height="1"/>
+  <dlg:fixedline dlg:id="FixedLine9" dlg:tab-index="14" dlg:left="190" dlg:top="5" dlg:width="1" dlg:height="100" dlg:align="vertical"/>
+  <dlg:fixedline dlg:id="FixedLine10" dlg:tab-index="23" dlg:left="239" dlg:top="5" dlg:width="1" dlg:height="100" dlg:align="vertical"/>
+  <dlg:fixedline dlg:id="FixedLine11" dlg:tab-index="26" dlg:left="4" dlg:top="105" dlg:width="235" dlg:height="1"/>
+  <dlg:text dlg:style-id="0" dlg:id="printout" dlg:tab-index="0" dlg:left="10" dlg:top="8" dlg:width="120" dlg:height="10" dlg:value="Ausdrucke"/>
+  <dlg:text dlg:style-id="0" dlg:id="copies" dlg:tab-index="15" dlg:left="144" dlg:top="8" dlg:width="40" dlg:height="10" dlg:value="Kopien"/>
+  <dlg:text dlg:id="Label1" dlg:tab-index="5" dlg:left="10" dlg:top="24" dlg:width="120" dlg:height="10" dlg:value="Ausdruck 1"/>
+  <dlg:text dlg:id="Label2" dlg:tab-index="10" dlg:left="10" dlg:top="41" dlg:width="120" dlg:height="10" dlg:value="Ausdruck 2"/>
+  <dlg:text dlg:id="Label3" dlg:tab-index="11" dlg:left="10" dlg:top="58" dlg:width="120" dlg:height="10" dlg:value="Ausdruck 3"/>
+  <dlg:text dlg:id="Label4" dlg:tab-index="12" dlg:left="10" dlg:top="75" dlg:width="120" dlg:height="10" dlg:value="Ausdruck 4"/>
+  <dlg:fixedline dlg:id="FixedLine5" dlg:tab-index="6" dlg:left="4" dlg:top="37" dlg:width="235" dlg:height="1"/>
+  <dlg:fixedline dlg:id="FixedLine6" dlg:tab-index="7" dlg:left="4" dlg:top="54" dlg:width="235" dlg:height="1"/>
+  <dlg:fixedline dlg:id="FixedLine7" dlg:tab-index="8" dlg:left="4" dlg:top="71" dlg:width="235" dlg:height="1"/>
+  <dlg:fixedline dlg:id="FixedLine8" dlg:tab-index="9" dlg:left="4" dlg:top="88" dlg:width="235" dlg:height="1"/>
+  <dlg:numericfield dlg:id="Count1" dlg:tab-index="13" dlg:left="144" dlg:top="23" dlg:width="40" dlg:height="10" dlg:decimal-accuracy="0" dlg:value="1" dlg:value-min="0" dlg:spin="true"/>
+  <dlg:numericfield dlg:id="Count2" dlg:tab-index="16" dlg:left="144" dlg:top="40" dlg:width="40" dlg:height="10" dlg:decimal-accuracy="0" dlg:value="1" dlg:value-min="0" dlg:spin="true"/>
+  <dlg:numericfield dlg:id="Count3" dlg:tab-index="17" dlg:left="144" dlg:top="57" dlg:width="40" dlg:height="10" dlg:decimal-accuracy="0" dlg:value="1" dlg:value-min="0" dlg:spin="true"/>
+  <dlg:numericfield dlg:id="Count4" dlg:tab-index="18" dlg:left="144" dlg:top="74" dlg:width="40" dlg:height="10" dlg:decimal-accuracy="0" dlg:value="1" dlg:value-min="0" dlg:spin="true"/>
+  <dlg:button dlg:id="Print1" dlg:tab-index="19" dlg:left="195" dlg:top="22" dlg:width="40" dlg:height="13" dlg:value="Drucken"/>
+  <dlg:button dlg:id="Print2" dlg:tab-index="20" dlg:left="195" dlg:top="39" dlg:width="40" dlg:height="13" dlg:value="Drucken"/>
+  <dlg:button dlg:id="Print3" dlg:tab-index="21" dlg:left="195" dlg:top="56" dlg:width="40" dlg:height="13" dlg:value="Drucken"/>
+  <dlg:button dlg:id="Print4" dlg:tab-index="22" dlg:left="195" dlg:top="73" dlg:width="40" dlg:height="13" dlg:value="Drucken"/>
+  <dlg:scrollbar dlg:id="ScrollBar" dlg:tab-index="24" dlg:left="239" dlg:top="20" dlg:width="8" dlg:height="68" dlg:align="vertical" dlg:pageincrement="3" dlg:maxpos="4" dlg:visible-size="4"/>
+  <dlg:text dlg:id="Label5" dlg:tab-index="25" dlg:left="10" dlg:top="92" dlg:width="120" dlg:height="10" dlg:value="Summe aller Ausdrucke"/>
+  <dlg:checkbox dlg:id="printOrderCheckbox" dlg:tab-index="28" dlg:left="10" dlg:top="110" dlg:width="120" dlg:height="12" dlg:value="Ausdruck in umgekehrter Reihenfolge" dlg:checked="false"/>
+  <dlg:button dlg:id="PrintAll" dlg:tab-index="31" dlg:left="160" dlg:top="125" dlg:width="80" dlg:height="15" dlg:value="Alle Drucken"/>
+  <dlg:button dlg:id="Abort" dlg:tab-index="29" dlg:left="10" dlg:top="126" dlg:width="40" dlg:height="15" dlg:value="Abbrechen"/>
+  <dlg:text dlg:id="Sum" dlg:tab-index="27" dlg:left="145" dlg:top="92" dlg:width="40" dlg:height="10" dlg:value="0"/>
+  <dlg:button dlg:id="collectAll" dlg:tab-index="30" dlg:left="55" dlg:top="125" dlg:width="100" dlg:height="15" dlg:value="PDF mit allen Ausdrucken erstellen" dlg:multiline="true"/>
+ </dlg:bulletinboard>
+</dlg:window>

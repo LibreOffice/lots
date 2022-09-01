@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="seriendruck_start" dlg:left="85" dlg:top="5" dlg:width="170" dlg:height="120" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
+ <dlg:bulletinboard>
+  <dlg:titledbox dlg:id="actionGroup" dlg:tab-index="0" dlg:left="5" dlg:top="5" dlg:width="160" dlg:height="65">
+   <dlg:title dlg:value="Aktionen"/>
+  </dlg:titledbox>
+  <dlg:radiogroup>
+   <dlg:radio dlg:id="gesamtDoc" dlg:tab-index="1" dlg:left="10" dlg:top="15" dlg:width="150" dlg:height="8" dlg:page="-7" dlg:value="Gesamtdokument erstellen (.odt)" dlg:group-name="action" dlg:checked="true"/>
+   <dlg:radio dlg:id="gesamtDocPDF" dlg:tab-index="2" dlg:left="10" dlg:top="25" dlg:width="150" dlg:height="8" dlg:value="Gesamtdokument erstellen (.pdf)" dlg:group-name="action"/>
+   <dlg:radio dlg:id="drucken" dlg:tab-index="3" dlg:left="10" dlg:top="35" dlg:width="150" dlg:height="8" dlg:value="Direkt Drucken" dlg:group-name="action"/>
+   <dlg:radio dlg:id="emails" dlg:tab-index="4" dlg:left="10" dlg:top="45" dlg:width="150" dlg:height="8" dlg:value="E-Mails verschicken" dlg:group-name="action"/>
+   <dlg:radio dlg:id="einzel" dlg:tab-index="5" dlg:left="10" dlg:top="55" dlg:width="150" dlg:height="8" dlg:value="Einzeldateien erzeugen" dlg:group-name="action"/>
+  </dlg:radiogroup>
+  <dlg:titledbox dlg:id="datasetGroup" dlg:tab-index="6" dlg:left="5" dlg:top="75" dlg:width="160" dlg:height="40">
+   <dlg:title dlg:value="Folgende Datensätze verwenden"/>
+  </dlg:titledbox>
+  <dlg:radiogroup>
+   <dlg:radio dlg:id="selectAll" dlg:tab-index="7" dlg:left="10" dlg:top="85" dlg:width="150" dlg:height="8" dlg:value="Alle" dlg:group-name="dataset" dlg:checked="true"/>
+   <dlg:radio dlg:id="selectRange" dlg:tab-index="8" dlg:left="10" dlg:top="97" dlg:width="10" dlg:height="8" dlg:group-name="dataset"/>
+  </dlg:radiogroup>
+  <dlg:text dlg:id="Label1" dlg:tab-index="9" dlg:left="22" dlg:top="98" dlg:width="12" dlg:height="8" dlg:value="Von"/>
+  <dlg:text dlg:id="Label2" dlg:tab-index="10" dlg:left="78" dlg:top="98" dlg:width="12" dlg:height="8" dlg:value="Bis"/>
+  <dlg:numericfield dlg:id="from" dlg:tab-index="11" dlg:left="35" dlg:top="96" dlg:width="40" dlg:height="12" dlg:help-text="Von" dlg:decimal-accuracy="0" dlg:value-min="1" dlg:spin="true"/>
+  <dlg:numericfield dlg:id="till" dlg:tab-index="12" dlg:left="93" dlg:top="96" dlg:width="40" dlg:height="12" dlg:help-text="Von" dlg:decimal-accuracy="0" dlg:value-min="1" dlg:spin="true"/>
+ </dlg:bulletinboard>
+</dlg:window>

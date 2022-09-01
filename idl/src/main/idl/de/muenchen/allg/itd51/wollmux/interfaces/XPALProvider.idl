@@ -1,0 +1,71 @@
+/*-
+ * #%L
+ * WollMux Interfaces
+ * %%
+ * Copyright (C) 2005 - 2022 Landeshauptstadt München
+ * %%
+ * Licensed under the EUPL, Version 1.1 or – as soon they will be
+ * approved by the European Commission - subsequent versions of the
+ * EUPL (the "Licence");
+ *
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * http://ec.europa.eu/idabc/eupl5
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ * #L%
+ */
+#ifndef __de_muenchen_allg_itd51_wollmux_XPALProvider_idl__ 
+#define __de_muenchen_allg_itd51_wollmux_XPALProvider_idl__ 
+ 
+#include <com/sun/star/uno/XInterface.idl> 
+  
+module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
+ 
+/** 
+  Das Interface XPALProvider stellt Methoden zum Auslesen der aktuellen
+  Persönliche Absenderliste (PAL) zur Verfügung.
+ */
+interface XPALProvider
+{
+    /**
+      Diese Methode liefert eine alphabethisch aufsteigend sortierte Liste mit
+      String-Repräsentationen aller Einträge der Persönlichen Absenderliste (PAL)
+      in einem String-Array. Die genaue Form der String-Repräsentationen wird
+      von diesem Interface nicht vorgeschrieben, sondern ist im Falle des WollMux
+      abhängig vom Wert von SENDER_DISPLAYTEMPLATE in der WollMux-Konfiguration.
+      Unabhängig von SENDER_DISPLAYTEMPLATE enthalten die über diese Methode
+      zurückgelieferten String-Repräsentationen der PAL-Einträge aber auf jeden
+      Fall immer am Ende den String "§§%=%§§" gefolgt vom Schlüssel des
+      entsprechenden Eintrags!
+     */
+	sequence< string > getPALEntries();
+
+    /**
+      Diese Methode liefert eine String-Repräsentation des aktuell aus der
+      persönlichen Absenderliste (PAL) ausgewählten Absenders zurück.
+      Die genaue Form der String-Repräsentation wird von diesem Interface nicht
+      vorgeschrieben, sondern ist im Falle des WollMux abhängig vom Wert von
+      SENDER_DISPLAYTEMPLATE in der WollMux-Konfiguration.
+      Unabhängig von SENDER_DISPLAYTEMPLATE enthält die über diese Methode
+      zurückgelieferte String-Repräsentation aber auf jeden Fall immer am Ende
+      den String "§§%=%§§" gefolgt vom Schlüssel des aktuell ausgewählten
+      Absenders.
+      Ist die PAL leer oder noch kein Absender ausgewählt, so liefert die Methode
+      den Leerstring "" zurück. Dieser Sonderfall sollte natürlich entsprechend
+      durch die aufrufende Methode behandelt werden.
+      
+      @return den aktuell aus der PAL ausgewählten Absender als String. Ist kein
+              Absender ausgewählt wird der Leerstring "" zurückgegeben.
+     */
+	string getCurrentSender();
+};
+
+}; }; }; }; }; };
+ 
+#endif

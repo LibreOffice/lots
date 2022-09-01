@@ -1,0 +1,5 @@
+de.muenchen.allg.itd51.wollmux.event.WollMuxEventListenerImpl
+de.muenchen.allg.itd51.wollmux.event.CheckInstallationListener
+de.muenchen.allg.itd51.wollmux.document.commands.OnProcessTextDocument
+de.muenchen.allg.itd51.wollmux.sender.SenderEventListener
+de.muenchen.allg.itd51.wollmux.slv.events.ContentBasedDirectiveEventListener

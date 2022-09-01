@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  WollMux LibreOffice Extension
+  %%
+  Copyright (C) 2005 - 2021 Landeshauptstadt München
+  %%
+  Licensed under the EUPL, Version 1.1 or – as soon they will be
+  approved by the European Commission - subsequent versions of the
+  EUPL (the "Licence");
+  You may not use this work except in compliance with the Licence.
+  You may obtain a copy of the Licence at:
+  http://ec.europa.eu/idabc/eupl5
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the Licence is distributed on an "AS IS" basis,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the Licence for the specific language governing permissions and
+  limitations under the Licence.
+  #L%
+  -->
+
+<description xmlns="http://openoffice.org/extensions/description/2006"
+	     xmlns:xlink="http://www.w3.org/1999/xlink">
+	<version value="${project.version}" />
+	<identifier value="${wollmux.oxt.id}"/>
+	<dependencies>
+		<OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>
+	</dependencies>
+
+	<publisher>
+		<name xlink:href="http://www.wollmux.org" lang="de">WollMux.org</name>
+	</publisher>
+
+	<display-name>
+		<name lang="de-DE">${wollmux.oxt.name}</name>
+	</display-name>
+
+	<update-information>
+	  <src xlink:href="http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/packages/WollMux-snapshot/WollMux.update.xml"/>
+	</update-information>
+<!--	<registration>
+		<simple-license accept-by="admin" default-license-id="en-NZ" suppress-on-update="true" >
+			<license-text xlink:href="registration/license_de-DE.txt" lang="de-DE" />
+			<license-text xlink:href="registration/license_en-GB.txt" lang="en-GB" />
+			<license-text xlink:href="registration/license_en-NZ.txt" lang="en-NZ" license-id="en-NZ" />
+			<license-text xlink:href="registration/license_en-US.txt" lang="en-US" />
+		</simple-license>
+	</registration>
+-->
+</description>

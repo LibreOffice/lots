@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE library:library PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "library.dtd">
+<library:library xmlns:library="http://openoffice.org/2000/library" library:name="WollMux"
+  library:readonly="false" library:passwordprotected="false">
+  <library:element library:name="about" />
+  <library:element library:name="email_auth" />
+  <library:element library:name="DatasourceSearchDialog" />
+  <library:element library:name="DatensatzBearbeitenPerson" />
+  <library:element library:name="DatensatzBearbeitenOrga" />
+  <library:element library:name="DatensatzBearbeitenFusszeile" />
+  <library:element library:name="DBDatasourceDialog" />
+  <library:element library:name="print_progress" />
+  <library:element library:name="gender_dialog" />
+  <library:element library:name="if_then_else" />
+  <library:element library:name="if_then_else2" />
+  <library:element library:name="seriendruck_format" />
+  <library:element library:name="seriendruck_mail" />
+  <library:element library:name="seriendruck_printer" />
+  <library:element library:name="seriendruck_start" />
+  <library:element library:name="seriendruck_single" />
+  <library:element library:name="slv_count" />
+  <library:element library:name="pal_dialog" />
+  <library:element library:name="print_parameter" />
+  <library:element library:name="edit_table_columns" />
+</library:library>

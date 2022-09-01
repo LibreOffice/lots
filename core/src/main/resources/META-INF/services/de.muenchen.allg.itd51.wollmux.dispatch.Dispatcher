@@ -1,0 +1,3 @@
+de.muenchen.allg.itd51.wollmux.dispatch.WollMuxDispatcher
+de.muenchen.allg.itd51.wollmux.slv.dispatch.ContentBasedDirectiveDispatcher
+de.muenchen.allg.itd51.wollmux.sender.dispatch.SenderDispatcher
