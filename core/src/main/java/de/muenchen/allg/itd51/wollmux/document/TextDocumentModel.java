@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,6 +45,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -732,6 +735,18 @@ public class TextDocumentModel
     {
       isFormDocument = true;
     }
+  }
+  
+  /**
+   * Returns whether the passed MIME type is one for a document template.
+   */
+  public boolean isOpenedAsTemplate(final String filePath) {
+    if (filePath.equals("") || "odt".equals(FilenameUtils.getExtension(filePath)))
+    {
+      return false;
+    }
+    
+    return true;
   }
 
   /**

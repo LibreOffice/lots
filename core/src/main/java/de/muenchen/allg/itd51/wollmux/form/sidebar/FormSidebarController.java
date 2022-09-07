@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -37,10 +38,12 @@ import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.FocusEvent;
 import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.TextEvent;
+import com.sun.star.awt.WindowEvent;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XFocusListener;
 import com.sun.star.awt.XWindow;
 import com.sun.star.frame.XModel;
+import com.sun.star.lang.EventObject;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.XComponentContext;
@@ -48,6 +51,7 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
+import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.db.ThingyDatasource;
@@ -63,7 +67,9 @@ import de.muenchen.allg.itd51.wollmux.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.form.model.VisibilityGroup;
+import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
+import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.util.UnoProperty;
 
@@ -159,6 +165,36 @@ public class FormSidebarController
     
     this.formSidebarPanel = new FormSidebarPanel(context, xWindow, resourceUrl, this);
 
+    AbstractWindowListener windowAdapter = new AbstractWindowListener()
+    {
+      @Override
+      public void windowResized(WindowEvent e)
+      {
+        //
+      }
+
+      @Override
+      public void windowShown(EventObject event)
+      { 
+        if (documentController != null && !documentController.getModel().isOpenedAsTemplate(
+            documentController.getModel().doc.getURL()))
+        {
+          documentController.setFormFieldsPreviewMode(true);
+        } else if (documentController != null) {
+          documentController.setFormFieldsPreviewMode(false);
+        }
+        
+        ConnectionModel.addOpenCalcWindows();
+      }
+
+      @Override
+      public void windowHidden(EventObject event)
+      {
+        //
+      }
+    };
+    xWindow.addWindowListener(windowAdapter);
+    
     if (DocumentManager.hasTextDocumentController(doc))
     {
       isUnregistered = true;
@@ -222,15 +258,23 @@ public class FormSidebarController
         formModel.setFormSidebarController(this);
         formSidebarPanel.createTabControl(formConfig, formModel);
         
+        if (!documentController.getModel().isOpenedAsTemplate(
+            documentController.getModel().doc.getURL()))
+        {
+          this.documentController.setFormFieldsPreviewMode(true);
+        } else {
+          this.documentController.setFormFieldsPreviewMode(false);
+        }
+        
         this.scanExecCommands();
         this.setFormularwerte();
-
+        
         formModel.updateFormControlsVisibility();
        
         Map<String,Control> formFieldValues = formModel.getFormControls();
         this.updateFormUiValues(formFieldValues);
         this.initFormularwerteBackgroundColor(formFieldValues);
-        
+                
         processUIElementEvents = true;
       } catch (FormModelException e)
       {
