@@ -114,12 +114,12 @@ public class HTMLElementTest
     HTMLElement element = new HTMLElement(
         "<html><font style=\"font-size: 24pt;\">Örtlicher Ausbildungsplan für den <br>Studiengang</font></html>");
     FontDescriptor fontDesc = element.getFontDescriptor();
-    assertEquals(24, fontDesc.Height);
+    assertEquals(24 * 2/3, fontDesc.Height);
     assertEquals("Örtlicher Ausbildungsplan für den \nStudiengang", element.getText());
 
     element = new HTMLElement(
         "<html><p style=\"font-size: 24pt;\">Örtlicher Ausbildungsplan für den <br>Studiengang</font></html>");
     fontDesc = element.getFontDescriptor();
-    assertEquals(24, fontDesc.Height);
+    assertEquals(24 * 2/3, fontDesc.Height);
   }
 }
