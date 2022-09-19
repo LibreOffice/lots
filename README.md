@@ -9,8 +9,8 @@ WollMux is licensed under the European Union Public Licence (EUPL - http://joinu
 
 ## How to build?
 WollMux is separated into 3 modules:
-* wollmux: all main classes of the extension
-* [wollmux-interfaces](idl/README.md): interfaces of the UNO API
+* wollmux: All main classes of the extension
+* [wollmux-interfaces](idl/): UNO API Interfaces
 * [unohelper](https://github.com/WollMux/UNOHelper): Support classes for using UNO
 
 The following applications have to be installed to compile WollMux:
