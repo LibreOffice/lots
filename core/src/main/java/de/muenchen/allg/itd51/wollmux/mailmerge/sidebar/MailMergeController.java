@@ -60,16 +60,19 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoHelperException;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import de.muenchen.allg.itd51.wollmux.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnSetFormValue;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentControllerInitialized;
+import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
@@ -174,7 +177,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
         LOGGER.debug("initialized");
         openDatasourceFromLastStoredSettings(
             textDocumentController.getModel().getMailmergeConfig());
-        showPreviewFiedls(false);
+        textDocumentController.setFormFieldsPreviewMode(false);
         unregisterListener();
       }
     }
@@ -186,7 +189,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     boolean isPreview = previewModel.isPreview();
     gui.updatePreview(isPreview, previewModel.getPreviewNumber());
     textDocumentController.collectNonWollMuxFormFields();
-    showPreviewFiedls(isPreview);
+    textDocumentController.setFormFieldsPreviewMode(isPreview);
     updatePreviewFields();
   }
 
@@ -223,17 +226,6 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
   public void dispose()
   {
     unregisterListener();
-  }
-
-  /**
-   * Changes the document to show the field names or their content.
-   *
-   * @param hide
-   *          If true, the content is shown, otherwise the names.
-   */
-  public void showPreviewFiedls(boolean hide)
-  {
-    textDocumentController.setFormFieldsPreviewMode(hide);
   }
 
   /**
@@ -381,6 +373,26 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
 
         if (doc != null)
         {
+          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
+              textDocumentController, WollMuxFiles.isDebugMode());
+
+          try
+          {
+            dci.scanInsertFormValueCommands();
+
+            textDocumentController.getFormModel();
+            
+            Map<String,String> formFieldValues = textDocumentController.getFormFieldValues();
+
+            for (Map.Entry<String, String> entry: formFieldValues.entrySet())
+            {
+              textDocumentController.updateDocumentFormFields(entry.getKey());
+            }
+          } catch (FormModelException e)
+          {
+            LOGGER.error("", e);
+          }
+          
           setDatasource(ConnectionModel.addAndSelectDatasource(doc, Optional.empty()));
           gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
         }
@@ -635,6 +647,10 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     datasourceChanged();
   }
 
+  public void setPreviewMode(boolean isPreview)
+  {
+    textDocumentController.setFormFieldsPreviewMode(isPreview);
+  }
   /**
    * Set the fields in the document to the content of the data source.
    */

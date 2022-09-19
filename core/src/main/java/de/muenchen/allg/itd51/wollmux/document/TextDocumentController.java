@@ -140,7 +140,7 @@ public class TextDocumentController
   public TextDocumentController(TextDocumentModel model, FunctionLibrary globalFunctions, DialogLibrary globalDialogs)
   {
     this.model = model;
-    this.formFieldPreviewMode = true;
+    this.setFormFieldsPreviewMode(true);
     this.globalFunctions = globalFunctions;
     this.globalDialogs = globalDialogs;
 
@@ -1264,7 +1264,6 @@ public class TextDocumentController
   {
     this.formFieldPreviewMode = previewMode;
     updateAllFormFields();
-    cleanupGarbageOfUnreferencedAutofunctions();
   }
 
   /**
@@ -1551,8 +1550,6 @@ public class TextDocumentController
           }
           updateDocumentFormFields(fieldId);
         }
-
-        cleanupGarbageOfUnreferencedAutofunctions();
       } catch (java.lang.Exception e)
       {
         LOGGER.error("", e);

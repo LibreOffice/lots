@@ -219,11 +219,12 @@ public class GuiFactory
    * @return A new combo box.
    */
   public static XControl createCombobox(XMultiComponentFactory xMCF, XComponentContext context, String text,
-      AbstractItemListener listener, Rectangle size, SortedMap<String, Object> props)
+      AbstractItemListener listener, AbstractTextListener textListener, Rectangle size, SortedMap<String, Object> props)
   {
     XControl ctrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_COMBO_BOX, props, size);
     XTextComponent tf = UNO.XTextComponent(ctrl);
     tf.setText(text);
+    tf.addTextListener(textListener);
     XComboBox cmb = UNO.XComboBox(ctrl);
     cmb.addItemListener(listener);
     cmb.setDropDownLineCount((short) 10);

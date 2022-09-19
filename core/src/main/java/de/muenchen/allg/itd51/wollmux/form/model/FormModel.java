@@ -170,6 +170,7 @@ public class FormModel
       }
       if (!value.equals(control.getValue()))
       {
+        txtDocController.setValueChanged(control.getId(), value); 
         control.setValue(value);
         values.put(control.getId(), value);
       }
@@ -376,7 +377,7 @@ public class FormModel
           .ifPresent(autofill -> setValue(c.getId(), autofill.getResult(idToValue())));
     }
   }
-
+  
   /**
    * Has the form a control with the given ID.
    *

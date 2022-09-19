@@ -25,7 +25,6 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.sidebar;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import com.sun.star.accessibility.XAccessible;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.Selection;
@@ -120,14 +119,14 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
       @Override
       public void windowShown(EventObject event)
       {
+        controller.setPreviewMode(false);
         ConnectionModel.addOpenCalcWindows();
-        controller.showPreviewFiedls(false);
       }
 
       @Override
       public void windowHidden(EventObject event)
       {
-        controller.showPreviewFiedls(true);
+        //
       }
     };
     parentWindow.addWindowListener(windowAdapter);
@@ -415,7 +414,7 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     SortedMap<String, Object> props = new TreeMap<>();
     props.put("Dropdown", true);
     mailmergeBox = UNO.XComboBox(GuiFactory.createCombobox(xMCF, context, "", controller::addMailMergeField,
-        new Rectangle(0, 0, 80, 32), props));
+        null, new Rectangle(0, 0, 80, 32), props));
     UNO.XWindow(mailmergeBox).setEnable(false);
     mailMergeField = new MailMergeField(mailmergeBox);
     controlContainer.addControl("mailmergeBox", UNO.XControl(mailmergeBox));
@@ -430,7 +429,7 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     props = new TreeMap<>();
     props.put("Dropdown", true);
     specialBox = UNO.XComboBox(
-        GuiFactory.createCombobox(xMCF, context, "", controller::addSpecialField, new Rectangle(0, 0, 80, 32), props));
+        GuiFactory.createCombobox(xMCF, context, "", controller::addSpecialField, null, new Rectangle(0, 0, 80, 32), props));
     UNO.XWindow(specialBox).setEnable(false);
     SpecialField.addItems(specialBox);
     controlContainer.addControl("specialBox", UNO.XControl(specialBox));
