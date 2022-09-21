@@ -42,7 +42,7 @@ public class WollMuxDispatcher extends Dispatcher
         TextbausteinDispatch.COMMAND_REFERENCE, PlatzhalterAnspringenDispatch.COMMAND,
         FormularMaxDispatch.COMMAND, SeriendruckDispatch.COMMAND, FunctionDialogDispatch.COMAND,
         DumpInfoDispatch.COMMAND, AboutDispatch.COMMAND, OpenTemplateDispatch.COMMAND_TEMPLATE,
-        OpenTemplateDispatch.COMMAND_DOCUMENT, KillDispatch.COMMAND);
+        OpenTemplateDispatch.COMMAND_DOCUMENT, KillDispatch.COMMAND, ImportFormularinhaltDispatch.COMMAND);
   }
 
   @Override
@@ -82,9 +82,12 @@ public class WollMuxDispatcher extends Dispatcher
       return new OpenTemplateDispatch(origDisp, origUrl, frame, false);
     case KillDispatch.COMMAND:
       return new KillDispatch(origDisp, origUrl, frame);
+    case ImportFormularinhaltDispatch.COMMAND:
+      return new ImportFormularinhaltDispatch(origDisp, origUrl, frame);
     default:
       return null;
     }
+
   }
 
 }

@@ -36,6 +36,10 @@ Sub TextbausteinVerweisEinfuegen
   dispatchURL(&quot;wollmux:TextbausteinVerweisEinfuegen&quot;)
 End Sub
 
+Sub ImportFormularinhalt
+  dispatchURL(&quot;wollmux:ImportFormularinhalt&quot;)
+End Sub
+
 Sub Seriendruck
   dispatchURL(&quot;wollmux:Seriendruck&quot;)
 End Sub

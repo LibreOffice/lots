@@ -258,6 +258,27 @@
           </prop>
         </node>
 
+        <node oor:name="m4" oor:op="replace">
+          <prop oor:name="URL" oor:type="xs:string">
+            <value>wollmux:ImportFormularinhalt</value>
+          </prop>
+          <prop oor:name="Title" oor:type="xs:string">
+            <value>Importiere Formularinhalt</value>
+            <value xml:lang="de">Importiere Formularinhalt</value>
+            <value xml:lang="nl">Inhoud van formulier importeren</value>
+            <value xml:lang="en">Import content of formular</value>
+          </prop>
+          <prop oor:name="ImageIdentifier" oor:type="xs:string">
+            <value/>
+          </prop>
+          <prop oor:name="Target" oor:type="xs:string">
+            <value>_self</value>
+          </prop>
+          <prop oor:name="Context" oor:type="xs:string">
+            <value>com.sun.star.text.TextDocument</value>
+          </prop>
+        </node>
+
       </node>
       
       <node oor:name="de.muenchen.allg.itd51.wollmux.WerkzeugeFuerVorlagenersteller" oor:op="replace">
@@ -407,8 +428,8 @@
           </prop>
         </node>
       </node>
-      
      
     </node>
+    
   </node>
 </oor:component-data>
