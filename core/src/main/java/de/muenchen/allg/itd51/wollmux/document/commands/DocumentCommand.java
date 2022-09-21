@@ -46,6 +46,7 @@ import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.document.VisibilityElement;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
 import de.muenchen.allg.itd51.wollmux.util.L;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 
 /**
  * A document command with its properties like visibility, execution state and groups.
@@ -1162,12 +1163,19 @@ public abstract class DocumentCommand
         currentSep = sep;
       }
 
-      try
+      if(dbSpalte.compareToIgnoreCase("Telefon")==0 && isTelefonManually())
       {
-        trafo = wmCmd.get("WM").get("TRAFO").toString();
-      } catch (NodeNotFoundException e)
+
+      }
+      else
       {
-        // TRAFO is optional
+        try
+        {
+          trafo = wmCmd.get("WM").get("TRAFO").toString();
+        } catch (NodeNotFoundException e)
+        {
+          // TRAFO is optional
+        }
       }
     }
 
@@ -1203,6 +1211,39 @@ public abstract class DocumentCommand
     {
       return true;
     }
+    /**
+     * Check if Telephone number can be set manually, e.g by a mobile number.
+     *
+     * @return True if Telephone number can be set manually.
+     */
+    protected boolean isTelefonManually()
+    {
+      ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
+      if (wmConf == null || wmConf.count() == 0)
+      {
+        return false;
+      }
+
+      ConfigThingy log = wmConf.query("SetTelefonManually");
+      if (log.count() > 0)
+      {
+        try
+        {
+          String mode = log.getLastChild().toString();
+
+          if (mode.compareToIgnoreCase("true") == 0 )
+          {
+            return true;
+          }
+        } catch (NodeNotFoundException x)
+        {
+          LOGGER.error("", x);
+        }
+      }
+
+      return false;
+    }
+
   }
 
   /**
