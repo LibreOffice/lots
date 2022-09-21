@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.Timer;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +149,11 @@ public class FormSidebarController
       processUIElementEvents = true;
     }
   };
+
+  private Timer setValueTimer;
+  private boolean isInSetValueTimer = false;
   
+  private List<Pair<String,String>> setValueList = new ArrayList<>();
   /**
    * Create a new controller and the gui of the form.
    *
@@ -206,6 +213,9 @@ public class FormSidebarController
       isUnregistered = false;
       WollMuxEventHandler.getInstance().registerListener(this);
     }
+    setValueTimer = new Timer(50, e -> setValue());
+    setValueTimer.setCoalesce(true);
+    setValueTimer.setRepeats(false);
     
   }
 
@@ -238,8 +248,10 @@ public class FormSidebarController
     initController(docController);
   }
   
+  private boolean initDone = false;
   private void initController(TextDocumentController documentController)
   {
+    initDone = false;
     if (documentController == null)
     {
       LOGGER.trace("{} notify(): documentController is NULL.", this.getClass().getSimpleName());
@@ -286,6 +298,7 @@ public class FormSidebarController
     }
     
     unregisterListener();
+    initDone = true;
   }
   
   private void scanExecCommands()
@@ -390,13 +403,46 @@ public class FormSidebarController
       XControl txtField = UNO.XControl(event.Source);
       String id = (String) UnoProperty.getProperty(txtField.getModel(), UnoProperty.DEFAULT_CONTROL);
       String text = (String) UnoProperty.getProperty(txtField.getModel(), UnoProperty.TEXT);
-      setDocFormModelValue(id, text);
+      if(initDone)
+      {
+        setValueList.add(Pair.of(id,text));
+        setValueTimer.restart();
+      }
+      else
+      {
+        setDocFormModelValue(id, text);
+      }
     } catch (UnoHelperException e)
     {
       LOGGER.error("", e);
     }
   }
+  private void setValue()
+  {
+    isInSetValueTimer = true;
+    List<Pair<String,String>> setValueListH = new ArrayList<>();
+    setValueListH.addAll(setValueList);
+    setValueList.clear();
 
+    String id="", value="", idH = "", valueH;
+    for (int i = 0; i < setValueListH.size(); i++)
+    {
+      valueH = setValueListH.get(i).getValue();
+      idH = setValueListH.get(i).getKey();
+      if(!id.equals(idH))
+      {
+        if(!id.equals(""))
+          setDocFormModelValue(id, value);
+        id = idH;
+      }
+      value = valueH;
+    }
+    if(!id.equals(""))
+      setDocFormModelValue(id, value);
+    isInSetValueTimer = false;
+    if(setValueList.size()>0)
+      setValueTimer.restart();
+  }
   /**
    * Update the form model with a new value. Don't handle value changes on the control which
    * triggered this action.
