@@ -252,7 +252,7 @@ public class TextModule
    * Stelle die neue frag_id enthält und in den folgenden Stellen die Argumente.
    *
    * @param identifierWithArgs
-   *          Ein String in der Form "<identifier>#arg1#...#argN", wobei der
+   *          Ein String in der Form "&lt;identifier&gt;#arg1#...#argN", wobei der
    *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
    *          werden kann.
    * @param textbausteine

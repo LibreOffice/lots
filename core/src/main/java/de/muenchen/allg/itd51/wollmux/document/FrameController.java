@@ -241,7 +241,7 @@ public class FrameController
   /**
    * Liefert den Titel des Dokuments, wie er im Fenster des Dokuments angezeigt wird,
    * ohne den Zusatz " - OpenOffice.org Writer" oder "NoTitle", wenn der Titel nicht
-   * bestimmt werden kann. TextDocumentModel('<title>')
+   * bestimmt werden kann. TextDocumentModel('&lt;title&gt;')
    */
   public synchronized String getTitle()
   {
