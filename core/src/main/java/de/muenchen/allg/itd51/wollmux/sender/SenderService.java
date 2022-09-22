@@ -547,7 +547,7 @@ public class SenderService implements XPALProvider
     } catch (SenderException e)
     {
       LOGGER.error(e.getMessage(), e);
-      InfoDialog.showInfoModal("WollMux", L.m("Personal sender list could not be updated."));
+      InfoDialog.showInfoModal("WollMux", L.m("Persönliche Absenderliste konnte nicht aktualisiert werden."));
     }
   }
 
