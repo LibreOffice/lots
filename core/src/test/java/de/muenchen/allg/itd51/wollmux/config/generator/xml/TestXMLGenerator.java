@@ -147,8 +147,8 @@ public class TestXMLGenerator
     Map<String, String> fileContentMap = new HashMap<>();
     if (windowsOS)
     {
-      // hier von 9 auf 8, weil Windows im Unterschied zu Linux (ein LineFeed) die Kombination
-      // CarriageReturn und LineFeed verwendet, also 2 Zeichen
+      // here from 9 to 8, because Windows uses the combination CarriageReturn and LineFeed
+      // in contrast to Linux (one LineFeed), so 2 characters
       assertEquals(in.length(), out.length() + 8, "Different content length");
       fileContentMap.put(getClass().getResource("tmp2.conf").getFile(), "%include \"tmp.conf\"\r\n\r\n");
       fileContentMap.put(getClass().getResource("tmp.conf").getFile(),
