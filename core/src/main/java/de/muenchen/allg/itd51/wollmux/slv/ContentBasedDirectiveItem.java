@@ -181,9 +181,9 @@ public class ContentBasedDirectiveItem
           UnoProperty.CHAR_STYLE_NAME,
           ContentBasedDirectiveModel.CHAR_STYLE_NAME_NUMBER);
 
-      // Zeichen danach auf Standardformatierung setzen, damit der Text, der
-      // danach geschrieben wird nicht auch obiges Zeichenformat besitzt:
-      // ("Standard" gilt laut DevGuide auch in englischen Versionen)
+      // Set character afterwards to standard formatting, so that the text written
+      // afterwards does not also have the above character format:
+      // ("Standard" is also valid in English versions according to DevGuide)
       Utils.setProperty(numberRange.getEnd(), UnoProperty.CHAR_STYLE_NAME, "Standard");
     }
   }
@@ -282,7 +282,7 @@ public class ContentBasedDirectiveItem
   {
     if (isCopy())
     {
-      // Behandlung von Paragraphen mit einem "Abdruck"-String
+      // Handling paragraphs with an "Abdruck" string
       String abdruckStr = copyString(count) + getCopySuffix();
       if (!textRange.getString().equals(abdruckStr))
       {
@@ -291,7 +291,7 @@ public class ContentBasedDirectiveItem
       }
     } else
     {
-      // Behandlung von normalen Verfügungspunkten:
+      // Handling normal "Verfügungspunkte" (TODO: What is the correct english term here?)
       String numberStr = ContentBasedDirectiveConfig.getNumber(count) + "\t";
       XTextRange zifferOnly = getZifferOnly();
       if (zifferOnly != null)
@@ -299,7 +299,7 @@ public class ContentBasedDirectiveItem
         zifferOnly.setString(numberStr);
       } else
       {
-        // Nummer neu anlegen, wenn sie noch gar nicht existierte
+        // Create new number if it did not exist yet
         zifferOnly = textRange.getText().createTextCursorByRange(textRange.getStart());
         zifferOnly.setString(numberStr);
         formatNumberInTextRange(zifferOnly);
