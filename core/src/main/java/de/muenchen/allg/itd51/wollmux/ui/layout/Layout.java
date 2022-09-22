@@ -28,9 +28,7 @@ import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.XControl;
 
 /**
- * Ein LayoutManager für die Sidebar.
- *
- * @author daniel.sikeler
+ * A LayoutManager for the sidebar.
  */
 public interface Layout
 {
@@ -44,17 +42,17 @@ public interface Layout
   Pair<Integer, Integer> layout(Rectangle rect);
 
   /**
-   * Fügt den Layout ein weiteres Sub-Layout hinzu.
+   * Adds another sub-layout to the layout.
    *
    * @param layout
-   *          Das neue Sub-Layout.
+   *          The new sub-layout.
    * @param weight
-   *          Die Gewichtung (Größe) im Vergleich zu den anderen Layouts.
+   *          The weighting (size) compared to the other layouts.
    */
   void addLayout(Layout layout, int weight);
 
   /**
-   * {@link #addLayout(Layout, int)} mit {@link ControlLayout} und Gewicht 1.
+   * {@link #addLayout(Layout, int)} with {@link ControlLayout} and weight 1.
    *
    * @see #addLayout(Layout, int)
    * @param control
@@ -80,11 +78,11 @@ public interface Layout
   }
 
   /**
-   * Die Höhe des Layouts.
+   * The height of the layout.
    *
    * @param width
    *          The requested width.
-   * @return Die Höhe.
+   * @return The height
    */
   int getHeightForWidth(int width);
 
