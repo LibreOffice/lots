@@ -94,7 +94,7 @@ If you have a running instance, which you like to debug. You can connect to it b
 * connection type: Standard (Socket Attach)
 * connection properties: localhost, 8000
 
-There are also some configuration changes for LibreOffice necessary. Go to **Extras** &rarr; **Options...** &rarr; **LibreOffice** &rarr; **Additional** &rarr; **Parameter...** and add the following parameters:
+There are also some configuration changes for LibreOffice necessary. Go to **Tools** &rarr; **Options...** &rarr; **LibreOffice** &rarr; **Advanced** &rarr; **Parameters...** and add the following parameters:
 * `-Xdebug`
 * `-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n`
 
