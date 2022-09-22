@@ -82,46 +82,47 @@ public class SenderService implements XPALProvider
   private static SenderService instance;
 
   /**
-   * Wird von {@link #getSelectedDatasetTransformed()} verwendet; kann null sein!
+   * Used by {@link #getSelectedDatasetTransformed()}; can be null!
    */
   protected ColumnTransformer columnTransformer;
 
   protected SenderCache cache;
 
   /**
-   * Enthält alle registrierten SenderBox-Objekte.
+   * Contains all registered {@code SenderBox} objects.
    */
   private List<XPALChangeEventListener> registeredPALChangeListener;
 
   /**
-   * Der ausgewählte Datensatz. Nur dann null, wenn data leer ist.
+   * The selected data set. Null only if data is empty.
    */
   protected Sender selectedSender = null;
 
   /**
-   * Die Datenquelle auf die sich find(), getLOS(), etc beziehen.
+   * The data source to which find(), getLOS(), etc. refer.
    */
   protected Datasource mainDatasource;
 
   /**
-   * Eine Liste, die die {@link Dataset}s enthält, die mit einer Hintergrunddatenbank verknüpft
-   * sind, deren Schlüssel jedoch darin nicht mehr gefunden wurde und deshalb nicht aktualisiert
-   * werden konnte.
+   * A list containing the {@link Dataset}s that are linked to a background
+   * database, but whose key was no longer found in it and therefore
+   * could not be updated.
    */
   protected List<Sender> lostDatasets = new ArrayList<>(0);
 
   /**
-   * Liste aller LOSDJDatasets. Die Liste muss geordnet sein, damit Datensätze mit gleichem
-   * Schlüssel über ihre Position in der Liste identifiziert werden können.
+   * List of all LOSDJDatasets.
+   * The list must be ordered so that datasets with the same key
+   * can be identified by their position in the list.
    */
   protected List<Sender> data = new ArrayList<>();
 
   protected String overrideFragDbSpalte;
 
   /**
-   * Der String, der in der String-Repräsentation von PAL-Einträgen, den Schlüssel des PAL-Eintrags
-   * vom Rest des PAL-Eintrags abtrennt (siehe auch Dokumentation der Methoden des
-   * {@link XPALProvider}-Interfaces.
+   * The string which, in the string representation of PAL entries,
+   * separates the key of the PAL entry from the rest of the PAL entry
+   * (see also documentation of the methods of the {@link XPALProvider} interface.
    */
   public static final String SENDER_KEY_SEPARATOR = "§§%=%§§";
 
@@ -136,9 +137,7 @@ public class SenderService implements XPALProvider
         senderSourceStr = senderSource.getLastChild().toString();
       } catch (NodeNotFoundException e)
       {
-        // hier geben wir im Vergleich zu früher keine Fehlermeldung mehr aus,
-        // sondern erst später, wnn
-        // tatsächlich auf die Datenquelle "null" zurück gegriffen wird.
+        // No longer issue an error message (only when the data source "null" is actually accessed)
       }
 
       String overrideFragDbSpalte;
@@ -148,7 +147,7 @@ public class SenderService implements XPALProvider
         overrideFragDbSpalte = overrideFragDbSpalteConf.getLastChild().toString();
       } catch (NodeNotFoundException x)
       {
-        // keine OVERRIDE_FRAG_DB_SPALTE Direktive gefunden
+        // no OVERRIDE_FRAG_DB_SPALTE directive found
         overrideFragDbSpalte = "";
       }
 
@@ -230,7 +229,7 @@ public class SenderService implements XPALProvider
 
     String lostKeys = lostDatasets.stream().map(Sender::getKey).collect(Collectors.joining(", "));
     if (!lostKeys.isEmpty())
-      LOGGER.info("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: {}",
+      LOGGER.info("The records with the following keys could not be updated from the database: {}",
           lostKeys);
     updateSenderList(newSender);
   }
@@ -263,8 +262,9 @@ public class SenderService implements XPALProvider
   }
 
   /**
-   * Search for a sender by evaluating the configuration or using the information of the LibreOffice
-   * profile. If one sender is found, further search strategies aren't evaluated.
+   * Suche nach einem Absender durch Auswertung der Konfiguration oder
+   * anhand der Informationen des LibreOffice Profils.
+   * Wenn ein Absender gefunden wird, werden weitere Suchstrategien nicht ausgewertet.
    *
    * @return The number of senders found.
    */
@@ -288,7 +288,7 @@ public class SenderService implements XPALProvider
           futures.add(new ByOOoUserProfileFinder(this).find(element));
         } else
         {
-          LOGGER.error("Ungültiger Schlüssel in Suchstrategie: {}", element.stringRepresentation());
+          LOGGER.error("Invalid key in search strategy: {}", element.stringRepresentation());
         }
       }
     } catch (NodeNotFoundException e)
@@ -313,16 +313,18 @@ public class SenderService implements XPALProvider
   }
 
   /**
-   * Diese Methode liefert eine String-Repräsentation des aktuell aus der persönlichen Absenderliste
-   * (PAL) ausgewählten Absenders zurück. Die String-Repräsentation enthält auf jeden Fall immer am
-   * Ende den String "§§%=%§§" gefolgt vom Schlüssel des aktuell ausgewählten Absenders. Ist die PAL
-   * leer oder noch kein Absender ausgewählt, so liefert die Methode den Leerstring "" zurück.
-   * Dieser Sonderfall sollte natürlich entsprechend durch die aufrufende Methode behandelt werden.
+   * This method returns a string representation of the sender currently
+   * selected from the personal sender list (PAL).
+   * The string representation always contains the string "§§%=%§§" at the end
+   *  followed by the key of the currently selected sender.
+   *  If the PAL is empty or no sender has been selected yet,
+   *  the method returns the empty string "".
+   *  This special case should of course be handled accordingly by the calling method.
    *
    * @see de.muenchen.allg.itd51.wollmux.XPALProvider#getCurrentSender()
    *
-   * @return den aktuell aus der PAL ausgewählten Absender als String. Ist kein Absender ausgewählt
-   *         wird der Leerstring "" zurückgegeben.
+   * @return the sender currently selected from the PAL as a string.
+   *         If no sender is selected the empty string "" is returned.
    */
   @Override
   public String getCurrentSender()
@@ -335,14 +337,15 @@ public class SenderService implements XPALProvider
   }
 
   /**
-   * Add a listener for changes in the sender list. A listener can be registered only once.
+   * Add a listener for changes in the sender list.
+   * A listener can be registered only once.
    *
    * @param listener
    *          The listener to add.
    */
   public void addPALChangeEventListener(XPALChangeEventListener listener)
   {
-    LOGGER.trace("PersoenlicheAbsenderliste::addPALChangeEventListener()");
+    LOGGER.trace("SenderService::addPALChangeEventListener()");
 
     if (listener == null)
     {
@@ -386,10 +389,10 @@ public class SenderService implements XPALProvider
   }
 
   /**
-   * Diese Methode liefert eine alphabethisch aufsteigend sortierte Liste mit
-   * String-Repräsentationen aller Einträge der Persönlichen Absenderliste (PAL) in einem
-   * String-Array. Jeder PAL-Eintrag enthält immer am Ende den String "§§%=%§§" gefolgt vom
-   * Schlüssel des entsprechenden Eintrags!
+   * This method returns an alphabetically ascending sorted list with string
+   * representations of all Personal Sender List (PAL) entries in a string array.
+   * Each PAL entry always contains the string "§§%=%§§" at the end
+   * followed by the key of the corresponding entry!
    *
    * @see de.muenchen.allg.itd51.wollmux.XPALProvider#getPALEntries()
    * @return Sender names
@@ -430,22 +433,22 @@ public class SenderService implements XPALProvider
           select(palDatasets.get(idx));
         } catch (SenderException e)
         {
-          LOGGER.error("Setzen des Senders '{}' schlug fehl, da der index '{}'"
-              + " nicht mit der PAL übereinstimmt (Inkonsistenzen?)", senderName, idx, e);
+          LOGGER.error("Setting sender '{}' failed because index '{}'"
+              + " does not match the PAL (inconsistencies?)", senderName, idx, e);
         }
       }
     } else
     {
-      LOGGER.error("Setzen des Senders '{}' schlug fehl, da der index '{}'"
-          + " nicht mit der PAL übereinstimmt (Inkonsistenzen?)", senderName, idx);
+      LOGGER.error("Setting sender '{}' failed because index '{}'"
+          + " does not match the PAL (inconsistencies?)", senderName, idx);
     }
   }
 
   /**
    * Get the values of the current sender.
    *
-   * @return Mapping from schema to value for the current sender. If a value is null, the column is
-   *         omitted.
+   * @return Mapping from schema to value for the current sender.
+   *         If a value is null, the column is omitted.
    */
   public Map<String, String> getCurrentSenderValues()
   {
@@ -482,7 +485,7 @@ public class SenderService implements XPALProvider
   {
     if (!getSchema().contains(column))
     {
-      throw new ColumnNotFoundException("Spalte existiert nicht");
+      throw new ColumnNotFoundException("Column does not exist");
     }
     String value = getSelectedDatasetTransformed().get(column);
     if (value == null)
@@ -507,13 +510,13 @@ public class SenderService implements XPALProvider
         overrideFragConf = new ConfigThingy("overrideFrag", value);
       } catch (SenderException e)
       {
-        throw new SenderException("Kein Absender ausgewählt => OVERRIDE_FRAG_DB_SPALTE bleibt wirkungslos", e);
+        throw new SenderException("No sender selected => OVERRIDE_FRAG_DB_SPALTE is ineffective", e);
       } catch (ColumnNotFoundException e)
       {
-        LOGGER.debug("OVERRIDE_FRAG_DB_SPALTE {} ist nicht vorhanden", overrideFragDbSpalte, e);
+        LOGGER.debug("OVERRIDE_FRAG_DB_SPALTE {} does not exist", overrideFragDbSpalte, e);
       } catch (IOException | SyntaxErrorException e)
       {
-        throw new SenderException("Fehler beim Parsen der OVERRIDE_FRAG_DB_SPALTE " + overrideFragDbSpalte, e);
+        throw new SenderException("Error parsing OVERRIDE_FRAG_DB_SPALTE " + overrideFragDbSpalte, e);
       }
     }
 
@@ -576,18 +579,18 @@ public class SenderService implements XPALProvider
   }
 
   /**
-   * Falls kein {@link ColumnTransformer} gesetzt wurde, so liefert diese Funktion das selbe wie
-   * {@link #getSender()}, ansonsten wird das durch den ColumnTransformer transformierte Dataset
-   * geliefert.
+   * If no {@link ColumnTransformer} is set, this function returns the same
+   * as {@link #getSender()}, otherwise the dataset transformed
+   * by the ColumnTransformer is returned.
    *
    * @throws SenderException
-   *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
+   *           if the LOS is empty (otherwise one record is always selected).
    */
   Sender getSelectedDatasetTransformed() throws SenderException
   {
     if (selectedSender == null)
     {
-      throw new SenderException("Es ist kein Sender ausgewählt");
+      throw new SenderException("No sender is selected");
     }
     if (columnTransformer == null)
     {
@@ -622,7 +625,7 @@ public class SenderService implements XPALProvider
   {
     if (sender != null && !data.contains(sender))
     {
-      throw new SenderException("Unbekannter Sender wurde ausgewählt.");
+      throw new SenderException("Unknown sender was selected.");
     }
     if (this.selectedSender != null)
     {
