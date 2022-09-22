@@ -96,7 +96,8 @@ public class GuiFactory
     XControl buttonCtrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_BUTTON, props, size);
     XButton button = UNO.XButton(buttonCtrl);
     button.setLabel(label);
-    button.addActionListener(listener);
+    if (listener != null)
+      button.addActionListener(listener);
     return buttonCtrl;
   }
 
@@ -130,7 +131,8 @@ public class GuiFactory
     XControl buttonCtrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_EDIT, props, size);
 
     XTextComponent txt = UNO.XTextComponent(buttonCtrl);
-    txt.addTextListener(textListener);
+    if (textListener != null)
+      txt.addTextListener(textListener);
     txt.setText(text);
     return buttonCtrl;
   }
@@ -224,7 +226,8 @@ public class GuiFactory
     XControl ctrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_COMBO_BOX, props, size);
     XTextComponent tf = UNO.XTextComponent(ctrl);
     tf.setText(text);
-    tf.addTextListener(textListener);
+    if (textListener != null)
+      tf.addTextListener(textListener);
     XComboBox cmb = UNO.XComboBox(ctrl);
     cmb.addItemListener(listener);
     cmb.setDropDownLineCount((short) 10);
@@ -254,7 +257,8 @@ public class GuiFactory
   {
     XControl ctrl = createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_NUMERIC_FIELD, props, size);
     UNO.XNumericField(ctrl).setValue(value);
-    UNO.XTextComponent(ctrl).addTextListener(listener);
+    if (listener != null)
+      UNO.XTextComponent(ctrl).addTextListener(listener);
 
     return ctrl;
   }
