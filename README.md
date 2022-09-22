@@ -14,7 +14,7 @@ WollMux is separated into 3 modules:
 * [unohelper](https://github.com/WollMux/UNOHelper): Support classes for using UNO
 
 The following applications have to be installed to compile WollMux:
-* [JAVA JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* JAVA Development Kit (e.g. [Adoptium](https://adoptium.net)) (at least Java 11)
 * [Apache Maven](https://maven.apache.org/download.cgi)
 * [Git](http://git-scm.com/downloads/)
 * [LibreOffice SDK](https://api.libreoffice.org/docs/install.html)
