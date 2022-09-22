@@ -32,9 +32,7 @@ import org.slf4j.LoggerFactory;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 /**
- * Funktionen zur Lokalisierung.
- *
- * @author Matthias Benkmann (D-III-ITD D.10)
+ * Localization functions
  */
 public class L
 {
@@ -44,8 +42,7 @@ public class L
   private static StringBuilder debugMessages;
 
   /**
-   * Wird für die aktuelle Sprache initialisiert und bildet einen Originalstring auf
-   * einen übersetzten String ab.
+   * Initialized for the current language and maps an original string to a translated string.
    */
   private static final Map<String, String> mapMessageToTranslation =
     new HashMap<>();
@@ -54,8 +51,8 @@ public class L
   {}
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
-   * ansonsten der Originalstring.
+   * If a translation is available for original, it will be returned,
+   * otherwise the original string.
    */
   public static String m(String original)
   {
@@ -67,49 +64,44 @@ public class L
   }
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
-   * ansonsten der Originalstring. Dabei werden alle Vorkommen von "%1" durch
-   * insertion1 ersetzt.
+   * If a translation is available for original, it will be returned,
+   * otherwise the original string.
+   * All occurrences of "%1" will be replaced by insertion1.
    */
   public static String m(String original, Object insertion1)
   {
-    // nicht replaceAll verwenden, weil es \ und $ besonders
-    // interpretiert
+    // do not use replaceAll because it interprets \ and $ specially
     return replace(m(original), "%1", "" + insertion1);
   }
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
-   * ansonsten der Originalstring. Dabei werden alle Vorkommen von "%1" durch
-   * insertion1 und von "%2" durch insertion2 ersetzt.
+   * If a translation is available for original, it will be returned,
+   * otherwise the original string.
+   * All occurrences of "%1" will be replaced by insertion1 and of "%2" by insertion2.
    */
   public static String m(String original, Object insertion1, Object insertion2)
   {
-    // nicht replaceAll verwenden, weil es \ und $ besonders
-    // interpretiert
+ // do not use replaceAll because it interprets \ and $ specially
     return replace(m(original, insertion1), "%2", "" + insertion2);
   }
 
   public static String m(String original, Object insertion1, Object insertion2,
       Object insertion3)
   {
-    // nicht replaceAll verwenden, weil es \ und $ besonders
-    // interpretiert
+    // do not use replaceAll because it interprets \ and $ specially
     return replace(m(original, insertion1, insertion2), "%3", "" + insertion3);
   }
 
   public static String m(String original, Object insertion1, Object insertion2,
       Object insertion3, Object insertion4)
   {
-    // nicht replaceAll verwenden, weil es \ und $ besonders
-    // interpretiert
+    // do not use replaceAll because it interprets \ and $ specially
     return replace(m(original, insertion1, insertion2, insertion3), "%4", ""
       + insertion4);
   }
 
   /**
-   * Ersetzt in where alle Vorkommen von what durch withWhat und liefert das Ergebnis
-   * zurück.
+   * Replaces in where all occurrences of what by withWhat and returns the result returned.
    */
   private static String replace(String where, String what, String withWhat)
   {
@@ -129,8 +121,7 @@ public class L
   }
 
   /**
-   * Liefert alle während der Initialisierung aufgelaufenen Debug-Messages zurück und
-   * gibt dann ihren Speicher frei.
+   * Returns all debug messages accumulated during initialization and then releases their memory.
    */
   public static String flushDebugMessages()
   {
@@ -138,7 +129,7 @@ public class L
     if (debugMessages != null)
     {
       str = debugMessages.toString();
-      debugMessages = null; // Speicher freigeben
+      debugMessages = null; // Free memory
     }
     else
       str = "";
@@ -147,10 +138,10 @@ public class L
   }
 
   /**
-   * Initialisiert die Übersetzungs-Map mit l10n.
+   * Initializes the translation map with l10n.
    *
    * @param l10n
-   *          ein beliebiger Knoten mit "L10n"-Unterknoten.
+   *          any node with "L10n" subnodes.
    */
   public static void init(ConfigThingy l10n)
   {
