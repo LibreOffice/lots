@@ -12,6 +12,6 @@ idl/de/muenchen/allg/itd51/wollmux/*.class
 release.properties
 /target/
 **/.settings/org.sonarlint.eclipse.core.prefs
-**/bin
+*/**/bin
 dist/
 .settings
