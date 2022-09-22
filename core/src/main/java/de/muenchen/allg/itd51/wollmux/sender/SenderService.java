@@ -66,6 +66,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.sender.dialog.PersoenlicheAbsenderlisteVerwalten;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Entry point for editing or selecting sender and adding or removing sender from the list.
@@ -546,7 +547,7 @@ public class SenderService implements XPALProvider
     } catch (SenderException e)
     {
       LOGGER.error(e.getMessage(), e);
-      InfoDialog.showInfoModal("WollMux", "Persönliche Absenderliste konnte nicht aktualisiert werden.");
+      InfoDialog.showInfoModal("WollMux", L.m("Personal sender list could not be updated."));
     }
   }
 
