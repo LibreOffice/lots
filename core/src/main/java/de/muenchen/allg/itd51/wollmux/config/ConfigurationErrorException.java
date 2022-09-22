@@ -23,14 +23,10 @@
 package de.muenchen.allg.itd51.wollmux.config;
 
 /**
- * wird geworfen, wenn eine Fehlkonfiguration festgestellt wird (d.h. Benutzer hat Config verbockt)
- * @author Matthias Benkmann (D-III-ITD 5.1)
+ * Is thrown when a misconfiguration is detected (user error)
  */
 public class ConfigurationErrorException extends RuntimeException
 {
-  /**
-   * keine Ahnung, was das soll, aber es macht Eclipse glücklich.
-   */
   private static final long serialVersionUID = -2457549809413613658L;
   public ConfigurationErrorException() {super();}
   public ConfigurationErrorException(String message) {super(message);}
