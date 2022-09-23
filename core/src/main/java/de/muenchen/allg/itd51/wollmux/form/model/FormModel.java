@@ -290,15 +290,17 @@ public class FormModel
       }
       modifiedGroups.forEach(g -> g.computeVisibility(newValues));
 
-        for (VisibilityGroup g : modifiedGroups)
-        {
-          if (txtDocController != null && formSidebarController != null) {
-            //update vis. in doc
-            txtDocController.setVisibilityChanged(g.getGroupId(), g.isVisible());
-            //update vis in form-ui
-            formSidebarController.visibilityChanged(g.getGroupId());
-          }
+      for (VisibilityGroup g : modifiedGroups)
+      {
+        if (txtDocController != null && formSidebarController != null) {
+          //update vis. in doc
+          txtDocController.setVisibilityChanged(g.getGroupId(), g.isVisible());
+          //update vis in form-ui
+          formSidebarController.visibilityChanged(g.getGroupId());
         }
+      }
+
+      formSidebarController.checkTabIsOk();
     }
   }
 
