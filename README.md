@@ -47,7 +47,6 @@ Then run the following commands to download and build WollMux:
 
 ```
 git clone https://github.com/WollMux/WollMux.git
-git checkout WollMux_18.2
 mvn clean package
 ```
 
