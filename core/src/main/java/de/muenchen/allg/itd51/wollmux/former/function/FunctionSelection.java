@@ -34,13 +34,13 @@ public class FunctionSelection implements FunctionSelectionAccess
   /**
    * Dieser spezielle Funktionsname signalisiert, dass keine Funktion ausgewählt ist.
    */
-  public static final String NO_FUNCTION = L.m("<keine>");
+  public static final String NO_FUNCTION = L.m("<none>");
 
   /**
    * Dieser spezielle Funktionsname signalisiert, dass der Benutzer die Funktion manuell eingegeben
    * hat und sie direkt in dieser FunctionSelection gespeichert ist.
    */
-  public static final String EXPERT_FUNCTION = L.m("<Experte>");
+  public static final String EXPERT_FUNCTION = L.m("<Expert>");
 
   /**
    * Leere Liste von Parameternamen.

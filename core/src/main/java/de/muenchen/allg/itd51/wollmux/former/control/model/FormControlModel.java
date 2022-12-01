@@ -202,7 +202,7 @@ public class FormControlModel
   {
     this.formularMax4000 = formularMax4000;
     this.groups = new GroupsProvider();
-    label = L.m("Steuerelement");
+    label = L.m("Control element");
     type = TEXTFIELD_TYPE;
     String idStr = "";
     ConfigThingy plausiConf = null;
@@ -663,7 +663,7 @@ public class FormControlModel
     else
     {
       if (!isLegalID(id))
-        throw new SyntaxErrorException(L.m("'%1' ist keine syntaktisch korrekte ID",
+        throw new SyntaxErrorException(L.m("'%1' is not a correct ID",
           id));
       if (idO == null)
       {

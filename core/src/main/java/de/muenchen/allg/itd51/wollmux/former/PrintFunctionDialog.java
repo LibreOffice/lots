@@ -116,10 +116,10 @@ public class PrintFunctionDialog extends JDialog
         printFunctionCurrentList.setListData(new Vector<>(documentController.getModel().getPrintFunctions()));
       };
 
-      JButton wegDamit = new JButton(L.m("Entfernen"));
+      JButton wegDamit = new JButton(L.m("Remove"));
       wegDamit.addActionListener(removeFunc);
 
-      JButton machDazu = new JButton(L.m("Hinzufügen"));
+      JButton machDazu = new JButton(L.m("Add"));
       machDazu.addActionListener(addFunc);
 
       JButton ok = new JButton(L.m("OK"));

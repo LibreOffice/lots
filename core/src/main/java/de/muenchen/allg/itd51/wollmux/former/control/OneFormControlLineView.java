@@ -431,7 +431,7 @@ public class OneFormControlLineView extends LineView
   private JComboBox<Object> makeTypeView()
   {
     typeView = new JComboBox<>();
-    typeView.setToolTipText(L.m("Feldtyp"));
+    typeView.setToolTipText(L.m("Field type"));
     typeView.setEditable(false);
     typeView.addItem(FormControlModel.COMBOBOX_TYPE);
     typeView.addItem(FormControlModel.TEXTFIELD_TYPE);
@@ -466,7 +466,7 @@ public class OneFormControlLineView extends LineView
 	.setLayout(new BoxLayout(comboBoxAdditionalView, BoxLayout.X_AXIS));
 
     final JComboBox<Object> combo = new JComboBox<>();
-    combo.setToolTipText(L.m("Eingabeliste"));
+    combo.setToolTipText(L.m("Input list"));
     combo.setEditable(true);
     combo.setPrototypeDisplayValue("Sicherungsgeberin");
 
@@ -493,7 +493,7 @@ public class OneFormControlLineView extends LineView
     comboBoxAdditionalView.addMouseListener(myMouseListener);
 
     final JCheckBox editBox = new JCheckBox();
-    editBox.setToolTipText(L.m("Erweiterbar"));
+    editBox.setToolTipText(L.m("Expandable"));
     editBox.setSelected(model.getEditable());
     comboBoxAdditionalView.add(editBox);
     editBox.addActionListener(e ->
@@ -504,7 +504,7 @@ public class OneFormControlLineView extends LineView
     });
     editBox.addMouseListener(myMouseListener);
     final JButton newButton = new JButton("N");
-    newButton.setToolTipText(L.m("Neuer Wert"));
+    newButton.setToolTipText(L.m("New value"));
     Insets ins = newButton.getInsets();
     newButton.setMargin(new Insets(ins.top, 0, ins.bottom, 0));
     comboBoxAdditionalView.add(newButton);
@@ -521,7 +521,7 @@ public class OneFormControlLineView extends LineView
     });
     newButton.addMouseListener(myMouseListener);
     JButton delButton = new JButton("X");
-    delButton.setToolTipText(L.m("Wert löschen"));
+    delButton.setToolTipText(L.m("Delete value"));
     ins = delButton.getInsets();
     delButton.setMargin(new Insets(ins.top, 0, ins.bottom, 0));
     comboBoxAdditionalView.add(delButton);
@@ -732,7 +732,7 @@ public class OneFormControlLineView extends LineView
     textAreaAdditionalView
 	.setLayout(new BoxLayout(textAreaAdditionalView, BoxLayout.X_AXIS));
     final JTextField linesTextfield = new JTextField("" + model.getLines(), 3);
-    linesTextfield.setToolTipText(L.m("Anzahl der Zeilen"));
+    linesTextfield.setToolTipText(L.m("Rows number"));
     Document tfdoc = linesTextfield.getDocument();
     tfdoc.addDocumentListener(new DocumentListener()
     {
@@ -780,7 +780,7 @@ public class OneFormControlLineView extends LineView
     textAreaAdditionalView.add(linesTextfield);
 
     final JCheckBox wrapBox = new JCheckBox();
-    wrapBox.setToolTipText(L.m("Automatischer Zeilenumbruch"));
+    wrapBox.setToolTipText(L.m("Automatic word wrapping"));
     wrapBox.setSelected(model.getWrap());
     textAreaAdditionalView.add(wrapBox);
     wrapBox.addActionListener(e -> {

@@ -62,7 +62,7 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
   public AllInsertionTrafoViewsPanel(InsertionModelList insertionModelList,
       FunctionLibrary funcLib, FormularMax4kController formularMax4000)
   {
-    super(L.m("Trafo-View"));
+    super(L.m("TRAFO View"));
     this.funcLib = funcLib;
     insertionModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());

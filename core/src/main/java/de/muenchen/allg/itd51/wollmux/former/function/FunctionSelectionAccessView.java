@@ -78,7 +78,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Eintrag für die Funktionsauswahl-ComboBox, wenn keine Funktion gewünscht ist.
    */
-  private static final String NONE_ITEM = L.m("<keine>");
+  private static final String NONE_ITEM = L.m("<none>");
 
   /**
    * Eintrag für die Funktionsauswahl-ComboBox, wenn manuelle Eingabe gewünscht ist.
@@ -89,13 +89,13 @@ public class FunctionSelectionAccessView implements View
    * Eintrag für die Funktionsauswahl-ComboBox, wenn manuelle Eingabe eines Strings
    * gewünscht ist.
    */
-  private static final String STRING_ITEM = L.m("<Wert>");
+  private static final String STRING_ITEM = L.m("<Value>");
 
   /**
    * Eintrag für die ComboBox zum Festlegen eines Parameters, der anzeigt, dass der
    * Parameter nicht vorbelegt sein soll.
    */
-  private static final String UNSPECIFIED_ITEM = L.m("[nicht fest verdrahtet]");
+  private static final String UNSPECIFIED_ITEM = L.m("[not hardwired]");
 
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
@@ -218,7 +218,7 @@ public class FunctionSelectionAccessView implements View
         GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
 
     int y = 0;
-    JLabel label = new JLabel(L.m("Funktion"));
+    JLabel label = new JLabel(L.m("Function"));
     gbcLabelLeft.gridx = 0;
     gbcLabelLeft.gridy = y;
     myPanel.add(label, gbcLabelLeft);

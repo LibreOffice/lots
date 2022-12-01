@@ -76,7 +76,7 @@ public class FormConfig
    */
   public FormConfig(ConfigThingy conf, String frameTitle) throws FormModelException
   {
-    String formTitle = conf.getString("TITLE", L.m("Unbenanntes Formular"));
+    String formTitle = conf.getString("TITLE", L.m("Unknown form"));
     if (frameTitle != null)
     {
       title = frameTitle + " - " + formTitle;
@@ -94,7 +94,7 @@ public class FormConfig
       }
     } catch (NodeNotFoundException e)
     {
-      throw new FormModelException(L.m("Schlüssel 'Fenster' fehlt in %1", conf.getName()),
+      throw new FormModelException(L.m("Key 'Fenster' is missing in %1", conf.getName()),
           e);
     }
 

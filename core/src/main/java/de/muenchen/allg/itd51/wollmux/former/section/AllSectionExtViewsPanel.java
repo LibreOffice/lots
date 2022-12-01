@@ -59,7 +59,7 @@ public class AllSectionExtViewsPanel extends OnDemandCardView
   public AllSectionExtViewsPanel(SectionModelList sectionModelList,
       GroupModelList groupModelList, FormularMax4kController formularMax4000)
   {
-    super(L.m("GROUPS-View"));
+    super(L.m("GROUPS View"));
     this.groupModelList = groupModelList;
     sectionModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());

@@ -166,7 +166,7 @@ public class FunctionTester
     this.funcLib = funcLib;
     dialogLib = new DialogLibrary();
 
-    myFrame = new JFrame(L.m("Funktionstester"));
+    myFrame = new JFrame(L.m("Function Tester"));
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
@@ -314,15 +314,15 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("CAT",
       "CAT(String1, String2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("FORMAT",
-      L.m("FORMAT(Zahl MIN \"Zahl\" MAX \"Zahl\")")));
+      L.m("FORMAT(Number MIN \"Zahl\" MAX \"Zahl\")")));
     functionInsertPanel.add(makeCodeInsertionButton("IF",
-      L.m("IF(Bedingung THEN(Dann) ELSE(Sonst))")));
+      L.m("IF(Condition THEN(then) ELSE(else))")));
     functionInsertPanel.add(makeCodeInsertionButton("SELECT",
-      L.m("SELECT(\nFunktion1\nFunktion2\n,,,\nELSE(Sonst)\n)")));
+      L.m("SELECT(\nFunktion1\nFunktion2\n,,,\nELSE(else)\n)")));
     functionInsertPanel.add(makeCodeInsertionButton("ISERROR",
-      L.m("ISERROR(Funktion)")));
+      L.m("ISERROR(function)")));
     functionInsertPanel.add(makeCodeInsertionButton("ISE.STR.",
-      L.m("ISERRORSTRING(Funktion)")));
+      L.m("ISERRORSTRING(Function)")));
     functionInsertPanel.add(makeCodeInsertionButton("AND",
       "AND(Boolean1, Boolean2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("OR",
@@ -330,33 +330,33 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("NOT",
       "NOT(Boolean1, Boolean2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("MINUS",
-      L.m("MINUS(Zahl1, Zahl2 ,,,)")));
+      L.m("MINUS(number1, number2 ,,,)")));
     functionInsertPanel.add(makeCodeInsertionButton("SUM",
-      L.m("SUM(Zahl1, Zahl2 ,,,)")));
+      L.m("SUM(number1, number2 ,,,)")));
     functionInsertPanel.add(makeCodeInsertionButton("DIFF",
-      L.m("DIFF(Zahl1, Zahl2 ,,,)")));
+      L.m("DIFF(number1, number2 ,,,)")));
     functionInsertPanel.add(makeCodeInsertionButton("PRODUCT",
-      L.m("PRODUCT(Zahl1, Zahl2 ,,,)")));
+      L.m("PRODUCT(number1, number1 ,,,)")));
     functionInsertPanel.add(makeCodeInsertionButton("DIVIDE",
-      L.m("DIVIDE(Zahl BY(Zahl) MIN \"Zahl\" MAX \"Zahl\")")));
-    functionInsertPanel.add(makeCodeInsertionButton("ABS", L.m("ABS(Zahl)")));
-    functionInsertPanel.add(makeCodeInsertionButton("SIGN", L.m("SIGN(Zahl)")));
+      L.m("DIVIDE(number BY(number) MIN \"Zahl\" MAX \"Zahl\")")));
+    functionInsertPanel.add(makeCodeInsertionButton("ABS", L.m("ABS(number)")));
+    functionInsertPanel.add(makeCodeInsertionButton("SIGN", L.m("SIGN(number)")));
     functionInsertPanel.add(makeCodeInsertionButton("STRCMP",
       L.m("STRCMP(String1, String2 ,,,)")));
     functionInsertPanel.add(makeCodeInsertionButton("NUMCMP",
-      L.m("NUMCMP(Zahl1, Zahl2 ,,, MARGIN(\"0\"))")));
+      L.m("NUMCMP(number1, number2 ,,, MARGIN(\"0\"))")));
     functionInsertPanel.add(makeCodeInsertionButton("LT",
-      L.m("LT(Zahl1, Zahl2 ,,,)")));
+      L.m("LT(number1, number2 ,,,)")));
     functionInsertPanel.add(makeCodeInsertionButton("LE",
-      L.m("LE(Zahl1, Zahl2 ,,,)")));
+      L.m("LE(number1, number2 ,,,)")));
     functionInsertPanel.add(makeCodeInsertionButton("GT",
-      L.m("GT(Zahl1, Zahl2 ,,,)")));
+      L.m("GT(number1, number2 ,,,)")));
     functionInsertPanel.add(makeCodeInsertionButton("GE",
-      L.m("GE(Zahl1, Zahl2 ,,,)")));
+      L.m("GE(number1, number2 ,,,)")));
 
     functionInsertPanel.add(makeCodeInsertionButton(
       "BIND",
-      L.m("BIND(FUNCTION(Funktion)\n SET(\"ParamName1\" Wert1)\n SET(\"ParamName2\" Wert2) ,,,\n)")));
+      L.m("BIND(FUNCTION(Function)\n SET(\"ParamName1\" Value1)\n SET(\"ParamName2\" Value2) ,,,\n)")));
     functionInsertPanel.add(makeCodeInsertionButton("EXTERN",
       "EXTERN(URL \"url\" PARAMS(\"ParamName1\" \"ParamName2\" ,,,))"));
 
@@ -381,7 +381,7 @@ public class FunctionTester
     evaluatePanel.add(Box.createVerticalStrut(5));
 
     JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
-    JButton button = new JButton(L.m("Auswerten"));
+    JButton button = new JButton(L.m("Evaluate"));
     Dimension prefSize = button.getPreferredSize();
     button.setPreferredSize(new Dimension(prefSize.width, prefSize.height * 2));
     buttonPanel.add(button);
@@ -418,7 +418,7 @@ public class FunctionTester
         Function func = FunctionFactory.parse(codeConf, funcLib, dialogLib, myContext);
         String result = func.getResult(myParameters);
         if (result.equals(FunctionLibrary.ERROR))
-          throw new Exception(L.m("Illegaler oder fehlender Parameter!"));
+          throw new Exception(L.m("Illegal or missing parameter!"));
         stringResult.setText(result);
         stringResult.setCaretPosition(0);
         booleanResult.setText("" + func.getBoolean(myParameters));

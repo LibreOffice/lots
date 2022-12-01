@@ -94,7 +94,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     
     createGui();
     
-    setTitle(L.m("Dateiname vorgeben"));
+    setTitle(L.m("Enter file name"));//TODO
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     pack();
 
@@ -132,14 +132,14 @@ public class FilenameGeneratorFunctionDialog extends JDialog
         TextComponentTags.makeInsertFieldActions(ids, tt));
     insertFieldButton.setFocusable(false);
     Box hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Dateiname"), SwingConstants.LEFT));
+    hbox.add(new JLabel(L.m("File name"), SwingConstants.LEFT));
     hbox.add(Box.createHorizontalGlue());
     hbox.add(insertFieldButton);
     vbox.add(hbox);
     vbox.add(tf);
 
     final List<String> adjustFuncs = new ArrayList<>();
-    adjustFuncs.add(L.m("-- keine --"));
+    adjustFuncs.add(L.m("-- none --"));
     int sel = 0;
     for (String fName : documentController.getFunctionLibrary().getFunctionNames())
     {
@@ -154,7 +154,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     }
     vbox.add(Box.createVerticalStrut(5));
     hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Nachträgliche Anpassung")));
+    hbox.add(new JLabel(L.m("Supplemental Mods")));
     hbox.add(Box.createHorizontalGlue());
     vbox.add(hbox);
     final JComboBox<String> adjustFuncCombo = new JComboBox<>(new Vector<>(adjustFuncs));
@@ -169,7 +169,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
         if (adjustFuncCombo.getSelectedIndex() == adjustFuncs.size())
         {
           adjustFuncCombo.setBackground(Color.red);
-          adjustFuncCombo.setToolTipText(L.m("Achtung: Funktion nicht definiert!"));
+          adjustFuncCombo.setToolTipText(L.m("Warning: Function not defined!"));
         } else
         {
           adjustFuncCombo.setBackground(null);
@@ -182,7 +182,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     DimAdjust.maxHeightIsPrefMaxWidthUnlimited(adjustFuncCombo);
     vbox.add(adjustFuncCombo);
 
-    JButton cancel = new JButton(L.m("Abbrechen"));
+    JButton cancel = new JButton(L.m("Cancel"));
     cancel.addActionListener(e -> dispose());
 
     ActionListener submitActionListener = e -> {

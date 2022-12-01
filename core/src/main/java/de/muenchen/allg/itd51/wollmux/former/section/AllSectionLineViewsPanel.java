@@ -164,17 +164,17 @@ public class AllSectionLineViewsPanel implements View
       new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    JButton button = new JButton(L.m("Aufheben"));
+    JButton button = new JButton(L.m("Remove"));
     button.addActionListener(e -> deleteSelectedElements());
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
-    button = new JButton(L.m("Neu"));
+    button = new JButton(L.m("New"));
     button.addActionListener(e -> createNewSectionFromSelection());
     buttonPanel.add(button, gbcButton);
 
     ++gbcButton.gridx;
-    button = new JButton(L.m("Neu (ganze Seiten)"));
+    button = new JButton(L.m("New (whole page)"));
     button.addActionListener(e -> createNewSectionFromAllPagesTouchedBySelection());
     buttonPanel.add(button, gbcButton);
 
@@ -299,7 +299,7 @@ public class AllSectionLineViewsPanel implements View
     XNamed section = UNO.XNamed(UnoService.createService(UnoService.CSS_TEXT_TEXT_SECTION, doc));
     XTextSectionsSupplier tssupp = UNO.XTextSectionsSupplier(doc);
     UnoDictionary<XTextSection> textSections = UnoDictionary.create(tssupp.getTextSections(), XTextSection.class);
-    String baseName = L.m("Sichtbarkeitsbereich");
+    String baseName = L.m("Visibility Section");
     int count = 1;
     while (textSections.containsKey(baseName + count))
       ++count;
