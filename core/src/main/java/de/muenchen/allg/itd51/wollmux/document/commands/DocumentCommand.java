@@ -975,7 +975,7 @@ public abstract class DocumentCommand
         fragID = wm.get("FRAG_ID").toString();
       } catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException(L.m("Fehlendes Attribut FRAG_ID", e));
+        throw new InvalidCommandException(L.m("Missing attribute FRAG_ID", e));
       }
 
       args = new Vector<>();
@@ -1013,7 +1013,7 @@ public abstract class DocumentCommand
             styles.add(s.toLowerCase());
           } else
           {
-            throw new InvalidCommandException(L.m("STYLE '%1' ist unbekannt.", s));
+            throw new InvalidCommandException(L.m("STYLE '%1' is unknown.", s));
           }
         }
       } catch (NodeNotFoundException e)
@@ -1128,7 +1128,7 @@ public abstract class DocumentCommand
         dbSpalte = wmCmd.get("WM").get("DB_SPALTE").toString();
       } catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException(L.m("Fehlendes Attribut DB_SPALTE"));
+        throw new InvalidCommandException(L.m("Missing attribute DB_SPALTE"));
       }
 
       Iterator<ConfigThingy> autoseps = wmCmd.query("AUTOSEP").iterator();
@@ -1157,7 +1157,7 @@ public abstract class DocumentCommand
         } else
         {
           throw new InvalidCommandException(
-              L.m("Unbekannter AUTOSEP-Typ \"%1\". Erwarte \"left\", \"right\" oder \"both\".", as.toString()));
+              L.m("Unknown AUTOSEP-Type \"%1\". Expect \"left\", \"right\" or \"both\".", as.toString()));
         }
         currentSep = sep;
       }
@@ -1233,7 +1233,7 @@ public abstract class DocumentCommand
         id = wmCmd.get("WM").get("ID").toString();
       } catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException(L.m("Fehlendes Attribut ID"));
+        throw new InvalidCommandException(L.m("Missing attribute ID"));
       }
 
       try
@@ -1345,13 +1345,13 @@ public abstract class DocumentCommand
         type = wmCmd.get("WM").get("TYPE").toString();
       } catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException(L.m("Fehlendes Attribut TYPE"));
+        throw new InvalidCommandException(L.m("Missing attribute TYPE"));
       }
       if (type.compareToIgnoreCase("templateTemplate") != 0 && type.compareToIgnoreCase("normalTemplate") != 0
           && type.compareToIgnoreCase("formDocument") != 0)
       {
-        throw new InvalidCommandException(L.m("Angegebener TYPE ist ungültig oder falsch geschrieben. "
-            + "Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!"));
+        throw new InvalidCommandException(L.m("Specified TYPE is invalid or incorrectly written. "
+            + "Expect \"templateTemplate\", \"normalTemplate\" or \"formDocument\"!"));
       }
     }
 
@@ -1395,7 +1395,7 @@ public abstract class DocumentCommand
         fragId = wmCmd.get("WM").get("FRAG_ID").toString();
       } catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException(L.m("Fehlendes Attribut FRAG_ID"));
+        throw new InvalidCommandException(L.m("Missing attribute FRAG_ID"));
       }
       try
       {
@@ -1458,7 +1458,7 @@ public abstract class DocumentCommand
         funcName = wmCmd.get("WM").get("FUNCTION").toString();
       } catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException(L.m("Fehlendes Attribut FUNCTION"));
+        throw new InvalidCommandException(L.m("Missing attribute FUNCTION"));
       }
     }
 

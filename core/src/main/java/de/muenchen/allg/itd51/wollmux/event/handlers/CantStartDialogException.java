@@ -41,7 +41,7 @@ public class CantStartDialogException extends WollMuxFehlerException
   public CantStartDialogException(Exception e)
   {
     super(
-        L.m("Der Dialog konnte nicht gestartet werden!\n\nBitte kontaktieren Sie Ihre Systemadministration."),
+        L.m("The dialog could not be started!\n\nPlease contact your system administrator."),
         e);
   }
 }

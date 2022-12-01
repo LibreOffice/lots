@@ -173,7 +173,7 @@ public abstract class AbstractExecutor implements DocumentCommand.Executor
    */
   public static void insertErrorField(DocumentCommand cmd, XTextDocument doc, java.lang.Exception e)
   {
-    String msg = L.m("Fehler in Dokumentkommando '%1'", cmd.getBookmarkName());
+    String msg = L.m("Error at document command '%1'", cmd.getBookmarkName());
     String property = msg + ":\n\n";
 
     // Meldung auch auf dem Logger ausgeben
@@ -187,14 +187,14 @@ public abstract class AbstractExecutor implements DocumentCommand.Executor
       LOGGER.error(msg);
     }
 
-    cmd.setTextRangeString(L.m("<FEHLER:  >"));
+    cmd.setTextRangeString(L.m("<ERROR:  >"));
 
     // Cursor erst NACH Aufruf von cmd.setTextRangeString(...) holen, da Bookmark
     // eventuell dekollabiert wird!
     XTextCursor insCursor = cmd.getTextCursor();
     if (insCursor == null)
     {
-      LOGGER.error("Kann Fehler-Feld nicht einfügen, da kein InsertCursor erzeugt werden konnte.");
+      LOGGER.error(L.m("Cannot insert error field because InsertCursor could not be created."));//TODO
       return;
       // Anmerkung: Aufruf von cmd.setTextRangeString() oben macht nichts, falls kein
       // InsertCursor erzeugt werden kann, daher kein Problem, dass die Abfrage nach

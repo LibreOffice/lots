@@ -97,7 +97,7 @@ public class OnJumpToMark extends WollMuxEvent
       if (msg)
       {
         InfoDialog.showInfoModal(L.m("WollMux"),
-            L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
+            L.m("No placeholder and no 'setJumpMark' flag available!"));
       }
     }
   }
