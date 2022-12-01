@@ -200,7 +200,7 @@ public class OpenExt
         }
         catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("One entry within the section ""ExterneAnwendungen"" (external Applications) contains an invalid PROGRAM-Specification."));
+          LOGGER.error(L.m("One entry within the section \"ExterneAnwendungen\" (external Applications) contains an invalid PROGRAM-Specification."));
           continue;
         }
 
@@ -264,7 +264,7 @@ public class OpenExt
   {
     if (filter == null)
       throw new ConfigurationErrorException(L.m(
-        "FILTER specification is missing with the application for \"%1\"", ext)); //TODO
+        "FILTER specification is missing for application \"%1\"", ext));
     this.doc = doc;
     this.url = null;
   }
@@ -305,7 +305,7 @@ public class OpenExt
       }
       catch (Exception x)
       {
-        throw new IOException(L.m("Error when storing the file: %1",//TODO
+        throw new IOException(L.m("Error when storing the file: %1",
           x.getMessage()));
       }
     }
@@ -334,7 +334,7 @@ public class OpenExt
   private void testState()
   {
     if (doc == null && url == null)
-      throw new IllegalStateException(L.m("setSource() was not called"));//TODO
+      throw new IllegalStateException(L.m("setSource() was not called"));
   }
 
   /**
@@ -517,7 +517,7 @@ public class OpenExt
         String arg[] = param[i].split("=");
         if (arg.length != 2)
           throw new IllegalArgumentException(
-            L.m("The /loadComponentFromURL/ parameter must be in the form \"Param=Value\""));//TODO
+            L.m("/loadComponentFromURL/ parameter must be of the form \"Param=Value\""));
 
         if (arg[0].equals("AsTemplate"))
           asTemplate = arg[1].equalsIgnoreCase("true");

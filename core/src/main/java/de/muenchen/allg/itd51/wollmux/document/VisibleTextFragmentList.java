@@ -122,7 +122,7 @@ public class VisibleTextFragmentList
         // Die Variable kann nicht ersetzt werden und wird auch nicht
         // ersetzt. Eine Exception muss deswegen nicht geworfen werden, es ist
         // aber sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
-        LOGGER.error(L.m("The variable '{}' in the URL '{}' is not defined.", key, string));//TODO
+        LOGGER.error(L.m("The variable '{0}' in the URL '{1}' is not defined.", key, string));
       }
     }
     if (count == MAXCOUNT)

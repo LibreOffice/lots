@@ -502,7 +502,7 @@ public class FormularMax4kView extends JFrame
     submenu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Cancel, <-Back, PDF, Print"));
-    
+
     final URL STANDARD_BUTTONS_LAST_URL =
       this.getClass().getClassLoader().getResource(
             "default_buttons/standardbuttons_letztes.conf");
@@ -512,13 +512,13 @@ public class FormularMax4kView extends JFrame
       setFrameSize();
     });
     submenu.add(menuItem);
-    
-    menuItem = new JMenuItem(L.m("Cancel, <-Back, Send as Email, Print"));//TODO
-    
+
+    menuItem = new JMenuItem(L.m("Cancel, <-Back, Send as Email, Print"));
+
     final URL STANDARD_BUTTONS_EMAIL =
     	      this.getClass().getClassLoader().getResource(
             "default_buttons/standardbuttons_email.conf");
-    	
+
     menuItem.addActionListener(e -> {
       controller.insertStandardButtons(null, STANDARD_BUTTONS_EMAIL, leftPanel.getButtonInsertionIndex());
       setFrameSize();

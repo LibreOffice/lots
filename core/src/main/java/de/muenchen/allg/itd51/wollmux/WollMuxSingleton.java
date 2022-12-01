@@ -238,10 +238,10 @@ public class WollMuxSingleton
     {
       if (noConfig)
       {
-        return L.m("none loaded");//TODO
+        return L.m("none loaded");
       } else
       {
-        return L.m("unknown");//TODO
+        return L.m("unknown");
       }
     }
   }
@@ -284,7 +284,7 @@ public class WollMuxSingleton
       } catch (NodeNotFoundException e)
       {
         LOGGER.error(
-            L.m("URL-attribute is missing in 'Datenquellen'/'Registriere' section for data source '%1'", //TODO
+            L.m("URL attribute is missing in 'DatenquellenRegistriere' section for data source '%1'",
                 name),
             e);
         continue;
@@ -311,7 +311,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Error during checking whether the datasource '%1' is already registered", name), x);
+            L.m("Error during checking whether the data source '%1' is already registered", name), x);
       }
 
       LOGGER.debug("Versuche, Datenquelle '{}' bei OOo zu registrieren für URL '{}'", name, urlStr);
@@ -324,7 +324,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Error during registration of datasource '%1': Illegal URL: '%2'", name, urlStr),
+            L.m("Error during registration of data source '%1': Illegal URL: '%2'", name, urlStr),
             x);
         continue;
       }
@@ -334,11 +334,11 @@ public class WollMuxSingleton
         Object datasource = UnoDictionary.create(UNO.dbContext, Object.class).get(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
         if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
-          LOGGER.error(L.m("Test access to datasource '{}' failed after registration", name));//TODO
+          LOGGER.error(L.m("Test access to data source '{}' failed after registration", name));
       } catch (Exception x)
       {
         LOGGER.error(L.m(
-            "Error during registration of datasource '%1'. Make sure that the URL '%2' is valid.",
+            "Error during registration of data source '%1'. Make sure that the URL '%2' is valid.",
             name, parsedUrl), x);
         continue;
       }

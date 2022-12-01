@@ -59,7 +59,7 @@ public class AllGroupFuncViewsPanel extends OnDemandCardView
   public AllGroupFuncViewsPanel(GroupModelList groupModelList,
       FunctionLibrary funcLib, FormularMax4kController formularMax4000)
   {
-    super(L.m("Function View"));//TODO
+    super(L.m("Function View"));
     this.funcLib = funcLib;
     groupModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());

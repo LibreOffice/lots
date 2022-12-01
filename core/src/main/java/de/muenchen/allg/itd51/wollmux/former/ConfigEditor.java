@@ -100,8 +100,8 @@ public class ConfigEditor extends JFrame implements SearchListener
         if (editor.isDirty())
         {
           if (JOptionPane.showConfirmDialog(ConfigEditor.this,
-            L.m("Do you want to close the Editor without saving?"),//TODO
-            L.m("Close Editor"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)//TODO
+            L.m("Close the Editor without saving?"),
+            L.m("Close Editor"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
           {
             ConfigEditor.this.dispose();
           }

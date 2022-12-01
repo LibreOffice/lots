@@ -279,7 +279,7 @@ public class MailMergeRunner implements Runnable
       }
     } catch (NoSuchMethodException e)
     {
-      LOGGER.error(L.m("A necessary print function is not defined.", e)(;
+      LOGGER.error(L.m("A necessary print function is not defined.", e));
       InfoDialog.showInfoModal(L.m("Error during printing"), L.m(
           "A necessary print function is not defined. Please contact your system administrator "
               + "so your configuration can be updated."));

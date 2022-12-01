@@ -350,10 +350,10 @@ public class FunctionFactory
     funcConf = funcConf.iterator().next(); // funcConf = FUNCTION - ...
     if (funcConf.count() == 0)
       throw new ConfigurationErrorException(
-        L.m("For functions of type \"BIND\" after \"FUNCTION\" a function name or a function must follow."));//TODO
+        L.m("For functions of type \"BIND\" after \"FUNCTION\" a function name or a function must follow."));
     if (funcConf.count() > 1)
-      throw new ConfigurationErrorException(L.m("For functions of type \"BIND\" after \"FUNCTION\" "
-          + "no list but a function name or function must follow."));//TODO
+      throw new ConfigurationErrorException(L.m("For functions of type \"BIND\", "
+          + "\"FUNCTION\" must not be followed by a list, but only by a function name or a function"));
 
     funcConf = funcConf.iterator().next(); // <Funktionsname>|<Funktion> - ...
 
@@ -512,7 +512,7 @@ public class FunctionFactory
     }
     if (idx < 0)
       throw new ConfigurationErrorException(L.m(
-        "Index argument of %1 must be \"<NonNegativeInteger>\"",//TODO
+        "Index argument of %1 must not be negative.",
         conf.getName()));
 
     String regex = reFun.getResult(new Values.None());
@@ -754,7 +754,7 @@ public class FunctionFactory
         catch (ConfigurationErrorException e)
         {
           LOGGER.error(L.m(
-            "Error parsing the function \"%1\" in section \"%2\"", name,//TODO
+            "Error parsing the function \"%1\" in section \"%2\"", name,
             section), e);
         }
       }

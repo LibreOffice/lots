@@ -76,7 +76,7 @@ public class DialogFactory
         ConfigThingy dialogConf = iter.next();
         String name = dialogConf.getName();
         if (dialogsInBlock.contains(name))
-          LOGGER.error(L.m("Function dialog \"{}\" was defined more than once in the same 'Funktionsdialoge' section", name));//TODO
+          LOGGER.error(L.m("Function dialog \"{0}\" was defined more than once in the same 'Funktionsdialoge' section", name));//TODO
         dialogsInBlock.add(name);
         try
         {

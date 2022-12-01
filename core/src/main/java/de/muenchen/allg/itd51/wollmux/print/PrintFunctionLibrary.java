@@ -167,7 +167,7 @@ public class PrintFunctionLibrary
         } catch (NumberFormatException e)
         {
           LOGGER.error(
-              L.m("The value of the key ORDER is invalid in the print function '%2'.", name),//TODO
+              L.m("The value of the key ORDER in the print function '%2' is invalid.", name),
               e);
         }
       }

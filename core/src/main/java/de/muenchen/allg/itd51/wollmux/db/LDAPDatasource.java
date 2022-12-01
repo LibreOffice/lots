@@ -163,7 +163,7 @@ public class LDAPDatasource extends Datasource
       new URI(url);
     } catch (URISyntaxException e)
     {
-      throw new ConfigurationErrorException(L.M("Error in LDAP-URL " + url, e));
+      throw new ConfigurationErrorException(L.m("Error in LDAP-URL " + url, e));
     }
 
     baseDN = parseConfig(sourceDesc, "BASE_DN",

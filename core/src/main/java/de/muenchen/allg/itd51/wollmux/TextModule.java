@@ -179,7 +179,7 @@ public class TextModule
            */
           if (!processedAtLeastOneTBSuccessfully)
             throw new WollMuxFehlerException(
-              L.m("At the insertion point there is already a reference to a text block."));//TODO
+              L.m("At the insertion point there is already a reference to a text block."));
           else
             break;
         }

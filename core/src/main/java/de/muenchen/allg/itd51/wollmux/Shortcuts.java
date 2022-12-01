@@ -127,7 +127,7 @@ public class Shortcuts
       }
       else
       {
-        LOGGER.error(L.m("Invalid shortcut '{}' at .conf section 'Tastenkuerzel'"), shortcut);//TODO
+        LOGGER.error(L.m("Invalid shortcut '{}' in .conf section 'Tastenkuerzel'", shortcut));
       }
     }
 

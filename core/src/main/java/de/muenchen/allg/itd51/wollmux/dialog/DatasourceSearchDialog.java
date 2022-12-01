@@ -534,7 +534,7 @@ public class DatasourceSearchDialog implements Dialog
         resultsList = UNO.XListBox(uiElement);
         if (resultsList == null)
         {
-          LOGGER.error(L.m("UI element with ID \"suchergebnis\" must be of TYPE  \"listbox\"!"));//TODO
+          LOGGER.error(L.m("UI element with ID \"suchergebnis\" must be of TYPE \"listbox\"!"));
         }
         displayTemplate = config.getDisplay();
         if (displayTemplate == null)
@@ -639,8 +639,8 @@ public class DatasourceSearchDialog implements Dialog
           }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error(L.m("Error within the paragraph \"Spaltenumsetzung\" or \"Vorschau\". Column \"{}\" should be "
-              + "displayed in the preview but should not be defined within the columnreplacement.", dbSpalte));//TODO
+          LOGGER.error(L.m("Error within the section \"Spaltenumsetzung\" or \"Vorschau\". Column \"{0}\" is to be "
+              + "displayed in the preview, but is not defined in the section \"Spaltenumsetzung\".", dbSpalte));
         }
       }
     }
@@ -712,11 +712,11 @@ public class DatasourceSearchDialog implements Dialog
         } catch (IllegalArgumentException x)
         {
           LOGGER.error("", x);
-          InfoDialog.showInfoModal(L.m("Timeout at search query"),//TODO
-              L.m("Processing your search query took too long and was therefore aborted.\n"//TODO
-                  + "The reason for this could be a problem with the data source or with the used\n"//TODO
-                  + "search term matching too many results.\n"//TODO
-                  + "Please try another, more precise search query."));//TODO
+          InfoDialog.showInfoModal(L.m("Search timeout"),
+              L.m("Processing your search query took too long and was therefore aborted.\n"
+                  + "The reason for this could be a problem with the data source or with the used\n"
+                  + "search term matching too many results.\n"
+                  + "Please try another, more precise search query."));
         }
         return r;
       }).thenAcceptAsync(r -> {

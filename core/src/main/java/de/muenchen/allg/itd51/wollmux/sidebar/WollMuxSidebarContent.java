@@ -127,11 +127,12 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
    * Error message if no configuration can be found.
    */
   public static final String WOLLMUX_CONFIG_ERROR_MESSAGE = L
-      .m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden. "
-          + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf "
-          + "der %include für die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und "
-          + "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler "
-          + "aufgetreten ist.");
+      .m("No section \"Symbolleisten\" could be read from your WollMux configuration.\n"
+          + "Therefore, the WollMux toolbar cannot be started. "
+          + "Please check if in your wollmux.conf the %include for the configuration "
+          + "of the WollMuxBar (e.g. wollmuxbar_standard.conf) is present "
+          + "and check with the wollmux.log if possibly an error occurred "
+          + "while processing a %include.");
 
   /**
    * The component in which the sidebar is visible.
@@ -249,8 +250,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
 
       if (WollMuxSingleton.getInstance().isNoConfig())
       {
-        String text = L.m("WollMux is running without wollmux.conf !\n"
-            + "This means not all features are available.");//TODO
+        String text = L.m("WollMux is running without the WollMux configuration.\n"
+            + "For this reason, unfortunately, the complete range of functions is not available.");
         XControl txt = GuiFactory.createLabel(xMCF, context, text, new Rectangle(5, 15, 10, 80), null);
         controlContainer.addControl("txt", txt);
         layout.addControl(txt);

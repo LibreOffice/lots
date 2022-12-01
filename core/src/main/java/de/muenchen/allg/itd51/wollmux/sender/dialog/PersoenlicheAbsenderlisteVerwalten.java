@@ -61,9 +61,6 @@ import de.muenchen.allg.util.UnoComponent;
  */
 public class PersoenlicheAbsenderlisteVerwalten
 {
-
-  private static final String INFO_DIALOG_TITLE = "Fehler";
-
   private static final Logger LOGGER = LoggerFactory.getLogger(PersoenlicheAbsenderlisteVerwalten.class);
 
   private List<Sender> searchSenderList = null;
@@ -275,8 +272,8 @@ public class PersoenlicheAbsenderlisteVerwalten
         addSenderToList(newSender);
       } else
       {
-        short res = InfoDialog.showYesNoModal("Persönliche Absenderliste",
-            "Datensatz ist bereits in der Absenderliste vorhanden, Datensatz trotzdem erneut speichern?");
+        short res = InfoDialog.showYesNoModal(L.m("Personal sender list"),
+            L.m("Data record already exists in the sender list, save data record again anyway?"));
 
         if (res == MessageBoxResults.YES)
         {
@@ -293,8 +290,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     String oid = sender.get("OID");
     if (oid == null || oid.isEmpty() || "*".equals(oid))
     {
-      InfoDialog.showInfoModal(INFO_DIALOG_TITLE,
-          "Der Datensatz enthält keine gültige OID und wird daher nicht in die PAL übernommen.");
+      InfoDialog.showInfoModal(L.m("Fehlende ID"),
+          L.m("The record does not contain a valid OID and therefore will not be included in the personal sender list."));
     } else
     {
       senderList.add(sender);
@@ -310,12 +307,12 @@ public class PersoenlicheAbsenderlisteVerwalten
       try
       {
         Sender datasetCopy = new Sender(senderList.get(index));
-        datasetCopy.overrideValue("Rolle", L.m("Copies"));
+        datasetCopy.overrideValue("Rolle", L.m("Copy"));
         senderList.add(datasetCopy);
         palListe.addItem(datasetCopy.getDisplayString(), (short) (palListe.getItemCount() + 1));
       } catch (SenderException e)
       {
-        InfoDialog.showInfoModal(INFO_DIALOG_TITLE, "Der Sender konnte nicht kopiert werden.");
+        InfoDialog.showInfoModal(L.m("Error copying sender"), L.m("Sender could not be copied."));
       }
     }
   }
@@ -381,15 +378,15 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     if (ldapSearchResults == null)
     {
-      InfoDialog.showInfoModal(INFO_DIALOG_TITLE,
-          "Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen. "
-              + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten "
-              + "Suchbegriff, der auf zu viele Ergebnisse zutrifft. "
-              + "Bitte versuchen Sie eine andere, präzisere Suchanfrage.");
+      InfoDialog.showInfoModal(L.m("Search timeout"),
+          L.m("Processing your search query took too long and was therefore aborted.\n"
+              + "The reason for this could be a problem with the data source or with the used\n"
+              + "search term matching too many results.\n"
+              + "Please try another, more precise search query."));
 
     } else if (ldapSearchResults.isEmpty())
     {
-      InfoDialog.showInfoModal(INFO_DIALOG_TITLE, "Es wurde nichts gefunden.");
+      InfoDialog.showInfoModal(L.m("Search results"), L.m("No results."));
     }
   }
 

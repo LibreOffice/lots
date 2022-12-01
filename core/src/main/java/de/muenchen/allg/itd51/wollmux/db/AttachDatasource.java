@@ -108,7 +108,7 @@ public class AttachDatasource extends Datasource
         .get("NAME", ConfigurationErrorException.class, L.m("NAME of data source is missing"))
         .toString();
     source1Name = sourceDesc.get("SOURCE", ConfigurationErrorException.class,
-        L.m("SOURCE1 of data source ""%1"" is missing", name)).toString();
+        L.m("SOURCE1 of data source \"%1\" is missing", name)).toString();
     source2Name = sourceDesc.get("ATTACH", ConfigurationErrorException.class,
         L.m("ATTACH specification of data source %1 is missing", name)).toString();
     source1 = nameToDatasource.get(source1Name);

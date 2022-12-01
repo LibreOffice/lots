@@ -295,7 +295,7 @@ public class OOoDatasource extends Datasource
         catch (Exception x)
         {
           LOGGER.debug(L.m(
-            "Table \"%1\" not found. Try to take it as the name of a query",//TODO
+            "Table \"%1\" not found. Try to use it as query name.",
               oooTableName), x);
           try
           {
@@ -306,8 +306,8 @@ public class OOoDatasource extends Datasource
           }
           catch (Exception y)
           {
-            throw new ConfigurationErrorException(L.m("Table or query \"%1\" does not exist in data source "//TODO
-                + "\"%2\" or error wheb determining the columns ", oooTableName, oooDatasourceName), y);//TODO
+            throw new ConfigurationErrorException(L.m("Table or query \"%1\" does not exist in data source "
+                + "\"%2\" or error when determining the columns ", oooTableName, oooDatasourceName), y);
           }
         }
         Set<String> colNames = columns.keySet();

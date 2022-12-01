@@ -93,8 +93,8 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     }
 
     createGui();
-    
-    setTitle(L.m("Enter file name"));//TODO
+
+    setTitle(L.m("File name"));
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     pack();
 

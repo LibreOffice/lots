@@ -64,10 +64,9 @@ public class SenderEventListener implements WollMuxEventListener
       long found = service.searchDefaultSender();
       if (found != 1)
       {
-        InfoDialog.showInfoModal(L.m("WollMux Info"),
-            "More than one sender was found. The first one was selected.\n"//TODO
-                + "Please make sure it is the right one. "//TODO
-                + "For this you can use the dropdown in the WollMux sidebar.");//TODO
+        InfoDialog.showInfoModal(L.m("Select sender"),
+            "More than one sender was found. The first one was selected.\n"
+            + "Please make sure it is the right one (Use the dropdown in the WollMux sidebar).");
       }
     } else
     {
@@ -80,8 +79,8 @@ public class SenderEventListener implements WollMuxEventListener
         {
           names.append("- " + l + "\n");
         }
-        String message = L.m("The following datasets could not " + "be updated from the database:\n\n"
-            + "%1\n" + "If this problem persists, " + "you might want to delete these datasets from "
+        String message = L.m("The following data sets could not be updated from the database:\n\n"
+            + "%1\nIf this problem persists, you might want to delete these data sets from "
             + "your sender list and add them again!", names);
         InfoDialog.showInfoModal(L.m("WollMux Info"), message);
       }

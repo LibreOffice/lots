@@ -143,8 +143,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     {
       InfoDialog.showInfoModal(L.m("WollMux error"),
           L.m("The configuration of the Wollmux must be re-read.\n\n"
-              + "Please close the Wollmux and LibreOffice as well as "
-              + "all running 'soffice.bin' processes in the Task Manager"));//TODO
+              + "Please close Wollmux and LibreOffice and make sure "
+              + "no 'soffice.bin' processes are still running."));
     }
   }
 
