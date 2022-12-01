@@ -267,7 +267,7 @@ public class LibreOfficeEventListener implements XEventListener
     }
     catch (java.lang.Exception e)
     {
-      LOGGER.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
+      LOGGER.error(L.m("DispatchInterceptor could not be registered:"), e);
     }
 
     // update toolbar

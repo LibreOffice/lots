@@ -319,7 +319,7 @@ public class DocumentTree
       }
       catch (Exception x)
       {
-        LOGGER.error(L.m("Fehlerhaftes WM()-Bookmark: \"%1\"", name), x);
+        LOGGER.error(L.m("Incorrect WM()-Bookmark: \"%1\"", name), x);
         return;
       }
       return;
@@ -341,7 +341,7 @@ public class DocumentTree
       }
       catch (Exception x)
       {
-        LOGGER.error(L.m("Fehlerhaftes WM()-Bookmark: \"%1\"", name), x);
+        LOGGER.error(L.m("Incorrect WM()-Bookmark: \"%1\"", name), x);
         return;
       }
     }

@@ -74,12 +74,12 @@ public class OnTextbausteinEinfuegen extends WollMuxEvent
         new OnReprocessTextDocument(documentController).emit();
       } else
       {
-        InfoDialog.showInfoModal(L.m("WollMux"), L.m("Der Textbausteinverweis wurde eingefügt."));
+        InfoDialog.showInfoModal(L.m("WollMux"), L.m("The text block reference was inserted."));//TODO
       }
     } catch (WollMuxFehlerException e)
     {
-      LOGGER.error("Textbausteinverweis konnte nicht eingefügt werden.", e);
-      InfoDialog.showInfoModal(L.m("WollMux-Fehler"), e.getMessage());
+      LOGGER.error("The text block reference could not be inserted", e);//TODO
+      InfoDialog.showInfoModal(L.m("WollMux error"), e.getMessage());
     }
   }
 

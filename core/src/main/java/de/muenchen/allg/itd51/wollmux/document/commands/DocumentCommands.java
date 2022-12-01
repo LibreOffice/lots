@@ -618,7 +618,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
       // Paragraphen im GarbageCollector. Ich habe bereits probiert, einen
       // minimalen Testfall ohne WollMux für dieses Problem zu extrahieren, war
       // aber damit nicht erfolgreich.
-      LOGGER.debug(L.m("Warnung: inkonsistentes Bookmark entdeckt:"), e);
+      LOGGER.debug(L.m("Warning: inconsistent bookmark detected:"), e);
     }
     catch (Exception e)
     {
@@ -665,7 +665,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     {
       LOGGER.error(
         L.m(
-          "Der Textbereich mit dem Namen '%1' enthält ein fehlerhaftes GROUPS-Attribut.",
+          "The textarea with the name '%1' contains an incorrect GROUPS attribute.",
           name), e);
     }
 
@@ -708,7 +708,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
       catch (NodeNotFoundException e)
       {
         throw new DocumentCommand.InvalidCommandException(
-          L.m("Fehlendes CMD-Attribut"));
+          L.m("Missing CMD-attribute"));
       }
 
       // spezielle Kommando-Instanzen erzeugen
@@ -775,7 +775,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
       }
 
       throw new DocumentCommand.InvalidCommandException(L.m(
-        "Unbekanntes Kommando '%1'", cmd));
+        "Unknown command '%1'", cmd));
     }
     catch (DocumentCommand.InvalidCommandException e)
     {

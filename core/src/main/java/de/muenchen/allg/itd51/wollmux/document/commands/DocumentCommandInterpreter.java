@@ -231,8 +231,8 @@ public class DocumentCommandInterpreter
     if (errors != 0)
     {
       throw new WMCommandsFailedException(
-          L.m("Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
-              ((errors == 1) ? "einen" : "" + errors)));
+          L.m("The used template contains %1 errors.\n\nPlease contact your system administrator.",
+              ((errors == 1) ? L.m("one") : "" + errors)));//TODO try to use proper ngettext() plurals instead
     }
   }
 

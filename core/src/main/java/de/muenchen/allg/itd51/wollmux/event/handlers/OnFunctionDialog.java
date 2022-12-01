@@ -83,7 +83,7 @@ public class OnFunctionDialog extends WollMuxEvent
     if (dialog == null)
     {
       throw new WollMuxFehlerException(
-          L.m("Funktionsdialog '%1' ist nicht definiert.", dialogName));
+          L.m("Function dialog '%1' is not defined.", dialogName));
     }
 
     try

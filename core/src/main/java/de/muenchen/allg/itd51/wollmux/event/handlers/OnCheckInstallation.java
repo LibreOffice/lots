@@ -58,11 +58,11 @@ public class OnCheckInstallation extends WollMuxEvent
   protected void doit() throws WollMuxFehlerException
   {
     // default values
-    String title = L.m("Mehrfachinstallation des WollMux");
-    String msg = L.m("Es wurden eine systemweite und eine benutzerlokale Installation des WollMux "
-        + "(oder Überreste von einer unvollständigen Deinstallation) gefunden.\n"
-        + "Diese Konstellation kann obskure Fehler verursachen.\n\nEntfernen Sie eine der beiden Installationen.\n\n"
-        + "Die wollmux.log enthält nähere Informationen zu den betroffenen Pfaden.");
+    String title = L.m("Multiple WollMux installations");
+    String msg = L.m("A system wide and a local WollMux installation were found "
+        + "(or the remains of an incomplete deinstallation).\n"
+        + "This constellation can cause obscure errors.\n\nRemove one of the two installations.\n\n"
+        + "More information regarding the affected paths can be found in the wollmux.log.");
     String logMsg = msg;
 
     // get all installations
@@ -79,10 +79,10 @@ public class OnCheckInstallation extends WollMuxEvent
 
     if (recentInst.isPresent() && wmInsts.size() > 1)
     {
-      logMsg += "\n" + L.m("Die juengste WollMux-Installation liegt unter:")
+      logMsg += "\n" + L.m("The newest WollMux installation is located under:")
           + "\n "
           + recentInst.get().getLeft() + "\n"
-          + L.m("Ausserdem wurden folgende WollMux-Installationen gefunden:")
+          + L.m("Furthermore the following WollMux installations was found:")
           + "\n" + otherInstsList;
       LOGGER.error(logMsg);
       InfoDialog.showInfoModal(title, msg);
@@ -113,7 +113,7 @@ public class OnCheckInstallation extends WollMuxEvent
 
       if (myPath == null || oooPath == null)
       {
-        LOGGER.error("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen.");
+        LOGGER.error(L.m("Determination of the installation path for the WollMux package failed."));
         return wmInstallations;
       }
 
