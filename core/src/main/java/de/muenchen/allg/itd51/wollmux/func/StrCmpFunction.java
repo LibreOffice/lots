@@ -38,7 +38,7 @@ public class StrCmpFunction extends MultiFunction
     super(conf, funcLib, dialogLib, context);
     if (subFunction.size() < 2)
       throw new ConfigurationErrorException(L.m(
-        "Funktion %1 erfordert mindestens 2 Parameter", conf.getName()));
+        "Function %1 requires at least 2 parameters", conf.getName()));
   }
 
   @Override

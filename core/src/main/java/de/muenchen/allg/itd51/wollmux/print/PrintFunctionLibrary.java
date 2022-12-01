@@ -97,7 +97,7 @@ public class PrintFunctionLibrary
   public void add(String funcName, PrintFunction func)
   {
     if (func == null || funcName == null)
-      throw new NullPointerException(L.m("Weder Funktionsname noch Funktion darf null sein"));
+      throw new NullPointerException(L.m("Neither function name nor function may be null"));
     mapIdToFunction.put(funcName, func);
   }
 
@@ -159,15 +159,15 @@ public class PrintFunctionLibrary
           funcs.add(name, func);
         } catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("Druckfunktion '%1' enthält keinen Schlüssel EXTERN", name), e);
+          LOGGER.error(L.m("Print function '%1' does not contain key EXTERN", name), e);
         } catch (ConfigurationErrorException e)
         {
-          LOGGER.error(L.m("Fehler beim Parsen der Druckfunktion \"%1\"", name));
-          LOGGER.debug(L.m("Fehler beim Parsen der Druckfunktion \"%1\"", name), e);
+          LOGGER.error(L.m("Error while parsing the print function \"%1\"", name));
+          LOGGER.debug(L.m("Error while parsing the print function \"%1\"", name), e);
         } catch (NumberFormatException e)
         {
           LOGGER.error(
-              L.m("Der Wert des Schlüssels ORDER in der Druckfunktion '%2' ist ungültig.", name),
+              L.m("The value of the key ORDER is invalid in the print function '%2'.", name),//TODO
               e);
         }
       }

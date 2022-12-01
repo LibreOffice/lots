@@ -158,7 +158,7 @@ public class OOoBasedMailMerge implements AutoCloseable
   {
     this.pmod = pmod;
     this.type = type;
-    PrintModels.setStage(pmod, L.m("Seriendruck vorbereiten"));
+    PrintModels.setStage(pmod, L.m("Preparing mail merge"));//TODO
 
     createMailMergeTempdir();
     prepareDatasource();
@@ -189,7 +189,7 @@ public class OOoBasedMailMerge implements AutoCloseable
     {
       return;
     }
-    PrintModels.setStage(pmod, L.m("Gesamtdokument erzeugen"));
+    PrintModels.setStage(pmod, L.m("Generating merged document"));//TODO
 
     try
     {
@@ -259,8 +259,8 @@ public class OOoBasedMailMerge implements AutoCloseable
       }
     } else
     {
-      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
-          L.m("Leider konnte kein Gesamtdokument erstellt werden."));
+      InfoDialog.showInfoModal(L.m("WollMux mail merge"),
+          L.m("Unfortunately the merged document could not be created."));//TODO
       pmod.cancel();
     }
     try
@@ -284,7 +284,7 @@ public class OOoBasedMailMerge implements AutoCloseable
     } catch (java.io.IOException ex)
     {
       throw new PrintException(
-          L.m("OOo-Based-MailMerge: kann Simulationsdatenquelle nicht erzeugen!"), ex);
+          L.m("OOo-Based-MailMerge: the simulated data source could not be created!"), ex);//TODO
     }
     if (ds.getSize() == 0)
     {
@@ -821,12 +821,12 @@ public class OOoBasedMailMerge implements AutoCloseable
           }
 
           pmod.setPrintProgressValue((short) ++count);
-          LOGGER.trace(L.m("OOo-MailMerger: verarbeite Datensatz %1 (%2 ms)", count,
+          LOGGER.trace(L.m("OOo-MailMerger: processing record %1 (%2 ms)", count,//TODO
               (System.currentTimeMillis() - start)));
           if (count >= maxDatasets && type == MailMergeType.PRINTER)
           {
             count = 0;
-            pmod.setPrintMessage(L.m("Sende Druckauftrag - bitte warten..."));
+            pmod.setPrintMessage(L.m("Sending print job - please wait..."));//TODO
           }
         }
       });
@@ -852,8 +852,8 @@ public class OOoBasedMailMerge implements AutoCloseable
     {
       LOGGER.error("Can't create directory.", e);
       pmod.cancel();
-      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
-          "Es konnte kein Ordner für den Seriendruck erstellt werden.");
+      InfoDialog.showInfoModal(L.m("WollMux mail merge"),
+          "No folder could be created for mail merge.");//TODO
     }
   }
 

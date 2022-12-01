@@ -38,8 +38,8 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  */
 public class FunctionLibrary implements Iterable<Function>
 {
-  public static final String ERROR = L.m("!¤£!FEHLERHAFTE DATEN!¤£!");
-
+  public static final String ERROR = L.m("!¤£!INCORRECT DATA!¤£!");
+  
   private Map<String, Function> mapIdToFunction;
 
   private FunctionLibrary baselib;
@@ -92,7 +92,7 @@ public class FunctionLibrary implements Iterable<Function>
   {
     if (func == null || funcName == null)
       throw new NullPointerException(
-        L.m("Weder Funktionsname noch Funktion darf null sein"));
+        L.m("Neither function name nor function may be null"));
     mapIdToFunction.put(funcName, func);
   }
 

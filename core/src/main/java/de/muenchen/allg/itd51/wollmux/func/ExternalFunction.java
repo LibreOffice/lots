@@ -108,7 +108,7 @@ public class ExternalFunction
           {
             if (method != null)
             {
-              LOGGER.error("Klasse \"{}\" enthält 2 Methoden namens \"{}\"", classStr, methodStr);
+              LOGGER.error(L.m("Class \"{}\" contains 2 methods called \"{}\"", classStr, methodStr));//TODO
               break;
             }
             method = methods[i];
@@ -116,7 +116,7 @@ public class ExternalFunction
 
         if (method == null)
           throw new ConfigurationErrorException(L.m(
-            "Klasse \"%1\" enthält keine PUBLIC Methode namens \"%2", classStr,
+            "Class \"%1\" contains no PUBLIC method called \"%2", classStr,
             methodStr));
       }
       else
@@ -127,7 +127,7 @@ public class ExternalFunction
     catch (ClassNotFoundException | ScriptFrameworkErrorException e)
     {
       throw new ConfigurationErrorException(
-        L.m("Skript \"%1\" nicht verfügbar", url), e);
+        L.m("Script \"%1\" not available", url), e);
     }
 
     ConfigThingy paramsConf = conf.query("PARAMS");

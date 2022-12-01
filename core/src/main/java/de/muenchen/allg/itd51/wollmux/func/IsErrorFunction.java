@@ -45,7 +45,7 @@ public class IsErrorFunction implements Function
   {
     if (conf.count() != 1)
       throw new ConfigurationErrorException(L.m(
-        "Funktion %1 muss genau einen Parameter haben", conf.getName()));
+        "Function %1 must have exactly one parameter", conf.getName()));
 
     this.objectCompare = objectCompare;
     func = FunctionFactory.parseChildren(conf, funcLib, dialogLib, context);

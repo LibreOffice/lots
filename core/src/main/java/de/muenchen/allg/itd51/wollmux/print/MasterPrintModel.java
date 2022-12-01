@@ -112,7 +112,7 @@ class MasterPrintModel implements XPrintModel
   /**
    * Description of the current print function.
    */
-  private String currentStage = L.m("Drucke");
+  private String currentStage = L.m("Printing");
 
   private TextDocumentController documentController;
 
@@ -139,7 +139,7 @@ class MasterPrintModel implements XPrintModel
       functions.add(newFunc);
     }
     else
-      throw new NoSuchMethodException(L.m("Druckfunktion '%1' ist nicht definiert.", functionName));
+      throw new NoSuchMethodException(L.m("Print function '%1' is not defined.", functionName));
   }
 
   /**

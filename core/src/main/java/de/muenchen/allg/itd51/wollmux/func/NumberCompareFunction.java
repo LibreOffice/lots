@@ -80,7 +80,7 @@ public class NumberCompareFunction extends NumberFunction
     super(conf, funcLib, dialogLib, context);
     if (subFunction.size() < 2)
       throw new ConfigurationErrorException(L.m(
-        "Funktion %1 erfordert mindestens 2 Parameter", conf.getName()));
+        "Function %1 requires at least 2 parameters", conf.getName()));
     this.cmp1 = cmp1;
     this.cmp2 = cmp2;
     this.result = result;
@@ -94,7 +94,7 @@ public class NumberCompareFunction extends NumberFunction
     {
       if (conf.count() != 1)
         throw new ConfigurationErrorException(
-          L.m("MARGIN muss genau eine Funktion enthalten"));
+          L.m("MARGIN must contain exactly one function"));
       marginFun = FunctionFactory.parseChildren(conf, funcLib, dialogLib, context);
       return true;
     }
