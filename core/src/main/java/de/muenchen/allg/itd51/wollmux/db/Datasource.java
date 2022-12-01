@@ -131,7 +131,7 @@ public abstract class Datasource
 
         if (timeout <= 0)
         {
-          LOGGER.error("DATASOURCE_TIMEOUT muss größer als 0 sein!");
+          LOGGER.error(L.m("DATASOURCE_TIMEOUT has to be greater than 0"));
         } else
         {
           datasourceTimeout = timeout;
@@ -141,7 +141,7 @@ public abstract class Datasource
         LOGGER.error("", e);
       } catch (NumberFormatException e)
       {
-        LOGGER.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
+        LOGGER.error(L.m("DATASOURCE_TIMEOUT has to be an integer number"));
       }
     }
     return datasourceTimeout;

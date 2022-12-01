@@ -72,7 +72,7 @@ public class FunkyDatasource extends Datasource
     }
     catch (NodeNotFoundException x)
     {
-      throw new ConfigurationErrorException(L.m("NAME der Datenquelle fehlt"));
+      throw new ConfigurationErrorException(L.m("NAME of data source is missing"));
     }
 
     String sourceName;
@@ -83,14 +83,14 @@ public class FunkyDatasource extends Datasource
     catch (NodeNotFoundException x)
     {
       throw new ConfigurationErrorException(L.m(
-        "SOURCE der Datenquelle \"%1\" fehlt", name));
+        "SOURCE of data source \"%1\" is missing", name));
     }
 
     source = nameToDatasource.get(sourceName);
 
     if (source == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
-          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, sourceName));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"%1\": "
+          + "Referenced datasource \"%2\" missing or defined incorrectly", name, sourceName));
 
     /*
      * TODO why not use global FunctionLibrary and global DialogLibrary?

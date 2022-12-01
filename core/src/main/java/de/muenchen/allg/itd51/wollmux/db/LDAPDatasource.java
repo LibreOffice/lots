@@ -155,30 +155,30 @@ public class LDAPDatasource extends Datasource
   {
     setTimeout(Datasource.getDatasourceTimeout());
 
-    datasourceName = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
-    url = parseConfig(sourceDesc, "URL", () -> errorMessage() + L.m("URL des LDAP-Servers fehlt."));
+    datasourceName = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
+    url = parseConfig(sourceDesc, "URL", () -> errorMessage() + L.m("URL of LDAP-Server is missing."));
 
     try
     {
       new URI(url);
     } catch (URISyntaxException e)
     {
-      throw new ConfigurationErrorException("Fehler in LDAP-URL " + url, e);
+      throw new ConfigurationErrorException(L.M("Error in LDAP-URL " + url, e));
     }
 
     baseDN = parseConfig(sourceDesc, "BASE_DN",
-        () -> errorMessage() + L.m("BASE_DN des LDAP-Servers fehlt."));
+        () -> errorMessage() + L.m("BASE_DN of LDAP-Server is missing."));
     if (!BASEDN_RE.matcher(baseDN).matches())
     {
-      throw new ConfigurationErrorException("BASE_DN-Wert ist ungültig: " + baseDN);
+      throw new ConfigurationErrorException(L.m("BASE_DN-value is invalid: " + baseDN));
     }
 
     objectClass = parseConfig(sourceDesc, "OBJECT_CLASS",
-        () -> errorMessage() + L.m("Keine OBJECT_CLASS definiert."));
+        () -> errorMessage() + L.m("No OBJECT_CLASS defined."));
     if (!ATTRIBUTE_RE.matcher(objectClass).matches())
     {
       throw new ConfigurationErrorException(
-          "OBJECT_CLASS enthält unerlaubte Zeichen: " + objectClass);
+          L.m("OBJECT_CLASS contains of forbidden characters: " + objectClass));
     }
 
     String user = "";
@@ -205,7 +205,7 @@ public class LDAPDatasource extends Datasource
     ConfigThingy spalten = sourceDesc.query("Spalten");
 
     if (spalten.count() == 0)
-      throw new ConfigurationErrorException(errorMessage() + L.m("Abschnitt 'Spalten' fehlt."));
+      throw new ConfigurationErrorException(errorMessage() + L.m("Section 'Spalten' is missing."));
 
     schema = new ArrayList<>();
 
@@ -216,15 +216,15 @@ public class LDAPDatasource extends Datasource
       for (ConfigThingy spalteDesc : spaltenDesc)
       {
         String spalte = parseConfig(spalteDesc, "DB_SPALTE",
-            () -> errorMessage() + L.m("DB_SPALTE Angabe fehlt"));
+            () -> errorMessage() + L.m("Specification of DB-SPALTE is missing"));
         if (!SPALTENNAME.matcher(spalte).matches())
         {
           throw new ConfigurationErrorException(errorMessage()
-              + L.m("Spalte \"%1\" entspricht nicht der Syntax eines Bezeichners", spalte));
+              + L.m("Column \"%1\" does not match the syntax of an identifier", spalte));
         }
 
         String path = parseConfig(spalteDesc, "PATH",
-            () -> L.m("PATH-Angabe fehlt für Spalte %1", spalte));
+            () -> L.m("Path specification is missing for column %1", spalte));
         int relativePath;
         String attributeName;
         String columnObjectClass = null;
@@ -236,7 +236,7 @@ public class LDAPDatasource extends Datasource
         if (splitted.length != 2)
         {
           throw new ConfigurationErrorException(
-              errorMessage() + L.m("Syntaxerror bei Pfadangabe von %1", spalte));
+              errorMessage() + L.m("Syntaxerror in path specification of %1", spalte));
         }
 
         try
@@ -245,13 +245,13 @@ public class LDAPDatasource extends Datasource
         } catch (NumberFormatException e)
         {
           throw new ConfigurationErrorException(
-              errorMessage() + L.m("Syntaxerror bei Angabe des relativen Pfads von %1", spalte));
+              errorMessage() + L.m("Syntaxerror in specification of the relative path of %1", spalte));
         }
 
         attributeName = splitted[1];
         if (!ATTRIBUTE_RE.matcher(attributeName).matches())
           throw new ConfigurationErrorException(
-              L.m("Illegaler Attributsbezeichner: \"%1\"", attributeName));
+              L.m("Illegal attribute identifier: \"%1\"", attributeName));
 
         columnObjectClass = spalteDesc.getString("OBJECT_CLASS");
         lineSeparator = spalteDesc.getString("LINE_SEPARATOR");
@@ -268,7 +268,7 @@ public class LDAPDatasource extends Datasource
     ConfigThingy keys = sourceDesc.query("Schluessel");
 
     if (keys.count() == 0)
-      throw new ConfigurationErrorException(errorMessage() + L.m("Schluessel-Abschnitt fehlt."));
+      throw new ConfigurationErrorException(errorMessage() + L.m("Schluessel section is missing."));
 
     ConfigThingy keySpalten;
 
@@ -279,7 +279,7 @@ public class LDAPDatasource extends Datasource
     } catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException(
-          L.m("Unmöglich. Ich hab doch vorher count() überprüft."), e);
+          L.m("Impossible. Count() was checked before."), e);
     }
 
     Iterator<ConfigThingy> keyIterator = keySpalten.iterator();
@@ -287,7 +287,7 @@ public class LDAPDatasource extends Datasource
     if (!keyIterator.hasNext())
     {
       throw new ConfigurationErrorException(
-          errorMessage() + L.m("Keine Schluesselspalten angegeben."));
+          errorMessage() + L.m("No Key column specified."));
     }
 
     boolean onlyRelative = true; // true, falls kein Attributpfad der Form 0:*
@@ -303,7 +303,7 @@ public class LDAPDatasource extends Datasource
       // ist Schluesselattribut vorhanden?
       if (currentKeyLDAPAttribute == null)
         throw new ConfigurationErrorException(L.m(
-            "Spalte \"%1\" ist nicht im Schema definiert und kann deshalb nicht als Schluesselspalte verwendet werden.",
+            "Column \"%1\" was not defined in the schema and therefore it cannot be used as a key column.",
             currentName));
 
       if (currentKeyLDAPAttribute.relativePath != 0)
@@ -1469,7 +1469,7 @@ public class LDAPDatasource extends Datasource
 
   private String errorMessage()
   {
-    return L.m("Fehler in Definition von Datenquelle \"%1\": ", datasourceName);
+    return L.m("Error in data source definition of \"%1\": ", datasourceName);
   }
 
   private class LDAPDataset implements Dataset
@@ -1490,7 +1490,7 @@ public class LDAPDatasource extends Datasource
     {
       if (!schema.contains(columnName))
       {
-        throw new ColumnNotFoundException(L.m("Spalte \"%1\" ist nicht im Schema", columnName));
+        throw new ColumnNotFoundException(L.m("Column \"%1\" is not defined in schema", columnName));
       }
 
       return relation.get(columnName);

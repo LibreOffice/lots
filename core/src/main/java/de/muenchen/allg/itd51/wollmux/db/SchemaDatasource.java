@@ -81,14 +81,14 @@ public class SchemaDatasource extends Datasource
   public SchemaDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, URL context)
   {
-    name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
-    sourceName = parseConfig(sourceDesc, "SOURCE", () -> L.m("SOURCE der Datenquelle %1 fehlt", name));
+    name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
+    sourceName = parseConfig(sourceDesc, "SOURCE", () -> L.m("SOURCE of data source %1 is missing", name));
 
     source = nameToDatasource.get(sourceName);
 
     if (source == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
-          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, sourceName));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"%1\": "
+          + " Referenced datasource \"%2\" missing or defined incorrectly", name, sourceName));
 
     schema = new ArrayList<>(source.getSchema());
     mapNewToOld = new HashMap<>();
@@ -119,7 +119,7 @@ public class SchemaDatasource extends Datasource
     {
       if (renameDesc.count() != 2)
         throw new ConfigurationErrorException(L.m(
-          "Fehlerhafte RENAME Angabe in Datenquelle \"%1\"", name));
+          "Incorrect RENAME specification in data source \"%1\"", name));
 
       String spalte1 = "";
       String spalte2 = "";
@@ -135,11 +135,11 @@ public class SchemaDatasource extends Datasource
 
       if (!schema.contains(spalte1))
         throw new ConfigurationErrorException(L.m(
-          "Spalte \"%1\" ist nicht im Schema", spalte1));
+          "Column \"%1\" is not defined in schema", spalte1));
 
       if (!SPALTENNAME.matcher(spalte2).matches())
         throw new ConfigurationErrorException(L.m(
-          "\"%2\" ist kein erlaubter Spaltenname", spalte2));
+          "\"%2\" is not a valid column name", spalte2));
 
       mapNewToOld.put(spalte2, spalte1);
       columnsToDrop.add(spalte1);
@@ -158,7 +158,7 @@ public class SchemaDatasource extends Datasource
         String spalte = addColumn.toString();
         if (!SPALTENNAME.matcher(spalte).matches())
           throw new ConfigurationErrorException(L.m(
-            "\"%1\" ist kein erlaubter Spaltenname", spalte));
+            "\"%1\" is not a valid column name", spalte));
         columnsToAdd.add(spalte);
         columnsToDrop.remove(spalte);
       }
@@ -176,7 +176,7 @@ public class SchemaDatasource extends Datasource
         String spalte = dropColumn.toString();
         if (!schema.contains(spalte))
           throw new ConfigurationErrorException(L.m(
-            "Spalte \"%1\" ist nicht im Schema", spalte));
+            "Column \"%1\" is not defined in schema", spalte));
         columnsToDrop.add(spalte);
       }
     }
@@ -257,7 +257,7 @@ public class SchemaDatasource extends Datasource
     {
       // dieser Test ist nicht redundant wegen DROPs
       if (!schema.contains(columnName))
-        throw new ColumnNotFoundException(L.m("Spalte \"%1\" existiert nicht!",
+        throw new ColumnNotFoundException(L.m("Column \"%1\" does not exist!",
           columnName));
 
       String alteSpalte = mapNewToOld.get(columnName);
