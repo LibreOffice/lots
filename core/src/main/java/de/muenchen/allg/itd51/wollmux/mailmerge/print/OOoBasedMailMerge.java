@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,11 +48,15 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.PropertyVetoException;
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.frame.XModel;
 import com.sun.star.frame.XStorable;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.lang.XSingleServiceFactory;
 import com.sun.star.sdb.CommandType;
@@ -80,6 +85,10 @@ import de.muenchen.allg.afid.UnoCollection;
 import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.document.text.Bookmark;
+import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.FormFieldFactory;
@@ -357,11 +366,11 @@ public class OOoBasedMailMerge implements AutoCloseable
         adjustDatabaseAndInputUserFields(tmpDoc);
         /*
          * Bookmarks make LO mail merge slow. So we delete all of the.
-         *
+         * 
          * If at some time we need bookmarks at least WollMux document commands have to be removed
          * so that they are not processed twice.
          */
-        removeAllBookmarks(tmpDoc);
+        updateBookmarks(tmpDoc);
         ContentBasedDirectiveModel.createModel(UNO.XTextDocument(tmpDoc)).renameTextStyles();
         removeWollMuxMetadata(UNO.XTextDocument(tmpDoc));
 
@@ -420,7 +429,7 @@ public class OOoBasedMailMerge implements AutoCloseable
   }
 
   /**
-   * Remove all non informational meta data of wollmux from the document.
+   * Remove all non informational meta data of WollMux from the document.
    * 
    * @param doc
    *          The document.
@@ -437,30 +446,83 @@ public class OOoBasedMailMerge implements AutoCloseable
   }
 
   /**
-   * Remove all bookmarks from the document.
+   * Remove all bookmarks except setGroups-commands from the document. setGroups
+   * commands are converted, so that they can be interpreted by LibreOffice mail
+   * merge.
    * 
    * @param tmpDoc
    *          The document.
    */
-  private void removeAllBookmarks(XTextDocument tmpDoc)
+  private void updateBookmarks(XTextDocument tmpDoc)
   {
     if (UNO.XBookmarksSupplier(tmpDoc) != null)
     {
+      Predicate<String> setGroups = DocumentCommands.getPatternForCommand("setGroups").asMatchPredicate();
       UnoDictionary<XTextContent> bookmarks = UnoDictionary
           .create(UNO.XBookmarksSupplier(tmpDoc).getBookmarks(), XTextContent.class);
-      for (XTextContent bookmark : bookmarks.values())
+      for (Map.Entry<String, XTextContent> bookmark : bookmarks.entrySet())
       {
         try
         {
-          if (bookmark != null)
+          if (setGroups.test(bookmark.getKey()))
           {
-            bookmark.getAnchor().getText().removeTextContent(bookmark);
+            updateSetGroupsBookmark(tmpDoc, bookmark.getKey());
+          } else if (bookmark.getValue() != null)
+          {
+            bookmark.getValue().getAnchor().getText().removeTextContent(bookmark.getValue());
           }
+        }
+        catch (NoSuchElementException e)
+        {
+          continue;
         } catch (Exception e)
         {
           LOGGER.error("", e);
         }
       }
+    }
+  }
+
+  /**
+   * Sets a condition on the given book mark according to its name. All
+   * mentioned groups are part of the condition. Renames the book mark.
+   *
+   * @param tmpDoc
+   *          The document which has the book mark
+   * @param name
+   *          The name of the book mark.
+   * @throws NoSuchElementException
+   *           Couldn't find the book mark.
+   */
+  private void updateSetGroupsBookmark(XTextDocument tmpDoc, String name)
+      throws NoSuchElementException
+  {
+    try
+    {
+      Bookmark bookmark = new Bookmark(name, UNO.XBookmarksSupplier(tmpDoc));
+      ConfigThingy groups = new ConfigThingy("cmd", name).get("GROUPS");
+      List<String> conditions = new ArrayList<>();
+      List<String> names = new ArrayList<>();
+
+      UnoProperty.setPropertyToDefault(bookmark.getAnchor(), UnoProperty.CHAR_HIDDEN);
+      for (ConfigThingy groupName : groups)
+      {
+	conditions.add(String.format("([%s] != \"true\")",
+	    COLUMN_PREFIX_TEXTSECTION + groupName.toString()));
+	names.add(groupName.toString());
+      }
+      String condition = StringUtils.join(conditions, " or ");
+
+      XPropertySet ps = UNO.XPropertySet(
+          UNO.XBookmarksSupplier(tmpDoc).getBookmarks().getByName(name));
+      ps.setPropertyValue(UnoProperty.BOOKMARK_HIDDEN, true);
+      ps.setPropertyValue(UnoProperty.BOOKMARK_CONDITION, condition);
+      bookmark.rename(StringUtils.join(names, "_"));
+    } catch (NodeNotFoundException | java.io.IOException | SyntaxErrorException
+        | WrappedTargetException | UnknownPropertyException
+        | PropertyVetoException | UnoHelperException ex)
+    {
+      LOGGER.debug("", ex);
     }
   }
 
