@@ -208,5 +208,9 @@
       <groupId>org.jacoco</groupId>
       <artifactId>org.jacoco.core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.gnu.gettext</groupId>
+      <artifactId>libintl</artifactId>
+    </dependency>
   </dependencies>
 </project>

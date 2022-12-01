@@ -228,7 +228,7 @@ public class WollMuxFiles
     ConfigThingy l10n = config.query("L10n", 1);
     if (l10n.count() > 0)
     {
-      L.init(l10n);
+      L.initTemplateTranslations(l10n);
     }
 
     return true;

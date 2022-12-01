@@ -26,10 +26,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+import gnu.gettext.GettextResource;
 
 /**
  * Localization functions
@@ -40,6 +42,7 @@ public class L
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(L.class);
 
   private static StringBuilder debugMessages;
+  private static ResourceBundle catalog;
 
   /**
    * Initialized for the current language and maps an original string to a translated string.
@@ -51,10 +54,19 @@ public class L
   {}
 
   /**
-   * If a translation is available for original, it will be returned,
-   * otherwise the original string.
+   * Translate string (based on gettext translations, provided by WollMux)
    */
   public static String m(String original)
+  {
+    return GettextResource.gettext(catalog, original);
+  }
+
+  /**
+   * Translate user template strings (based on ConfigThingy translations, provided by user)
+   * @param original
+   * @return
+   */
+  public static String tm(String original)
   {
     String trans = mapMessageToTranslation.get(original.trim());
     if (trans == null)
@@ -81,7 +93,7 @@ public class L
    */
   public static String m(String original, Object insertion1, Object insertion2)
   {
- // do not use replaceAll because it interprets \ and $ specially
+    // do not use replaceAll because it interprets \ and $ specially
     return replace(m(original, insertion1), "%2", "" + insertion2);
   }
 
@@ -137,13 +149,18 @@ public class L
     return str;
   }
 
+  public static void initWollMuxTranslations()
+  {
+    catalog = ResourceBundle.getBundle("wollmux");
+  }
+
   /**
-   * Initializes the translation map with l10n.
+   * Initializes the translation map for template translations with l10n.
    *
    * @param l10n
    *          any node with "L10n" subnodes.
    */
-  public static void init(ConfigThingy l10n)
+  public static void initTemplateTranslations(ConfigThingy l10n)
   {
     try
     {
