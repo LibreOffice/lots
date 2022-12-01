@@ -164,7 +164,7 @@ public class ConfClassLoader extends URLClassLoader
           getClassLoader().addURL(url);
         } catch (MalformedURLException e)
         {
-          LOGGER.error(L.m("Fehlerhafte CLASSPATH-Angabe: \"%1\"", urlStr), e);
+          LOGGER.error(L.m("Illegal CLASSPATH specified: \"%1\"", urlStr), e);
         }
       }
     }

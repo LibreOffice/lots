@@ -236,10 +236,10 @@ public class WollMuxSingleton
     {
       if (noConfig)
       {
-        return L.m("keine geladen");
+        return L.m("none loaded");//TODO
       } else
       {
-        return L.m("unbekannt");
+        return L.m("unknown");//TODO
       }
     }
   }
@@ -271,7 +271,7 @@ public class WollMuxSingleton
         name = regConf.get("NAME").toString();
       } catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt"), e);
+        LOGGER.error(L.m("NAME attribute is missing in 'Datenquellen'/'Registriere' section"), e);
         continue;
       }
 
@@ -282,7 +282,7 @@ public class WollMuxSingleton
       } catch (NodeNotFoundException e)
       {
         LOGGER.error(
-            L.m("URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle '%1'",
+            L.m("URL-attribute is missing in 'Datenquellen'/'Registriere' section for data source '%1'", //TODO
                 name),
             e);
         continue;
@@ -309,7 +309,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Fehler beim Überprüfen, ob Datenquelle '%1' bereits registriert ist", name), x);
+            L.m("Error during checking whether the datasource '%1' is already registered", name), x);
       }
 
       LOGGER.debug("Versuche, Datenquelle '{}' bei OOo zu registrieren für URL '{}'", name, urlStr);
@@ -322,7 +322,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Fehler beim Registrieren von Datenquelle '%1': Illegale URL: '%2'", name, urlStr),
+            L.m("Error during registration of datasource '%1': Illegal URL: '%2'", name, urlStr),
             x);
         continue;
       }
@@ -332,11 +332,11 @@ public class WollMuxSingleton
         Object datasource = UnoDictionary.create(UNO.dbContext, Object.class).get(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
         if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
-          LOGGER.error("Testzugriff auf Datenquelle '{}' nach Registrierung fehlgeschlagen", name);
+          LOGGER.error(L.m("Test access to datasource '{}' failed after registration", name));//TODO
       } catch (Exception x)
       {
         LOGGER.error(L.m(
-            "Fehler beim Registrieren von Datenquelle '%1'. Stellen Sie sicher, dass die URL '%2' gültig ist.",
+            "Error during registration of datasource '%1'. Make sure that the URL '%2' is valid.",
             name, parsedUrl), x);
         continue;
       }
@@ -366,7 +366,7 @@ public class WollMuxSingleton
         setConfigurationValue(node, prop, v);
       } catch (Exception e)
       {
-        LOGGER.error(L.m("OOoEinstellungen: Konnte Einstellung '%1'nicht setzen:",
+        LOGGER.error(L.m("OOoConfiguration: Configuration '%1' could not be set:",
             element.stringRepresentation()), e);
       }
     }
@@ -407,7 +407,7 @@ public class WollMuxSingleton
     }
 
     throw new IllegalArgumentException(L.m(
-        "Der TYPE '%1' ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' und 'string'.",
+        "The TYPE '%1' is invalid. Valid are 'boolean', 'integer', 'float' and 'string'.",
         type));
   }
 

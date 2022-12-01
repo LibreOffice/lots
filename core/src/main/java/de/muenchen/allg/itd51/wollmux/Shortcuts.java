@@ -94,7 +94,7 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("SHORTCUT Angabe fehlt in '%1%'",
+        LOGGER.error(L.m("SHORTCUT specification is missing in '%1%'",
           tastenkombination.stringRepresentation()));
         continue;
       }
@@ -107,7 +107,7 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("URL Angabe fehlt in '%1'",
+        LOGGER.error(L.m("URL specification is missing in '%1'",
           tastenkombination.stringRepresentation()));
         continue;
       }
@@ -127,7 +127,7 @@ public class Shortcuts
       }
       else
       {
-        LOGGER.error("Ungültige Tastenkombination '{}' im .conf Abschnitt Tastenkuerzel", shortcut);
+        LOGGER.error(L.m("Invalid shortcut '{}' at .conf section 'Tastenkuerzel'"), shortcut);//TODO
       }
     }
 

@@ -112,7 +112,7 @@ public class WollMuxFiles
   private static final String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
 
   private static final String WOLLMUX_NOCONF = L.m(
-      "Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft WollMux im NoConfig-Modus.");
+      "No WollMux configuration (wollmux.conf) found - therefore WollMux runs in NoConfig mode.");//TODO
 
   /**
    * Default context defined in wollmux.conf.
@@ -576,7 +576,7 @@ public class WollMuxFiles
       out.write("===================== END OOo datasources ==================\n");
     } catch (IOException | NumberFormatException | JMException x)
     {
-      LOGGER.error(L.m("Fehler beim Erstellen des Dumps"), x);
+      LOGGER.error(L.m("Error while creating the dump file"), x);
       return null;
     }
     return dumpFile.getAbsolutePath();
@@ -634,10 +634,10 @@ public class WollMuxFiles
       }
       if (!found)
         out.write(
-            L.m("Datei '%1' konnte nicht gefunden werden.\n", jConfPath + "/javasettings_*.xml"));
+            L.m("File '%1' could not be found.\n", jConfPath + "/javasettings_*.xml"));
     } catch (java.lang.Exception e)
     {
-      out.write(L.m("Kann JVM-Settings nicht bestimmen: %1\n", "" + e));
+      out.write(L.m("JVM-Settings can not be determined: %1\n", "" + e));
     }
   }
 
@@ -725,7 +725,7 @@ public class WollMuxFiles
     } catch (java.lang.Exception e)
     {
       LOGGER.error("", e);
-      return L.m("Fehler beim Auslesen der OOo-Konfiguration mit dem Nodepath '%1'", nodePath);
+      return L.m("Error while extracting the OOo configuration with the node path '%1'", nodePath);
     }
   }
 

@@ -200,7 +200,7 @@ public class OpenExt
         }
         catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige PROGRAM-Angabe."));
+          LOGGER.error(L.m("One entry within the section ""ExterneAnwendungen"" (external Applications) contains an invalid PROGRAM-Specification."));
           continue;
         }
 
@@ -264,7 +264,7 @@ public class OpenExt
   {
     if (filter == null)
       throw new ConfigurationErrorException(L.m(
-        "FILTER-Angabe fehlt bei Anwendung für \"%1\"", ext));
+        "FILTER specification is missing with the application for \"%1\"", ext)); //TODO
     this.doc = doc;
     this.url = null;
   }
@@ -305,7 +305,7 @@ public class OpenExt
       }
       catch (Exception x)
       {
-        throw new IOException(L.m("Fehler beim Speichern der Datei: %1",
+        throw new IOException(L.m("Error when storing the file: %1",//TODO
           x.getMessage()));
       }
     }
@@ -320,7 +320,7 @@ public class OpenExt
       File tempFile = prepareTempFile(fileName);
 
       if (!tempFile.createNewFile())
-        throw new IOException(L.m("Konnte temporäre Datei \"%1\" nicht anlegen", tempFile.getPath()));
+        throw new IOException(L.m("Could not create a temporay file \"%1\"", tempFile.getPath()));
       try (InputStream istream = url.openStream(); FileOutputStream out = new FileOutputStream(tempFile);)
       {
         byte[] buffy = new byte[4096];
@@ -334,7 +334,7 @@ public class OpenExt
   private void testState()
   {
     if (doc == null && url == null)
-      throw new IllegalStateException(L.m("setSource() wurde nicht aufgerufen"));
+      throw new IllegalStateException(L.m("setSource() was not called"));//TODO
   }
 
   /**
@@ -351,7 +351,7 @@ public class OpenExt
     if (!tmpDir.isDirectory() || !tmpDir.canWrite())
       throw new IOException(
         L.m(
-          "Temporäres Verzeichnis\n\"%1\"\nexistiert nicht oder kann nicht beschrieben werden!",
+          "Temporary directory\n\"%1\"\ndoes not exist or it cannot be written!",
           tmpDir.getPath()));
 
     File downloadDir = null;
@@ -366,7 +366,7 @@ public class OpenExt
 
     if (downloadDir == null)
       throw new IOException(
-        L.m("Konnte kein temporäres Verzeichnis für den Download der Datei anlegen!"));
+        L.m("Could not create a temporary directory for the file download!"));
 
     if (fileName.length() == 0) fileName = "temp";
     if (!fileName.endsWith("." + ext)) fileName += "." + ext;
@@ -463,7 +463,7 @@ public class OpenExt
 
         handler.handle(new Exception(
           L.m(
-            "Keines der für die Erweiterung \"%1\"konfigurierten Programme konnte gestartet werden!\n%2",
+            "None of the programs configured for the extension \"%1\" could be started!\n%2",
             ext, errors.toString())));
       }
 
@@ -517,7 +517,7 @@ public class OpenExt
         String arg[] = param[i].split("=");
         if (arg.length != 2)
           throw new IllegalArgumentException(
-            L.m("/loadComponentFromURL/ Parameter muss die Form \"Param=Wert\" haben"));
+            L.m("The /loadComponentFromURL/ parameter must be in the form \"Param=Value\""));//TODO
 
         if (arg[0].equals("AsTemplate"))
           asTemplate = arg[1].equalsIgnoreCase("true");
