@@ -53,7 +53,7 @@ public class Dateinamensanpassungen
    * Pfaden/Dateinamen übergeben werden, wovon der erste Eintrag dieser Liste
    * zurückgegeben wird, dessen Pfad-Anteil tatsächlich verfügbar ist.
    * Innerhalb eines Pfades/Dateinamens kann vor der Verfügbarkeitsprüfung mit
-   * ${<name>} der Wert einer Java-Systemproperty in den Dateinamen eingefügt
+   * ${&lt;name&gt;} der Wert einer Java-Systemproperty in den Dateinamen eingefügt
    * werden.
    */
   public static String verfuegbarenPfadVerwenden(String fileName)

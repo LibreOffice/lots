@@ -1255,7 +1255,7 @@ public class TextDocumentModel
   }
 
   /**
-   * {@link DocumentCommands#addNewDocumentCommand(XTextRange, String)
+   * {@link DocumentCommands#addNewDocumentCommand(XTextRange, String)}
    *
    * @param r
    *          The text range.

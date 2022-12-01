@@ -227,7 +227,7 @@ public class IdModel
      * Ein IDChangeListener wird benachrichtigt, wenn sich ein {@link IdModel}
      * Objekt ändert.
      *
-     * @see ID.addIDChangeListener(IDChangeListener)
+     * @see #addIDChangeListener(IDChangeListener)
      */
     public interface IDChangeListener
     {
