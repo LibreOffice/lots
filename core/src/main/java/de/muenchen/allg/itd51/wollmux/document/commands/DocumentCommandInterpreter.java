@@ -231,8 +231,9 @@ public class DocumentCommandInterpreter
     if (errors != 0)
     {
       throw new WMCommandsFailedException(
-          L.m("The used template contains %1 errors.\n\nPlease contact your system administrator.",
-              ((errors == 1) ? L.m("one") : "" + errors)));//TODO try to use proper ngettext() plurals instead
+          L.mn("The used template contains an error.", "The used template contains %d errors", errors)
+          + "\n\n"
+          + L.m("Please contact your system administrator."));
     }
   }
 

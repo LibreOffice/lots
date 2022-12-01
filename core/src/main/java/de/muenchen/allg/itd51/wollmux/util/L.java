@@ -112,6 +112,12 @@ public class L
       + insertion4);
   }
 
+  /* Supports plural forms */
+  public static String mn(String singular, String plural, int count)
+  {
+    return GettextResource.ngettext(catalog, singular, plural, count);
+  }
+
   /**
    * Replaces in where all occurrences of what by withWhat and returns the result returned.
    */
