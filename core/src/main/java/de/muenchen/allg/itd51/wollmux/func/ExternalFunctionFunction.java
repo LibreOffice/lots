@@ -64,7 +64,7 @@ public class ExternalFunctionFunction implements Function
       Object result = func.invoke(parameters);
       if (result == null)
         throw new Exception(
-          L.m("Unbekannter Fehler beim Ausführen einer externen Funktion"));
+          L.m("Unknown error during execution of external function"));
       return result.toString();
     }
     catch (Exception e)

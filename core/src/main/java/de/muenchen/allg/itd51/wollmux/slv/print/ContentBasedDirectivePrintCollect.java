@@ -76,7 +76,7 @@ public class ContentBasedDirectivePrintCollect extends PrintFunction
     } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException | WrappedTargetException
         | IOException | com.sun.star.io.IOException | UnoHelperException e)
     {
-      LOGGER.error(L.m("Konnte die Dokumente für den Druck der Sachleitenden Verfügung nicht aufsammeln."), e);
+      LOGGER.error(L.m("Could not pick up the documents for the printing of the subject order."), e);//TODO what is Sachleitende Verfügung in English???
       InfoDialog.showInfoModal("Sachleitende Verfügungen drucken", "Die Dokumente konnten nicht gesammelt werden.");
       printModel.cancel();
     }

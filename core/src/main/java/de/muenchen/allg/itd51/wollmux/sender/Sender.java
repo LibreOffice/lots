@@ -201,7 +201,7 @@ public class Sender
   {
     if (newValue == null)
     {
-      throw new SenderException(L.m("Override kann nicht null sein"));
+      throw new SenderException(L.m("Override can not be null"));
     }
     overridenValues.put(columnName, newValue);
   }

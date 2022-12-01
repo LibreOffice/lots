@@ -61,7 +61,7 @@ public class ToOdtFile extends PrintFunction
     {
       LOGGER.error("Fehler beim Seriendruck", e);
       printModel.cancel();
-      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"), L.m(e.getMessage()));
+      InfoDialog.showInfoModal(L.m("WollMux mail merge"), L.m(e.getMessage()));
     } catch (Exception ex)
     {
       LOGGER.warn("Fehler beim Aufräumen der temporären Dokumente", ex);

@@ -113,7 +113,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
   /**
    * Title for dialogs indicating an error.
    */
-  public static final String MAIL_ERROR_MESSAGE_TITLE = L.m("Fehler beim E-Mail-Versand");
+  public static final String MAIL_ERROR_MESSAGE_TITLE = L.m("Error while sending e-mail");//TODO
 
   /**
    * Create a new print function with name and order.
@@ -141,7 +141,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     String from = pmod.getProp(PROP_EMAIL_FROM, "").toString();
     if (!isMailAddress(from))
     {
-      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m("Die Absenderadresse '%1' ist ungültig.", from));
+      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m("The sender address '%1' is invalid.", from));//TODO
       pmod.cancel();
       return;
     }
@@ -151,11 +151,11 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     HashMap<String, String> ds = new HashMap<>(
         (HashMap<String, String>) pmod.getProp(SetFormValue.PROP_DATASET_EXPORT, new HashMap<String, String>()));
     String to = ds.get(fieldName);
-    PrintModels.setStage(pmod, L.m("Sende an %1", to));
+    PrintModels.setStage(pmod, L.m("Send to %1", to));//TODO
     if (!isMailAddress(to))
     {
-      boolean res = InfoDialog.showCancelModal("ungültige Empfängeradresse",
-          L.m("Die Empfängeradresse '%1' ist ungültig!\n\nDiesen Datensatz überspringen und fortsetzen?", to));
+      boolean res = InfoDialog.showCancelModal(L.m("Invalid recipient address"),//TODO
+          L.m("The '%1' recipient address is invalid!\n\nDo you want to skip this record and continue?", to));//TODO
       if (res)
       {
         pmod.cancel();
@@ -163,7 +163,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
       return;
     }
 
-    String subject = pmod.getProp(PROP_EMAIL_SUBJECT, L.m("<kein Betreff>")).toString();
+    String subject = pmod.getProp(PROP_EMAIL_SUBJECT, L.m("<no match>")).toString();
     String message = (String) pmod.getProp(PROP_EMAIL_MESSAGE_TEXTTAGS, null);
 
     try
@@ -208,13 +208,13 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     {
       LOGGER.error("Kein Mailserver", e);
       InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m(
-          "Es konnten keine Angaben zum Mailserver gefunden werden - eventuell ist die WollMux-Konfiguration "
-              + "nicht vollständig."));
+          "Could not find information about the mail server - maybe the WollMux configuration "
+              + "is not complete."));//TODO
       pmod.cancel();
     } catch (MessagingException e)
     {
       LOGGER.error("Email versenden fehlgeschlagen", e);
-      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m("Der Versand der E-Mail ist fehlgeschlagen."));
+      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m("Sending the e-mail failed."));//TODO
       pmod.cancel();
     } catch (Exception e)
     {

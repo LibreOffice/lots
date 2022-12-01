@@ -444,8 +444,8 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
             .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(datasource.getColumnNames()));
         List<String> columns = new ArrayList<>(datasource.getColumnNames());
 
-        AdjustFields.showFieldMappingDialog("Tabellenspalten ergänzen", L.m("Spalte"),
-            L.m("Vorbelegung"), L.m("Spalten ergänzen"), fieldIDs, columns, true,
+        AdjustFields.showFieldMappingDialog("Tabellenspalten ergänzen", L.m("Column"),
+            L.m("Assignment (initial)"), L.m("Add columns"), fieldIDs, columns, true,
             addTableColumnsFinishListener);
       } catch (NoTableSelectedException ex)
       {
@@ -475,8 +475,8 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
         ReferencedFieldID[] fieldIDs = textDocumentController.getModel()
             .getReferencedFieldIDsThatAreNotInSchema(new HashSet<>(ds.getColumnNames()));
         List<String> columns = new ArrayList<>(ds.getColumnNames());
-        AdjustFields.showFieldMappingDialog("Felder anpassen", L.m("Altes Feld"),
-            L.m("Neue Belegung"), L.m("Felder anpassen"), fieldIDs, columns, false,
+        AdjustFields.showFieldMappingDialog("Adjust fields", L.m("Old field"),
+            L.m("New assignment"), L.m("Adjust fields"), fieldIDs, columns, false,
             adjustFieldsFinishListener);
       } catch (NoTableSelectedException ex)
       {
@@ -726,7 +726,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       }
     } catch (NodeNotFoundException e)
     {
-      LOGGER.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
+      LOGGER.error(L.m("Missing argument for datasource of type '%1':", type), e);
     } catch (NoTableSelectedException ex)
     {
       LOGGER.error("Die Tabelle existiert nicht", ex);

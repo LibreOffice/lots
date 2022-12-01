@@ -310,7 +310,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       try
       {
         Sender datasetCopy = new Sender(senderList.get(index));
-        datasetCopy.overrideValue("Rolle", L.m("Kopie"));
+        datasetCopy.overrideValue("Rolle", L.m("Copies"));
         senderList.add(datasetCopy);
         palListe.addItem(datasetCopy.getDisplayString(), (short) (palListe.getItemCount() + 1));
       } catch (SenderException e)

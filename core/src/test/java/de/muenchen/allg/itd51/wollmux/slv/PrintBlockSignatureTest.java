@@ -38,7 +38,7 @@ public class PrintBlockSignatureTest
     PrintBlockSignature signature = PrintBlockSignature.valueOfIgnoreCase("allversions");
     assertEquals("AllVersions", signature.getName());
     assertEquals("SLV_AllVersions", signature.getGroupName());
-    assertEquals(L.m("wird immer gedruckt"), signature.getMessage());
+    assertEquals(L.m("will always be printed"), signature.getMessage());
     assertThrows(IllegalArgumentException.class, () -> PrintBlockSignature.valueOfIgnoreCase("foo"));
   }
 }

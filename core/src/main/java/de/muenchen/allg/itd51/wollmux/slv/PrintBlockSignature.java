@@ -32,24 +32,24 @@ public enum PrintBlockSignature
   /**
    * Text marked with this command is always printed.
    */
-  ALL_VERSIONS("AllVersions", L.m("wird immer gedruckt")),
+  ALL_VERSIONS("AllVersions", L.m("will always be printed")),
   /**
    * Text marked with this command is only printed in the original (first content based directive).
    */
-  ORIGINAL_ONLY("OriginalOnly", L.m("wird ausschließlich im Original gedruckt")),
+  ORIGINAL_ONLY("OriginalOnly", L.m("will only be printed in the original")),
   /**
    * Text marked with this command isn't printed in the original (first content based directive),
    * but everywhere else.
    */
-  NOT_IN_ORIGINAL("NotInOriginal", L.m("wird im Original nicht gedruckt")),
+  NOT_IN_ORIGINAL("NotInOriginal", L.m("will not be printed in the original")),
   /**
    * Text marked with this command is only printed in drafts.
    */
-  DRAFT_ONLY("DraftOnly", L.m("wird nur im Entwurf gedruckt")),
+  DRAFT_ONLY("DraftOnly", L.m("will only be printed in the draft")),
   /**
    * Text marked with this command is only printed in copies (all prints except original and draft).
    */
-  COPY_ONLY("CopyOnly", L.m("wird ausschließlich in Abdrucken gedruckt"));
+  COPY_ONLY("CopyOnly", L.m("will only be printed in copies"));
 
   /**
    * The command name.

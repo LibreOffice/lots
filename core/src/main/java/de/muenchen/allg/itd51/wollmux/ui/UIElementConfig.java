@@ -232,7 +232,7 @@ public class UIElementConfig
     {
       if (getType() == UIElementType.COMBOBOX)
       {
-        LOGGER.error(L.m("Fehlerhaftes Element des Typs \"combobox\""), x);
+        LOGGER.error(L.m("Incorrect element of the type \"combobox\""), x);
       }
     }
     plausi = controlConf.query("PLAUSI");

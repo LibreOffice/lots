@@ -56,7 +56,7 @@ public abstract class MultiFunction implements Function
 
     if (subFunc.isEmpty())
       throw new ConfigurationErrorException(L.m(
-        "Funktion %1 erfordert mindestens einen Parameter", conf.getName()));
+        "Function %1 requires at least one parameter", conf.getName()));
 
     init(subFunc);
   }

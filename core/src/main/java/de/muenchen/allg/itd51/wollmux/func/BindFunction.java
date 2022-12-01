@@ -61,7 +61,7 @@ public class BindFunction implements Function
       ConfigThingy set = iter.next();
       if (set.count() != 2)
         throw new ConfigurationErrorException(
-          L.m("BIND: SET benötigt genau 2 Parameter"));
+          L.m("BIND: SET requires exactly 2 parameters"));
 
       try
       {
@@ -70,7 +70,7 @@ public class BindFunction implements Function
 
         if (mapParamNameToSetFunction.containsKey(name))
           throw new ConfigurationErrorException(
-              L.m("BIND: Der Parameter %1 wird 2 mal mit SET gebunden", name));
+              L.m("BIND: The parameter %1 will be bound twice with SET", name));
 
         mapParamNameToSetFunction.put(name, setFunc);
         setFuncParams.addAll(Arrays.asList(setFunc.parameters()));

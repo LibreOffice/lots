@@ -88,7 +88,7 @@ public class OnMarkBlock extends WollMuxEvent
 
     if (range.isCollapsed())
     {
-      InfoDialog.showInfoModal(L.m("Fehler"), L.m("Bitte wählen Sie einen Bereich aus, der markiert werden soll."));
+      InfoDialog.showInfoModal(L.m("Error"), L.m("Please select an area to be marked."));
       return;
     }
 
@@ -168,15 +168,15 @@ public class OnMarkBlock extends WollMuxEvent
     if (allMatch)
     {
       bookmarks.forEach(this::deleteBookmark);
-      InfoDialog.showInfoModal(L.m("Markierung des Blockes aufgehoben"),
-          L.m("Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. "
-              + "Die bestehende Markierung wurde aufgehoben.", markChange));
+      InfoDialog.showInfoModal(L.m("Block is no longer marked"),
+          L.m("The selected block already contained a marker 'Block %1'. "
+              + "The existing marker has been removed.", markChange));
     } else
     {
-      short result = InfoDialog.showYesNoModal(L.m("Verschiedene Blöcke"),
-          L.m("Der ausgewählte Bock enthält bereits eine andere Markierungen.\n"
-              + "Soll der neue Block wirklich angelegt werden?\n"
-              + "Das kann zu unerwartetem Verhatlten führen und zeigt einen\nWarndialog beim Öffnen der Datei."));
+      short result = InfoDialog.showYesNoModal(L.m("Different blocks"),
+          L.m("The selected block already contains another marker.\n"
+              + "Should the new block is really to be created?\n"
+              + "This can lead to unexpected behavior and show a warning dialog\n when opening the file."));
       if (result == MessageBoxResults.YES)
       {
         setNewDocumentCommand(bookmarkName, range, highlightColor, markChange);
@@ -206,9 +206,9 @@ public class OnMarkBlock extends WollMuxEvent
     bookmarks.forEach(this::deleteBookmark);
     if (allMatch)
     {
-      InfoDialog.showInfoModal(L.m("Markierung des Blockes aufgehoben"), L.m(
-          "Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. "
-              + "Die bestehende Markierung wurde aufgehoben.",
+      InfoDialog.showInfoModal(L.m("Block is no longer marked"), L.m(
+          "The selected block already contained a marker 'Block %1'. "
+              + "The existing marker has been removed.",
           markChange));
     } else
     {
@@ -267,7 +267,7 @@ public class OnMarkBlock extends WollMuxEvent
         LOGGER.error("Couldn't set background color.");
       }
     }
-    InfoDialog.showInfoModal(L.m("Block wurde markiert"), L.m("Der ausgewählte Block %1", markChange));
+    InfoDialog.showInfoModal(L.m("Block was marked"), L.m("The selected block %1", markChange));
   }
 
   @Override

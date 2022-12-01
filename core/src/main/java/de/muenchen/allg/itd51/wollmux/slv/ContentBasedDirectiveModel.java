@@ -226,7 +226,7 @@ public class ContentBasedDirectiveModel
     {
       ContentBasedDirective original = new ContentBasedDirective(
           L.m(ContentBasedDirectiveConfig.getNumber(1) + " Original"));
-      original.addReceiverLine(L.m("Empfänger siehe Empfängerfeld"));
+      original.addReceiverLine(L.m("Recipient see recipient field"));
       items.add(original);
     }
 
