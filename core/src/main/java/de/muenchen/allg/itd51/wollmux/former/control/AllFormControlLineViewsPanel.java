@@ -200,7 +200,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
       new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    JButton hochButton = new JButton(L.m("Hoch"));
+    JButton hochButton = new JButton(L.m("Up"));
     hochButton.addActionListener(e ->
     {
       if (noSelectedElementsOnVisibleTab()) return;
@@ -210,7 +210,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     buttonPanel.add(hochButton, gbcButton);
 
     ++gbcButton.gridx;
-    JButton runterButton = new JButton(L.m("Runter"));
+    JButton runterButton = new JButton(L.m("Down"));
     runterButton.addActionListener(e ->
     {
       if (noSelectedElementsOnVisibleTab()) return;
@@ -220,7 +220,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     buttonPanel.add(runterButton, gbcButton);
 
     ++gbcButton.gridx;
-    JButton killButton = new JButton(L.m("Löschen"));
+    JButton killButton = new JButton(L.m("Delete"));
     killButton.addActionListener(e ->
     {
       if (noSelectedElementsOnVisibleTab()) return;
@@ -229,12 +229,12 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     buttonPanel.add(killButton, gbcButton);
 
     ++gbcButton.gridx;
-    JButton tabButton = new JButton(L.m("Neuer Tab"));
+    JButton tabButton = new JButton(L.m("New tab"));
     tabButton.addActionListener(e -> insertNewTab());
     buttonPanel.add(tabButton, gbcButton);
 
     ++gbcButton.gridx;
-    JButton newButton = new JButton(L.m("Neues Label"));
+    JButton newButton = new JButton(L.m("New label"));
     newButton.addActionListener(e -> insertNewElement());
     buttonPanel.add(newButton, gbcButton);
 
@@ -505,7 +505,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     String[] items = new String[itemList.size()];
     items = itemList.toArray(items);
     FormControlModel comboModel =
-      FormControlModel.createComboBox(L.m("Auswahl"), id, items, formularMax4000);
+      FormControlModel.createComboBox(L.m("Selection"), id, items, formularMax4000);
     comboModel.setEditable(false);
     int index = getInsertionIndex();
     formControlModelList.add(comboModel, index);

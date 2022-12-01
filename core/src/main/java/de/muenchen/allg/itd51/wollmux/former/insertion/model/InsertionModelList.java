@@ -173,7 +173,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
           }
           catch (UnknownIDException e)
           {
-            LOGGER.error(L.m("Programmfehler"), e);
+            LOGGER.error(L.m("Application error"), e);
             return;
           }
 
@@ -247,7 +247,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
         }
         catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("Kann nicht passieren"), e);
+          LOGGER.error(L.m("Can not happen"), e);
           return;
         }
 

@@ -100,8 +100,8 @@ public class ConfigEditor extends JFrame implements SearchListener
         if (editor.isDirty())
         {
           if (JOptionPane.showConfirmDialog(ConfigEditor.this,
-            L.m("Wollen Sie den Editor schließen ohne zu speichern?"),
-            L.m("Editor schließen"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+            L.m("Do you want to close the Editor without saving?"),//TODO
+            L.m("Close Editor"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)//TODO
           {
             ConfigEditor.this.dispose();
           }
@@ -194,9 +194,9 @@ public class ConfigEditor extends JFrame implements SearchListener
     JMenuItem menuItem;
     JMenuBar editorMenuBar = new JMenuBar();
     // ========================= Datei ============================
-    menu = new JMenu(L.m("Datei"));
+    menu = new JMenu(L.m("File"));
 
-    menuItem = new JMenuItem(L.m("Speichern"));
+    menuItem = new JMenuItem(L.m("Save"));
     menuItem.addActionListener(e -> {
       try
       {
@@ -207,18 +207,18 @@ public class ConfigEditor extends JFrame implements SearchListener
       } catch (Exception e1)
       {
         JOptionPane.showMessageDialog(ConfigEditor.this, e1.getMessage(),
-            L.m("Fehler beim Parsen der Formularbeschreibung"), JOptionPane.WARNING_MESSAGE);
+            L.m("Error while parsing the form description"), JOptionPane.WARNING_MESSAGE);
       }
     });
     menu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Abbrechen"));
+    menuItem = new JMenuItem(L.m("Cancel"));
     menuItem.addActionListener(e -> dispose());
     menu.add(menuItem);
 
     editorMenuBar.add(menu);
 
-    menu = new JMenu(L.m("Bearbeiten"));
+    menu = new JMenu(L.m("Edit"));
     menu.add(new JMenuItem(RTextArea.getAction(RTextArea.UNDO_ACTION)));
     menu.add(new JMenuItem(RTextArea.getAction(RTextArea.REDO_ACTION)));
     menu.addSeparator();
@@ -294,7 +294,7 @@ public class ConfigEditor extends JFrame implements SearchListener
       case REPLACE_ALL:
         result = SearchEngine.replaceAll(editor, event.getSearchContext());
         JOptionPane.showMessageDialog(null,
-          String.format(L.m("%d Ersetzung vorgenommen."), result.getCount()));
+          String.format(L.m("%d replacement made."), result.getCount()));
         break;
     }
 
@@ -306,7 +306,7 @@ public class ConfigEditor extends JFrame implements SearchListener
 
     public ShowFindDialogAction()
     {
-      super(L.m("Suchen..."));
+      super(L.m("Search..."));
       int c = getToolkit().getMenuShortcutKeyMaskEx();
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, c));
     }
@@ -328,7 +328,7 @@ public class ConfigEditor extends JFrame implements SearchListener
 
     public ShowReplaceDialogAction()
     {
-      super(L.m("Ersetzen..."));
+      super(L.m("Replace..."));
       int c = getToolkit().getMenuShortcutKeyMaskEx();
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, c));
     }

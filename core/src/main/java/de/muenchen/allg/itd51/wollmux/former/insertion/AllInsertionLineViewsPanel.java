@@ -140,7 +140,7 @@ public class AllInsertionLineViewsPanel implements View
       new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
         GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
           BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    JButton button = new JButton(L.m("Entfernen (DeMux)"));
+    JButton button = new JButton(L.m("Remove (DeMux)"));
     button.addActionListener(e -> demuxSelectedElements());
     buttonPanel.add(button, gbcButton);
 

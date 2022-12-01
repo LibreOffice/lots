@@ -58,7 +58,7 @@ public class ContextMenuMouseListener implements AWTEventListener {
   private JTextComponent textComponent;
 
   public ContextMenuMouseListener() {
-      cutAction = new AbstractAction(L.m("Ausschneiden")) {
+      cutAction = new AbstractAction(L.m("Cut")) {
 
         private static final long serialVersionUID = -7972302689720579714L;
 
@@ -70,7 +70,7 @@ public class ContextMenuMouseListener implements AWTEventListener {
 
       popup.add(cutAction);
 
-      copyAction = new AbstractAction(L.m("Kopieren")) {
+      copyAction = new AbstractAction(L.m("Copy")) {
 
         private static final long serialVersionUID = -3983750413260485527L;
 
@@ -82,7 +82,7 @@ public class ContextMenuMouseListener implements AWTEventListener {
 
       popup.add(copyAction);
 
-      pasteAction = new AbstractAction(L.m("Einfügen")) {
+      pasteAction = new AbstractAction(L.m("Insert")) {
 
         private static final long serialVersionUID = -1398305541404836086L;
 
@@ -95,7 +95,7 @@ public class ContextMenuMouseListener implements AWTEventListener {
       popup.add(pasteAction);
       popup.addSeparator();
 
-      selectAllAction = new AbstractAction(L.m("Alles markieren")) {
+      selectAllAction = new AbstractAction(L.m("Select all")) {
 
         private static final long serialVersionUID = 8875656666599278428L;
 
