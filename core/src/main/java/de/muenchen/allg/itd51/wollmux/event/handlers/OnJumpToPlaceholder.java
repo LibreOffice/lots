@@ -42,7 +42,7 @@ public class OnJumpToPlaceholder extends WollMuxEvent
 
   /**
    * Create this event.
-   * 
+   *
    * @param documentController
    *          The document.
    */

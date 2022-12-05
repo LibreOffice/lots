@@ -36,7 +36,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Anzeige erweiterter Eigenschaften eines FormControlModels.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class OneFormControlExtView implements LazyView
@@ -92,7 +92,7 @@ public class OneFormControlExtView implements LazyView
 
   /**
    * Erzeugt eine neue View.
-   * 
+   *
    * @param model
    *          das Model dessen Daten angezeigt werden sollen.
    * @param funcLib

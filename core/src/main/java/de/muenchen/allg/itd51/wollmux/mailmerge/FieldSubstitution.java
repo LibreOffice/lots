@@ -75,7 +75,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
   /**
    * Add a substitution by a field.
-   * 
+   *
    * @param fieldname
    *          The name of the field.
    */
@@ -96,7 +96,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
   /**
    * Add a substitution by fixed text.
-   * 
+   *
    * @param text
    *          The text.
    */
@@ -172,7 +172,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
   /**
    * Update a field.
-   * 
+   *
    * @param controller
    *          The controller of the document which contains the field.
    * @param formField
@@ -222,7 +222,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
   /**
    * Update a field with Trafo.
-   * 
+   *
    * @param controller
    *          The controller of the document which contains the field.
    * @param formField
@@ -252,7 +252,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
   /**
    * Replace all occurrences of oldFieldId in a Trafo and stores the function. If any of the
    * parameters is null nothing is done.
-   * 
+   *
    * @param controller
    *          The controller of the document.
    * @param trafoName
@@ -297,7 +297,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
   /**
    * Substitute all VALUE nodes in the configuration which have exactly one child with oldFieldId.
-   * 
+   *
    * @param conf
    *          The configuration.
    * @param oldFieldId
@@ -357,7 +357,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
     /**
      * Create this substitution element.
-     * 
+     *
      * @param type
      *          The type of substitution.
      * @param value
@@ -371,7 +371,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
     /**
      * Get the value.
-     * 
+     *
      * @return If {@link #isField()} returns true, this is an Id of a field. If
      *         {@link #isFixedText()} returns true, this is some fixed text.
      */
@@ -382,7 +382,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
     /**
      * Is this a field?
-     * 
+     *
      * @return True if its type is {@link SubstElementType#FIELD}.
      */
     public boolean isField()
@@ -392,7 +392,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
 
     /**
      * Is this a field?
-     * 
+     *
      * @return True if its type is {@link SubstElementType#FIXED_TEXT}.
      */
     public boolean isFixedText()

@@ -170,7 +170,7 @@ public class FormularMax4kController
    */
   private static final String GENERATED_FORM_TITLE =
     L.m("Generiert durch FormularMax 4000");
-  
+
   /**
    * Der Titel des Formulars.
    */
@@ -270,7 +270,7 @@ public class FormularMax4kController
     {
       LOGGER.error("", x);
     }
-    
+
     selectionSupplier = getSelectionSupplier();
     if(selectionSupplier != null)
     {
@@ -590,7 +590,7 @@ public class FormularMax4kController
     {
       LOGGER.trace("", x);
     }
-    
+
     try
     {
       javax.swing.SwingUtilities.invokeLater(() -> {
@@ -624,13 +624,13 @@ public class FormularMax4kController
       LOGGER.error("documentController is NULL. returning.");
       return new ConfigThingy("");
     }
-    
+
     LOGGER.debug("Übertrage Formularbeschreibung ins Dokument");
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<>();
 
     Set<String> renamedToUpdate = insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     sectionModelList.updateDocumentSections();
-    
+
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
     documentController.setFormDescription(new ConfigThingy(conf));
     documentController.getModel().setFormularConf(conf);
@@ -646,14 +646,14 @@ public class FormularMax4kController
       {
         LOGGER.error("", e);
       }
-      
+
       // parse function and update library
       FunctionLibrary funcLib = documentController.getFunctionLibrary();
       Function func = FunctionFactory.parseChildren(trafoConf, funcLib,
           documentController.getDialogLibrary(), documentController.getFunctionContext());
       funcLib.add(functionName, func);
     });
-    
+
     return conf;
   }
 
@@ -1015,18 +1015,18 @@ public class FormularMax4kController
       LOGGER.error(L.m("Fehler während des Scan-Vorgangs"), x);
     }
   }
-  
+
   public String getTitle()
   {
     XDocumentProperties info =
       UNO.XDocumentPropertiesSupplier(documentController.getModel().doc).getDocumentProperties();
-    
+
     String title = "";
-    
+
     try
     {
       title = ((String) UnoProperty.getProperty(info, UnoProperty.TITLE)).trim();
-      
+
       if (formTitle.equals(GENERATED_FORM_TITLE) && title.length() > 0)
       {
         return title;
@@ -1036,7 +1036,7 @@ public class FormularMax4kController
     {
       LOGGER.trace("", x);
     }
-    
+
     return title;
   }
 

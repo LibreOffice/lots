@@ -39,7 +39,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 public class FunctionLibrary implements Iterable<Function>
 {
   public static final String ERROR = L.m("!¤£!FEHLERHAFTE DATEN!¤£!");
-  
+
   private Map<String, Function> mapIdToFunction;
 
   private FunctionLibrary baselib;

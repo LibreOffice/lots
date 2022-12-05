@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 public class PrintFunctionDialog extends JDialog
 {
   private static final long serialVersionUID = 1L;
-  
+
   private transient TextDocumentController documentController;
   transient PrintFunctionLibrary printFunctionLibrary;
 
@@ -64,14 +64,14 @@ public class PrintFunctionDialog extends JDialog
       PrintFunctionLibrary printFuncLib)
   {
     super(owner, modal);
-    
+
     this.documentController = documentController;
     this.printFunctionLibrary = printFuncLib;
-    
+
     setTitle(L.m("Druckfunktion setzen"));
-    
+
     createGui();
-    
+
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     pack();

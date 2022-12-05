@@ -29,7 +29,7 @@ import de.muenchen.allg.itd51.wollmux.document.DocumentTreeVisitor;
 
 /**
  * Oberklasse für Knoten, die Nachfahren haben können (z,B, Absätze).
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class ContainerNode implements Container, Node

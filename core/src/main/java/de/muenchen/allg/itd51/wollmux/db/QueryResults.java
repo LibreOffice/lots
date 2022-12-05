@@ -31,7 +31,7 @@ public interface QueryResults extends Iterable<Dataset>
    * Die Anzahl der Ergebnisse.
    */
   public int size();
-  
+
   /**
    * Liefert true, falls es keine Ergebnisse gibt.
    */

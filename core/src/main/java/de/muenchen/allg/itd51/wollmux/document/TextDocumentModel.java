@@ -544,7 +544,7 @@ public class TextDocumentModel
 
   /**
    * Import the form values form a file.
-   * 
+   *
    * @param file
    *          A file containing a description of form values.
    * @throws IOException
@@ -555,7 +555,7 @@ public class TextDocumentModel
     String data = new String(Files.readAllBytes(file.toPath()));
     parseFormValues(data);
   }
-  
+
   /**
    * Parses the string as {@link ConfigThingy} of the form "WM(FormularWerte(...))" and adds the
    * values to {@link #formFieldValues}.
@@ -650,7 +650,7 @@ public class TextDocumentModel
 
     /**
      * A new chaining overrides exception.
-     * 
+     *
      * @param fragId
      *          The ID of the fragment which causes the exception.
      */
@@ -718,7 +718,7 @@ public class TextDocumentModel
 
   /**
    * Mark the document as form, template or template for templates.
-   * 
+   *
    * @param typeStr
    *          Should be one of the values {@code "normalTemplate"}, {@code "templateTemplate"},
    *          {@code "formDocument"}. Otherwise nothing is done.
@@ -736,7 +736,7 @@ public class TextDocumentModel
       isFormDocument = true;
     }
   }
-  
+
   /**
    * Returns whether the passed MIME type is one for a document template.
    */
@@ -745,7 +745,7 @@ public class TextDocumentModel
     {
       return false;
     }
-    
+
     return true;
   }
 
@@ -779,7 +779,7 @@ public class TextDocumentModel
   /**
    * Store the print functions in the persistent data. There are 2 syntax variants. Either the
    * section contains only the name or is like
-   * 
+   *
    * <pre>
    * WM(
    *   Druckfunktionen(
@@ -788,7 +788,7 @@ public class TextDocumentModel
    *     )
    *   )
    * </pre>
-   * 
+   *
    * If there aren't any print functions the section is removed from the persistent data.
    */
   private void storePrintFunctions()

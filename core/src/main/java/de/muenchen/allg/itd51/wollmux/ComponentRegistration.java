@@ -34,7 +34,7 @@ import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 
 /**
  * A service for registering and creating UNO Service components.
- * 
+ *
  * This class name has be passed as 'RegistrationClassName' in the manifest to
  * be called by LibreOffice.
  */
@@ -42,21 +42,21 @@ public interface ComponentRegistration
 {
   /**
    * get the class to register.
-   * 
+   *
    * @return A class implementing a component.
    */
   Class<?> getComponent();
 
   /**
    * get the name of the class.
-   * 
+   *
    * @return The class name.
    */
   String getName();
 
   /**
    * Get a list of all services supported by this component.
-   * 
+   *
    * @return A list of services.
    */
   String[] getServiceNames();
@@ -90,7 +90,7 @@ public interface ComponentRegistration
   /**
    * Registers a component in a registry under a given root key. It is called
    * during extension installation.
-   * 
+   *
    * This method is called by
    * {@link JavaLoader#writeRegistryInfo(XRegistryKey, String, String)}.
    *

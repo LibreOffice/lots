@@ -36,7 +36,7 @@ public class OnExecutePrintFunction extends WollMuxEvent
 
   /**
    * Create this event.
-   * 
+   *
    * @param documentController
    *          The document.
    */

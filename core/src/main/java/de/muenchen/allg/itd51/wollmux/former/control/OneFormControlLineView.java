@@ -362,7 +362,7 @@ public class OneFormControlLineView extends LineView
     readOnlyfield.setToolTipText("Read Only");
     readOnlyfield.setSelected(model.getReadonly());
     comboBoxAdditionalView.add(readOnlyfield);
-    readOnlyfield.addActionListener(e -> 
+    readOnlyfield.addActionListener(e ->
     {
 	ignoreAttributeChanged = true;
 	model.setReadonly(readOnlyfield.isSelected());

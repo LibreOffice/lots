@@ -29,7 +29,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  */
 class ByJavaPropertyFinder extends SenderFinder
 {
-  
+
   public ByJavaPropertyFinder(SenderService senderList)
   {
     super(senderList);

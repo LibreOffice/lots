@@ -20,18 +20,18 @@
  * limitations under the Licence.
  * #L%
  */
-#ifndef __de_muenchen_allg_itd51_wollmux_XPALChangeEventBroadcaster_idl__ 
-#define __de_muenchen_allg_itd51_wollmux_XPALChangeEventBroadcaster_idl__ 
- 
-#include "XPALChangeEventListener.idl" 
- 
+#ifndef __de_muenchen_allg_itd51_wollmux_XPALChangeEventBroadcaster_idl__
+#define __de_muenchen_allg_itd51_wollmux_XPALChangeEventBroadcaster_idl__
+
+#include "XPALChangeEventListener.idl"
+
 module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
 
-/** 
+/**
   Das Interface XPALChangeEventBroadcasteristener definiert einen Broadcaster, der über
   Änderungen an der Persönlichen Absenderliste (PAL) informieren kann. Er enthält
   Methoden zum Registrieren und Deregistrieren von XPALChangeEventListenern.
- */ 
+ */
 interface XPALChangeEventBroadcaster
 {
     /**
@@ -56,7 +56,7 @@ interface XPALChangeEventBroadcaster
       sofort ein erster update aller Listener ausgeführt wird. Die Methode
       ignoriert alle XPALChangeEventListenener-Instanzen, die bereits registriert
       wurden. Mehrfachregistrierung der selben Instanz ist also nicht möglich.
-      
+
       @param l
                Der zu registrierende XPALChangeEventListener
       @param wollmuxConfHashCode
@@ -75,5 +75,5 @@ interface XPALChangeEventBroadcaster
 };
 
 }; }; }; }; }; };
- 
+
 #endif

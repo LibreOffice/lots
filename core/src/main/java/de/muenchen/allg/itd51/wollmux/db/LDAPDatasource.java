@@ -59,7 +59,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Datasource für Zugriff auf ein LDAP-Verzeichnis
- * 
+ *
  * @author Max Meier (D-III-ITD 5.1)
  */
 public class LDAPDatasource extends Datasource
@@ -138,7 +138,7 @@ public class LDAPDatasource extends Datasource
 
   /**
    * Erzeugt eine neue LDAPDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser LDAPDatasource bereits
    *          vollständig instanziierten Datenquellen (zur Zeit nicht verwendet).
@@ -340,7 +340,7 @@ public class LDAPDatasource extends Datasource
 
   /**
    * repräsentiert eine Spaltendefinition
-   * 
+   *
    * @author Max Meier (D-III-ITD 5.1)
    */
   private static class ColumnDefinition
@@ -377,7 +377,7 @@ public class LDAPDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
   @Override
@@ -387,7 +387,7 @@ public class LDAPDatasource extends Datasource
   }
 
   /**
-   * 
+   *
    * @param key
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -416,7 +416,7 @@ public class LDAPDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection , long)
    */
   @Override
@@ -502,7 +502,7 @@ public class LDAPDatasource extends Datasource
   /**
    * Speichert eine Liste von (Ldap)Names, die zu einer Suchanfrage über Attribute mit Pfad-Level
    * ungleich 0 gehören (alle mit dem selben Level).
-   * 
+   *
    * @author Max Meier (D-III-ITD 5.1)
    */
   private static class RelativePaths
@@ -524,7 +524,7 @@ public class LDAPDatasource extends Datasource
    * Ein (Ldap)Name und der Pfad-Level für die Suche. Typischerweise ist der Pfad-Level != 0, aber
    * ein Level von 0 ist auch möglich (kann bei Bildung der Schnittmenge von positiven und negativen
    * Kandidaten entstehen).
-   * 
+   *
    * @author Max Meier (D-III-ITD 5.1)
    */
   private static class RelativePath
@@ -544,7 +544,7 @@ public class LDAPDatasource extends Datasource
 
   /**
    * Liefert zum Pfadlevel pathLength alle Knoten, die auf die LDAP-Suchanfrage filter passen
-   * 
+   *
    * @author Max Meier (D-III-ITD 5.1)
    */
   private RelativePaths getPaths(String filter, int pathLength)
@@ -608,7 +608,7 @@ public class LDAPDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
@@ -714,7 +714,7 @@ public class LDAPDatasource extends Datasource
 
     /*
      * bilde die Schnittmenge aller angegebenen positiv relativen Pfade
-     * 
+     *
      * Dieser Algorithmus vergleicht zwei Listen, die jeweils alle relevanten Pfade eines
      * Suchattributs repräsentieren. Zuerst werden die Listen nach der Länge der enthaltenen Pfade
      * sortiert, danach wird betrachte, ob für jedes Element der Liste der längeren Pfade ein
@@ -786,7 +786,7 @@ public class LDAPDatasource extends Datasource
 
     /*
      * bilde die Schnittmenge aller angegebenen negativen relativen Pfade
-     * 
+     *
      * Vergleiche jeweils zwei Listen, die je ein Suchattribut repräsentieren.
      */
     List<RelativePath> mergedNegativeList = null;
@@ -1029,7 +1029,7 @@ public class LDAPDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getName()
    */
   @Override
@@ -1040,7 +1040,7 @@ public class LDAPDatasource extends Datasource
 
   /**
    * generiert einen Schluessel aus einem geordneten(!) Vector der Schluesselwerte
-   * 
+   *
    * @param values
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1156,12 +1156,12 @@ public class LDAPDatasource extends Datasource
 
   /**
    * vervollständigt SearchResults um Daten aus dem Verzeichnis und gibt ein Dataset zurück
-   * 
+   *
    * @param searchResult
    * @param endTime
    * @return Dataset
    * @author Max Meier (D-III-ITD 5.1)
-   * 
+   *
    */
   private Dataset getDataset(SearchResult searchResult)
   {
@@ -1278,7 +1278,7 @@ public class LDAPDatasource extends Datasource
 
   /**
    * Sucht im Teilbaum path + BASE_DN nach Knoten, auf die Suchkriterium filter passt.
-   * 
+   *
    * @param path
    *          der Pfad des Startknotens. Wird mit BASE_DN konkateniert.
    * @param filter
@@ -1292,7 +1292,7 @@ public class LDAPDatasource extends Datasource
    * @return die Suchergebnisse
    * @author Max Meier (D-III-ITD 5.1)
    * @throws NamingException
-   * 
+   *
    */
   private NamingEnumeration<SearchResult> searchLDAP(String path, String filter, int searchScope,
       boolean onlyObjectClass)
@@ -1355,10 +1355,10 @@ public class LDAPDatasource extends Datasource
    * Durchsucht die Nachfahren des durch path + BASE_DN bezeichneten Knotens mit Abstand level zu
    * diesem Knoten nach Knoten, die auf die Suchanfrage filter passen. Es werden nur Objekte mit
    * objectClass = {@link #objectClass} geliefert.
-   * 
+   *
    * @return eine List von {@link SearchResult}s.
    * @author Max Meier (D-III-ITD 5.1)
-   * 
+   *
    */
   private List<SearchResult> searchLDAPLevel(String path, String filter, int level)
   {
@@ -1434,16 +1434,16 @@ public class LDAPDatasource extends Datasource
    * LDAP Pfadkomponenten erlaubt ist, im JNDI jedoch als Komponententrenner verwendet wird.
    * Deswegen werden Pfade, die '/' enthalten von .getName() in Anführungszeichen gesetzt und können
    * deshalb nicht mehr geparsed werden.]
-   * 
+   *
    * Nach dem Entfernen der Doublequotes wird geschaut ob path auf {@link #baseDN} endet (ist
    * normalerweise der Fall) und falls ja wird dieses Suffix weggeschnitten.
-   * 
+   *
    * [Folgendes ist mit der Umstellung auf getNameInNamespace() eventuell auch überholt: TOD0 Ich
    * bin mir nicht sicher, ob hier nicht noch mehr zu tun ist. Was ist z.B. mit enthaltenen
    * Doublequotes? Kann das passieren? Wie werden die escapet?]
-   * 
+   *
    * @author Max Meier, Matthias Benkmann (D-III-ITD 5.1)
-   * 
+   *
    */
   private String preparePath(String path)
   {

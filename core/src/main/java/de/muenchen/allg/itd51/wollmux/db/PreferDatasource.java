@@ -45,7 +45,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * Datensatz (oder mehrere Datensätze) mit gleichem Schlüssel in Datenquelle B ist.
  * Falls dies so ist, werden für diesen Schlüssel nur die Datensätze aus Datenquelle
  * B zurückgeliefert.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class PreferDatasource extends Datasource
@@ -64,7 +64,7 @@ public class PreferDatasource extends Datasource
 
   /**
    * Erzeugt eine neue PreferDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser PreferDatasource
    *          bereits vollständig instanziierten Datenquellen.

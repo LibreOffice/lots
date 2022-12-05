@@ -38,7 +38,7 @@ public class MockDatasource extends Datasource
   private List<Dataset> datasets;
   private String name;
   private List<String> schema;
-  
+
   public MockDatasource(String name, List<String> schema, List<Dataset> datasets)
   {
     this.name = name;

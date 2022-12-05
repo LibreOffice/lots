@@ -50,7 +50,7 @@ public class ThingyDatasource extends RAMDatasource
 
   /**
    * Erzeugt eine neue ThingyDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser
    *          ThingyDatasource bereits vollständig instanziierten Datenquellen.
@@ -179,7 +179,7 @@ public class ThingyDatasource extends RAMDatasource
    * erkennt automatisch, ob die Beschreibung in der Form ("Spaltenwert1",
    * "Spaltenwert2",...) oder der Form (Spalte1 "Wert1" Spalte2 "Wert2" ...)
    * ist.
-   * 
+   *
    * @param schema
    *          das Datenbankschema
    * @param schemaOrdered
@@ -215,7 +215,7 @@ public class ThingyDatasource extends RAMDatasource
   /**
    * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. dsDesc muss in der
    * Form (Spalte1 "Spaltenwert1" Spalte2 "Spaltenwert2 ...) sein.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           bei verstössen gegen diverse Regeln
    */
@@ -241,7 +241,7 @@ public class ThingyDatasource extends RAMDatasource
   /**
    * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. dsDesc muss in der
    * Form ("Spaltenwert1" "Spaltenwert2 ...) sein.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           bei verstössen gegen diverse Regeln
    */
@@ -291,7 +291,7 @@ public class ThingyDatasource extends RAMDatasource
     /**
      * Setzt aus den Werten der Schlüsselspalten separiert durch KEY_SEPARATOR
      * den Schlüssel zusammen.
-     * 
+     *
      * @param keyCols
      *          die Namen der Schlüsselspalten
      */

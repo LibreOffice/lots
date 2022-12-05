@@ -88,7 +88,7 @@ public class FormModel
    * Instance of TextDocumentController.
    */
   private TextDocumentController txtDocController;
-  
+
   /**
    * Instance of FormSidebarController.
    */
@@ -148,10 +148,10 @@ public class FormModel
 
     this.initControls(presetValues);
   }
-  
+
   /**
    * Init Controls autofills, trafos and visibilites.
-   * 
+   *
    * @param presetValues
    */
   private void initControls(Map<String, String> presetValues)
@@ -170,7 +170,7 @@ public class FormModel
       }
       if (!value.equals(control.getValue()))
       {
-        txtDocController.setValueChanged(control.getId(), value); 
+        txtDocController.setValueChanged(control.getId(), value);
         control.setValue(value);
         values.put(control.getId(), value);
       }
@@ -183,9 +183,9 @@ public class FormModel
     for (VisibilityGroup group : visiblities.values())
     {
       storeDepsForVisibility(group);
-    } 
+    }
   }
-  
+
   public void setFormSidebarController(FormSidebarController formSidebarController)
   {
     this.formSidebarController = formSidebarController;
@@ -229,17 +229,17 @@ public class FormModel
   {
     return formControls.get(controlId);
   }
-  
+
   /**
    * List of Form Controls.
-   * 
+   *
    * @return All form controls from the container.
    */
   public Map<String, Control> getFormControls()
   {
     return formControls;
   }
-  
+
   /**
    * Update visibilites in form ui.
    */
@@ -322,7 +322,7 @@ public class FormModel
 
   /**
    * Get a collection of {@link Control} with belong to the group.
-   * 
+   *
    * @param groupId
    *          The ID of the group.
    * @return Collection of {@link Control}.
@@ -377,7 +377,7 @@ public class FormModel
           .ifPresent(autofill -> setValue(c.getId(), autofill.getResult(idToValue())));
     }
   }
-  
+
   /**
    * Has the form a control with the given ID.
    *

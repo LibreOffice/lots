@@ -25,7 +25,7 @@ package de.muenchen.allg.itd51.wollmux;
 /**
  * Repräsentiert einen Fehler, der benutzersichtbar in einem Fehlerdialog angezeigt
  * wird.
- * 
+ *
  * @author christoph.lutz
  */
 public class WollMuxFehlerException extends java.lang.Exception

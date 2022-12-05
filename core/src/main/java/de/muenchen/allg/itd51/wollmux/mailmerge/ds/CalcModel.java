@@ -434,7 +434,7 @@ public class CalcModel implements DatasourceModel
             int startColumn = columnIndexes.first();
             int endColumn = columnIndexes.last();
             XCellRange range = UNO.XCellRange(sheet).getCellRangeByPosition(startColumn, startRow,
-                endColumn, endRow);            
+                endColumn, endRow);
             Object[][] cellData = UNO.XCellRangeData(range).getDataArray();
             readRowData(cellData, range);
           }
@@ -452,7 +452,7 @@ public class CalcModel implements DatasourceModel
    *
    * @param cellData
    *          The data of the whole sheet..
-   * @throws IndexOutOfBoundsException 
+   * @throws IndexOutOfBoundsException
    */
   private void readRowData(Object[][] cellData, XCellRange range) throws IndexOutOfBoundsException
   {

@@ -47,7 +47,7 @@ public class Search
    * Ergebnisse in einem {@link QueryResults}-Objekt zurück. Falls einer der übergebenen Parameter
    * <code>null</code> ist oder falls der queryString leer ist, wird <code>null</code>
    * zurückgeliefert.
-   * 
+   *
    * @param queryString
    *          die Suchanfrage
    * @param searchStrategy
@@ -87,7 +87,7 @@ public class Search
 
   /**
    * Führt die Ergenismengen zusammen. Dabei werden mehrfache Ergebnisse ausgefiltert.
-   * 
+   *
    * @return bereinigte Ergebnisliste.
    */
   private static QueryResults mergeListOfQueryResultsList(List<QueryResults> listOfQueryResultsList)
@@ -120,7 +120,7 @@ public class Search
    * {@link SearchStrategy#parse(ConfigThingy)}). Gibt es für die übergebene Anzahl Wörter keine
    * Suchstrategie, so wird solange das letzte Wort entfernt bis entweder nichts mehr übrig ist oder
    * eine Suchstrategie für die Anzahl Wörter gefunden wurde.
-   * 
+   *
    * @return die leere Liste falls keine Liste bestimmt werden konnte.
    */
   private static List<Query> parseQuery(SearchStrategy searchStrategy, String queryString)

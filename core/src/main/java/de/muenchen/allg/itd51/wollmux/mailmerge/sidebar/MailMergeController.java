@@ -381,7 +381,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
             dci.scanInsertFormValueCommands();
 
             textDocumentController.getFormModel();
-            
+
             Map<String,String> formFieldValues = textDocumentController.getFormFieldValues();
 
             for (Map.Entry<String, String> entry: formFieldValues.entrySet())
@@ -392,7 +392,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
           {
             LOGGER.error("", e);
           }
-          
+
           setDatasource(ConnectionModel.addAndSelectDatasource(doc, Optional.empty()));
           gui.selectDatasource(ConnectionModel.buildConnectionName(datasourceModel));
         }

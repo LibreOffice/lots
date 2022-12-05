@@ -59,7 +59,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  */
 public abstract class Datasource
 {
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger(Datasource.class);
 
   private static Long datasourceTimeout = null;
@@ -73,7 +73,7 @@ public abstract class Datasource
    * Liefert alle Datensätze, deren Schlüssel in der Collection keys enthalten sind. Man beachte,
    * dass die Eindeutigkeit von Schlüsseln nur eine Empfehlung darstellt. Die Anzahl der
    * zurückgelieferten Datensätze kann also die Anzahl der übergebenen Schlüssel übersteigen.
-   * 
+   *
    * @param keys
    *          Keys to search against.
    * @return Results as {@link QueryResults}
@@ -84,7 +84,7 @@ public abstract class Datasource
    * Liefert alle Datensätze, die alle Bedingungen von query (Liste von {@link QueryPart}s)
    * erfüllen. Ist query leer, werden keine Datensätze zurückgeliefert. Enthält query Bedingungen
    * über Spalten, die die Datenbank nicht hat, werden keine Datensätze zurückgeliefert.
-   * 
+   *
    * @param query
    *          Query to search against the main datasource.
    * @return Results as {@link QueryResults}
@@ -105,7 +105,7 @@ public abstract class Datasource
 
   /**
    * Gets datasource value by given {@link ConfigThingy} and key.
-   * 
+   *
    * @param source
    *          {@link ConfigThingy} ConfigThingy that should contain a configured datasource.
    * @param key
@@ -118,7 +118,7 @@ public abstract class Datasource
   {
     return source.get(key, ConfigurationErrorException.class, errorMessage.get()).toString();
   }
-  
+
   public static long getDatasourceTimeout()
   {
     if (datasourceTimeout == null)
@@ -128,7 +128,7 @@ public abstract class Datasource
       try
       {
         long timeout = Long.parseLong(dataSourceTimeout.getLastChild().toString());
-  
+
         if (timeout <= 0)
         {
           LOGGER.error("DATASOURCE_TIMEOUT muss größer als 0 sein!");

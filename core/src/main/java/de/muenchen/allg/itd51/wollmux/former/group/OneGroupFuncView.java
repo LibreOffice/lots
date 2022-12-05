@@ -31,7 +31,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 /**
  * Stellt die Sichtbarkeitsfunktion einer Sichtbarkeitsgruppe dar und erlaubt deren
  * Bearbeitung.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class OneGroupFuncView extends FunctionSelectionAccessView

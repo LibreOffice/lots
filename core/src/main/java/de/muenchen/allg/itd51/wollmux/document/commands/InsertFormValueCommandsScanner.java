@@ -40,7 +40,7 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InsertFo
 class InsertFormValueCommandsScanner extends AbstractExecutor
 {
   /**
-   * 
+   *
    */
   private final DocumentCommandInterpreter documentCommandInterpreter;
 

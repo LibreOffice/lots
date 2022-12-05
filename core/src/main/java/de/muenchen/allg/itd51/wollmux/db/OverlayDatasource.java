@@ -58,7 +58,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * In der Ergebnisdatenquelle sind alle Spalten unter ihren ursprünglichen Namen verfügbar
  * (Unterschied zu {@link AttachDatasource}). Konflikte werden über den MODE-Spezifizierer aufgelöst
  * (siehe wollmux.conf Doku).<br>
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class OverlayDatasource extends Datasource
@@ -104,7 +104,7 @@ public class OverlayDatasource extends Datasource
 
   /**
    * Erzeugt eine neue OverlayDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser OverlayDatasource bereits
    *          vollständig instanziierten Datenquellen.
@@ -200,7 +200,7 @@ public class OverlayDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
   @Override
@@ -211,7 +211,7 @@ public class OverlayDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection, long)
    */
   @Override
@@ -228,7 +228,7 @@ public class OverlayDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
@@ -321,12 +321,12 @@ public class OverlayDatasource extends Datasource
        * An dieser Stelle haben wir alle gesuchten Datensätze. Allerdings kann es zwischen results1
        * und results2 Überschneidungen geben. Dies ist das oben angesprochene Duplikat-Problem. Um
        * die Duplikate zu eliminieren gehen wir wie folgt vor:
-       * 
+       *
        * 1. Alle Datensatzschlüssel bestimmen, die sowohl in results1 als auch in results2
        * vorkommen.
-       * 
+       *
        * 2. Alle Datensätze mit Schlüsseln aus 1. entfernen aus den results Listen
-       * 
+       *
        * 3. In einer weiteren Abfrage alle Datensätze mit den Schlüsseln aus 1. bestimmen und
        * diejenigen, die die Filterbedingung erfüllen den Ergebnissen wieder hinzufügen.
        */
@@ -372,9 +372,9 @@ public class OverlayDatasource extends Datasource
    * Versucht, den QueryPart aus query (darf nicht leer sein) zu bestimmen, der den Ergebnisraum
    * einer Suchanfrage am meisten einschränkt und liefert diesen zurück. Kriterium hierfür ist die
    * Anzahl der Sternchen und die Anzahl der Nicht-Sternchen-Zeichen im Suchstring.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private QueryPart getMostRestrictingQueryPart(List<QueryPart> query)
@@ -413,7 +413,7 @@ public class OverlayDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getName()
    */
   @Override
@@ -513,7 +513,7 @@ public class OverlayDatasource extends Datasource
 
     /**
      * ds1 is always from SOURCE and ds2 from OVERLAY.
-     * 
+     *
      * @author Matthias Benkmann (D-III-ITD-D101)
      */
     public ConcatDataset(Dataset ds1, Dataset ds2)

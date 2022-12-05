@@ -29,13 +29,13 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.SetType;
  * Hierbei handelt es sich um einen minimalen Scanner, der zu aller erst abläuft
  * und die globalen Einstellungen des Dokuments (setType, setPrintFunction)
  * ausliest und dem TextDocumentModel zur Verfügung stellt.
- * 
+ *
  * @author christoph.lutz
  */
 class GlobalDocumentCommandsScanner extends AbstractExecutor
 {
   /**
-   * 
+   *
    */
   private final DocumentCommandInterpreter documentCommandInterpreter;
 

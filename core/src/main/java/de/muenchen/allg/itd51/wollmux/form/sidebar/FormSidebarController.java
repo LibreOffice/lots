@@ -146,7 +146,7 @@ public class FormSidebarController
       processUIElementEvents = true;
     }
   };
-  
+
   /**
    * Create a new controller and the gui of the form.
    *
@@ -162,7 +162,7 @@ public class FormSidebarController
   public FormSidebarController(String resourceUrl, XComponentContext context, XWindow xWindow, XModel model)
   {
     XTextDocument doc = UNO.XTextDocument(model);
-    
+
     this.formSidebarPanel = new FormSidebarPanel(context, xWindow, resourceUrl, this);
 
     AbstractWindowListener windowAdapter = new AbstractWindowListener()
@@ -175,7 +175,7 @@ public class FormSidebarController
 
       @Override
       public void windowShown(EventObject event)
-      { 
+      {
         if (documentController != null && !documentController.getModel().isOpenedAsTemplate(
             documentController.getModel().doc.getURL()))
         {
@@ -183,7 +183,7 @@ public class FormSidebarController
         } else if (documentController != null) {
           documentController.setFormFieldsPreviewMode(false);
         }
-        
+
         ConnectionModel.addOpenCalcWindows();
       }
 
@@ -194,19 +194,19 @@ public class FormSidebarController
       }
     };
     xWindow.addWindowListener(windowAdapter);
-    
+
     if (DocumentManager.hasTextDocumentController(doc))
     {
       isUnregistered = true;
       TextDocumentController txtDocController = DocumentManager.getTextDocumentController(doc);
       initController(txtDocController);
-      
+
     } else
     {
       isUnregistered = false;
       WollMuxEventHandler.getInstance().registerListener(this);
     }
-    
+
   }
 
   public FormSidebarPanel getFormSidebarPanel()
@@ -229,15 +229,15 @@ public class FormSidebarController
   public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
   {
     TextDocumentController docController = event.getTextDocumentController();
-    
+
     if (docController == null)
     {
       LOGGER.debug("DocController is null.");
     }
-    
+
     initController(docController);
   }
-  
+
   private void initController(TextDocumentController documentController)
   {
     if (documentController == null)
@@ -245,7 +245,7 @@ public class FormSidebarController
       LOGGER.trace("{} notify(): documentController is NULL.", this.getClass().getSimpleName());
       return;
     }
-    
+
     this.documentController = documentController;
 
     if (this.documentController.getModel().getFormDescription().count() == 1)
@@ -257,7 +257,7 @@ public class FormSidebarController
         formModel = this.documentController.getFormModel();
         formModel.setFormSidebarController(this);
         formSidebarPanel.createTabControl(formConfig, formModel);
-        
+
         if (!documentController.getModel().isOpenedAsTemplate(
             documentController.getModel().doc.getURL()))
         {
@@ -265,16 +265,16 @@ public class FormSidebarController
         } else {
           this.documentController.setFormFieldsPreviewMode(false);
         }
-        
+
         this.scanExecCommands();
         this.setFormularwerte();
-        
+
         formModel.updateFormControlsVisibility();
-       
+
         Map<String,Control> formFieldValues = formModel.getFormControls();
         this.updateFormUiValues(formFieldValues);
         this.initFormularwerteBackgroundColor(formFieldValues);
-                
+
         processUIElementEvents = true;
       } catch (FormModelException e)
       {
@@ -284,10 +284,10 @@ public class FormSidebarController
     {
       formSidebarPanel.createTabControl(null, null);
     }
-    
+
     unregisterListener();
   }
-  
+
   private void scanExecCommands()
   {
     DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
@@ -512,11 +512,11 @@ public class FormSidebarController
 
   /**
    * Sets control's text if value changed. Can be called by a dependency to another control.
-   * 
+   *
    * @param id
    *        Control Id.
    * @param value
-   *        value to set.       
+   *        value to set.
    */
   public void setFormUiValue(String id, String value)
   {
@@ -530,7 +530,7 @@ public class FormSidebarController
 
   /**
    * Get notifications if current textfield's value is valid. Colorize if not.
-   * 
+   *
    * @param id
    *        Control Id.
    * @param okay
@@ -543,45 +543,45 @@ public class FormSidebarController
 
   /**
    * Hide / Show form controls by its new visibility changed status.
-   * 
+   *
    * @param groupId
    *        The group Id which visibility should be changed.
    */
   public void visibilityChanged(String groupId)
   {
     Collection<Control> controls = formModel.getControlsByGroupId(groupId);
-    
+
     if (controls.isEmpty())
     {
       LOGGER.debug("visibility groups are empty");
     }
-    
+
     for (Control control : controls)
     {
       String controlId = control.getId();
       formSidebarPanel.setVisible(controlId, control.getGroups().stream().allMatch(VisibilityGroup::isVisible));
     }
-    
+
     formSidebarPanel.paint();
   }
-  
+
   /**
    * Sets preset Values (Formularwerte) in form ui.
    */
   public void setFormularwerte()
   {
     Map<String,String> formFieldValues = documentController.getFormFieldValues();
-    
+
     processUIElementEvents = true;
-    
+
     for (Map.Entry<String, String> entry: formFieldValues.entrySet())
     {
       setFormUiValue(entry.getKey(), entry.getValue());
     }
-    
+
     processUIElementEvents = false;
   }
-  
+
   /**
    * Sets background Colors in form ui.
    */
@@ -597,7 +597,7 @@ public class FormSidebarController
 
   /**
    * updates and sets all form control values in form ui.
-   * 
+   *
    * @param formControls
    */
   public void updateFormUiValues(Map<String,Control> formControls)

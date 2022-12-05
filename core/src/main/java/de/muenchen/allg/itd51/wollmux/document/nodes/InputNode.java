@@ -87,7 +87,7 @@ public class InputNode extends TextFieldNode implements FormControl
     {
       LOGGER.trace("", x);
     }
-    
+
     if (buf.toString().trim().length() < 2)
     {
       try

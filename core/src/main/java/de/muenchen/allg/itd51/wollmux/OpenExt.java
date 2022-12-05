@@ -142,14 +142,14 @@ public class OpenExt
     openExt.setSource(srcUrl);
     return openExt;
   }
-  
+
   /**
    * Erzeugt ein neues OpenExt Objekt für die Erweitertung ext, wobei Informationen
    * über die externe Applikation aus wollmuxConf,query("ExterneAnwendungen")
    * genommen werden.
-   * 
+   *
    * ACHTUNG! Jedes OpenExt-Objekt kann nur einmal benutzt werden.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           falls für ext keine externe Anwendung (korrekt) definiert wurde.
    */
@@ -217,7 +217,7 @@ public class OpenExt
    * {@link #launch(de.muenchen.allg.itd51.wollmux.OpenExt.ExceptionHandler)}
    * versuchen wird, sie auszuführen. Die gelieferte Liste ist eine Referenz auf die
    * internen Daten. Es ist also möglich, sie vor dem Aufruf von launch zu verändern.
-   * 
+   *
    * TESTED
    */
   public List<String> getPrograms()
@@ -231,9 +231,9 @@ public class OpenExt
    * Inhalt der URL heruntergeladen und in eine Datei gespeichert wird, deren Pfad
    * als Parameter übergeben wird, wird durch die DOWNLOAD-Angabe in der Definition
    * der externen Anwendung in der wollmux.conf bestimmt.
-   * 
+   *
    * @see #setSource(XStorable)
-   * 
+   *
    * TESTED
    */
   public void setSource(URL url)
@@ -251,13 +251,13 @@ public class OpenExt
    * DOWNLOAD-Angabe. Als Dateierweiterung für die temporäre Datei wird das dem
    * Konstruktor übergebenene ext verwendet. Werden mehrere setSource() Funktionen
    * aufgerufen, so gewinnt die letzte.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           falls die FILTER-Angabe in der Definition der externen Anwendung
    *           fehlt.
-   * 
+   *
    * @see #setSource(URL)
-   * 
+   *
    * TESTED
    */
   public void setSource(XStorable doc) throws ConfigurationErrorException
@@ -273,14 +273,14 @@ public class OpenExt
    * Speichert die Datei auf der Festplatte, falls download==true oder die Quelle ein
    * XStorable ist. In letzterem Fall wird ein Export gemacht, der die Quell-URL des
    * Dokuments nicht ändert.
-   * 
+   *
    * @throws IOException
    *           falls beim Speichern ein Problem aufgetreten ist. *
    * @throws IllegalStateException
    *           falls diese Methode aufgerufen wurde ohne dass vorher mit setSource()
    *           eine Quelle festgelegt wurde.
-   * 
-   * 
+   *
+   *
    * TESTED
    */
   public void storeIfNecessary() throws IOException, IllegalStateException
@@ -341,7 +341,7 @@ public class OpenExt
    * Generiert aus fileName (kann leerer String oder null sein) einen Dateinamen und
    * legt ein temporärers Verzeichnis an. Aus der Zusammensetzung von beidem wird
    * {@link #destFile} generiert.
-   * 
+   *
    * TESTED
    */
   private File prepareTempFile(String fileName) throws IOException
@@ -385,27 +385,27 @@ public class OpenExt
    * bzw, exportiert wurde (d.h. falls noch nicht geschehen wird
    * {@link #storeIfNecessary()} aufgerufen). ACHTUNG! Der Aufruf erfolgt immer in
    * einem eigenen Thread. Diese Methode kehrt also sofort zurück.
-   * 
+   *
    * Hinweis: Es macht einen Unterschied ob man {@link #storeIfNecessary()} vor dem
    * Aufruf dieser Methode explizit aufruft oder nicht. Ruft man
    * {@link #storeIfNecessary()} nicht explizit auf, erfolgt
    * {@link #storeIfNecessary()} ebenfalls im neuen Thread. Man kann Speicherprobleme
    * dann nicht mehr von Programmaufrufproblemen unterscheiden.
-   * 
+   *
    * ACHTUNG! Im Fall, dass /loadComponentFromURL/ bei den zu versuchenden Programmen ({@link #getPrograms()})
    * dabei ist, geht diese Methode davon aus, dass eine funktionierende
    * OOo-Verbindung über {@link UNO} besteht.
-   * 
+   *
    * @param handler
    *          wird im Falle einer Exception im von launch gestarteten Thread
    *          aufgerufen. Ausnahme ist die IllegalStateException im Falle dass
    *          setSource nicht aufgerufen wurde. Diese fliegt ganz normal aus der
    *          Methode raus.
-   * 
+   *
    * @throws IllegalStateException
    *           falls diese Methode aufgerufen wurde ohne dass vorher mit setSource()
    *           eine Quelle festgelegt wurde.
-   * 
+   *
    * TESTED
    */
   public void launch(final ExceptionHandler handler) throws IllegalStateException
@@ -478,25 +478,25 @@ public class OpenExt
    * {@link UNO#loadComponentFromURL(String, boolean, short, boolean)} zu laden,
    * wobei die Parameter aus command extrahiert werden. Eine OOo-Verbindung mittels
    * {@link UNO} muss bereits bestehen. command hat folgende Form
-   * 
+   *
    * <pre>
    *  /loadComponentFromURL/AsTemplate=true/MacroExecutionMode=3/Hidden=false/
    * </pre>
-   * 
+   *
    * wobei die Reihenfolge der Parameter beliebig ist und nicht alle angegeben werden
    * müssen. Obiges Beispiel zeigt die Default-Werte. Das folgende command ist also
    * äquivalent
-   * 
+   *
    * <pre>
    * /loadComponentFromURL/
    * </pre>
-   * 
+   *
    * @param appArgument
    *          die URL der zu ladenden Datei
-   * 
+   *
    * @param errors
    *          Fehler beim Laden der Datei werden hier angehängt.
-   * 
+   *
    * @return true wenn die Datei geladen werden konnte.
    */
   private static boolean loadComponentFromURL(String command, String appArgument,
@@ -542,15 +542,15 @@ public class OpenExt
   /**
    * Versucht, einen Prozess zu starten zur Ausführung von command mit
    * Kommandozeilenargument appArgument.
-   * 
+   *
    * @param pipe
    *          falls true leert diese Methode in einer Endlosschleife stdout und
    *          stderr des gestarteten Prozesses. Falls false werden die beiden einfach
    *          geschlossen. stdin wird immer geschlossen.
-   * 
+   *
    * @param errors
    *          Fehler beim Ausführen des Prozesses werden hier angehängt.
-   * 
+   *
    * @return true wenn der Prozess gestartet werden konnte.
    */
   private static boolean runProgram(String command, String appArgument,
@@ -577,7 +577,7 @@ public class OpenExt
        * kein Stdout+Stderr zu haben. Falls ein Programm damit Probleme hat, kann ein
        * einfaches Shell-Skript als Wrapper verwendet werden, das die Umleitung nach
        * /dev/null erledigt.
-       * 
+       *
        * Eine alternative Lösung ist der durch pipe==true angetriggerte Code, der
        * einfach Stdout+Stderr ausliest. Unschön an dieser Lösung ist, dass der
        * Java-Thread weiterläuft solange wie das externe Programm läuft.

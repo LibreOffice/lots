@@ -28,7 +28,7 @@ import java.io.Writer;
 
 /**
  * Prints some data to a writer line by line.
- * 
+ *
  * @author daniel.sikeler
  */
 public class PrettyPrinter
@@ -45,7 +45,7 @@ public class PrettyPrinter
 
   /**
    * Create a new PrettyPrinter.
-   * 
+   *
    * @param writer
    *          The writer to use for writing the data.
    */
@@ -69,7 +69,7 @@ public class PrettyPrinter
 
   /**
    * Add some data to the line.
-   * 
+   *
    * @param data
    *          The data.
    */
@@ -80,7 +80,7 @@ public class PrettyPrinter
 
   /**
    * Print the line with indention.
-   * 
+   *
    * @throws IOException
    *           Line couldn't be written.
    */
@@ -93,7 +93,7 @@ public class PrettyPrinter
 
   /**
    * Causes data to be written immediately.
-   * 
+   *
    * @throws IOException
    *           Data couldn't be written.
    */
@@ -104,7 +104,7 @@ public class PrettyPrinter
 
   /**
    * Close the printer and underlying streams.
-   * 
+   *
    * @throws IOException
    *           Printer couldn't be closed.
    */

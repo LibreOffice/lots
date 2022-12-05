@@ -20,35 +20,35 @@
  * limitations under the Licence.
  * #L%
  */
-#ifndef __de_muenchen_allg_itd51_wollmux_XPALChangeEventListener_idl__ 
-#define __de_muenchen_allg_itd51_wollmux_XPALChangeEventListener_idl__ 
- 
-#include <com/sun/star/lang/XEventListener.idl> 
-#include <com/sun/star/lang/EventObject.idl> 
-#include <com/sun/star/frame/XFrame.idl> 
-  
+#ifndef __de_muenchen_allg_itd51_wollmux_XPALChangeEventListener_idl__
+#define __de_muenchen_allg_itd51_wollmux_XPALChangeEventListener_idl__
+
+#include <com/sun/star/lang/XEventListener.idl>
+#include <com/sun/star/lang/EventObject.idl>
+#include <com/sun/star/frame/XFrame.idl>
+
 module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
- 
-/** 
+
+/**
   Das Interface XPALChangeEventListener definiert einen Listener, der Änderungen an der
-  Persönlichen Absenderliste (PAL) behandeln kann. 
-  
+  Persönlichen Absenderliste (PAL) behandeln kann.
+
   Siehe auch XPALChangeEventBroadcaster, in dem der Listener registriert werden kann.
  */
-interface XPALChangeEventListener 
+interface XPALChangeEventListener
 {
     // Ableitung vom Standard-XEventListener
     interface com::sun::star::lang::XEventListener;
-    
+
     /**
       Die Methode wird wird bei jeder Änderung (hinzufügen und entfernen von Einträgen oder
-      wenn ein neuer Absender gesetzt wurde) an der Persölichen Absenderliste aufgerufen. 
-      Das eventObject.Source enthält den XPALProvider, dessen PAL sich geändert hat. Der 
+      wenn ein neuer Absender gesetzt wurde) an der Persölichen Absenderliste aufgerufen.
+      Das eventObject.Source enthält den XPALProvider, dessen PAL sich geändert hat. Der
       übergebene XPALProvider kann verwendet werden, um die Absenderliste neu aufzubauen.
      */
 	void updateContent( [in] com::sun::star::lang::EventObject eventObject );
 };
 
 }; }; }; }; }; };
- 
+
 #endif

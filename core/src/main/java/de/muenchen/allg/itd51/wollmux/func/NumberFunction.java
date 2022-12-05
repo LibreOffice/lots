@@ -52,7 +52,7 @@ abstract class NumberFunction extends MultiFunction
   /**
    * Startet eine neue Auswertung der Funktion für Parameter parameters. Im Falle
    * einer Summen-Funktion würde dies den Summenzähler mit 0 initialisieren.
-   * 
+   *
    * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
    *         (z.B. Function.ERROR, wenn ein benötigter Parameter nicht in
    *         parameters übergeben wurde), so wird dieses zurückgeliefert, ansonsten
@@ -64,7 +64,7 @@ abstract class NumberFunction extends MultiFunction
    * Fügt den Wert num der aktuellen Berechnung hinzu. Im Falle einer
    * Summen-Funktion würde er auf den Summen-Zähler addiert. Darf eine Exception
    * werfen. In diesem Fall wird die Funktion Function.ERROR zurückliefern.
-   * 
+   *
    * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
    *         (z.B. im Falle einer Vergleichsfunktion, die Kurzschlussauswertung
    *         macht), so wird dieses zurückgeliefert, ansonsten null.
@@ -74,7 +74,7 @@ abstract class NumberFunction extends MultiFunction
   /**
    * Wird aufgerufen, nachdem der letzte Wert mittels addComputation() verarbeitet
    * wurde, wenn jeder addComputation()-Aufruf null geliefert hat.
-   * 
+   *
    * @return das Endergebnis der Berechnung. null ist NICHT erlaubt.
    */
   protected abstract String computationResult();

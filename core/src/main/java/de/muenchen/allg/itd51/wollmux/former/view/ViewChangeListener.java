@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.former.view;
 
 /**
  * Interface für Klassen, die an Änderungen einer View interessiert sind.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface ViewChangeListener

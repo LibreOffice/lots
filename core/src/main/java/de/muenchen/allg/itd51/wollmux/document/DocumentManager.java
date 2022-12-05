@@ -98,7 +98,7 @@ public class DocumentManager
   private DocumentManager() {
     registeredDocumentEventListener = new ArrayList<>();
   }
-  
+
   /**
    * Fügt compo den gemanageten Objekten hinzu, wobei die für Textdokumente
    * relevanten Informationen hinterlegt werden.
@@ -107,10 +107,10 @@ public class DocumentManager
   {
     TextDocumentInfo docInfo = new TextDocumentInfo(compo);
     info.put(new HashableComponent(compo), docInfo);
-      
+
     new OnTextDocumentControllerInitialized(docInfo.getTextDocumentController()).emit();
   }
-  
+
   public Map<HashableComponent, Info> getTextDocumentList() {
     return info;
   }

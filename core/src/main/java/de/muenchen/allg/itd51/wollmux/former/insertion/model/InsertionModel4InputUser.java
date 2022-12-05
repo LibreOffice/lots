@@ -52,7 +52,7 @@ public class InsertionModel4InputUser extends InsertionModel
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(InsertionModel4InputUser.class);
-  
+
   private static final String FUNCTION = "FUNCTION";
 
   /**
@@ -74,7 +74,7 @@ public class InsertionModel4InputUser extends InsertionModel
 
   /**
    * Erzeugt ein neues InsertionModel für das InputUser Textfeld textField.
-   * 
+   *
    * @param doc
    *          das Dokument in dem sich das InputUser-Feld befindet
    * @param funcSelections
@@ -142,7 +142,7 @@ public class InsertionModel4InputUser extends InsertionModel
     {
       LOGGER.trace("", x);
     }
-    
+
     try
     {
       getFieldMaster().dispose();
@@ -171,7 +171,7 @@ public class InsertionModel4InputUser extends InsertionModel
   /**
    * Erzeugt einen neuen FieldMaster mit Namen newName und biegt dieses
    * InputUser-Feld darauf um.
-   * 
+   *
    * @throws Exception
    *           falls was schief geht.
    */
@@ -191,7 +191,7 @@ public class InsertionModel4InputUser extends InsertionModel
     }
 
     XPropertySet master = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, doc));
-    
+
     try
     {
       UnoProperty.setProperty(master, UnoProperty.VALUE, Double.valueOf(0));
@@ -202,7 +202,7 @@ public class InsertionModel4InputUser extends InsertionModel
     {
       LOGGER.trace("", e);
     }
-   
+
     try
     {
       getFieldMaster().dispose(); // clean up old field master
@@ -254,7 +254,7 @@ public class InsertionModel4InputUser extends InsertionModel
     // ihrer Parameter gebunden wurden, dann nehmen wir direkt den
     // Original-Funktionsnamen für das TRAFO-Attribut ...
     String funcName = "";
-    
+
     if (trafo.isReference() && !trafo.hasSpecifiedParameters())
     {
       conf.add(FUNCTION).add(trafo.getFunctionName());
@@ -276,13 +276,13 @@ public class InsertionModel4InputUser extends InsertionModel
     try
     {
       rename(conf.stringRepresentation(false, '\'', false));
-      
+
       return funcName;
     }
     catch (Exception x)
     {
       LOGGER.error("", x);
-      
+
       return "";
     }
   }

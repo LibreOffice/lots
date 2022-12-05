@@ -703,7 +703,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
         viewDescriptor.view.setViewVisibilityDescriptor(newDesc);
       }
     }
-    
+
     /**
      * Hebt die Selektion aller Elemente auf.
      */

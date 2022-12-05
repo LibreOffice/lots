@@ -90,16 +90,16 @@ public class HTMLElement
     }
     return fontDescriptor;
   }
-  
+
   private short parseFontSizeString(String value)
   {
     switch (value)
     {
-      case "x-small" : 
+      case "x-small" :
         return 7;
       case "small" :
         return 10;
-      case "medium" : 
+      case "medium" :
         return 12;
       case "large":
         return 14;

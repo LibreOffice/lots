@@ -160,7 +160,7 @@ public class FunctionSelectionAccessView implements View
 
   /**
    * Erzeugt eine neue View über die funcSel angezeigt und bearbeitet werden kann.
-   * 
+   *
    * @param funcLib
    *          die Funktionsbibliothek, deren Funktionen auswählbar sein sollen.
    * @param idManager
@@ -188,7 +188,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Baut {@link #myPanel} komplett neu auf für den momentanen Zustand des
    * FunctionSelectionAccess.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void buildPanel()
@@ -319,7 +319,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Liefert eine JComboBox zurück über die der Benutzer einen Parameter der Funktion
    * festlegen kann.
-   * 
+   *
    * @param paramName
    *          der Name des Parameters.
    * @param startValue
@@ -435,7 +435,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Aktualisiert die Liste der Einträge in combo, so dass sie den aktiven IDs von
    * {@link #idManager} entspricht.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void updateParameterBox(JComboBox<String> combo)
@@ -481,7 +481,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Liefert eine JComboBox, die die Auswahl einer Funktion aus {@link #funcLib}
    * erlaubt.
-   * 
+   *
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -540,7 +540,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Schreibt die aktuelle manuelle Eingabe der Expertenfunktion in den
    * FunctionSelectionAccess zurück.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void updateExpertFunction()
@@ -579,7 +579,7 @@ public class FunctionSelectionAccessView implements View
    * {@link FunctionSelectionAccessView#literalValueArea} als auch
    * {@link FunctionSelectionAccessView#complexFunctionArea} verwendet, um auf
    * Benutzereingaben zu reagieren.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class ExpertFunctionChangeListener implements DocumentListener
@@ -606,7 +606,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Wird auf die Funktionsauswahl-Kombobox registriert und reagiert darauf, dass der
    * Benutzer eine andere Funktion auswählt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class FunctionSelectionBoxItemListener implements ItemListener

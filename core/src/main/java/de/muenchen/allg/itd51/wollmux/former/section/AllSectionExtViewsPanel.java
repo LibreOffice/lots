@@ -38,7 +38,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 /**
  * Eine View, die alle
  * {@link de.muenchen.allg.itd51.wollmux.former.section.OneSectionExtView}s enthält.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllSectionExtViewsPanel extends OnDemandCardView
@@ -51,7 +51,7 @@ public class AllSectionExtViewsPanel extends OnDemandCardView
   /**
    * Erzeugt ein {@link AllSectionExtViewsPanel}, das den Inhalt von
    * sectionModelList anzeigt.
-   * 
+   *
    * @param groupModelList
    *          die Liste der Sichtbarkeitsgruppen die zur Auswahl angeboten werden
    *          sollen.

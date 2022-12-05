@@ -34,7 +34,7 @@ public interface DispatchHelper
 
   /**
    * Send a result to the listener of this dispatch.
-   * 
+   *
    * @param success
    *          Was the operation successful?
    */

@@ -58,7 +58,7 @@ public abstract class InsertionModel
   /**
    * Entfernt die Einfügestelle komplett aus dem Dokument, d,h, sowohl das eventuell vorhandene
    * WollMux-Bookmark als auch den Feldbefehl.
-   * 
+   *
    * @throws UnoHelperException
    *           Can't get the view cursor.
    */
@@ -72,7 +72,7 @@ public abstract class InsertionModel
 
   /**
    * Setzt den ViewCursor auf die Einfügestelle.
-   * 
+   *
    * @throws UnoHelperException
    *           Can't get the view cursor.
    */

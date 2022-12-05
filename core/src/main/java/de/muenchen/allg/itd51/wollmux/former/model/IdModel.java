@@ -105,19 +105,19 @@ public class IdModel
      * Listeners.
      */
     public void addIDChangeListener(IDChangeListener listen)
-    {      
+    {
       for (WeakReference<IDChangeListener> changeListener : listeners)
       {
         IDChangeListener listener = changeListener.get();
-        if (listener == null) 
+        if (listener == null)
         {
           listeners.remove(changeListener);
-        } else if (listener == listen)   
-        { 
+        } else if (listener == listen)
+        {
           return;
         }
       }
-      
+
       listeners.add(new WeakReference<>(listen));
     }
 
@@ -130,11 +130,11 @@ public class IdModel
      * des Listeners.
      */
     public void removeIDChangeListener(IDChangeListener listen)
-    {      
+    {
       for (WeakReference<IDChangeListener> changeListener : listeners)
       {
         IDChangeListener listener = changeListener.get();
-        
+
         if (listener == null || listener == listen)
         {
             listeners.remove(changeListener);
@@ -175,11 +175,11 @@ public class IdModel
       mapString2ID.remove(id);
       id = newID;
       mapString2ID.put(id, this);
-      
+
       for (WeakReference<IDChangeListener> changeListener : listeners)
       {
         IDChangeListener listener = changeListener.get();
-        
+
         if (listener == null)
           listeners.remove(changeListener);
         else
@@ -222,7 +222,7 @@ public class IdModel
     {
       return super.hashCode();
     }
-    
+
     /**
      * Ein IDChangeListener wird benachrichtigt, wenn sich ein {@link IdModel}
      * Objekt ändert.

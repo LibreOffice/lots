@@ -75,7 +75,7 @@ public class FunctionFactory
    * geliefert, die diesem Enkel entspricht. Hat conf mehr als einen Enkel, so wird
    * eine Funktion geliefert, die alle Enkel als Booleans auswertet und
    * UND-verknüpft.
-   * 
+   *
    * @param funcLib
    *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
    *          aufgelöst werden sollen.
@@ -123,7 +123,7 @@ public class FunctionFactory
    * wird null geliefert. Hat conf genau ein Kind, so wird eine Funktion geliefert,
    * die diesem Kind entspricht. Hat conf mehr als ein Kind, so wird eine Funktion
    * geliefert, die alle Kinder als Booleans auswertet und UND-verknüpft.
-   * 
+   *
    * @param funcLib
    *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
    *          aufgelöst werden sollen.
@@ -165,7 +165,7 @@ public class FunctionFactory
   /**
    * Liefert ein Function Objekt zu conf, wobei conf selbst schon ein erlaubter
    * Knoten der Funktionsbeschreibung (z,B, "AND" oder "MATCH") sein muss.
-   * 
+   *
    * @param funcLib
    *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
    *          aufgelöst werden sollen.
@@ -704,12 +704,12 @@ public class FunctionFactory
   /**
    * Parst die "Funktionen" Abschnitte aus conf und liefert eine entsprechende
    * FunctionLibrary.
-   * 
+   *
    * @param context
    *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
    *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
    *          gespeichert, es ist nicht nur ein Schlüssel.
-   * 
+   *
    * @param baselib
    *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
    *          liefern, die anderweitig nicht gefunden werden.
@@ -724,12 +724,12 @@ public class FunctionFactory
   /**
    * Parst die Inhalte von conf,query(section) als Funktionsdefinitionen und fügt sie
    * funcs hinzu.
-   * 
+   *
    * @param context
    *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
    *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
    *          gespeichert, es ist nicht nur ein Schlüssel.
-   * 
+   *
    * @return funcs
    */
   public static FunctionLibrary parseFunctions(FunctionLibrary funcs,

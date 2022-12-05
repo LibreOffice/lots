@@ -25,7 +25,7 @@ package de.muenchen.allg.itd51.wollmux.config;
 
 /**
  * Handles the different name formats for files, which are included.
- * 
+ *
  * @author Daniel Sikeler
  */
 public final class PathProcessor
@@ -37,7 +37,7 @@ public final class PathProcessor
 
   /**
    * Process include instruction. Extracts the file path and the protocol.
-   * 
+   *
    * @param url
    *          The URL of the file.
    * @return A string representation of the file.
@@ -64,7 +64,7 @@ public final class PathProcessor
   /**
    * Remove a offset from a String. If it is a Linux-System removes one char
    * less than offset.
-   * 
+   *
    * @param string
    *          The string to trim.
    * @param offset

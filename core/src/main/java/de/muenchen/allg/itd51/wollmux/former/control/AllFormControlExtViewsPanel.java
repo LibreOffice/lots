@@ -40,7 +40,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * Eine View, die alle
  * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlExtView}s
  * enthält.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllFormControlExtViewsPanel extends OnDemandCardView
@@ -59,7 +59,7 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
   /**
    * Erzeugt ein {@link AllFormControlExtViewsPanel}, das den Inhalt von
    * formControlModelList anzeigt.
-   * 
+   *
    * @param funcLib
    *          die Funktionsbibliothek, die die Funktionen enthält, die die View zur
    *          Auswahl anbieten sollen.

@@ -33,7 +33,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 /**
  * Anzeige erweiterter Eigenschaften eines {@link SectionModel}s.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class OneSectionExtView implements View
@@ -56,7 +56,7 @@ public class OneSectionExtView implements View
 
   /**
    * Erzeugt eine neue View.
-   * 
+   *
    * @param model
    *          das Model dessen Daten angezeigt werden sollen.
    * @param groupModelList

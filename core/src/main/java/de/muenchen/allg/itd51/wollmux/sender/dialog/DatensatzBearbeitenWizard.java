@@ -100,11 +100,11 @@ public class DatensatzBearbeitenWizard implements XWizardController
       case PERSON:
         page = new DatensatzBearbeitenWizardPage(pageId, parentWindow, "DatensatzBearbeitenPerson", dataset, dbSchema);
         break;
-        
+
       case ORGA:
         page = new DatensatzBearbeitenWizardPage(pageId, parentWindow, "DatensatzBearbeitenOrga", dataset, dbSchema);
         break;
-        
+
       case FUSSZEILE:
         page = new DatensatzBearbeitenWizardPage(pageId, parentWindow, "DatensatzBearbeitenFusszeile", dataset,
             dbSchema);

@@ -201,7 +201,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     copyBtn.addActionListener(copyBtnActionListener);
 
     XButton delBtn = UNO.XButton(controlContainer.getControl("btnDel"));
-    AbstractActionListener deleteBtnActionListener = event -> 
+    AbstractActionListener deleteBtnActionListener = event ->
     {
       short[] selectedItemsPos = palListe.getSelectedItemsPos();
       removeSender(selectedItemsPos);

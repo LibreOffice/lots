@@ -221,7 +221,7 @@ public class OneInsertionLineView extends LineView
         idChangedDueToExternalReasons((IdModel) newValue);
       }
     }
-    
+
     private void idChangedDueToExternalReasons(IdModel newId)
     {
       idBox.setSelectedItem(newId.toString());

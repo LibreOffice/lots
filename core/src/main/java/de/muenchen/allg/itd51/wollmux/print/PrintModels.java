@@ -96,7 +96,7 @@ public class PrintModels
 
   /**
    * Update the stage description of the print model.
-   * 
+   *
    * @param pmod
    *          The print model.
    * @param stage

@@ -40,7 +40,7 @@ public class SimpleDataset implements Dataset
   /**
    * Erzeugt ein SimpleDataset, das eine Kopie von ds ist. Das erzeugte SimpleDataset
    * ist von schema und ds unabhängig und hält keine Verknüpfungen darauf.
-   * 
+   *
    * @param schema
    *          enthält die Namen aller zu kopierenden Spalten
    * @param ds
@@ -73,7 +73,7 @@ public class SimpleDataset implements Dataset
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Dataset#get(java.lang.String)
    */
   @Override
@@ -87,7 +87,7 @@ public class SimpleDataset implements Dataset
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Dataset#getKey()
    */
   @Override

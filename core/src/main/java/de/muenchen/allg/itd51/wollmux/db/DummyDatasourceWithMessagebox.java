@@ -29,9 +29,9 @@ import java.util.Vector;
 /**
  * Eine Dummy-Datenquelle, die im Schema keine Datensätze enthält und als QueryResult
  * bei getDatasetsByKey den String "&lt;key&gt;" zurück liefert.
- * 
+ *
  * verwendet im  noConfig Modus.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DummyDatasourceWithMessagebox extends Datasource
@@ -51,7 +51,7 @@ public class DummyDatasourceWithMessagebox extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
   @Override
@@ -62,7 +62,7 @@ public class DummyDatasourceWithMessagebox extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection
    * , long)

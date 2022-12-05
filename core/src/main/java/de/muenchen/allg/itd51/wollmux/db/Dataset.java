@@ -29,7 +29,7 @@ public interface Dataset
 {
   /**
    * Liefert den Wert des Datensatzes aus der Spalte columnName (null falls nicht belegt).
-   * 
+   *
    * @throws ColumnNotFoundException
    *           falls die Spalte nicht existiert. Man beachte, dass dies eine Eigenschaft des
    *           Datenbankschemas ist und nichts damit zu tun hat, ob der Wert des Datensatzes in der

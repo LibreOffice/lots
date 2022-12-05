@@ -28,7 +28,7 @@ import java.util.Vector;
 
 /**
  * Eine Datenquelle, die keine Datensätze enthält.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class EmptyDatasource extends Datasource
@@ -48,7 +48,7 @@ public class EmptyDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
   @Override
@@ -59,7 +59,7 @@ public class EmptyDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection,
    *      long)
    */

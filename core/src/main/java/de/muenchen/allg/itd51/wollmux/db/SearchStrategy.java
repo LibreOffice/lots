@@ -57,7 +57,7 @@ public class SearchStrategy
   /**
    * Parst den "Suchstrategie"-Abschnitt von conf und liefert eine entsprechende
    * SearchStrategy.
-   * 
+   *
    * @param conf
    *          das {@link ConfigThingy}, dessen "Suchstrategie"-Abschnitt geparst
    *          werden soll.
@@ -110,7 +110,7 @@ public class SearchStrategy
    * Query sind, die bei einer Suchanfrage mit wordcount Wörtern durchgeführt werden
    * soll. Die Querys sollen in der Reihenfolge in der sie in der Liste stehen
    * durchgeführt werden solange bis eine davon ein Ergebnis liefert.
-   * 
+   *
    * @return <code>null</code> falls keine Strategie für den gegebenen wordcount
    *         vorhanden ist.
    */

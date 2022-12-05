@@ -61,9 +61,9 @@ import de.muenchen.allg.util.UnoProperty;
 /**
  * This model maintains the call hierarchy of all print functions. The hierarchy is defined by the
  * ORDER value of the print functions.
- * 
+ *
  * The {@link XPropertySet} interface is used to share data between the print functions.
- * 
+ *
  * Each print function is executed with its own {@link SlavePrintModel} in a new thread. This class
  * has to do the synchronization.
  */

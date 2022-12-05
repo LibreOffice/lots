@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.former.view;
 
 /**
  * Eine View die erst wenn sie das erste mal angezeigt wird initialisiert wird.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public interface LazyView extends View

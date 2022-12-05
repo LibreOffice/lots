@@ -43,7 +43,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 /**
  * Datenquelle, die die Daten einer existierenden Datenquelle mit geänderten Spalten
  * zur Verfügung stellt.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class SchemaDatasource extends Datasource
@@ -67,7 +67,7 @@ public class SchemaDatasource extends Datasource
 
   /**
    * Erzeugt eine neue SchemaDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser SchemaDatasource
    *          bereits vollständig instanziierten Datenquellen.

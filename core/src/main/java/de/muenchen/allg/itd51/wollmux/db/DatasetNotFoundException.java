@@ -25,7 +25,7 @@ package de.muenchen.allg.itd51.wollmux.db;
 /**
  * Wird geworfen, falls kein passender Datensatz gefunden wurde und
  * die Möglichkeit, eine leere Ergebnisliste zurückzugeben nicht
- * existiert. 
+ * existiert.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatasetNotFoundException extends Exception
