@@ -239,7 +239,7 @@ public class FunctionFactoryTest
     Map<String, Function> trafos = FunctionFactory.parseTrafos(new ConfigThingy("Trafos", "TRAFOS (trafo \"abc\")"),
         "TRAFOS", funcLib, dialogLib, context);
     assertTrue(trafos.containsKey("trafo"));
-    
+
     trafos = FunctionFactory.parseTrafos(new ConfigThingy("Trafos", "TRAFOS \"abc\""), "TRAFOS", funcLib, dialogLib,
         context);
     assertTrue(trafos.isEmpty());

@@ -655,7 +655,7 @@ public class WollMuxFiles
 
   /**
    * Get the size attribute of the system memory parts.
-   * 
+   *
    * @param key
    *          Values could be TotalPhysicalMemorySize or FreeSwapSpaceSize.
    * @return The size of the memory part.

@@ -50,7 +50,7 @@ public class FormFactory extends AbstractSidebarFactory
   {
     super(SERVICE_NAME, context);
   }
-  
+
   @Override
   public XUIElement createUIElement(String resourceUrl, PropertyValue[] arguments)
       throws NoSuchElementException

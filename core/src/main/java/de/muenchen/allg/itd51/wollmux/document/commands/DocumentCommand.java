@@ -817,7 +817,7 @@ public abstract class DocumentCommand
 
     /**
      * New InvalidCommandException with cause.
-     * 
+     *
      * @param message
      *          The message.
      */
@@ -828,7 +828,7 @@ public abstract class DocumentCommand
 
     /**
      * New InvalidCommandException with message and cause.
-     * 
+     *
      * @param message
      *          The message.
      * @param cause
@@ -1252,7 +1252,7 @@ public abstract class DocumentCommand
 
     /**
      * Update the id of this command.
-     * 
+     *
      * @param id
      *          The new id.
      */
@@ -1413,7 +1413,7 @@ public abstract class DocumentCommand
 
     /**
      * Get the new FRAG_ID.
-     * 
+     *
      * @return The new FRAG_ID or the empty String if no FRAG_ID was given.
      */
     public String getNewFragID()

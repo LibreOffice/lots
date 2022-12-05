@@ -56,7 +56,7 @@ public class ColumnTransformerTest
 
     assertEquals("transformed", transformer.get("trafo", new MockDataset()));
     assertEquals("value", transformer.get("column", new MockDataset()));
-    
+
     Dataset dsTransformed = transformer.transform(new MockDataset());
     assertEquals("transformed", dsTransformed.get("trafo"));
     assertEquals("ds", dsTransformed.getKey());
@@ -82,24 +82,24 @@ public class ColumnTransformerTest
       {
         return null;
       }
-      
+
       @Override
       public String getResult(Values parameters)
       {
         assertFalse(parameters.hasValue("unknwon"));
         assertTrue(parameters.hasValue("column"));
-        
+
         assertFalse(parameters.getBoolean("unknown"));
-        
+
         assertEquals("", parameters.getString("unknown"));
         return parameters.getString("column");
       }
-      
+
       @Override
       public void getFunctionDialogReferences(Collection<String> set)
       {
       }
-      
+
       @Override
       public boolean getBoolean(Values parameters)
       {

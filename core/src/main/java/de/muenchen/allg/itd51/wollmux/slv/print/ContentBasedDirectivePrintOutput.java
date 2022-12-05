@@ -252,7 +252,7 @@ public class ContentBasedDirectivePrintOutput extends PrintFunction
         // 'I./t' or 'I.' ('I.' without tab is used left of recipient frame in some cases), so
         // only goLeft(1) to exclude tab.
         if (cursor.getString().contains("\t"))
-        { 
+        {
           cursor.goLeft((short) 1, true);
         }
 

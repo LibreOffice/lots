@@ -47,7 +47,7 @@ public class ExternalFunctionTest
     values.put("param", "value");
     assertEquals(1, f.parameters().length);
     assertEquals("value", f.invoke(values));
-    
+
     assertThrows(ConfigurationErrorException.class, () -> new ExternalFunction(new ConfigThingy("",
         "URL \"java:de.muenchen.allg.itd51.wollmux.func.ExternalFunctionTest.extMethod4\"")));
     assertThrows(ConfigurationErrorException.class, () -> new ExternalFunction(

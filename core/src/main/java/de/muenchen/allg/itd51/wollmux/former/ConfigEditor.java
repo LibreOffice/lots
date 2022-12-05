@@ -105,7 +105,7 @@ public class ConfigEditor extends JFrame implements SearchListener
           {
             ConfigEditor.this.dispose();
           }
-        } 
+        }
         else
         {
           ConfigEditor.this.dispose();
@@ -177,7 +177,7 @@ public class ConfigEditor extends JFrame implements SearchListener
 
     FindToolBar findToolBar = new FindToolBar(this);
     findToolBar.setSearchContext(context);
-    
+
     ReplaceToolBar replaceToolBar = new ReplaceToolBar(this);
     replaceToolBar.setSearchContext(context);
 
@@ -257,7 +257,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     provider.addCompletion(new BasicCompletion(provider, "HOTKEY"));
     provider.addCompletion(new BasicCompletion(provider, "EDIT"));
     provider.addCompletion(new BasicCompletion(provider, "FRAG_ID"));
-    
+
     return provider;
   }
 

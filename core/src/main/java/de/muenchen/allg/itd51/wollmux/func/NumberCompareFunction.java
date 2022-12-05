@@ -69,7 +69,7 @@ public class NumberCompareFunction extends NumberFunction
    * zurückgeliefert. Falls mindestens ein compareTo +1 geliefert hat wird "1"
    * geliefert. Der Fall, dass ein compareTo -1 und ein anderer +1 geliefert hat
    * wird wie bereits oben beschrieben schon früher abgefangen.
-   * 
+   *
    * @throws ConfigurationErrorException
    *           falls nicht mindestens 2 Unterfunktionen in conf enthalten sind.
    */

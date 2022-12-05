@@ -92,7 +92,7 @@ public class AdjustFields
 
   /**
    * Show a dialog to override existing fields with free text or other fields.
-   * 
+   *
    * @param title
    *          The title of the dialog.
    * @param labelOldFields
@@ -226,7 +226,7 @@ public class AdjustFields
 
   /**
    * Collect the mappings and call the listener.
-   * 
+   *
    * @param submitActionListener
    *          The listener.
    * @param ignoreIsTransformed
@@ -304,7 +304,7 @@ public class AdjustFields
 
   /**
    * Check whether a string is valid.
-   * 
+   *
    * @param text
    *          The string.
    * @param isTransformed
@@ -327,7 +327,7 @@ public class AdjustFields
 
   /**
    * Divide the text in several parts by tags. Each tag is also a part.
-   * 
+   *
    * @param text
    *          The text.
    * @return A list of parts.

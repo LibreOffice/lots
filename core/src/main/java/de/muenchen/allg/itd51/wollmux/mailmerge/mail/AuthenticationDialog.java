@@ -43,7 +43,7 @@ public class AuthenticationDialog
   {
     // nothing to do
   }
-  
+
   /**
    * Show the dialog.
    *

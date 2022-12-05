@@ -65,14 +65,14 @@ public class ScanVisitor implements DocumentTreeVisitor
    * speziellen Hinweisen/Namen/Einträgen, die diesem Muster entsprechen. Diese
    * Zusatzinformationen werden herangezogen um Labels, IDs und andere Informationen
    * zu bestimmen.
-   * 
+   *
    * >>>>Eingabefeld<<<<: Als "Hinweis" kann "Label<<ID>>" angegeben werden und wird
    * beim Import entsprechend berücksichtigt. Wird nur "<<ID>>" angegeben, so
    * markiert das Eingabefeld eine reine Einfügestelle (insertValue oder
    * insertContent) und beim Import wird dafür kein Formularsteuerelement erzeugt.
    * Wird ID ein "glob:" vorangestellt, so wird gleich ein insertValue-Bookmark
    * erstellt.
-   * 
+   *
    * >>>>>Eingabeliste/Dropdown<<<<<: Als "Name" kann "Label<<ID>>" angegeben werden
    * und wird beim Import berücksichtigt. Als Spezialeintrag in der Liste kann
    * "<<Freitext>>" eingetragen werden und signalisiert dem FM4000, dass die ComboBox
@@ -89,13 +89,13 @@ public class ScanVisitor implements DocumentTreeVisitor
    * wobei N die Anzahl der Einträge ist, die bis auf folgende Leerzeichen identisch
    * zu diesem Eintrag sind. Dies ermöglicht es, das selbe Wort mehrfach in die Liste
    * aufzunehmen.
-   * 
+   *
    * >>>>>Checkbox<<<<<: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>" angegeben
    * werden und wird beim Import entsprechend berücksichtigt.
-   * 
+   *
    * Technischer Hinweis: Auf dieses Pattern getestet wird grundsätzlich der String,
    * der von {@link FormControl#getDescriptor()} geliefert wird.
-   * 
+   *
    */
   private static final Pattern MAGIC_DESCRIPTOR_PATTERN =
     Pattern.compile("\\A(.*)<<(.*)>>\\z");
@@ -203,7 +203,7 @@ public class ScanVisitor implements DocumentTreeVisitor
 
     return true;
   }
-  
+
   /**
    * Fügt der {@link #formControlModelList} ein neues {@link FormControlModel} hinzu
    * für das {@link de.muenchen.allg.itd51.wollmux.document.nodes.FormControl}
@@ -212,11 +212,11 @@ public class ScanVisitor implements DocumentTreeVisitor
    * {@link #insertionModelList} ein entsprechendes {@link InsertionModel}
    * hinzugefügt. Zusätzlich wird immer ein entsprechendes Bookmark um das Control
    * herumgelegt, das die Einfügestelle markiert.
-   * 
+   *
    * @return null, falls es sich bei dem Control nur um eine reine Einfügestelle
    *         handelt. In diesem Fall wird nur der {@link #insertionModelList} ein
    *         Element hinzugefügt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   FormControlModel registerFormControl(FormControl control,
@@ -312,7 +312,7 @@ public class ScanVisitor implements DocumentTreeVisitor
   /**
    * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für eine
    * Checkbox hinzu und liefert es zurück.
-   * 
+   *
    * @param control
    *          das entsprechende
    *          {@link de.muenchen.allg.itd51.wollmux.document.nodes.FormControl}
@@ -340,7 +340,7 @@ public class ScanVisitor implements DocumentTreeVisitor
   /**
    * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für eine
    * Auswahlliste hinzu und liefert es zurück.
-   * 
+   *
    * @param control
    *          das entsprechende
    *          {@link de.muenchen.allg.itd51.wollmux.document.nodes.FormControl}
@@ -384,7 +384,7 @@ public class ScanVisitor implements DocumentTreeVisitor
   /**
    * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für ein
    * Eingabefeld hinzu und liefert es zurück.
-   * 
+   *
    * @param control
    *          das entsprechende
    *          {@link de.muenchen.allg.itd51.wollmux.document.nodes.FormControl}
@@ -412,7 +412,7 @@ public class ScanVisitor implements DocumentTreeVisitor
   /**
    * Liefert str zurück minus führende und folgende Whitespace (wobei
    * Unicode-Leerzeichen) korrekt berücksichtigt werden.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private String unicodeTrim(String str)
@@ -430,14 +430,14 @@ public class ScanVisitor implements DocumentTreeVisitor
       {
         ++i;
       }
-      
+
       int j = str.length() - 1;
       while (j >= 0 && Character.isWhitespace(str.charAt(j)))
       {
         --j;
       }
-        
-      if (i > j) 
+
+      if (i > j)
       {
         return "";
       }
@@ -450,7 +450,7 @@ public class ScanVisitor implements DocumentTreeVisitor
   /**
    * Bastelt aus dem Start des Textes text ein Label, das maximal maxlen Zeichen lang
    * ist.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String makeLabelFromStartOf(StringBuilder text, int maxlen)
@@ -458,7 +458,7 @@ public class ScanVisitor implements DocumentTreeVisitor
     String label;
     String str = text.toString().trim();
     int len = str.length();
-    if (len > maxlen) 
+    if (len > maxlen)
     {
       len = maxlen;
     }
@@ -469,11 +469,11 @@ public class ScanVisitor implements DocumentTreeVisitor
     }
     return label;
   }
-  
+
   /**
    * Bastelt aus dem Ende des Textes text ein Label das maximal maxlen Zeichen lang
    * ist.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String makeLabelFromEndOf(StringBuilder text, int maxlen)
@@ -498,7 +498,7 @@ public class ScanVisitor implements DocumentTreeVisitor
    * insertionOnlyNoLabel == true, so muss der Bezeichner nicht eindeutig sein (dies
    * ist der Marker für eine reine Einfügestelle, für die kein Steuerelement erzeugt
    * werden muss).
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String makeControlId(String str, boolean insertionOnlyNoLabel)
@@ -518,7 +518,7 @@ public class ScanVisitor implements DocumentTreeVisitor
         s = s.substring(GENDER_PREFIX.length());
       }
       s = s.replaceAll("[^a-zA-Z_0-9]", "");
-      if (s.length() == 0) 
+      if (s.length() == 0)
       {
         s = "Einfuegung";
       }
@@ -542,10 +542,10 @@ public class ScanVisitor implements DocumentTreeVisitor
       return formularMax4000.getFormControlModelList().makeUniqueId(s);
     }
   }
-  
+
   /**
    * Liefert "WM(CMD'insertValue' DB_SPALTE '&lt;id>').
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String insertValue(String id)
@@ -555,18 +555,18 @@ public class ScanVisitor implements DocumentTreeVisitor
 
   /**
    * Liefert "WM(CMD'insertFormValue' ID '&lt;id>').
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String insertFormValue(String id)
   {
     return "WM(CMD 'insertFormValue' ID '" + id + "')";
   }
-  
+
   /**
    * Verpasst model eine Gender-TRAFO, die ihre Herr/Frau/Anders-Texte aus den Items
    * von control bezieht.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void addGenderTrafo(InsertionModel model, DropdownFormControl control)
@@ -597,7 +597,7 @@ public class ScanVisitor implements DocumentTreeVisitor
         {
           item2 = item2.substring(0, item2.length() - 1);
         }
-        if (item1.equals(item2)) 
+        if (item1.equals(item2))
         {
           ++n;
         }

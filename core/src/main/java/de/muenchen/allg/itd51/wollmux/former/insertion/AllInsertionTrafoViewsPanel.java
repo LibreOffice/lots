@@ -39,7 +39,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * Eine View, die alle
  * {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionExtView}s
  * enthält.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllInsertionTrafoViewsPanel extends OnDemandCardView
@@ -54,7 +54,7 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
   /**
    * Erzeugt ein {@link AllInsertionTrafoViewsPanel}, das den Inhalt von
    * insertionModelList anzeigt.
-   * 
+   *
    * @param funcLib
    *          die Funktionsbibliothek, die die Funktionen enthält, die die Views zur
    *          Auswahl anbieten sollen.

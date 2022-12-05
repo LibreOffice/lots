@@ -30,7 +30,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Stellt die TRAFO eines InsertionModels dar und erlaubt ihre Bearbeitung.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class OneInsertionTrafoView extends FunctionSelectionAccessView

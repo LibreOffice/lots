@@ -382,7 +382,7 @@ public class AllSectionLineViewsPanel implements View
     {
       removeItem((OneSectionLineView) view);
     }
-    
+
     /**
      * Entfernt view aus diesem Container (falls dort vorhanden).
      */
@@ -447,7 +447,7 @@ public class AllSectionLineViewsPanel implements View
         }
       }
     }
-    
+
     /**
      * Hebt die Selektion aller Elemente auf.
      */

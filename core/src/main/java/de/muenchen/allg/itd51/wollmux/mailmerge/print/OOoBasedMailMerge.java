@@ -179,7 +179,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Start the mail merge.
-   * 
+   *
    * @throws PrintException
    *           Something went wrong.
    */
@@ -318,7 +318,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Create and prepare the input document for the mail merge form the print model.
-   * 
+   *
    * @throws PrintException
    *           The input document can't be created or prepared.
    */
@@ -366,7 +366,7 @@ public class OOoBasedMailMerge implements AutoCloseable
         adjustDatabaseAndInputUserFields(tmpDoc);
         /*
          * Bookmarks make LO mail merge slow. So we delete all of the.
-         * 
+         *
          * If at some time we need bookmarks at least WollMux document commands have to be removed
          * so that they are not processed twice.
          */
@@ -385,7 +385,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Prepare text sections in the document for the mail merge.
-   * 
+   *
    * @param doc
    *          The document.
    */
@@ -430,7 +430,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Remove all non informational meta data of WollMux from the document.
-   * 
+   *
    * @param doc
    *          The document.
    */
@@ -449,7 +449,7 @@ public class OOoBasedMailMerge implements AutoCloseable
    * Remove all bookmarks except setGroups-commands from the document. setGroups
    * commands are converted, so that they can be interpreted by LibreOffice mail
    * merge.
-   * 
+   *
    * @param tmpDoc
    *          The document.
    */
@@ -528,7 +528,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Replace all insertFormValue-Bookmarks with mail merge fields.
-   * 
+   *
    * @param doc
    *          The document which contains the bookmarks.
    */
@@ -569,7 +569,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Create a column name for a {@link FormField}.
-   * 
+   *
    * @param field
    *          The {@link FormField}.
    * @return A column name created from the type and possible Trafos of the {@link FormField}. Can
@@ -597,7 +597,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Adjust mail merge fields and InputUserFields to use the new database {@link #dbName}.
-   * 
+   *
    * @param tmpDoc
    *          The document which contains the fields.
    */
@@ -644,7 +644,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Adjust a InputUserField in the document.
-   * 
+   *
    * @param tmpDoc
    *          The document.
    * @param tf
@@ -678,7 +678,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Count the number of "Next record" fields in the document.
-   * 
+   *
    * @return The number of fields.
    */
   private int countNextSets()
@@ -710,7 +710,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Create a new mail merge field using the database {@link #dbName}
-   * 
+   *
    * @param factory
    *          The factory to create the field.
    * @param tableName
@@ -761,7 +761,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Register a database with a new random name.
-   * 
+   *
    * @throws PrintException
    *           The database can't be registered.
    */
@@ -786,7 +786,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
   /**
    * Create the mail merge job.
-   * 
+   *
    * @return The job.
    * @throws PrintException
    *           The job can't be created.
@@ -840,7 +840,7 @@ public class OOoBasedMailMerge implements AutoCloseable
   /**
    * Creates a folder in the system temporary folder with name
    * '{@link #TEMP_WOLLMUX_MAILMERGE_PREFIX}xxx', where xxx is a 3 digit number.
-   * 
+   *
    * @return The folder.
    */
   private void createMailMergeTempdir()
@@ -884,7 +884,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
     /**
      * Get the number of available records.
-     * 
+     *
      * @return Number of records.
      */
     public int getSize()
@@ -894,7 +894,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
     /**
      * Add a new record.
-     * 
+     *
      * @param ds
      *          Key/Value pair defining a record.
      */
@@ -907,7 +907,7 @@ public class OOoBasedMailMerge implements AutoCloseable
     /**
      * After all records where added with {@link #addRecord(Map)}. This method writes the file.
      * Later calls of {@link #addRecord(Map)} have no impact.
-     * 
+     *
      * @throws java.io.IOException
      *           Data can't be written.
      */
@@ -978,9 +978,9 @@ public class OOoBasedMailMerge implements AutoCloseable
 
     /**
      * Create a {@link XDocumentDataSource}.
-     * 
+     *
      * @return The {@link XDocumentDataSource}.
-     * 
+     *
      * @throws PrintException
      *           Can't be created.
      */
@@ -1036,7 +1036,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
     /**
      * Create a line from a record.
-     * 
+     *
      * @param list
      *          The record
      * @return String representing one line terminated by '\n'.
@@ -1056,7 +1056,7 @@ public class OOoBasedMailMerge implements AutoCloseable
 
     /**
      * Escape Strings so that they can be used in a CSV-file.
-     * 
+     *
      * @param value
      *          String to be escaped
      * @return Escaped String

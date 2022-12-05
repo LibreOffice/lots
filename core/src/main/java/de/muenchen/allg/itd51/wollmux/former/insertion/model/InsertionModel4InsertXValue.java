@@ -91,7 +91,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
    * aus dem Formular kommen (insertFormValue).
    */
   private static final int FORM_TYPE = 1;
-  
+
   private static final String TRAFO_FUNCTION = "TRAFO";
 
   /**
@@ -293,8 +293,8 @@ public class InsertionModel4InsertXValue extends InsertionModel
     }
 
     String newBookmarkName = conf.stringRepresentation(false, '\'', true);
-    
-    if (!bookmark.rename(newBookmarkName).equals(Bookmark.BROKEN))    
+
+    if (!bookmark.rename(newBookmarkName).equals(Bookmark.BROKEN))
     {
       return "";
     } else
@@ -330,25 +330,25 @@ public class InsertionModel4InsertXValue extends InsertionModel
   public void setDataID(String newId) throws UnknownIDException
   {
     if (newId.equals(dataId.toString())) return;
-    
+
     if (newId.length() == 0)
     {
         LOGGER.trace("Leere ID");
         throw new UnknownIDException();
     }
-    
+
     if (sourceType == FORM_TYPE)
     {
       IdModel newDataId =
         formularMax4000.getIDManager().getExistingID(
           FormularMax4kController.NAMESPACE_FORMCONTROLMODEL, newId);
-      
+
       if (newDataId == null)
       {
         LOGGER.trace("newDataID is NULL.");
         throw new UnknownIDException();
       }
-    
+
       dataId.removeIDChangeListener(myIDChangeListener);
       dataId = newDataId;
       dataId.addIDChangeListener(myIDChangeListener);

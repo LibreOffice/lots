@@ -25,7 +25,7 @@ package de.muenchen.allg.itd51.wollmux.document;
 /**
  * Beim Der Interpretation der WollMux-Kommandos traten Fehler auf, die eine
  * Überprüfung des erzeugten Dokuments erforderlich machen.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
 public class WMCommandsFailedException extends Exception

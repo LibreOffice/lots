@@ -32,7 +32,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Anzeige erweiterter Eigenschaften eines InsertionModels.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class OneInsertionExtView implements View
@@ -55,7 +55,7 @@ public class OneInsertionExtView implements View
 
   /**
    * Erzeugt eine neue View.
-   * 
+   *
    * @param model
    *          das Model dessen Daten angezeigt werden sollen.
    * @param funcLib

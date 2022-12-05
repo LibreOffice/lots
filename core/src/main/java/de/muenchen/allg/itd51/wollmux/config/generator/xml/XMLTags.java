@@ -24,9 +24,9 @@ package de.muenchen.allg.itd51.wollmux.config.generator.xml;
 
 /**
  * Enum for the XML-elements in the generated XML by the {@link XMLGenerator}.
- * 
+ *
  * @author daniel.sikeler
- * 
+ *
  */
 public enum XMLTags
 {
@@ -66,7 +66,7 @@ public enum XMLTags
 
   /**
    * Create a new XMLTag.
-   * 
+   *
    * @param name
    *          The name of the tag.
    */

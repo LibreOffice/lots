@@ -123,7 +123,7 @@ public enum UIElementType
 
   /**
    * Map a string to a {@link UIElementType}.
-   * 
+   *
    * @param type
    *          The string.
    * @return The type.

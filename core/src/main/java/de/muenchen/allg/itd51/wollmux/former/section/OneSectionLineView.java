@@ -201,7 +201,7 @@ public class OneSectionLineView extends LineView
         nameChangedDueToExternalReasons(newValue.toString());
       }
     }
-    
+
     private void nameChangedDueToExternalReasons(String newName)
     {
       nameBox.setText(newName);

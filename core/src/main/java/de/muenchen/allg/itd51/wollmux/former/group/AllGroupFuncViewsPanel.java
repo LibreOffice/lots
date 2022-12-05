@@ -36,7 +36,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 /**
  * Eine View, die alle
  * {@link de.muenchen.allg.itd51.wollmux.former.group.OneGroupFuncView}s enthält.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllGroupFuncViewsPanel extends OnDemandCardView
@@ -51,7 +51,7 @@ public class AllGroupFuncViewsPanel extends OnDemandCardView
   /**
    * Erzeugt ein {@link AllGroupFuncViewsPanel}, das den Inhalt von groupModelList
    * anzeigt.
-   * 
+   *
    * @param funcLib
    *          die Funktionsbibliothek, die die Funktionen enthält, die die Views zur
    *          Auswahl anbieten sollen.

@@ -889,7 +889,7 @@ public class FormControlModel
     this.items.clear();
     for (int i = 0; i < items.length; ++i)
       this.items.add(items[i]);
-    
+
     formularMax4000.comboBoxItemsHaveChanged(this);
   }
 

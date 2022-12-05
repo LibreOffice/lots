@@ -40,7 +40,7 @@ public class GenderTrafoModel
 
   /**
    * A new Gender-TRAFO model.
-   * 
+   *
    * @param conf
    *          The gender function in {@link ConfigThingy} format.
    */
@@ -155,7 +155,7 @@ public class GenderTrafoModel
    * {@code BIND(FUNCTION "Gender" SET("Anrede", VALUE
    * "<anredeFieldId>") SET("Falls_Anrede_HerrN", "<textHerr>") SET("Falls_Anrede_Frau",
    * "<textFrau>") SET("Falls_sonstige_Anrede", "<textSonst>"))}
-   * 
+   *
    * @return A {@link ConfigThingy} describing the gender field.
    */
   public ConfigThingy generateGenderTrafoConf()

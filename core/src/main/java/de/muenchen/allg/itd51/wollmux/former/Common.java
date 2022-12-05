@@ -266,7 +266,7 @@ public class Common
   /**
    * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die Fonts falls
    * erforderlich.
-   * 
+   *
    * @param config
    *          a valid ConfigThingy configuration.
    * @return {@link Double} returns Zoom factor value.
@@ -301,7 +301,7 @@ public class Common
    * Multipliziert alle Font-Größen mit zoomFactor. ACHTUNG! Nach jedem Aufruf von setLookAndFeel()
    * kann diese Funktion genau einmal verwendet werden und hat in folgenden Aufrufen keine Wirkung
    * mehr, bis wieder setLookAndFeel() aufgerufen wird (was den Zoom wieder zurücksetzt).
-   * 
+   *
    * @param zoomFactor
    *          Value for font zoom.
    */
@@ -466,7 +466,7 @@ public class Common
 
   /**
    * Sets the icon of the passed in JFrame to the WollMux icon.
-   * 
+   *
    * @param myFrame
    *          JFrame which should get the WollMux icon
    */
@@ -475,13 +475,13 @@ public class Common
     try
     {
       URL url = Common.class.getClassLoader().getResource("wollmux_icon32x32.png");
-      
+
       if (url == null) {
         LOGGER.error("Could not retrieve Image from resource.");
-    	  
+    	
         return;
       }
-      
+
       Image image = Toolkit.getDefaultToolkit().createImage(url);
       myFrame.setIconImage(image);
     }

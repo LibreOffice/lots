@@ -41,8 +41,8 @@ public class SenderEventListener implements WollMuxEventListener
 
   /**
    * Execute {@link OnInitialize} events.
-   * 
-   * The listener is unregistered after showing 
+   *
+   * The listener is unregistered after showing
    * some info dialogs to prevent showing dialogs multiple times
    * on new instances.
    *
@@ -53,12 +53,12 @@ public class SenderEventListener implements WollMuxEventListener
   public void onInitialize(OnInitialize event)
   {
     SenderService service = SenderService.getInstance();
-    
+
     if (WollMuxSingleton.getInstance().isNoConfig())
     {
       return;
     }
-    
+
     if (service.getPALEntries().length == 0)
     {
       long found = service.searchDefaultSender();
@@ -86,7 +86,7 @@ public class SenderEventListener implements WollMuxEventListener
         InfoDialog.showInfoModal(L.m("WollMux-Info"), message);
       }
     }
-    
+
     WollMuxEventHandler.getInstance().unregisterListener(this);
   }
 

@@ -203,7 +203,7 @@ public class OneGroupLineView extends LineView
    * in Broadcasts, die signalisieren, dass das entsprechende Model selektiert wurde.
    * Je nachdem ob CTRL gedrückt ist oder nicht wird die Selektion erweitert oder
    * ersetzt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyMouseListener extends MouseAdapter

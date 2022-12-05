@@ -35,17 +35,17 @@ import de.muenchen.allg.afid.UNO;
 /**
  * Implementiert den DatenContainer für den rdf-Modus. Dieser Modus verhält sich
  * wie folgt:
- * 
+ *
  * Beim Lesen: Existiert eine Notiz mit Metadaten, so wird diese vorrangig gelesen
  * (damit sichergestellt ist, dass Dokumente, die mit alten WollMux-Versionen
  * bearbeitet wurden, auch korrekt gelesen werden). Ansonsten werden die
  * RDF-Metadaten ausgelesen. Nach dem Lesen einer Notiz wird die Notiz anschließend
  * gelöscht und ohne Änderung des Modified-Status des Dokuments in die RDF-Daten
  * übertragen (CopyOnRead).
- * 
+ *
  * Beim Schreiben: Beim Schreiben wird ausschließlich in die RDF-Metadaten
  * geschrieben.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD-D101)
  */
 public class RDFReadLegacyModeDataContainer implements
@@ -64,7 +64,7 @@ public class RDFReadLegacyModeDataContainer implements
 
   /**
    * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
-   * 
+   *
    * @throws RDFMetadataNotSupportedException
    */
   public RDFReadLegacyModeDataContainer(XTextDocument doc)
@@ -78,11 +78,11 @@ public class RDFReadLegacyModeDataContainer implements
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#getData(java.lang.String
    * )
-   * 
+   *
    * TESTED
    */
   @Override
@@ -164,11 +164,11 @@ public class RDFReadLegacyModeDataContainer implements
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#setData(java.lang.String
    * , java.lang.String)
-   * 
+   *
    * TESTED
    */
   @Override
@@ -180,9 +180,9 @@ public class RDFReadLegacyModeDataContainer implements
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.PersistentDataContainer#flush()
-   * 
+   *
    * TESTED
    */
   @Override
@@ -194,7 +194,7 @@ public class RDFReadLegacyModeDataContainer implements
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * de.muenchen.allg.itd51.wollmux.PersistentDataContainer#removeData(java.lang.
    * String)

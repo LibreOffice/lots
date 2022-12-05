@@ -73,7 +73,7 @@ public interface FormControl
    * @param bmName
    *          The name of the book mark.
    * @return The name of the book mark.
-   * 
+   *
    * @throws UnoHelperException
    *           Can't create a book mark.
    */

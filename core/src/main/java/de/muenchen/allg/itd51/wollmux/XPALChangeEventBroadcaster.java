@@ -24,9 +24,9 @@ package de.muenchen.allg.itd51.wollmux;
 
 /**
  * Support renaming of IDL interfaces.
- * 
+ *
  * {@link de.muenchen.allg.itd51.wollmux.interfaces.XPALChangeEventBroadcaster}
- * 
+ *
  * @deprecated
  */
 @Deprecated(since = "18.2.0", forRemoval = true)

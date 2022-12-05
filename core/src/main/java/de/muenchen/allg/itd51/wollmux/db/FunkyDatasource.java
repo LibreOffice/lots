@@ -40,7 +40,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * Diese Datasource verhält sich bei Suchanfragen nicht entsprechend dem normalen
  * Verhalten einer Datasource, da sie immer auf den Originaldaten sucht, jedoch
  * transformierte Datensätze zurückliefert.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
 public class FunkyDatasource extends Datasource
@@ -55,7 +55,7 @@ public class FunkyDatasource extends Datasource
 
   /**
    * Erzeugt eine neue FunkyDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser UnionDatasource
    *          bereits vollständig instanziierten Datenquellen.

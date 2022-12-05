@@ -26,7 +26,7 @@ import java.io.IOException;
 
 /**
  * Exception class for the scanner module.
- * 
+ *
  * @author Daniel Sikeler
  */
 public class ScannerException extends IOException
@@ -37,7 +37,7 @@ public class ScannerException extends IOException
 
   /**
    * Constructor for scanner exceptions.
-   * 
+   *
    * @param message
    *          Description of the error.
    */
@@ -48,7 +48,7 @@ public class ScannerException extends IOException
 
   /**
    * Constructor for scanner exceptions.
-   * 
+   *
    * @param cause
    *          The error, which preceeds this exception.
    */
@@ -59,7 +59,7 @@ public class ScannerException extends IOException
 
   /**
    * Constructor for scanner exceptions.
-   * 
+   *
    * @param message
    *          Description of the error.
    * @param cause

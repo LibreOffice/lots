@@ -52,7 +52,7 @@ public class RAMDatasource extends Datasource
   /**
    * Erzeugt eine neue RAMDatasource mit Namen name. data und schema werden direkt als Referenz
    * eingebunden, nicht kopiert.
-   * 
+   *
    * @param name
    *          der Name der Datenquelle
    * @param schema
@@ -110,7 +110,7 @@ public class RAMDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
@@ -143,7 +143,7 @@ public class RAMDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getName()
    */
   @Override

@@ -91,9 +91,9 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     {
       functionName = func.functionName;
     }
-    
+
     createGui();
-    
+
     setTitle(L.m("Dateiname vorgeben"));
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     pack();
@@ -122,7 +122,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     {
       tt.setContent(TextComponentTags.CAT_VALUE_SYNTAX, func.cat);
     }
-    
+
     Collection<IdModel> idsCol = idManager.getAllIDs(FormularMax4kController.NAMESPACE_FORMCONTROLMODEL);
     List<String> ids = new ArrayList<>();
     for (IdModel id : idsCol)
@@ -207,9 +207,9 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     buttons.add(ok);
     vbox.add(Box.createVerticalGlue());
     vbox.add(buttons, BorderLayout.SOUTH);
-    add(vbox);    
+    add(vbox);
   }
-  
+
   private static class AdjustorFunction
   {
     final ConfigThingy cat;
@@ -254,7 +254,7 @@ public class FilenameGeneratorFunctionDialog extends JDialog
     }
     return true;
   }
-  
+
   private static ConfigThingy createFilenameGeneratorFunctionConf(
       TextComponentTags tt, JComboBox<String> adjustFuncCombo)
   {

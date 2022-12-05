@@ -129,7 +129,7 @@ public class TextDocumentController
 
   /**
    * New controller.
-   * 
+   *
    * @param model
    *          The model.
    * @param globalFunctions
@@ -280,7 +280,7 @@ public class TextDocumentController
 
   /**
    * Get the form description. Form adaptations are applied.
-   * 
+   *
    * @return The form description.
    */
   public synchronized ConfigThingy getFormDescription()
@@ -562,7 +562,7 @@ public class TextDocumentController
 
   /**
    * Create a mail merge form field for a text field.
-   * 
+   *
    * @param tf
    *          The text field.
    * @throws UnoHelperException
@@ -586,7 +586,7 @@ public class TextDocumentController
 
   /**
    * Create a form field for a text field.
-   * 
+   *
    * @param tf
    *          The text field.
    * @throws UnoHelperException
@@ -635,7 +635,7 @@ public class TextDocumentController
    * Get the initial values of all form fields. The value is defined if all form fields with the
    * same ID are unchanged or all fields without TRAFO have the same value. If there's no form field
    * the value from the stored data in the FormDescription is used.
-   * 
+   *
    * Use this method only after {@link TextDocumentModel#setIDToFormFields(Map)} has been called.
    *
    * @return A mapping from field ID to initial value.
@@ -1026,7 +1026,7 @@ public class TextDocumentController
 
   /**
    * Save the meta data of a mail merge in the persistent data.
-   * 
+   *
    * @param conf
    *          A valid mail merge configuration or an empty configuration. An empty configuration
    *          deletes the persistent data.
@@ -1053,9 +1053,9 @@ public class TextDocumentController
    * In preview mode sets the form values form the persistent data in the document. In non-preview
    * mode the field names are set. TRAFOs use the function library. The modified-state of the
    * document is set.
-   * 
+   *
    * In a simulation the document isn't modified.
-   * 
+   *
    * @param fieldId
    *          The id of the field to update.
    */
@@ -1083,7 +1083,7 @@ public class TextDocumentController
 
   /**
    * Show or hide all visibility elements within a group.
-   * 
+   *
    * @param groupId
    *          The id of the group.
    * @param visible
@@ -1148,7 +1148,7 @@ public class TextDocumentController
 
   /**
    * Set a visibility state but handle manually deleted content.
-   * 
+   *
    * @param visibleElement
    *          The visibility element to change.
    * @param setVisible
@@ -1424,7 +1424,7 @@ public class TextDocumentController
    *
    * If simulation has beeen startet with {@link #startSimulation()}, the persistend data isn't
    * modified.
-   * 
+   *
    * @param fieldId
    *          The id of the field.
    * @param value
@@ -1512,7 +1512,7 @@ public class TextDocumentController
    * the method returned.
    *
    * If nothing is selected, nothing is done.
-   * 
+   *
    * @param trafoConf
    *          The TRAFO of the for form field. Can be null. A TRAFO definition is in the form
    *          "Name(FUNCTION_DEFINITION)", where Name is a valid identifier and FUNCTION_DEFINITION
@@ -1641,7 +1641,7 @@ public class TextDocumentController
    *          valid identifier and FUNCTION_DEFINITION a valid parameter for
    *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}.
    *          The first child of FUNCTION_DEFINITION has to be a valid function name like "AND".
-   * 
+   *
    * @return The name of the function or null if the definition is erroneous.
    */
   private String addLocalAutofunction(ConfigThingy funcConf)
@@ -1945,5 +1945,5 @@ public class TextDocumentController
   {
     new OnSetVisibleState(this, groupId, visible, null).emit();
   }
-  
+
 }

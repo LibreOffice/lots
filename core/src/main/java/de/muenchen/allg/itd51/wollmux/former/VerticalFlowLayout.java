@@ -32,7 +32,7 @@ import java.awt.LayoutManager;
 /**
  * Similar to {@link FlowLayout} but using vertical arrangement. The height of the
  * layout will be the maximum height of the container.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD D.10)
  */
 public class VerticalFlowLayout implements LayoutManager
@@ -114,13 +114,13 @@ public class VerticalFlowLayout implements LayoutManager
        * JPotentiallyOverlongPopupMenuButton) the individual components don't always
        * start reporting their correct preferred sizes until after the last element's
        * preferred size has been accessed.
-       * 
+       *
        * With JPotentially... this can be observed when the button is moved to the
        * bottom of the screen so that the menu will no longer fit under the button
        * because it's just a little too wide. In that case, rather than switch to
        * making the menu vertically large, the menu extends beyond the screen border
        * to the right. The following statement fixes this.
-       * 
+       *
        * So just leave it in. It doesn't hurt.
        */
       if (parent.getComponentCount() > 0)

@@ -33,7 +33,7 @@ public class OnCloseTextDocument extends WollMuxEvent
 
   /**
    * Create this event.
-   * 
+   *
    * @param documentController
    *          The document to close.
    */

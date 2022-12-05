@@ -57,7 +57,7 @@ public class UnionDatasource extends Datasource
 
   /**
    * Erzeugt eine neue UnionDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser UnionDatasource
    *          bereits vollständig instanziierten Datenquellen.

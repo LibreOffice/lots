@@ -344,7 +344,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
     {
       remove(iter.next());
     }
-    
+
     return renamedFunctions;
   }
 

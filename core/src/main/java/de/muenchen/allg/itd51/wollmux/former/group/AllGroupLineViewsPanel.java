@@ -65,7 +65,7 @@ public class AllGroupLineViewsPanel implements View
 {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(AllGroupLineViewsPanel.class);
-  
+
   /**
    * Rand um Buttons (in Pixeln).
    */
@@ -209,7 +209,7 @@ public class AllGroupLineViewsPanel implements View
     scrollPane.validate();
   }
 
- 
+
   /**
    * Löscht alle ausgewählten Elemente.
    */
@@ -280,7 +280,7 @@ public class AllGroupLineViewsPanel implements View
     {
       removeItem((OneGroupLineView) view);
     }
-    
+
     /**
      * Entfernt view aus diesem Container (falls dort vorhanden).
      */

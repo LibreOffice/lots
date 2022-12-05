@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 /**
  * Wird geworfen, wenn versucht wird, eine ID zu verwenden, die dem System nicht bekannt ist.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class UnknownIDException extends Exception

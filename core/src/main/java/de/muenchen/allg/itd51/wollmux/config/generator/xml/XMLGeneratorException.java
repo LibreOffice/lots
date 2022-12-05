@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.config.generator.xml;
 
 /**
  * A Exception produced by the generator.
- * 
+ *
  * @author Daniel Sikeler
  */
 public class XMLGeneratorException extends Exception
@@ -35,7 +35,7 @@ public class XMLGeneratorException extends Exception
 
   /**
    * Constructor for generator exceptions.
-   * 
+   *
    * @param message
    *          The description of the exception.
    */
@@ -46,7 +46,7 @@ public class XMLGeneratorException extends Exception
 
   /**
    * Constructor for generator exceptions.
-   * 
+   *
    * @param message
    *          Description of the exception.
    * @param cause

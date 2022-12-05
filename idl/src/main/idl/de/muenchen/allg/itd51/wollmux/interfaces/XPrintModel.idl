@@ -20,28 +20,28 @@
  * limitations under the Licence.
  * #L%
  */
-#ifndef __de_muenchen_allg_itd51_wollmux_XPrintModel_idl__ 
-#define __de_muenchen_allg_itd51_wollmux_XPrintModel_idl__ 
- 
-#include <com/sun/star/uno/XInterface.idl> 
-#include <com/sun/star/lang/NoSuchMethodException.idl> 
-#include <com/sun/star/text/XTextDocument.idl> 
+#ifndef __de_muenchen_allg_itd51_wollmux_XPrintModel_idl__
+#define __de_muenchen_allg_itd51_wollmux_XPrintModel_idl__
+
+#include <com/sun/star/uno/XInterface.idl>
+#include <com/sun/star/lang/NoSuchMethodException.idl>
+#include <com/sun/star/text/XTextDocument.idl>
 #include <com/sun/star/beans/XPropertySet.idl>
 #include <com/sun/star/beans/PropertyValue.idl>
-  
+
 module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
- 
-/** 
+
+/**
   Jeder Druckfunktion wird beim Aufruf ein XPrintModel-Objekt übergeben, über
-  das der Zugriff auf das Dokument und Komfortmethoden für den Druck zur 
-  Verfuegung stehen. Verschiedene Druckfunktionen können dabei zu einer 
+  das der Zugriff auf das Dokument und Komfortmethoden für den Druck zur
+  Verfuegung stehen. Verschiedene Druckfunktionen können dabei zu einer
   Aufrufkette zusammengefügt sein.
  */
 interface XPrintModel
 {
 
     /**
-     * Jede Druckfunktion kann über dieses Interface beliebige funktionsspezifische 
+     * Jede Druckfunktion kann über dieses Interface beliebige funktionsspezifische
      * Properties im XPrintModel setzen, die von anderen Druckfunktionen in der
      * Aufrufkette des XPrintModels ausgewertet werden können. Abweichend vom
      * Standardverhalten von XPropertySet akzeptiert diese Implementierung alle
@@ -51,7 +51,7 @@ interface XPrintModel
 	interface com::sun::star::beans::XPropertySet;
 	
 	/**
-	 * Diese Komfortmethode verhält sich wie 
+	 * Diese Komfortmethode verhält sich wie
 	 * c.s.s.b.XPropertySet.getPropertyValue([in] string PropertyName), mit
 	 * dem Unterschied, dass sie keine Exceptions schmeißt und im Fehlerfall
 	 * defaultValue zurück liefert.
@@ -64,7 +64,7 @@ interface XPrintModel
      * richtigen Position in die Aufrufkette der zu bearbeitenden Druckfunktionen
      * ein; Wird die Druckfunktion aufgerufen, so bekommt sie genau ein Argument
      * (dieses XPrintModel) übergeben.
-     * 
+     *
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
      *          werden soll.
@@ -102,7 +102,7 @@ interface XPrintModel
      * zugehörigen Dokument um ein Dokument ohne Formularbeschreibung, so werden
      * nur alle insertFormValue-Kommandos dieses Dokuments angepasst, die die ID
      * id besitzen.
-     * 
+     *
      * @param id
      *          Die ID des Formularfeldes, dessen Wert verändert werden soll.
      *          Ist die FormGUI aktiv, so werden auch alle von id abhängigen
@@ -115,17 +115,17 @@ interface XPrintModel
     /**
      * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
      * z.B. die "Speichern?" Abfrage vor dem Schließen erscheint.
-     * 
+     *
      * Manche Druckfunktionen verändern u.U. den Inhalt von Dokumenten. Trotzdem
      * kann es sein, dass eine solche Druckfunktion den "Modifiziert"-Status des
      * Dokuments nicht verändern darf um ungewünschte "Speichern?"-Abfragen zu
      * verhindern. In diesem Fall kann der "Modifiziert"-Status mit folgendem
      * Konstrukt innerhalb der Druckfunktion unverändert gehalten werden:
-     * 
+     *
      * boolean modified = pmod.getDocumentModified();
-     * 
+     *
      * ...die eigentliche Druckfunktion, die das Dokument verändert...
-     * 
+     *
      * pmod.setDocumentModified(modified);
      */
     boolean getDocumentModified();
@@ -143,12 +143,12 @@ interface XPrintModel
      * manuell hinzugefügt wurden.
      */
     void collectNonWollMuxFormFields();
-    
+
     /**
      * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die
      * Anzeige der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke
-     * eines bestimmten Blocktyps blockName (z.B. "AllVersions"). 
-     * 
+     * eines bestimmten Blocktyps blockName (z.B. "AllVersions").
+     *
      * @param blockName
      *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
      *          Folgende Blocknamen werden derzeit unterstützt: "AllVersions",
@@ -160,7 +160,7 @@ interface XPrintModel
      *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur,
      *          wenn zu einem betroffenen Druckblock auch eine Hintergrundfarbe
      *          angegeben ist).
-     * 
+     *
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
 	void setPrintBlocksProps([in] string blockname, [in] boolean visible, [in] boolean showHighlightColor);
@@ -170,7 +170,7 @@ interface XPrintModel
      * neuen Status visible und wirkt sich damit auf alle Dokumentkommandos
      * WM(CMD'setGroups'...) bzw. alle Textbereiche aus, die über eine
      * GROUPS-Zuordnung die Sichtbarkeitsgruppe groupId verknüpft haben.
-     * 
+     *
      * @param groupID
      *          Name der Sichtbarkeitsgruppe, deren Sichtbarkeitsstatus
      *          verändert werden soll
@@ -207,7 +207,7 @@ interface XPrintModel
      * aktuellen Gesamtstatus wird von der Fortschrittsanzeige übernommen. Damit muss
      * jede Druckfunktion hier auch nur die Anzahl Versionen setzen, die von der
      * Druckfunktion selbst erzeugt werden.
-     * 
+     *
      * @param maxValue
      *          den maximalen Wert der von dieser Druckfunktion zu druckenden
      *          Ausfertigungen.
@@ -219,7 +219,7 @@ interface XPrintModel
      * value (=Anzahl bis jetzt tatsächlich gedruckter Versionen) der aktuellen
      * Druckfunktion übermittelt. Der Wert value muss im Bereich 0 <= value <=
      * maxValue (siehe setPrintProgressMaxValue(maxValue)) liegen.
-     * 
+     *
      * @param value
      *          Die Anzahl der bis jetzt tatsächlich von dieser Druckfunktion
      *          gedruckten Versionen. Es muss gelten: 0 <= value <= maxValue
@@ -230,7 +230,7 @@ interface XPrintModel
      * Diese Methode erlaubt das Setzen einer Nachricht, die in der
      * Fortschrittsleiste angezeigt wird. Der Fortschrittsbalken wird dabei
      * nicht zurückgesetzt, es wird lediglich der Textinhalt überschrieben.
-     * 
+     *
      * @param value
      *          Der anzuzeigende String.
      */
@@ -238,5 +238,5 @@ interface XPrintModel
 };
 
 }; }; }; }; }; };
- 
+
 #endif

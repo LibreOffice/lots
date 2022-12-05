@@ -26,7 +26,7 @@ import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 
 /**
  * Repräsentiert einen vom Benutzer konfigurierten Parameter für eine Funktion.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class ParamValue

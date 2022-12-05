@@ -58,9 +58,9 @@ public class ColumnTransformer
   /**
    * Initialisiert einen ColumnTransformer mit allen Abschnitten, die
    * trafoConf,query(nodeName, 1) zurückliefert.
-   * 
+   *
    *    * trafoConf hat folgenden Aufbau
-   * 
+   *
    * <pre>
    *   BeliebigerBezeichner(
    *      Name1( WollMux-Funktion1 )
@@ -68,7 +68,7 @@ public class ColumnTransformer
    *      ...
    *   )
    * </pre>
-   * 
+   *
    * NameX ist jeweils der Name, der zum Zugriff auf den entsprechenden Funktionswert
    * an {@link #get(String, Dataset)} übergeben werden muss. Innerhalb der
    * WollMux-Funktionen verwendete Aufrufe der VALUE-Grundfunktion beziehen sich
@@ -107,7 +107,7 @@ public class ColumnTransformer
       schema.add(trafo.getKey());
     }
   }
-  
+
   /**
    * Liefert die Menge aller Namen von Pseudospalten, die definiert sind, d,h, alle
    * Namen für die {@link #get(String, Dataset)} einen berechneten Wert und nicht
@@ -123,7 +123,7 @@ public class ColumnTransformer
    * aus dem {@link Dataset} ds berechnet wird. Falls keine Umsetzungsregel für
    * columnName existiert, wird direkt der Wert der Spalte columnName von ds
    * zurückgeliefert (null falls nicht belegt).
-   * 
+   *
    * @throws ColumnNotFoundException
    *           falls weder eine Umsetzungsregel für columnName definiert ist noch ds
    *           eine Spalte mit diesem Namen besitzt.

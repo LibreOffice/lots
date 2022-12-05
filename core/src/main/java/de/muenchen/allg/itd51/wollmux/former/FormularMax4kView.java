@@ -82,7 +82,7 @@ public class FormularMax4kView extends JFrame
 
     Common.setLookAndFeelOnce();
     createGUI();
-    
+
     setLocationRelativeTo(null);
   }
 
@@ -322,7 +322,7 @@ public class FormularMax4kView extends JFrame
     menu.add(menuItem);
     return menu;
   }
-  
+
   public void close()
   {
     /*
@@ -335,7 +335,7 @@ public class FormularMax4kView extends JFrame
     removeWindowListener(windowCloseListener);
     getContentPane().removeAll();
     setJMenuBar(null);
-    
+
     dispose();
   }
 
@@ -363,7 +363,7 @@ public class FormularMax4kView extends JFrame
   /**
    * Sorgt dafür, dass die Ausdehnung von frame nicht die maximal erlaubten
    * Fensterdimensionen überschreitet.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void fixFrameSize(JFrame frame)
@@ -394,14 +394,14 @@ public class FormularMax4kView extends JFrame
       frameBounds.height = maxWindowBounds.height;
     frame.setBounds(frameBounds);
   }
-  
+
   /**
    * Wertet den Konfigurationsabschnitt FormularMax4000/Standardelemente aus und fügt
    * submenu entsprechende Einträge hinzu.
-   * 
+   *
    * @return false, falls der Konfigurationsabschnitt nicht existiert.
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
+   *
    *         TESTED
    */
   private boolean createStandardelementeMenuNew(JMenu submenu)
@@ -472,18 +472,18 @@ public class FormularMax4kView extends JFrame
    * Fügt submenu die alten im WollMux gespeicherten Standardelemente-Einträge hinzu.
    * Sollte nur verwendet werden, wenn der entsprechende Konfigurationsabschnitt in
    * der wollmux,conf fehlt.
-   * 
+   *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   private void createStandardelementeMenuOld(JMenu submenu)
   {
     JMenuItem menuItem;
     menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
-    
+
     final URL EMPFAENGER_TAB_URL =
       this.getClass().getClassLoader().getResource(
             "default_buttons/empfaengerauswahl_controls.conf");
-    
+
     menuItem.addActionListener(e -> {
       controller.insertStandardTab(null, EMPFAENGER_TAB_URL);
       setFrameSize();
@@ -491,7 +491,7 @@ public class FormularMax4kView extends JFrame
     submenu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
-    
+
     final URL STANDARD_BUTTONS_MIDDLE_URL =
         this.getClass().getClassLoader().getResource("default_buttons/standardbuttons_mitte.conf");
 
@@ -502,23 +502,23 @@ public class FormularMax4kView extends JFrame
     submenu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, PDF, Drucken"));
-    
+
     final URL STANDARD_BUTTONS_LAST_URL =
       this.getClass().getClassLoader().getResource(
             "default_buttons/standardbuttons_letztes.conf");
-    
+
     menuItem.addActionListener(e -> {
       controller.insertStandardButtons(null, STANDARD_BUTTONS_LAST_URL, leftPanel.getButtonInsertionIndex());
       setFrameSize();
     });
     submenu.add(menuItem);
-    
+
     menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Als E-Mail versenden, Drucken"));
-    
+
     final URL STANDARD_BUTTONS_EMAIL =
     	      this.getClass().getClassLoader().getResource(
             "default_buttons/standardbuttons_email.conf");
-    	    
+    	
     menuItem.addActionListener(e -> {
       controller.insertStandardButtons(null, STANDARD_BUTTONS_EMAIL, leftPanel.getButtonInsertionIndex());
       setFrameSize();

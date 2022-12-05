@@ -101,7 +101,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
   /**
    * Creates a new form panel.
-   * 
+   *
    * @param context
    *          the sidebar context.
    * @param parentWindow
@@ -131,7 +131,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     this.formSidebarController = formSidebarController;
 
     parentWindow.addWindowListener(new AbstractWindowListener()
-    {      
+    {
       @Override
       public void windowResized(WindowEvent e)
       {
@@ -240,7 +240,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
   /**
    * Add controls from {@link TabConfig} description to {link Layout}.
-   * 
+   *
    * @param tab
    *          {@link TabConfig} Tab from {@link FormModel}.
    * @param tabPageControlContainer
@@ -314,7 +314,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
   /**
    * Inserts Buttons from form descriptions 'Buttons'-Section to given layout.
-   * 
+   *
    * @param tab
    *          Tab from {@link FormModel}
    * @param tabPageControlContainer
@@ -354,7 +354,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
   /**
    * Creates LO's UI controls by type of {@link UIElementConfig}. And puts them in a Layout.
-   * 
+   *
    * @param control
    *          control model.
    * @param page
@@ -538,7 +538,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
   /**
    * Set Text Property on {@link XControlModel}.
-   * 
+   *
    * @param id
    *          {@link XControlModel} Model from {@link XControl}
    * @param text
@@ -547,21 +547,21 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   public void setText(String id, String text)
   {
     Pair<XControl, XControl> controlPair = controls.get(id);
-    
+
     if (controlPair == null)
     {
       LOGGER.debug("controlPair ist null. id: {}", id);
       return;
     }
-    
+
     XControl control = controls.get(id).getRight();
-    
+
     if (control == null)
     {
       LOGGER.debug("control ist null. id: {}", id);
       return;
     }
-    
+
     if (UNO.XTextComponent(control) != null)
     {
       UNO.XTextComponent(control).setText(text);
@@ -701,7 +701,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   {
     XControl control = controls.get(id).getRight();
     XControl controlleft = controls.get(id).getLeft();
-    
+
     if (control == null)
     {
       LOGGER.debug("control ist null. id: {}", id);

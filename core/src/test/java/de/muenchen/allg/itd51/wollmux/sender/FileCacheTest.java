@@ -95,7 +95,7 @@ public class FileCacheTest
       assertEquals(conf.stringRepresentation(), newConf.stringRepresentation());
     }
   }
-  
+
   @Test
   public void testCreateConfigNoSelected() throws Exception
   {

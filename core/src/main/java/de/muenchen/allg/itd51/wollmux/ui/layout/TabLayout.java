@@ -75,7 +75,7 @@ public class TabLayout implements Layout
 
   /**
    * Vertical layout without margin.
-   * 
+   *
    * @param tabPageContainer
    *          The container of the tab pages. Is also an {@link XWindow}. All tab pages have to be
    *          added to the container before this layout should be created. Otherwise it may not work

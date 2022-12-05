@@ -65,7 +65,7 @@ import de.muenchen.allg.util.UnoProperty;
 /**
  * The main service of WollMux. It treats all Dispatches starting with "wollmux:" and is the
  * interface to other UNO components.
- * 
+ *
  * The service is instantiated several times. Every time a dispatch with "wollmux:" occurs a new
  * instance is created.
  */

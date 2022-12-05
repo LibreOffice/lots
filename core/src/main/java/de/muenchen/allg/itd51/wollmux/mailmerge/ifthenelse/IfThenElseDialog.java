@@ -115,7 +115,7 @@ public class IfThenElseDialog
   public IfThenElseDialog(List<String> fieldNames, IfThenElseModel model)
   {
     this.model = model;
-    
+
     try
     {
       XWindowPeer peer = UNO.XWindowPeer(UNO.desktop.getCurrentFrame().getContainerWindow());
@@ -236,7 +236,7 @@ public class IfThenElseDialog
   private void addNewConditionButton()
   {
     XButton newConditionBtn = UNO.XButton(controlContainer.getControl("newConditionBtn"));
-    AbstractActionListener newConditionBtnActionListener = e -> 
+    AbstractActionListener newConditionBtnActionListener = e ->
     {
       XMutableTreeNode node = getSelectedNode();
       XMutableTreeNode parent = UNO.XMutableTreeNode(node.getParent());
@@ -277,13 +277,13 @@ public class IfThenElseDialog
         selectedNode.setDisplayValue(data.toString());
       }
     };
-    
+
     XComboBox cbSerienbrieffeld = UNO.XComboBox(controlContainer.getControl(CONTROL_CBSERIENBRIEFFELD));
     cbSerienbrieffeld.addItemListener(cbSerienbrieffeldItemListener);
     fieldNames
         .forEach(fieldName -> cbSerienbrieffeld.addItem(fieldName, (short) (cbSerienbrieffeld.getItemCount() + 1)));
   }
-  
+
   private void addContentDropdown(List<String> fieldNames)
   {
     AbstractItemListener cbSerienbrieffeld2ItemListener = event -> {

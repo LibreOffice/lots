@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
- * 
+ *
  * Delivers Predicates for Datasets.
  *
  */
@@ -42,7 +42,7 @@ public class DatasetPredicate
   /**
    * Matches a List of {@link QueryPart} against a given {@link Dataset}. Invalid * character in
    * QueryPart's search string are filtered out.
-   * 
+   *
    * @param query
    *          List of {@link QueryPart}
    * @return Predicate for a dataset.

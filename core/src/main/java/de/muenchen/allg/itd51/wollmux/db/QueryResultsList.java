@@ -37,9 +37,9 @@ public class QueryResultsList implements QueryResults
    * Die Liste der Datasets.
    */
   private List<? extends Dataset> data;
-  
+
   /**
-   * Erzeugt eine neue QueryResultsList, die die Elemente enthält 
+   * Erzeugt eine neue QueryResultsList, die die Elemente enthält
    * die iter zurückliefert (müssen Datasets sein!).
    * @param count dient der Optimierung und sollte die Anzahl der Elemente
    * enthalten, die der Iterator zurückliefern wird. Ist dies nicht bekannt,
@@ -62,11 +62,11 @@ public class QueryResultsList implements QueryResults
   {
     data = datasets;
   }
-  
+
   @Override
   public int size() { return data.size();}
-  
-  @SuppressWarnings("unchecked") 
+
+  @SuppressWarnings("unchecked")
   // Die Typsicherheit kann hier nicht gefährdet sein, da laut
   // http://docs.oracle.com/javase/tutorial/java/generics/wildcardGuidelines.htm vor
   // allem gesichert sein muss, dass kein falscher Typ zur List<? extends Dataset>
@@ -75,9 +75,9 @@ public class QueryResultsList implements QueryResults
   @Override
   public Iterator<Dataset> iterator()
   {
-    return (Iterator<Dataset>) data.iterator(); 
+    return (Iterator<Dataset>) data.iterator();
   }
-  
+
   @Override
   public boolean isEmpty() { return data.isEmpty(); }
 }

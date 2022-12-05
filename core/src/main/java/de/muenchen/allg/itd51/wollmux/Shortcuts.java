@@ -149,7 +149,7 @@ public class Shortcuts
    * Wenn es Tastenkuerzel mit einer UNO-url beginnent mit "wollmux:" gibt, werden
    * diese gelöscht. Workaround wegen nicht funktionierendem
    * xAcceleratorConfiguration.removeCommandFromAllKeyEvents(). OOo Issue #72558
-   * 
+   *
    * @param xAcceleratorConfiguration
    *          AcceleratorConfiguration (muß danach noch mit store() persistent
    *          gemacht werden)
@@ -257,7 +257,7 @@ public class Shortcuts
 
   /**
    * Gibt die Konstante com.sun.star.awt.Key für die entsprechende Taste zurück
-   * 
+   *
    * @param shortcut
    *          Taste
    * @return Key der entsprechenden Taste
@@ -389,7 +389,7 @@ public class Shortcuts
   /**
    * Gibt die Konstante com.sun.star.awt.KeyModifier für die entsprechende Taste
    * zurück
-   * 
+   *
    * @param shortcut
    *          Taste
    * @return KeyModifier der entsprechenden Taste

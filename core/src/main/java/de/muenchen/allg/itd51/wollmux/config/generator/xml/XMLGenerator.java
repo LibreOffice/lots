@@ -55,9 +55,9 @@ import de.muenchen.allg.itd51.wollmux.config.scanner.TokenType;
 
 /**
  * Generates a XML-document from a configuration.
- * 
+ *
  * Use case:
- * 
+ *
  * <pre>
  * <code>
  * //create a new Generator with a stream. If you use a stream includes may not be resolved correctly.
@@ -72,7 +72,7 @@ import de.muenchen.allg.itd51.wollmux.config.scanner.TokenType;
  * new ConfGenerator(doc).generateConf(new FileOutputStream("someOtherFile"), 0);
  * </code>
  * </pre>
- * 
+ *
  * @author Daniel Sikeler
  */
 public class XMLGenerator
@@ -97,7 +97,7 @@ public class XMLGenerator
 
   /**
    * Create a new generator.
-   * 
+   *
    * @param url
    *          The URL of the configuration file.
    * @throws XMLGeneratorException
@@ -126,7 +126,7 @@ public class XMLGenerator
    * Create a new generator. If there are inclue-instructions in the
    * configuration, they may not be resolved correctly. Use XMLGenerator(URL)
    * instead.
-   * 
+   *
    * @param stream
    *          The stream of the configuration file.
    * @throws XMLGeneratorException
@@ -154,7 +154,7 @@ public class XMLGenerator
   /**
    * Create the XML-document and return it. If it was already created, it is
    * deleted and created from scratch.
-   * 
+   *
    * @return The document.
    * @throws XMLGeneratorException
    *           Couldn't create the document.
@@ -189,7 +189,7 @@ public class XMLGenerator
 
   /**
    * Create the XML-document.
-   * 
+   *
    * @return The XML-document.
    * @throws ScannerException
    *           Thrown if the scanner has problems or unknown tokens are
@@ -238,7 +238,7 @@ public class XMLGenerator
 
   /**
    * Process a {@link TokenType}.{@link KEY}.
-   * 
+   *
    * @param token
    *          The token.
    */
@@ -252,7 +252,7 @@ public class XMLGenerator
 
   /**
    * Process a {@link TokenType}.{@link VALUE}.
-   * 
+   *
    * @param token
    *          The token.
    */
@@ -269,7 +269,7 @@ public class XMLGenerator
 
   /**
    * Process a {@link TokenType}.{@link OPENING_BRACKET}.
-   * 
+   *
    * @param token
    *          The token.
    */
@@ -282,7 +282,7 @@ public class XMLGenerator
 
   /**
    * Process a {@link TokenType}.{@link CLOSING_BRACKET}.
-   * 
+   *
    * @param token
    *          The token.
    */
@@ -297,7 +297,7 @@ public class XMLGenerator
 
   /**
    * Process a {@link TokenType}.{@link COMMENT}.
-   * 
+   *
    * @param token
    *          The token.
    */
@@ -310,7 +310,7 @@ public class XMLGenerator
 
   /**
    * Process a {@link TokenType}.{@link NEW_FILE}.
-   * 
+   *
    * @param token
    *          The token.
    * @throws MalformedURLException
@@ -334,8 +334,8 @@ public class XMLGenerator
     if(windowsOS)
     {
       if(path.toFile().exists())
-      {        
-        element.setAttribute(FILE_NAME, new URL(context, "/" + newFile).getPath()); 
+      {
+        element.setAttribute(FILE_NAME, new URL(context, "/" + newFile).getPath());
       }
       else
       {
@@ -344,7 +344,7 @@ public class XMLGenerator
     }
     else
     {
-      element.setAttribute(FILE_NAME, new URL(context, newFile).getPath());  
+      element.setAttribute(FILE_NAME, new URL(context, newFile).getPath());
     }
     config.appendChild(element);
     files.push(element);
@@ -352,7 +352,7 @@ public class XMLGenerator
 
   /**
    * Print a document to some output stream.
-   * 
+   *
    * @param doc
    *          The document to print.
    * @param out

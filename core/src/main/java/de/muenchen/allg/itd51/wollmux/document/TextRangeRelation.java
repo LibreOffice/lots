@@ -33,7 +33,7 @@ import de.muenchen.allg.afid.UNO;
  * zueinander angeordnet sein können; Diese Klasse übersetzt die möglichen
  * Beziehungen in eine verständliche Form und repräsentiert damit die Beziehung
  * zwischen zwei Textbereichen.
- * 
+ *
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
 public class TextRangeRelation

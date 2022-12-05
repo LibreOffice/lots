@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.db;
 
 /**
  * Wird geworfen beim Versuch, auf eine Spalte zuzugreifen, die nicht existiert.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class ColumnNotFoundException extends Exception

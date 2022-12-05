@@ -62,7 +62,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * - Der Alias würde verschwinden, wenn die Quelle SOURCE1 später einmal um eine Spalte mit dem
  * entsprechenden Namen erweitert wird. Definitionen, die den Alias verwendet haben verwenden ab da
  * stillschweigend die Spalte aus SOURCE1, was schwierig zu findende Fehler nach sich ziehen kann.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AttachDatasource extends Datasource
@@ -92,7 +92,7 @@ public class AttachDatasource extends Datasource
 
   /**
    * Erzeugt eine neue AttachDatasource.
-   * 
+   *
    * @param nameToDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser AttachDatasource bereits
    *          vollständig instanziierten Datenquellen.
@@ -179,7 +179,7 @@ public class AttachDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
   @Override
@@ -190,7 +190,7 @@ public class AttachDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util. Collection, long)
    */
   @Override
@@ -207,7 +207,7 @@ public class AttachDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
@@ -247,7 +247,7 @@ public class AttachDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getName()
    */
   @Override

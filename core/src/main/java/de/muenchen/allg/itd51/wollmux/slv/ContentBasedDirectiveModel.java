@@ -551,7 +551,7 @@ public class ContentBasedDirectiveModel
 
   /**
    * Collect all book marks with print block commands.
-   * 
+   *
    * @return Stream of all book marks with print block commands.
    */
   public Stream<Bookmark> getAllPrintBlocks()
@@ -572,7 +572,7 @@ public class ContentBasedDirectiveModel
 
   /**
    * Get patterns for all print block commands.
-   * 
+   *
    * @return List of command patterns.
    */
   private static List<Pattern> getBookmarkPatterns()

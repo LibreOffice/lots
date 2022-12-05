@@ -46,7 +46,7 @@ public class BindFunctionTest
     FunctionLibrary funcLib = new FunctionLibrary();
     DialogLibrary dialogLib = new DialogLibrary();
     HashMap<Object, Object> context = new HashMap<>();
-    
+
     Function f = new BindFunction(new ValueFunction("test"), new ConfigThingy("", "SET(\"test\" \"value\")"), funcLib,
         dialogLib, context);
     assertEquals(0, f.parameters().length);

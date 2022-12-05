@@ -28,7 +28,7 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 /**
  * Interface zum Zugriff auf eine FunctionSelection.
- * 
+ *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface FunctionSelectionAccess
@@ -73,7 +73,7 @@ public interface FunctionSelectionAccess
   /**
    * Nimmt eine Abbildung von Parameternamen (Strings) auf Parameterwerte ({@link ParamValue}s)
    * und übernimmt diese direkt als Referenz.
-   * 
+   *
    * @param mapNameToParamValue
    *          wird direkt als Referenz übernommen.
    */
@@ -90,7 +90,7 @@ public interface FunctionSelectionAccess
 
   /**
    * Setzt den Wert für Parameter paramName auf paramValue.
-   * 
+   *
    * @param paramValue
    *          wird direkt als Referenz in die internen Datenstrukturen übernommen,
    *          darf also vom Aufrufer nachher nicht mehr geändert werden.
@@ -100,7 +100,7 @@ public interface FunctionSelectionAccess
   /**
    * Ändert den Namen der Funktion auf functionName und die Liste der Namen ihrer Parameter auf
    * paramNames.
-   * 
+   *
    * @param functionName
    *          Neuer Name der Funktion.
    * @param paramNames
@@ -111,7 +111,7 @@ public interface FunctionSelectionAccess
   /**
    * Liefert eine Kopie der gespeicherten vom Benutzer manuell eingegebenen Funktion.
    * Ist keine gesetzt, so wird ein ConfigThingy ohne Kinder zurückgeliefert.
-   * 
+   *
    * @return ein Objekt, das der Aufrufer ändern darf.
    */
   public ConfigThingy getExpertFunction();
@@ -119,7 +119,7 @@ public interface FunctionSelectionAccess
   /**
    * Setzt die zugehörige Funktionsdefinition auf conf. conf muss einen beliebigen Wurzelknoten
    * haben, wie z.B. "PLAUSI", "AUTOFILL" o.ä. der noch keine Grundfunktion ist.
-   * 
+   *
    * @param funConf
    *          wird kopiert, nicht als Referenz übernommen.
    */

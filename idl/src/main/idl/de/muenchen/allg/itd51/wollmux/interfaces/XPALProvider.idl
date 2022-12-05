@@ -20,14 +20,14 @@
  * limitations under the Licence.
  * #L%
  */
-#ifndef __de_muenchen_allg_itd51_wollmux_XPALProvider_idl__ 
-#define __de_muenchen_allg_itd51_wollmux_XPALProvider_idl__ 
- 
-#include <com/sun/star/uno/XInterface.idl> 
-  
+#ifndef __de_muenchen_allg_itd51_wollmux_XPALProvider_idl__
+#define __de_muenchen_allg_itd51_wollmux_XPALProvider_idl__
+
+#include <com/sun/star/uno/XInterface.idl>
+
 module de {  module muenchen {  module allg { module itd51 { module wollmux { module interfaces {
- 
-/** 
+
+/**
   Das Interface XPALProvider stellt Methoden zum Auslesen der aktuellen
   Persönliche Absenderliste (PAL) zur Verfügung.
  */
@@ -59,7 +59,7 @@ interface XPALProvider
       Ist die PAL leer oder noch kein Absender ausgewählt, so liefert die Methode
       den Leerstring "" zurück. Dieser Sonderfall sollte natürlich entsprechend
       durch die aufrufende Methode behandelt werden.
-      
+
       @return den aktuell aus der PAL ausgewählten Absender als String. Ist kein
               Absender ausgewählt wird der Leerstring "" zurückgegeben.
      */
@@ -67,5 +67,5 @@ interface XPALProvider
 };
 
 }; }; }; }; }; };
- 
+
 #endif

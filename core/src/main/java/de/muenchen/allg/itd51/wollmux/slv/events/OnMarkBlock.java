@@ -149,7 +149,7 @@ public class OnMarkBlock extends WollMuxEvent
    * The list of bookmarks is deleted if it contains only bookmarks with the same command. Otherwise
    * the bookmarks arent'deleted and the user is request to confirm, that he wants to create a
    * possibly conflicting command.
-   * 
+   *
    * @param range
    *          The range of the new bookmark.
    * @param highlightColor
@@ -187,7 +187,7 @@ public class OnMarkBlock extends WollMuxEvent
   /**
    * The list of bookmarks is deleted. If the list of bookmarks contains bookmarks with other
    * commands a new command is created.
-   * 
+   *
    * @param The
    *          range of the new bookmark.
    * @param highlightColor
@@ -219,7 +219,7 @@ public class OnMarkBlock extends WollMuxEvent
 
   /**
    * Delete a bookmark and reset the background color.
-   * 
+   *
    * @param bookmark
    *          The bookmark to delete.
    */

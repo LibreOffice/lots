@@ -166,7 +166,7 @@ public class ConfigTokenMaker extends AbstractTokenMaker
               if (RSyntaxUtilities.isLetterOrDigit(c) || c == '_')
               {
                 break;
-              } 
+              }
               else
               {
                 tokenType = Token.ERROR_IDENTIFIER;

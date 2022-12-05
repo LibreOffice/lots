@@ -59,7 +59,7 @@ public class WollMuxDocument implements XWollMuxDocument
   private HashMap<String, String> mapDbSpalteToValue;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WollMuxDocument.class);
-  
+
   /**
    * A new WollMux document.
    *
@@ -130,7 +130,7 @@ public class WollMuxDocument implements XWollMuxDocument
       dci.scanInsertFormValueCommands();
 
       documentController.getFormModel();
-      
+
       Map<String,String> formFieldValues = documentController.getFormFieldValues();
 
       for (Map.Entry<String, String> entry: formFieldValues.entrySet())
@@ -140,7 +140,7 @@ public class WollMuxDocument implements XWollMuxDocument
     } catch (WMCommandsFailedException | FormModelException e)
     {
       LOGGER.error("", e);
-    }    
+    }
   }
 
   @Override

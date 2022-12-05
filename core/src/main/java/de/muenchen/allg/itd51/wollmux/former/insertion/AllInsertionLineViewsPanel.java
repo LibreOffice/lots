@@ -235,7 +235,7 @@ public class AllInsertionLineViewsPanel implements View
     {
       removeItem((OneInsertionLineView) view);
     }
-    
+
     /**
      * Entfernt view aus diesem Container (falls dort vorhanden).
      */
@@ -307,7 +307,7 @@ public class AllInsertionLineViewsPanel implements View
         }
       }
     }
-    
+
     /**
      * Hebt die Selektion aller Elemente auf.
      */
