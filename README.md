@@ -98,3 +98,13 @@ There are also some configuration changes for LibreOffice necessary. Go to **Too
 * `-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n`
 
 If suspend is set to `y`, LibreOffice waits until an external process connects before initializing.
+
+## Translations
+
+To get the latest Translation template file, run this command:
+
+```bash
+xgettext --default-domain=wollmux --output=i18n/wollmux.pot --language=java --from-code=UTF-8 --keyword --keyword=m $(find . -name "*.java")
+```
+
+This creates the `i18n/wollmux.pot` template file.
