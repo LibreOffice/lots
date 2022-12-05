@@ -454,13 +454,13 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:41
 msgid "Create error information"
-msgstr ""
+msgstr "Fehlerinfos erstellen"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:47
 #, java-format
 msgid ""
 "The WollMux error information has been successfully written to file \"{0}\"."
-msgstr ""
+msgstr "Die WollMux-Fehlerinformationen wurden erfolgreich in die Datei \"{0}\" geschrieben."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:52
 msgid ""
