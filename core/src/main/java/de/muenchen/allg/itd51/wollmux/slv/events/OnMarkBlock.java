@@ -169,7 +169,7 @@ public class OnMarkBlock extends WollMuxEvent
     {
       bookmarks.forEach(this::deleteBookmark);
       InfoDialog.showInfoModal(L.m("Block is no longer marked"),
-          L.m("The selected block already contained a marker 'Block %1'. "
+          L.m("The selected block already contained a marker 'Block {0}'. "
               + "The existing marker has been removed.", markChange));
     } else
     {
@@ -207,7 +207,7 @@ public class OnMarkBlock extends WollMuxEvent
     if (allMatch)
     {
       InfoDialog.showInfoModal(L.m("Block is no longer marked"), L.m(
-          "The selected block already contained a marker 'Block %1'. "
+          "The selected block already contained a marker 'Block {0}'. "
               + "The existing marker has been removed.",
           markChange));
     } else
@@ -267,7 +267,7 @@ public class OnMarkBlock extends WollMuxEvent
         LOGGER.error("Couldn't set background color.");
       }
     }
-    InfoDialog.showInfoModal(L.m("Block was marked"), L.m("The selected block %1", markChange));
+    InfoDialog.showInfoModal(L.m("Block was marked"), L.m("The selected block {0}", markChange));
   }
 
   @Override

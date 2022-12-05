@@ -22,6 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.util;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -78,64 +79,41 @@ public class L
   /**
    * If a translation is available for original, it will be returned,
    * otherwise the original string.
-   * All occurrences of "%1" will be replaced by insertion1.
+   * All occurrences of "{0}" will be replaced by insertion1.
    */
   public static String m(String original, Object insertion1)
   {
-    // do not use replaceAll because it interprets \ and $ specially
-    return replace(m(original), "%1", "" + insertion1);
+    return MessageFormat.format(m(original), new Object[] { insertion1 });
   }
 
   /**
    * If a translation is available for original, it will be returned,
    * otherwise the original string.
-   * All occurrences of "%1" will be replaced by insertion1 and of "%2" by insertion2.
+   * All occurrences of "{0}" will be replaced by insertion1 and of "{1}" by insertion2.
    */
   public static String m(String original, Object insertion1, Object insertion2)
   {
-    // do not use replaceAll because it interprets \ and $ specially
-    return replace(m(original, insertion1), "%2", "" + insertion2);
+    return MessageFormat.format(m(original), new Object[] { insertion1, insertion2 });
   }
 
   public static String m(String original, Object insertion1, Object insertion2,
       Object insertion3)
   {
-    // do not use replaceAll because it interprets \ and $ specially
-    return replace(m(original, insertion1, insertion2), "%3", "" + insertion3);
+    return MessageFormat.format(m(original), new Object[] { insertion1, insertion2,
+        insertion3});
   }
 
   public static String m(String original, Object insertion1, Object insertion2,
       Object insertion3, Object insertion4)
   {
-    // do not use replaceAll because it interprets \ and $ specially
-    return replace(m(original, insertion1, insertion2, insertion3), "%4", ""
-      + insertion4);
+    return MessageFormat.format(m(original), new Object[] { insertion1, insertion2,
+        insertion3, insertion4});
   }
 
   /* Supports plural forms */
   public static String mn(String singular, String plural, int count)
   {
     return GettextResource.ngettext(catalog, singular, plural, count);
-  }
-
-  /**
-   * Replaces in where all occurrences of what by withWhat and returns the result returned.
-   */
-  private static String replace(String where, String what, String withWhat)
-  {
-    int i = where.indexOf(what);
-    if (i < 0 || what.length() == 0) {
-      return where;
-    }
-
-    StringBuilder buffy = new StringBuilder(where);
-    while (i >= 0)
-    {
-      buffy.replace(i, i + what.length(), withWhat);
-      i = buffy.indexOf(what, i + withWhat.length());
-    }
-
-    return buffy.toString();
   }
 
   /**

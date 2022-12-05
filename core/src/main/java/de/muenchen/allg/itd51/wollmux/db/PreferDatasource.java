@@ -79,19 +79,19 @@ public class PreferDatasource extends Datasource
       ConfigThingy sourceDesc, URL context)
   {
     name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
-    source1Name = parseConfig(sourceDesc, "SOURCE", () -> L.m("SOURCE of data source %1 is missing", name));
-    source2Name = parseConfig(sourceDesc, "OVER", () -> L.m("OVER-Specification of data source %1 is missing", name));
+    source1Name = parseConfig(sourceDesc, "SOURCE", () -> L.m("SOURCE of data source {0} is missing", name));
+    source2Name = parseConfig(sourceDesc, "OVER", () -> L.m("OVER-Specification of data source {0} is missing", name));
 
     source1 = nameToDatasource.get(source1Name);
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
-      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"%1\": "
-          + "Referenced datasource \"%2\" missing or defined incorrectly", name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name));
 
     if (source2 == null)
-      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"%1\": "
-          + "Referenced datasource \"%2\" missing or defined incorrectly", name, source2Name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source2Name));
 
     /*
      * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
@@ -128,9 +128,9 @@ public class PreferDatasource extends Datasource
         }
       }
       throw new ConfigurationErrorException(L.m(
-        "In datasource \"%1\" columns: %2 are missing", source1Name, buf2)
+        "In datasource \"{0}\" columns: {1} are missing", source1Name, buf2)
         + L.m(" and ")
-        + L.m("in datasource \"%1\" columns: %2 are missing", source2Name, buf1));
+        + L.m("in datasource \"{0}\" columns: {1} are missing", source2Name, buf1));
     }
 
     schema = new ArrayList<>(schema1);

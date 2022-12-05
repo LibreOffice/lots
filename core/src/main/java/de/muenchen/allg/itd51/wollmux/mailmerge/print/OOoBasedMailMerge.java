@@ -821,7 +821,7 @@ public class OOoBasedMailMerge implements AutoCloseable
           }
 
           pmod.setPrintProgressValue((short) ++count);
-          LOGGER.trace(L.m("OOo-MailMerge: processing record %1 (%2 ms)", count,
+          LOGGER.trace(L.m("OOo-MailMerge: processing record {0} ({1} ms)", count,
               (System.currentTimeMillis() - start)));
           if (count >= maxDatasets && type == MailMergeType.PRINTER)
           {

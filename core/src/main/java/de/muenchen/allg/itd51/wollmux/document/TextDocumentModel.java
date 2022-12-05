@@ -458,7 +458,7 @@ public class TextDocumentModel
       return;
     }
 
-    final String errmsg = L.m("Error while reading the 'Druckfunktionen' section '%1':", data);
+    final String errmsg = L.m("Error while reading the 'Druckfunktionen' section '{0}':", data);
 
     ConfigThingy conf = new ConfigThingy("");
     try
@@ -662,7 +662,7 @@ public class TextDocumentModel
     @Override
     public String getMessage()
     {
-      return L.m("With overrideFrag it is not possible to define replacement chains, the fragment '%1' "
+      return L.m("With overrideFrag it is not possible to define replacement chains, the fragment '{0}' "
           + "however appears in another overrideFrag command.", fragId);
     }
 

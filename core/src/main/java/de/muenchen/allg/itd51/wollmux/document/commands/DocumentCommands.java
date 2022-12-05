@@ -665,7 +665,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     {
       LOGGER.error(
         L.m(
-          "The textarea with the name '%1' contains an incorrect GROUPS attribute.",
+          "The textarea with the name '{0}' contains an incorrect GROUPS attribute.",
           name), e);
     }
 
@@ -775,7 +775,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
       }
 
       throw new DocumentCommand.InvalidCommandException(L.m(
-        "Unknown command '%1'", cmd));
+        "Unknown command '{0}'", cmd));
     }
     catch (DocumentCommand.InvalidCommandException e)
     {

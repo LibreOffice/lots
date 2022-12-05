@@ -163,7 +163,7 @@ public class InsertionModel4InputUser extends InsertionModel
     }
     catch (Exception x)
     {
-      throw new NoSuchElementException(L.m("FieldMaster \"%1\" does not exist.",
+      throw new NoSuchElementException(L.m("FieldMaster \"{0}\" does not exist.",
         fieldMasterName));
     }
   }

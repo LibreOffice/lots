@@ -44,7 +44,7 @@ public class OnDumpInfo extends WollMuxEvent
     if (name != null)
     {
       InfoDialog.showInfoModal(title, L.m(
-          "The error information of WollMux has been successfully written to file  '%1'.",
+          "The error information of WollMux has been successfully written to file  '{0}'.",
           name));
     } else
     {

@@ -213,9 +213,9 @@ public class OOoDatasource extends Datasource
   {
     datasourceName = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
     oooDatasourceName = parseConfig(sourceDesc, "SOURCE", () -> L.m(
-        "Data source \"%1\": Name of OOo-data source has to be specified as SOURCE", datasourceName));
+        "Data source \"{0}\": Name of OOo-data source has to be specified as SOURCE", datasourceName));
     oooTableName = parseConfig(sourceDesc, "TABLE",
-        () -> L.m("Data source \"%1\": Name of table/view within the "
+        () -> L.m("Data source \"{0}\": Name of table/view within the "
             + "OOo-Data Source has to be specified as TABLE", datasourceName));
 
     userName = sourceDesc.getString("USER", "");
@@ -235,7 +235,7 @@ public class OOoDatasource extends Datasource
       sqlSyntax = SQL_SYNTAX_PERVASIVESQL;
     else
       throw new ConfigurationErrorException(L.m(
-        "SQL_SYNTAX \"%1\" not supported", sqlSyntaxStr));
+        "SQL_SYNTAX \"{0}\" not supported", sqlSyntaxStr));
 
     schema = new ArrayList<>();
     ConfigThingy schemaConf = sourceDesc.query("Schema");
@@ -253,11 +253,11 @@ public class OOoDatasource extends Datasource
       }
       if (schema.isEmpty())
         throw new ConfigurationErrorException(L.m(
-          "Data source \"%1\": Schema-section is empty", datasourceName));
+          "Data source \"{0}\": Schema-section is empty", datasourceName));
       ConfigThingy schluesselConf = sourceDesc.query("Schluessel");
       if (schluesselConf.count() == 0)
         throw new ConfigurationErrorException(L.m(
-          "Data source \"%1\": Key-section is missing", datasourceName));
+          "Data source \"{0}\": Key-section is missing", datasourceName));
 
       if (noKey)
       {
@@ -295,7 +295,7 @@ public class OOoDatasource extends Datasource
         catch (Exception x)
         {
           LOGGER.debug(L.m(
-            "Table \"%1\" not found. Try to use it as query name.",
+            "Table \"{0}\" not found. Try to use it as query name.",
               oooTableName), x);
           try
           {
@@ -306,8 +306,8 @@ public class OOoDatasource extends Datasource
           }
           catch (Exception y)
           {
-            throw new ConfigurationErrorException(L.m("Table or query \"%1\" does not exist in data source "
-                + "\"%2\" or error when determining the columns ", oooTableName, oooDatasourceName), y);
+            throw new ConfigurationErrorException(L.m("Table or query \"{0}\" does not exist in data source "
+                + "\"{1}\" or error when determining the columns ", oooTableName, oooDatasourceName), y);
           }
         }
         Set<String> colNames = columns.keySet();
@@ -315,7 +315,7 @@ public class OOoDatasource extends Datasource
 
         if (schema.isEmpty())
           throw new ConfigurationErrorException(L.m(
-            "Data source \"%1\": Table \"%2\" has no columns", datasourceName,
+            "Data source \"{0}\": Table \"{1}\" has no columns", datasourceName,
             oooTableName));
 
         if (noKey)
@@ -345,7 +345,7 @@ public class OOoDatasource extends Datasource
             }
             catch (Exception x)
             {
-              throw new ConfigurationErrorException(L.m("Data source \"%1\": No key columns defined."
+              throw new ConfigurationErrorException(L.m("Data source \"{0}\": No key columns defined."
                   + "  Automatic determination of key column not possible.", datasourceName), x);
             }
             // Test ob kein Schluessel vorhanden siehe weiter unten
@@ -359,13 +359,13 @@ public class OOoDatasource extends Datasource
       catch (Exception x)
       {
         throw new ConfigurationErrorException(L.m(
-          "Schema of OOo-datasource \"%1\" could not be read.",
+          "Schema of OOo-datasource \"{0}\" could not be read.",
           oooDatasourceName), x);
       }
 
       if (keyColumns.length == 0)
         throw new ConfigurationErrorException(L.m(
-          "Data source \"%1\": No Key column defined", datasourceName));
+          "Data source \"{0}\": No Key column defined", datasourceName));
     }
   }
 
@@ -387,10 +387,10 @@ public class OOoDatasource extends Datasource
       String column = iter.next().toString();
       if (!schema.contains(column))
         throw new ConfigurationErrorException(L.m(
-          "Key column \"%1\" not defined in schema", column));
+          "Key column \"{0}\" not defined in schema", column));
       if (columns.contains(column))
         throw new ConfigurationErrorException(L.m(
-          "Key column \"%1\" was specified twice in the key section",
+          "Key column \"{0}\" was specified twice in the key section",
           column));
 
       columns.add(column);
@@ -719,7 +719,7 @@ public class OOoDatasource extends Datasource
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName))
-        throw new ColumnNotFoundException(L.m("Column %1 does not exist!",
+        throw new ColumnNotFoundException(L.m("Column {0} does not exist!",
           columnName));
       return data.get(columnName);
     }

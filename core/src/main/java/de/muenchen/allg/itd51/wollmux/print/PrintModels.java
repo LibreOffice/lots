@@ -109,7 +109,7 @@ public class PrintModels
       UnoProperty.setProperty(pmod, STAGE, stage);
     } catch (UnoHelperException e)
     {
-      LOGGER.error(L.m("Cannot set stage to '%1'", stage), e);
+      LOGGER.error(L.m("Cannot set stage to '{0}'", stage), e);
     }
   }
 }

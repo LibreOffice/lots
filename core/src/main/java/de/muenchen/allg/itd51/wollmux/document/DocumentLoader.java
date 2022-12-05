@@ -97,7 +97,7 @@ public class DocumentLoader
     } catch (IOException e)
     {
       LOGGER.error(
-        L.m("The template with the URL '%1' could not be opened.", url),
+        L.m("The template with the URL '{0}' could not be opened.", url),
         e);
     }
 

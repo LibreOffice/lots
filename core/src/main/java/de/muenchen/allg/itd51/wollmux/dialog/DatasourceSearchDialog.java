@@ -238,11 +238,11 @@ public class DatasourceSearchDialog implements Dialog
     }
     if (!"dbSelect".equals(type))
       throw new ConfigurationErrorException(
-          L.m("Unsupported TYPE \"%1\" in function dialog \"%2\"", type, myConf.getName()));
+          L.m("Unsupported TYPE \"{0}\" in function dialog \"{1}\"", type, myConf.getName()));
 
     final ConfigThingy fensterDesc = myConf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Key 'Fenster' is missing in %1", myConf.getName()));
+      throw new ConfigurationErrorException(L.m("Key 'Fenster' is missing in {0}", myConf.getName()));
 
     try
     {
@@ -798,7 +798,7 @@ public class DatasourceSearchDialog implements Dialog
         } catch (ColumnNotFoundException e)
         {
           LOGGER.error(
-              L.m("Error while resolving the placeholder \"${%1}\": Column for the dataset is not defined", spalte));
+              L.m("Error while resolving the placeholder \"${{0}}\": Column for the dataset is not defined", spalte));
         }
         display = display.substring(0, m.start()) + wert + display.substring(m.end());
         m = p.matcher(display);

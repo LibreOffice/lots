@@ -64,7 +64,7 @@ public class ThingyDatasource extends RAMDatasource
       throws IOException
   {
     String name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
-    String urlStr = parseConfig(sourceDesc, "URL", () -> L.m("URL of data source \"%1\" is missing", name));
+    String urlStr = parseConfig(sourceDesc, "URL", () -> L.m("URL of data source \"{0}\" is missing", name));
 
     try
     {
@@ -82,13 +82,13 @@ public class ThingyDatasource extends RAMDatasource
         if (!SPALTENNAME.matcher(spalte).matches())
         {
           throw new ConfigurationErrorException(L.m(
-              "Error in definition of data source %1: Column \"%2\" does not comply with the syntax of identifiers",
+              "Error in definition of data source {0}: Column \"{1}\" does not comply with the syntax of identifiers",
               name, spalte));
         }
         if (schema.contains(spalte))
         {
           throw new ConfigurationErrorException(L.m(
-              "Error in Defition of data source %1: Column \"%2\" was defined twice in schema",
+              "Error in Defition of data source {0}: Column \"{1}\" was defined twice in schema",
               name, spalte));
         }
         schema.add(spalte);
@@ -104,20 +104,20 @@ public class ThingyDatasource extends RAMDatasource
     catch (NodeNotFoundException x)
     {
       throw new ConfigurationErrorException(L.m(
-          "Error in Conf-File of data source %1: Section 'Schema' is missing",
+          "Error in Conf-File of data source {0}: Section 'Schema' is missing",
           name), x);
     }
     catch (MalformedURLException e)
     {
       throw new ConfigurationErrorException(
-          L.m("Error in Conf-file of data source %1: Error in URL \"%2\": ",
+          L.m("Error in Conf-file of data source {0}: Error in URL \"{1}\": ",
               name, urlStr),
           e);
     }
     catch (SyntaxErrorException e)
     {
       throw new ConfigurationErrorException(
-          L.m("Error in Conf-file of data source %1: ", name), e);
+          L.m("Error in Conf-file of data source {0}: ", name), e);
     }
   }
 
@@ -136,12 +136,12 @@ public class ThingyDatasource extends RAMDatasource
     }
     catch (ConfigurationErrorException x)
     {
-      throw new ConfigurationErrorException(L.m("Error in Conf-file of data source %1: ", name), x);
+      throw new ConfigurationErrorException(L.m("Error in Conf-file of data source {0}: ", name), x);
     }
     catch (NodeNotFoundException x)
     {
       throw new ConfigurationErrorException(
-          L.m("Error in Conf-file of data source %1: Section 'Daten' is missing", name), x);
+          L.m("Error in Conf-file of data source {0}: Section 'Daten' is missing", name), x);
     }
 
     return data;
@@ -162,14 +162,14 @@ public class ThingyDatasource extends RAMDatasource
         if (!schema.contains(spalte))
         {
           throw new ConfigurationErrorException(L.m(
-              "Error in Conf-file of data source %1: Key column \"%2\" is not defined in schema",
+              "Error in Conf-file of data source {0}: Key column \"{1}\" is not defined in schema",
               name, spalte));
         }
       }
     } catch (NodeNotFoundException x)
     {
       throw new ConfigurationErrorException(
-          L.m("Missing or incorrect key(...) specification for data source %1", name), x);
+          L.m("Missing or incorrect key(...) specification for data source {0}", name), x);
     }
     return keyCols.toArray(new String[keyCols.size()]);
   }
@@ -194,7 +194,7 @@ public class ThingyDatasource extends RAMDatasource
       String[] keyCols)
   { // TESTED
     if (!dsDesc.getName().isEmpty())
-      throw new ConfigurationErrorException(L.m("\"%1\" awaits a preceding open bracket", dsDesc.getName()));
+      throw new ConfigurationErrorException(L.m("\"{0}\" awaits a preceding open bracket", dsDesc.getName()));
     if (dsDesc.count() == 0)
     {
       return new MyDataset(schema, keyCols);
@@ -230,7 +230,7 @@ public class ThingyDatasource extends RAMDatasource
       if (!schema.contains(spalte))
       {
         throw new ConfigurationErrorException(
-            L.m("Data set has column \"%1\" which is not defined within the schema", spalte));
+            L.m("Data set has column \"{0}\" which is not defined within the schema", spalte));
       }
       String wert = spaltenDaten.toString();
       data.put(spalte, wert);
@@ -317,7 +317,7 @@ public class ThingyDatasource extends RAMDatasource
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName))
-        throw new ColumnNotFoundException(L.m("Column %1 does not exist!", columnName));
+        throw new ColumnNotFoundException(L.m("Column {0} does not exist!", columnName));
       return data.get(columnName);
     }
 

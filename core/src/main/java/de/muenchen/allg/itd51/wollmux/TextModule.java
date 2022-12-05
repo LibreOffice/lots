@@ -298,7 +298,7 @@ public class TextModule
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("FRAG_ID specification is missing in %1",
+        LOGGER.error(L.m("FRAG_ID specification is missing in {0}",
           mappingConf.stringRepresentation()));
         continue;
       }

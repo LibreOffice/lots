@@ -171,7 +171,7 @@ public class IdModel
        */
       if (mapString2ID.containsKey(newID))
         throw new DuplicateIDException(L.m(
-          "Collision while trying to change \"%1\" to \"%2\"", id, newID));
+          "Collision while trying to change \"{0}\" to \"{1}\"", id, newID));
       mapString2ID.remove(id);
       id = newID;
       mapString2ID.put(id, this);

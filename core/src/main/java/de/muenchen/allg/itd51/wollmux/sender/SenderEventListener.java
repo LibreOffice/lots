@@ -80,7 +80,7 @@ public class SenderEventListener implements WollMuxEventListener
           names.append("- " + l + "\n");
         }
         String message = L.m("The following data sets could not be updated from the database:\n\n"
-            + "%1\nIf this problem persists, you might want to delete these data sets from "
+            + "{0}\nIf this problem persists, you might want to delete these data sets from "
             + "your sender list and add them again!", names);
         InfoDialog.showInfoModal(L.m("WollMux Info"), message);
       }

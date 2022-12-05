@@ -84,7 +84,7 @@ public class DialogFactory
         }
         catch (ConfigurationErrorException e)
         {
-          LOGGER.error(L.m("Error in Functiondialog %1", name), e);
+          LOGGER.error(L.m("Error in Functiondialog {0}", name), e);
         }
       }
     }

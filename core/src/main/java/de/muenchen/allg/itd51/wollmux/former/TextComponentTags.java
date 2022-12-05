@@ -187,7 +187,7 @@ public class TextComponentTags
   public ConfigThingy getContent(int syntaxType)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException(L.m("Unknown syntaxType: %1", "" + syntaxType));
+      throw new IllegalArgumentException(L.m("Unknown syntaxType: {0}", "" + syntaxType));
 
     ConfigThingy conf = new ConfigThingy("CAT");
     List<ContentElement> content = getContent();
@@ -252,7 +252,7 @@ public class TextComponentTags
   public void setContent(int syntaxType, ConfigThingy conf)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException(L.m("Unknown syntaxType: %1", "" + syntaxType));
+      throw new IllegalArgumentException(L.m("Unknown syntaxType: {0}", "" + syntaxType));
 
     if (!"CAT".equals(conf.getName()))
       throw new IllegalArgumentException(L.m("Topmost node must be \"CAT\""));

@@ -284,7 +284,7 @@ public class WollMuxSingleton
       } catch (NodeNotFoundException e)
       {
         LOGGER.error(
-            L.m("URL attribute is missing in 'DatenquellenRegistriere' section for data source '%1'",
+            L.m("URL attribute is missing in 'DatenquellenRegistriere' section for data source '{0}'",
                 name),
             e);
         continue;
@@ -311,7 +311,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Error during checking whether the data source '%1' is already registered", name), x);
+            L.m("Error during checking whether the data source '{0}' is already registered", name), x);
       }
 
       LOGGER.debug("Versuche, Datenquelle '{}' bei OOo zu registrieren für URL '{}'", name, urlStr);
@@ -324,7 +324,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Error during registration of data source '%1': Illegal URL: '%2'", name, urlStr),
+            L.m("Error during registration of data source '{0}': Illegal URL: '{1}'", name, urlStr),
             x);
         continue;
       }
@@ -338,7 +338,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(L.m(
-            "Error during registration of data source '%1'. Make sure that the URL '%2' is valid.",
+            "Error during registration of data source '{0}'. Make sure that the URL '{1}' is valid.",
             name, parsedUrl), x);
         continue;
       }
@@ -368,7 +368,7 @@ public class WollMuxSingleton
         setConfigurationValue(node, prop, v);
       } catch (Exception e)
       {
-        LOGGER.error(L.m("OOoConfiguration: Configuration '%1' could not be set:",
+        LOGGER.error(L.m("OOoConfiguration: Configuration '{0}' could not be set:",
             element.stringRepresentation()), e);
       }
     }
@@ -409,7 +409,7 @@ public class WollMuxSingleton
     }
 
     throw new IllegalArgumentException(L.m(
-        "The TYPE '%1' is invalid. Valid are 'boolean', 'integer', 'float' and 'string'.",
+        "The TYPE '{0}' is invalid. Valid are 'boolean', 'integer', 'float' and 'string'.",
         type));
   }
 

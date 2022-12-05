@@ -320,7 +320,7 @@ public class FunctionFactory
     else
     {
       throw new ConfigurationErrorException(L.m(
-        "\"%1\" is not a supported basic function. ", name)
+        "\"{0}\" is not a supported basic function. ", name)
         + outputErrorPosition(conf));
     }
   }
@@ -334,7 +334,7 @@ public class FunctionFactory
     String str = conf.stringRepresentation();
     int end = 100;
     if (str.length() < end) end = str.length();
-    return L.m("Text at error position: %1", str.substring(0, end));
+    return L.m("Text at error position: {0}", str.substring(0, end));
   }
 
   private static Function parseBIND(ConfigThingy conf, FunctionLibrary funcLib,
@@ -364,7 +364,7 @@ public class FunctionFactory
       func = funcLib.get(funcName);
       if (func == null)
         throw new ConfigurationErrorException(L.m(
-          "Function \"%1\" is used before it was even defined", funcName));
+          "Function \"{0}\" is used before it was even defined", funcName));
     }
     else // d.h. es wurde eine ganze Funktion angegeben
     {
@@ -379,7 +379,7 @@ public class FunctionFactory
   {
     if (conf.count() != 2)
       throw new ConfigurationErrorException(L.m(
-        "Function of type \"DIALOG\" requires exacly 2 parameters, not %1",
+        "Function of type \"DIALOG\" requires exacly 2 parameters, not {0}",
         conf.count()));
 
     String dialogName;
@@ -400,7 +400,7 @@ public class FunctionFactory
     Dialog dialog = dialogLib.get(dialogName);
     if (dialog == null)
       throw new ConfigurationErrorException(L.m(
-        "Dialog \"%1\" is not defined, but it is used by the DIALOG-Function",
+        "Dialog \"{0}\" is not defined, but it is used by the DIALOG-Function",
         dialogName));
 
     if (context == null)
@@ -456,7 +456,7 @@ public class FunctionFactory
   {
     if (conf.count() != 3)
       throw new ConfigurationErrorException(L.m(
-        "Function of type \"REPLACE\" requires exactly 3 parameters, not %1",
+        "Function of type \"REPLACE\" requires exactly 3 parameters, not {0}",
         conf.count()));
 
     Function strFun;
@@ -476,7 +476,7 @@ public class FunctionFactory
     }
     catch (PatternSyntaxException x)
     {
-      throw new ConfigurationErrorException(L.m("Error in regex \"%1\"", regex), x);
+      throw new ConfigurationErrorException(L.m("Error in regex \"{0}\"", regex), x);
     }
     return new ReplaceFunction(strFun, p, repFun);
   }
@@ -486,7 +486,7 @@ public class FunctionFactory
   {
     if (conf.count() != 3)
       throw new ConfigurationErrorException(L.m(
-        "Function of type \"SPLIT\" requires exactly 3 parameters, not %1",
+        "Function of type \"SPLIT\" requires exactly 3 parameters, not {0}",
         conf.count()));
 
     Function strFun;
@@ -512,7 +512,7 @@ public class FunctionFactory
     }
     if (idx < 0)
       throw new ConfigurationErrorException(L.m(
-        "Index argument of %1 must not be negative.",
+        "Index argument of {0} must not be negative.",
         conf.getName()));
 
     String regex = reFun.getResult(new Values.None());
@@ -523,7 +523,7 @@ public class FunctionFactory
     }
     catch (PatternSyntaxException x)
     {
-      throw new ConfigurationErrorException(L.m("Error in regex \"%1\"", regex), x);
+      throw new ConfigurationErrorException(L.m("Error in regex \"{0}\"", regex), x);
     }
     return new SplitFunction(strFun, p, idx);
   }
@@ -543,7 +543,7 @@ public class FunctionFactory
     catch (NodeNotFoundException x)
     {
       throw new ConfigurationErrorException(
-          L.m("Function of type \"MATCH\" requires exacly 2 parameters, not %1", conf.count()), x);
+          L.m("Function of type \"MATCH\" requires exacly 2 parameters, not {0}", conf.count()), x);
     }
 
     String regex = reFun.getResult(new Values.None());
@@ -554,7 +554,7 @@ public class FunctionFactory
     }
     catch (PatternSyntaxException x)
     {
-      throw new ConfigurationErrorException(L.m("Error in regex \"%1\"", regex), x);
+      throw new ConfigurationErrorException(L.m("Error in regex \"{0}\"", regex), x);
     }
     return new MatchFunction(strFun, p);
   }
@@ -571,7 +571,7 @@ public class FunctionFactory
     catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException(L.m(
-          "Function of type \"VALUE\" requires exacly 2 parameters, not %1",
+          "Function of type \"VALUE\" requires exacly 2 parameters, not {0}",
           conf.count()), e);
     }
 
@@ -594,14 +594,14 @@ public class FunctionFactory
         if (funConf.count() != 1)
         {
           throw new ConfigurationErrorException(L.m(
-            "BY-specification of %1 has to contain exacly one function or one string",
+            "BY-specification of {0} has to contain exacly one function or one string",
             conf.getName()));
         }
 
         if (byFun != null)
         {
           throw new ConfigurationErrorException(L.m(
-            "%1-Function may only have one BY-specification", conf.getName()));
+            "{0}-Function may only have one BY-specification", conf.getName()));
         }
 
         byFun = parseChildren(funConf, funcLib, dialogLib, context);
@@ -624,7 +624,7 @@ public class FunctionFactory
         if (num < 0)
         {
           throw new ConfigurationErrorException(L.m(
-            "MIN-specification of %1 has to be \"<NonNegativeInteger>\"",
+            "MIN-specification of {0} has to be \"<NonNegativeInteger>\"",
             conf.getName()));
         }
 
@@ -649,7 +649,7 @@ public class FunctionFactory
         if (num < 0)
         {
           throw new ConfigurationErrorException(L.m(
-            "MAX-Angabe von %1 muss \"<NichtNegativeGanzeZahl>\" sein",
+            "MAX-Angabe von {0} muss \"<NichtNegativeGanzeZahl>\" sein",
             conf.getName()));
         }
 
@@ -660,7 +660,7 @@ public class FunctionFactory
         if (dividendFun != null)
         {
           throw new ConfigurationErrorException(L.m(
-              "For %1-function more than one unqualified function was specified. "
+              "For {0}-function more than one unqualified function was specified. "
                   + "Note that the divisor must be enclosed with BY(...).",
               conf.getName()));
         }
@@ -671,7 +671,7 @@ public class FunctionFactory
     if (dividendFun == null)
     {
       throw new ConfigurationErrorException(L.m(
-        "For the %1-function exactly one unqualified function must be specified",
+        "For the {0}-function exactly one unqualified function must be specified",
         conf.getName()));
     }
 
@@ -687,7 +687,7 @@ public class FunctionFactory
       {
         throw new ConfigurationErrorException(
           L.m(
-            "%1 requires specifying MAX \"<NonNegativeInteger>\", if specified with BY divisor",
+            "{0} requires specifying MAX \"<NonNegativeInteger>\", if specified with BY divisor",
             conf.getName()));
       }
     }
@@ -695,7 +695,7 @@ public class FunctionFactory
     if (maxScale < minScale)
     {
       throw new ConfigurationErrorException(L.m(
-        "In case of %1 MIN must be smaller than or equal to MAX", conf.getName()));
+        "In case of {0} MIN must be smaller than or equal to MAX", conf.getName()));
     }
 
     return new DivideFunction(dividendFun, byFun, minScale, maxScale);
@@ -754,7 +754,7 @@ public class FunctionFactory
         catch (ConfigurationErrorException e)
         {
           LOGGER.error(L.m(
-            "Error parsing the function \"%1\" in section \"%2\"", name,
+            "Error parsing the function \"{0}\" in section \"{1}\"", name,
             section), e);
         }
       }
@@ -784,7 +784,7 @@ public class FunctionFactory
           trafos.put(name, func);
         } catch (ConfigurationErrorException e)
         {
-          LOGGER.error(L.m("Error during parsing of the column replacement function for the result column \"%1\"", name), e);
+          LOGGER.error(L.m("Error during parsing of the column replacement function for the result column \"{0}\"", name), e);
         }
       }
     }

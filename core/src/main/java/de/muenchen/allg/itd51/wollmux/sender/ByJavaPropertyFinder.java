@@ -43,7 +43,7 @@ class ByJavaPropertyFinder extends SenderFinder
       return System.getProperty(key);
     } catch (java.lang.Exception e)
     {
-      throw new SenderException(L.m("Value for JavaProperty '%1' could not be determined:", key), e);
+      throw new SenderException(L.m("Value for JavaProperty '{0}' could not be determined:", key), e);
     }
   }
 }

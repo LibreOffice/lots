@@ -264,7 +264,7 @@ public class OpenExt
   {
     if (filter == null)
       throw new ConfigurationErrorException(L.m(
-        "FILTER specification is missing for application \"%1\"", ext));
+        "FILTER specification is missing for application \"{0}\"", ext));
     this.doc = doc;
     this.url = null;
   }
@@ -305,7 +305,7 @@ public class OpenExt
       }
       catch (Exception x)
       {
-        throw new IOException(L.m("Error when storing the file: %1",
+        throw new IOException(L.m("Error when storing the file: {0}",
           x.getMessage()));
       }
     }
@@ -320,7 +320,7 @@ public class OpenExt
       File tempFile = prepareTempFile(fileName);
 
       if (!tempFile.createNewFile())
-        throw new IOException(L.m("Could not create a temporay file \"%1\"", tempFile.getPath()));
+        throw new IOException(L.m("Could not create a temporay file \"{0}\"", tempFile.getPath()));
       try (InputStream istream = url.openStream(); FileOutputStream out = new FileOutputStream(tempFile);)
       {
         byte[] buffy = new byte[4096];
@@ -351,7 +351,7 @@ public class OpenExt
     if (!tmpDir.isDirectory() || !tmpDir.canWrite())
       throw new IOException(
         L.m(
-          "Temporary directory\n\"%1\"\ndoes not exist or it cannot be written!",
+          "Temporary directory\n\"{0}\"\ndoes not exist or it cannot be written!",
           tmpDir.getPath()));
 
     File downloadDir = null;
@@ -463,7 +463,7 @@ public class OpenExt
 
         handler.handle(new Exception(
           L.m(
-            "None of the programs configured for the extension \"%1\" could be started!\n%2",
+            "None of the programs configured for the extension \"{0}\" could be started!\n{1}",
             ext, errors.toString())));
       }
 

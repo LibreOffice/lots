@@ -128,7 +128,7 @@ public class FileCache implements SenderCache
       return new ConfigThingy(cacheFile.getPath(), context, reader);
     } catch (IOException | SyntaxErrorException e)
     {
-      throw new SenderException(L.m("Cache-File %1 could not be read.", cacheFile.getPath()), e);
+      throw new SenderException(L.m("Cache-File {0} could not be read.", cacheFile.getPath()), e);
     }
   }
 

@@ -156,7 +156,7 @@ public class OnSaveAs extends WollMuxEvent
     {
       LOGGER.error("", e);
       InfoDialog.showInfoModal(L.m("Save Error"),
-          L.m("Saving the file '%1' failed!", url));
+          L.m("Saving the file '{0}' failed!", url));
     }
     return false;
   }

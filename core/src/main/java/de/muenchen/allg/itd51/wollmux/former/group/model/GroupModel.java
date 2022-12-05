@@ -171,7 +171,7 @@ public class GroupModel
   {
     if (!isLegalID(newID))
       throw new SyntaxErrorException(L.m(
-        "'%1' is not a syntactically correct ID for visibility groups", newID));
+        "'{0}' is not a syntactically correct ID for visibility groups", newID));
     id.setID(newID);
     /*
      * ID ruft MyIDChangeListener.idHasChanged() auf, was wiederum die Listener auf diesem

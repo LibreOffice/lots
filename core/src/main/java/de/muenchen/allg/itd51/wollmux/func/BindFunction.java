@@ -70,7 +70,7 @@ public class BindFunction implements Function
 
         if (mapParamNameToSetFunction.containsKey(name))
           throw new ConfigurationErrorException(
-              L.m("BIND: The parameter %1 will be bound twice with SET", name));
+              L.m("BIND: The parameter {0} will be bound twice with SET", name));
 
         mapParamNameToSetFunction.put(name, setFunc);
         setFuncParams.addAll(Arrays.asList(setFunc.parameters()));

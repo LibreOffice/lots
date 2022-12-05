@@ -116,7 +116,7 @@ public class ExternalFunction
 
         if (method == null)
           throw new ConfigurationErrorException(L.m(
-            "Class \"%1\" contains no PUBLIC method called \"%2", classStr,
+            "Class \"{0}\" contains no PUBLIC method called \"{1}", classStr,
             methodStr));
       }
       else
@@ -127,7 +127,7 @@ public class ExternalFunction
     catch (ClassNotFoundException | ScriptFrameworkErrorException e)
     {
       throw new ConfigurationErrorException(
-        L.m("Script \"%1\" not available", url), e);
+        L.m("Script \"{0}\" not available", url), e);
     }
 
     ConfigThingy paramsConf = conf.query("PARAMS");

@@ -43,7 +43,7 @@ class ByOOoUserProfileFinder extends SenderFinder
       return UnoConfiguration.getConfiguration("/org.openoffice.UserProfile/Data", key).toString();
     } catch (Exception e)
     {
-      throw new SenderException(L.m("Value for the key '%1' of OOoUserProfil could not be determined:", key), e);
+      throw new SenderException(L.m("Value for the key '{0}' of OOoUserProfil could not be determined:", key), e);
     }
   }
 }

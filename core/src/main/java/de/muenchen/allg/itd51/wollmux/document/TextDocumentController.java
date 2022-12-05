@@ -791,7 +791,7 @@ public class TextDocumentController
         transformed = func.getResult(args);
       } else
       {
-        transformed = L.m("<ERROR: TRAFO '%1' not defined>", trafoName);
+        transformed = L.m("<ERROR: TRAFO '{0}' not defined>", trafoName);
         LOGGER.error(L.m("TRAFO '{}' is not defined.", trafoName));
       }
     }
@@ -820,8 +820,8 @@ public class TextDocumentController
       return func.getResult(args);
     } else
     {
-      LOGGER.error(L.m("ERROR: TRAFO '%1' not defined.", trafoName));
-      return L.m("<ERROR: TRAFO '%1' is not defined>", trafoName);
+      LOGGER.error(L.m("ERROR: TRAFO '{0}' not defined.", trafoName));
+      return L.m("<ERROR: TRAFO '{0}' is not defined>", trafoName);
     }
   }
 

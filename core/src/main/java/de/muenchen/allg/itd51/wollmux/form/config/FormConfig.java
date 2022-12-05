@@ -94,7 +94,7 @@ public class FormConfig
       }
     } catch (NodeNotFoundException e)
     {
-      throw new FormModelException(L.m("Key 'Fenster' is missing in %1", conf.getName()),
+      throw new FormModelException(L.m("Key 'Fenster' is missing in {0}", conf.getName()),
           e);
     }
 

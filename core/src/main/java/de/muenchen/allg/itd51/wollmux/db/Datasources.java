@@ -113,7 +113,7 @@ public class Datasources
         }
       } catch (Exception x)
       {
-        LOGGER.error(L.m("Error during initialization of data source \"%1\" (Type \"%2\"):", name, type), x);
+        LOGGER.error(L.m("Error during initialization of data source \"{0}\" (Type \"{1}\"):", name, type), x);
       }
 
       if (ds == null)

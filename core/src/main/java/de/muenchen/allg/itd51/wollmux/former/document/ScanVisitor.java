@@ -303,7 +303,7 @@ public class ScanVisitor implements DocumentTreeVisitor
     catch (Exception x)
     {
       LOGGER.error(
-        L.m("A faulty bookmark was generated: \"%1\"", bookmarkName), x);
+        L.m("A faulty bookmark was generated: \"{0}\"", bookmarkName), x);
     }
 
     return model;

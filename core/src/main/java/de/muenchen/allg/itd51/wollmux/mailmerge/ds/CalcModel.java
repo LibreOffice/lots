@@ -354,7 +354,7 @@ public class CalcModel implements DatasourceModel
 
       } catch (Exception x)
       {
-        LOGGER.error(L.m("Cannot add column \"%1\"", fieldId), x);
+        LOGGER.error(L.m("Cannot add column \"{0}\"", fieldId), x);
       }
     }
   }

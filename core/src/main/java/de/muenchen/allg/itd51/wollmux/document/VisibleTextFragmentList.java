@@ -127,7 +127,7 @@ public class VisibleTextFragmentList
     }
     if (count == MAXCOUNT)
       throw new EndlessLoopException(L.m(
-        "Infinite loop after replacing the variable in URL '%1'.",
+        "Infinite loop after replacing the variable in URL '{0}'.",
         node.toString()));
     return string;
   }
@@ -176,7 +176,7 @@ public class VisibleTextFragmentList
         }
         catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("FRAG_ID specification is missing in %1",
+          LOGGER.error(L.m("FRAG_ID specification is missing in {0}",
             mappingConf.stringRepresentation()), e);
           continue;
         }
@@ -207,7 +207,7 @@ public class VisibleTextFragmentList
             {
               LOGGER.error(
                 L.m(
-                  "The URL for text fragment '%1' with the FRAG_ID '%2' is incorrect.",
+                  "The URL for text fragment '{0}' with the FRAG_ID '{1}' is incorrect.",
                   mappingConf.stringRepresentation(), fragId), e);
             }
           }

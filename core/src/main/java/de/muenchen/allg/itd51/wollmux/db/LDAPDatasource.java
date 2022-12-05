@@ -220,11 +220,11 @@ public class LDAPDatasource extends Datasource
         if (!SPALTENNAME.matcher(spalte).matches())
         {
           throw new ConfigurationErrorException(errorMessage()
-              + L.m("Column \"%1\" does not match the syntax of an identifier", spalte));
+              + L.m("Column \"{0}\" does not match the syntax of an identifier", spalte));
         }
 
         String path = parseConfig(spalteDesc, "PATH",
-            () -> L.m("Path specification is missing for column %1", spalte));
+            () -> L.m("Path specification is missing for column {0}", spalte));
         int relativePath;
         String attributeName;
         String columnObjectClass = null;
@@ -236,7 +236,7 @@ public class LDAPDatasource extends Datasource
         if (splitted.length != 2)
         {
           throw new ConfigurationErrorException(
-              errorMessage() + L.m("Syntaxerror in path specification of %1", spalte));
+              errorMessage() + L.m("Syntaxerror in path specification of {0}", spalte));
         }
 
         try
@@ -245,13 +245,13 @@ public class LDAPDatasource extends Datasource
         } catch (NumberFormatException e)
         {
           throw new ConfigurationErrorException(
-              errorMessage() + L.m("Syntaxerror in specification of the relative path of %1", spalte));
+              errorMessage() + L.m("Syntaxerror in specification of the relative path of {0}", spalte));
         }
 
         attributeName = splitted[1];
         if (!ATTRIBUTE_RE.matcher(attributeName).matches())
           throw new ConfigurationErrorException(
-              L.m("Illegal attribute identifier: \"%1\"", attributeName));
+              L.m("Illegal attribute identifier: \"{0}\"", attributeName));
 
         columnObjectClass = spalteDesc.getString("OBJECT_CLASS");
         lineSeparator = spalteDesc.getString("LINE_SEPARATOR");
@@ -303,7 +303,7 @@ public class LDAPDatasource extends Datasource
       // ist Schluesselattribut vorhanden?
       if (currentKeyLDAPAttribute == null)
         throw new ConfigurationErrorException(L.m(
-            "Column \"%1\" was not defined in the schema and therefore it cannot be used as a key column.",
+            "Column \"{0}\" was not defined in the schema and therefore it cannot be used as a key column.",
             currentName));
 
       if (currentKeyLDAPAttribute.relativePath != 0)
@@ -1469,7 +1469,7 @@ public class LDAPDatasource extends Datasource
 
   private String errorMessage()
   {
-    return L.m("Error in data source definition of \"%1\": ", datasourceName);
+    return L.m("Error in data source definition of \"{0}\": ", datasourceName);
   }
 
   private class LDAPDataset implements Dataset
@@ -1490,7 +1490,7 @@ public class LDAPDatasource extends Datasource
     {
       if (!schema.contains(columnName))
       {
-        throw new ColumnNotFoundException(L.m("Column \"%1\" is not defined in schema", columnName));
+        throw new ColumnNotFoundException(L.m("Column \"{0}\" is not defined in schema", columnName));
       }
 
       return relation.get(columnName);

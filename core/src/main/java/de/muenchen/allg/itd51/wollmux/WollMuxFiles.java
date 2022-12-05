@@ -634,10 +634,10 @@ public class WollMuxFiles
       }
       if (!found)
         out.write(
-            L.m("File '%1' could not be found.\n", jConfPath + "/javasettings_*.xml"));
+            L.m("File '{0}' could not be found.\n", jConfPath + "/javasettings_*.xml"));
     } catch (java.lang.Exception e)
     {
-      out.write(L.m("JVM-Settings can not be determined: %1\n", "" + e));
+      out.write(L.m("JVM-Settings can not be determined: {0}\n", "" + e));
     }
   }
 
@@ -725,7 +725,7 @@ public class WollMuxFiles
     } catch (java.lang.Exception e)
     {
       LOGGER.error("", e);
-      return L.m("Error while extracting the OOo configuration with the node path '%1'", nodePath);
+      return L.m("Error while extracting the OOo configuration with the node path '{0}'", nodePath);
     }
   }
 

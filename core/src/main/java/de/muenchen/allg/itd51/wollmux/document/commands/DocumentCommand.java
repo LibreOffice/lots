@@ -1013,7 +1013,7 @@ public abstract class DocumentCommand
             styles.add(s.toLowerCase());
           } else
           {
-            throw new InvalidCommandException(L.m("STYLE '%1' is unknown.", s));
+            throw new InvalidCommandException(L.m("STYLE '{0}' is unknown.", s));
           }
         }
       } catch (NodeNotFoundException e)
@@ -1157,7 +1157,7 @@ public abstract class DocumentCommand
         } else
         {
           throw new InvalidCommandException(
-              L.m("Unknown AUTOSEP-Type \"%1\". Expect \"left\", \"right\" or \"both\".", as.toString()));
+              L.m("Unknown AUTOSEP-Type \"{0}\". Expect \"left\", \"right\" or \"both\".", as.toString()));
         }
         currentSep = sep;
       }

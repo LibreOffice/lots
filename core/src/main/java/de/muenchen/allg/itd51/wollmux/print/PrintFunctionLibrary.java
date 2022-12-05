@@ -159,15 +159,15 @@ public class PrintFunctionLibrary
           funcs.add(name, func);
         } catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("Print function '%1' does not contain key EXTERN", name), e);
+          LOGGER.error(L.m("Print function '{0}' does not contain key EXTERN", name), e);
         } catch (ConfigurationErrorException e)
         {
-          LOGGER.error(L.m("Error while parsing the print function \"%1\"", name));
-          LOGGER.debug(L.m("Error while parsing the print function \"%1\"", name), e);
+          LOGGER.error(L.m("Error while parsing the print function \"{0}\"", name));
+          LOGGER.debug(L.m("Error while parsing the print function \"{0}\"", name), e);
         } catch (NumberFormatException e)
         {
           LOGGER.error(
-              L.m("The value of the key ORDER in the print function '%2' is invalid.", name),
+              L.m("The value of the key ORDER in the print function '{1}' is invalid.", name),
               e);
         }
       }

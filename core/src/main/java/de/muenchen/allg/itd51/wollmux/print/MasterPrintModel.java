@@ -139,7 +139,7 @@ class MasterPrintModel implements XPrintModel
       functions.add(newFunc);
     }
     else
-      throw new NoSuchMethodException(L.m("Print function '%1' is not defined.", functionName));
+      throw new NoSuchMethodException(L.m("Print function '{0}' is not defined.", functionName));
   }
 
   /**

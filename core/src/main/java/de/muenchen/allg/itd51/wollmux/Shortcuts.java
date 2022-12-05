@@ -94,7 +94,7 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("SHORTCUT specification is missing in '%1%'",
+        LOGGER.error(L.m("SHORTCUT specification is missing in '{0}%'",
           tastenkombination.stringRepresentation()));
         continue;
       }
@@ -107,7 +107,7 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("URL specification is missing in '%1'",
+        LOGGER.error(L.m("URL specification is missing in '{0}'",
           tastenkombination.stringRepresentation()));
         continue;
       }

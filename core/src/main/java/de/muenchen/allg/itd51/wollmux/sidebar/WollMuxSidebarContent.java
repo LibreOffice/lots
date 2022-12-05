@@ -399,7 +399,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
           wollmuxbarConf = new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
         } catch (Exception x)
         {
-          LOGGER.error(L.m("Error while reading '%1'", wollmuxbarConfFile.toString()), x);
+          LOGGER.error(L.m("Error while reading '{0}'", wollmuxbarConfFile.toString()), x);
         }
       } else
       {
@@ -887,7 +887,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     } catch (IOException x)
     {
       LOGGER.error("", x);
-      showError(L.m("Error during download of file:\n%1", x.getMessage()));
+      showError(L.m("Error during download of file:\n{0}", x.getMessage()));
     } catch (Exception x)
     {
       LOGGER.error("", x);
@@ -904,6 +904,6 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   private void showError(String errorMsg)
   {
     InfoDialog.showInfoModal(L.m("Incorrect configuration"),
-        L.m("%1\nPlease contact your system administrator.", errorMsg));
+        L.m("{0}\nPlease contact your system administrator.", errorMsg));
   }
 }

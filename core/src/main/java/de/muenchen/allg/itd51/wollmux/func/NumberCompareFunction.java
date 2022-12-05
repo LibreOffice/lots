@@ -80,7 +80,7 @@ public class NumberCompareFunction extends NumberFunction
     super(conf, funcLib, dialogLib, context);
     if (subFunction.size() < 2)
       throw new ConfigurationErrorException(L.m(
-        "Function %1 requires at least 2 parameters", conf.getName()));
+        "Function {0} requires at least 2 parameters", conf.getName()));
     this.cmp1 = cmp1;
     this.cmp2 = cmp2;
     this.result = result;

@@ -108,19 +108,19 @@ public class AttachDatasource extends Datasource
         .get("NAME", ConfigurationErrorException.class, L.m("NAME of data source is missing"))
         .toString();
     source1Name = sourceDesc.get("SOURCE", ConfigurationErrorException.class,
-        L.m("SOURCE1 of data source \"%1\" is missing", name)).toString();
+        L.m("SOURCE1 of data source \"{0}\" is missing", name)).toString();
     source2Name = sourceDesc.get("ATTACH", ConfigurationErrorException.class,
-        L.m("ATTACH specification of data source %1 is missing", name)).toString();
+        L.m("ATTACH specification of data source {0} is missing", name)).toString();
     source1 = nameToDatasource.get(source1Name);
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
-      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"%1\": "
-          + "Referenced datasource \"%2\" missing or defined incorrectly", name, source1Name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source1Name));
 
     if (source2 == null)
-      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"%1\": "
-          + "Referenced datasource \"%2\" missing or defined incorrectly", name, source2Name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source2Name));
 
     List<String> schema1 = source1.getSchema();
     List<String> schema2 = source2.getSchema();
@@ -133,7 +133,7 @@ public class AttachDatasource extends Datasource
       spalte = source2Prefix + spalte;
       if (schema1.contains(spalte))
         throw new ConfigurationErrorException(
-            L.m("Collision with column \"%1\" from data source \"%2\"", spalte, source1Name));
+            L.m("Collision with column \"{0}\" from data source \"{1}\"", spalte, source1Name));
 
       schema.add(spalte);
     }
@@ -142,7 +142,7 @@ public class AttachDatasource extends Datasource
     int numMatches = matchesDesc.count();
     if (numMatches == 0)
       throw new ConfigurationErrorException(
-          L.m("At least one MATCH-specification has to be made in data source \"%1\"", name));
+          L.m("At least one MATCH-specification has to be made in data source \"{0}\"", name));
 
     match1 = new String[numMatches];
     match2 = new String[numMatches];
@@ -153,7 +153,7 @@ public class AttachDatasource extends Datasource
       ConfigThingy matchDesc = iter.next();
       if (matchDesc.count() != 2)
         throw new ConfigurationErrorException(
-            L.m("Incorrect MATCH specification in data source \"%1\"", name));
+            L.m("Incorrect MATCH specification in data source \"{0}\"", name));
 
       String spalte1 = "";
       String spalte2 = "";
@@ -350,7 +350,7 @@ public class AttachDatasource extends Datasource
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName))
-        throw new ColumnNotFoundException(L.m("Column \"%1\" is not defined in schema", columnName));
+        throw new ColumnNotFoundException(L.m("Column \"{0}\" is not defined in schema", columnName));
 
       if (columnName.startsWith(source2Prefix))
       {
