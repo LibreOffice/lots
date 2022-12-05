@@ -108,3 +108,9 @@ xgettext --default-domain=wollmux --output=i18n/wollmux.pot --language=java --fr
 ```
 
 This creates the `i18n/wollmux.pot` template file.
+
+After translating, convert the `po` file to a ResourceBundle (you might need to set the `JAVAC` variable to `<jdk>/bin/javac`):
+
+```bash
+msgfmt -v --java2 i18n/de.po -d core/src/main/resources/i18n/
+```
