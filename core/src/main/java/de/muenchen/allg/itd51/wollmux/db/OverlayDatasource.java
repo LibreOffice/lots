@@ -118,7 +118,7 @@ public class OverlayDatasource extends Datasource
   {
     name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
     String mode = parseConfig(sourceDesc, "MODE",
-        () -> L.m("MODE-specification of datasource '{0}' is missing", name));
+        () -> L.m("MODE-specification of datasource \"{0}\" is missing", name));
 
     String lcMode = mode.toLowerCase();
     if ("so".equals(lcMode))
@@ -127,15 +127,15 @@ public class OverlayDatasource extends Datasource
       modeSO = false;
     else
       throw new ConfigurationErrorException(
-          L.m("Incorrect MODE-specification in datasource  '{0}': MODE \"{1}\" is not allowed", name,
+          L.m("Incorrect MODE-specification in datasource  \"{0}\": MODE \"{1}\" is not allowed", name,
               mode));
 
     treatEmptyStringsAsNull = Character.isLowerCase(mode.charAt(1));
 
     source1Name = parseConfig(sourceDesc, "SOURCE",
-        () -> L.m("SOURCE of data source {0} is missing", name));
+        () -> L.m("SOURCE of data source \"{0}\" is missing", name));
     source2Name = parseConfig(sourceDesc, "OVERLAY",
-        () -> L.m("OVERLAY-specification of data source {0} is missing", name));
+        () -> L.m("OVERLAY-specification of data source \"{0}\" is missing", name));
 
     source1 = nameToDatasource.get(source1Name);
     source2 = nameToDatasource.get(source2Name);

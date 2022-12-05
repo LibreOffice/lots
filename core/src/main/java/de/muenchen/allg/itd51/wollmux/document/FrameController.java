@@ -235,7 +235,7 @@ public class FrameController
     else if (zoomValue != null)
       Utils.setProperty(viewSettings, UnoProperty.ZOOM_VALUE, zoomValue);
     else
-      throw new ConfigurationErrorException(L.m("Invalid ZOOM value '{0}'", zoom));
+      throw new ConfigurationErrorException(L.m("Invalid ZOOM value \"{0}\"", zoom));
   }
 
   /**

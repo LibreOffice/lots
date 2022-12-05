@@ -38,7 +38,7 @@ public class InvalidIdentifierException extends Exception
   @Override
   public String getMessage()
   {
-    return L.m("The identifier '{0}' is invalid, and can only contain the characters a-z, A-Z, _ and 0-9, "
+    return L.m("The identifier \"{0}\" is invalid, and can only contain the characters a-z, A-Z, _ and 0-9, "
         + "whereas the first character cannot be a number.", invalidId);
   }
 }

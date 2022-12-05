@@ -163,7 +163,7 @@ public abstract class WollMuxDispatch implements XDispatch
       arg = URLDecoder.decode(arg, StandardCharsets.UTF_8.name());
     } catch (UnsupportedEncodingException e)
     {
-      LOGGER.error(L.m("Error in dispatch URL '{0}':", origUrl.Complete), e);
+      LOGGER.error(L.m("Error in dispatch URL \"{0}\":", origUrl.Complete), e);
     }
     return arg;
   }

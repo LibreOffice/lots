@@ -1013,7 +1013,7 @@ public abstract class DocumentCommand
             styles.add(s.toLowerCase());
           } else
           {
-            throw new InvalidCommandException(L.m("STYLE '{0}' is unknown.", s));
+            throw new InvalidCommandException(L.m("STYLE \"{0}\" is unknown.", s));
           }
         }
       } catch (NodeNotFoundException e)

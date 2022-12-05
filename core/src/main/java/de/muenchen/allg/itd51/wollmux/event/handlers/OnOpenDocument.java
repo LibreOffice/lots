@@ -107,7 +107,7 @@ public class OnOpenDocument extends WollMuxEvent
       List<String> urls = new ArrayList<>();
 
       java.lang.Exception error = new ConfigurationErrorException(L.m(
-          "The textfragment with the FRAG_ID '{0}' is not defined!",
+          "The textfragment with the FRAG_ID \"{0}\" is not defined!",
           frag_id));
       try
       {
@@ -120,7 +120,7 @@ public class OnOpenDocument extends WollMuxEvent
       if (urls.isEmpty())
       {
         throw new WollMuxFehlerException(
-            L.m("The URL for the text fragment with the FRAG_ID '{0}' cannot be determined:",
+            L.m("The URL for the text fragment with the FRAG_ID \"{0}\" cannot be determined:",
                 frag_id),
             error);
       }
@@ -150,7 +150,7 @@ public class OnOpenDocument extends WollMuxEvent
         } catch (MalformedURLException e)
         {
           LOGGER.info("", e);
-          errors.append(L.m("The URL '{0}' is invalid:", urlStr)).append("\n").append(e.getLocalizedMessage())
+          errors.append(L.m("The URL \"{0}\" is invalid:", urlStr)).append("\n").append(e.getLocalizedMessage())
               .append("\n\n");
           continue;
         } catch (IOException e)
@@ -164,7 +164,7 @@ public class OnOpenDocument extends WollMuxEvent
       if (!found)
       {
         throw new WollMuxFehlerException(L.m(
-            "The text fragment with the FRAG_ID '{0}' cannot be resolved:",
+            "The text fragment with the FRAG_ID \"{0}\" cannot be resolved:",
             frag_id)
             + "\n\n" + errors);
       }
@@ -196,7 +196,7 @@ public class OnOpenDocument extends WollMuxEvent
     {
       // sollte eigentlich nicht auftreten, da bereits oben geprüft.
       throw new WollMuxFehlerException(L.m(
-          "The template with the URL '{0}' could not be opened.",
+          "The template with the URL \"{0}\" could not be opened.",
           loadUrlStr), x);
     }
   }

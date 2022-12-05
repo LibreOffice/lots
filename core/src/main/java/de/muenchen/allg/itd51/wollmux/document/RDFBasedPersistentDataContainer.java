@@ -142,7 +142,7 @@ public class RDFBasedPersistentDataContainer implements
     }
     catch (Exception e)
     {
-      LOGGER.error(L.m("Cannot access the RDF graph '{0}'.",
+      LOGGER.error(L.m("Cannot access the RDF graph \"{0}\".",
         WOLLMUX_DATEN_URI_STR), e);
     }
     return null;
@@ -169,7 +169,7 @@ public class RDFBasedPersistentDataContainer implements
     }
     catch (Exception e)
     {
-      LOGGER.error(L.m("Cannot create the RDF graph '{0}'.",
+      LOGGER.error(L.m("Cannot create the RDF graph \"{0}\".",
         WOLLMUX_DATEN_URI_STR), e);
     }
     return null;
@@ -222,7 +222,7 @@ public class RDFBasedPersistentDataContainer implements
     }
     catch (Exception e)
     {
-      LOGGER.error(L.m("Cannot read RDF metadata for DataID '{0}'.",
+      LOGGER.error(L.m("Cannot read RDF metadata for DataID \"{0}\".",
         dataId), e);
     }
     return null;
@@ -262,7 +262,7 @@ public class RDFBasedPersistentDataContainer implements
     catch (Exception e)
     {
       LOGGER.error(
-        L.m("Cannot set RDF metadata for DataID '{0}'.", dataId), e);
+        L.m("Cannot set RDF metadata for DataID \"{0}\".", dataId), e);
     }
   }
 
@@ -294,7 +294,7 @@ public class RDFBasedPersistentDataContainer implements
     catch (Exception e)
     {
       LOGGER.error(
-        L.m("Cannot delete RDF metadata for DataID '{0}'.", dataId), e);
+        L.m("Cannot delete RDF metadata for DataID \"{0}\".", dataId), e);
     }
   }
 

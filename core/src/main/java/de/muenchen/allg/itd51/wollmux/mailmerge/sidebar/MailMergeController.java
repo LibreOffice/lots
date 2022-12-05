@@ -726,7 +726,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       }
     } catch (NodeNotFoundException e)
     {
-      LOGGER.error(L.m("Missing argument for datasource of type '{0}':", type), e);
+      LOGGER.error(L.m("Missing argument for datasource of type \"{0}\":", type), e);
     } catch (NoTableSelectedException ex)
     {
       LOGGER.error("Die Tabelle existiert nicht", ex);

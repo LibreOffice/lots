@@ -187,7 +187,7 @@ class DocumentExpander extends AbstractExecutor
       if (urls.isEmpty())
       {
         throw new ConfigurationErrorException(L.m(
-          "The textfragment with the FRAG_ID '{0}' is not defined!",
+          "The textfragment with the FRAG_ID \"{0}\" is not defined!",
           cmd.getFragID()));
       }
 
@@ -198,7 +198,7 @@ class DocumentExpander extends AbstractExecutor
         try
         {
           URL url = WollMuxFiles.makeURL(urlStr);
-          LOGGER.debug("Insert Textfragment '{}' with URL '{}'.", cmd.getFragID(), url);
+          LOGGER.debug("Insert Textfragment \"{}\" with URL \"{}\".", cmd.getFragID(), url);
           if (cmd.importStylesOnly())
           {
             insertStylesFromURL(cmd, cmd.getStyles(), url);
@@ -233,9 +233,9 @@ class DocumentExpander extends AbstractExecutor
       {
         String msg =
           L.m(
-            "The Textfragment with the identifier(FRAG_ID) '{0}' {1} could not be inserted:",
+            "The Textfragment with the identifier(FRAG_ID) \"{0}\" {1} could not be inserted:",
             cmd.getFragID(), (fragId.equals(cmd.getFragID()) ? "" : L.m(
-              "(Override for fragment '{0}')", fragId)));
+              "(Override for fragment \"{0}\")", fragId)));
 
         LOGGER.error(msg, e);
 
@@ -264,7 +264,7 @@ class DocumentExpander extends AbstractExecutor
 
       try
       {
-        LOGGER.debug("Inserting textfragment from URL '{}'.", urlStr);
+        LOGGER.debug("Inserting textfragment from URL \"{}\".", urlStr);
 
         insertDocumentFromURL(cmd, WollMuxFiles.makeURL(urlStr));
       }

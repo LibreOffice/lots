@@ -141,7 +141,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     String from = pmod.getProp(PROP_EMAIL_FROM, "").toString();
     if (!isMailAddress(from))
     {
-      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m("The sender address '{0}' is invalid.", from));
+      InfoDialog.showInfoModal(MAIL_ERROR_MESSAGE_TITLE, L.m("The sender address \"{0}\" is invalid.", from));
       pmod.cancel();
       return;
     }
@@ -155,7 +155,7 @@ public abstract class PrintToEmail extends MailMergePrintFunction
     if (!isMailAddress(to))
     {
       boolean res = InfoDialog.showCancelModal(L.m("Invalid recipient address"),
-          L.m("The recipient address '{0}' is invalid.\n\nDo you want to skip this record and continue?", to));
+          L.m("The recipient address \"{0}\" is invalid.\n\nDo you want to skip this record and continue?", to));
       if (res)
       {
         pmod.cancel();

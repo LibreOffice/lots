@@ -284,7 +284,7 @@ public class WollMuxSingleton
       } catch (NodeNotFoundException e)
       {
         LOGGER.error(
-            L.m("URL attribute is missing in 'DatenquellenRegistriere' section for data source '{0}'",
+            L.m("URL attribute is missing in 'DatenquellenRegistriere' section for data source \"{0}\"",
                 name),
             e);
         continue;
@@ -311,7 +311,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Error during checking whether the data source '{0}' is already registered", name), x);
+            L.m("Error during checking whether the data source \"{0}\" is already registered", name), x);
       }
 
       LOGGER.debug("Versuche, Datenquelle '{}' bei OOo zu registrieren für URL '{}'", name, urlStr);
@@ -324,7 +324,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Error during registration of data source '{0}': Illegal URL: '{1}'", name, urlStr),
+            L.m("Error during registration of data source \"{0}\": Illegal URL: '{1}'", name, urlStr),
             x);
         continue;
       }
@@ -334,11 +334,11 @@ public class WollMuxSingleton
         Object datasource = UnoDictionary.create(UNO.dbContext, Object.class).get(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
         if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
-          LOGGER.error(L.m("Test access to data source '{}' failed after registration", name));
+          LOGGER.error(L.m("Test access to data source \"{}\" failed after registration", name));
       } catch (Exception x)
       {
         LOGGER.error(L.m(
-            "Error during registration of data source '{0}'. Make sure that the URL '{1}' is valid.",
+            "Error during registration of data source \"{0}\". Make sure that the URL \"{1}\" is valid.",
             name, parsedUrl), x);
         continue;
       }
@@ -368,7 +368,7 @@ public class WollMuxSingleton
         setConfigurationValue(node, prop, v);
       } catch (Exception e)
       {
-        LOGGER.error(L.m("OOoConfiguration: Configuration '{0}' could not be set:",
+        LOGGER.error(L.m("OOoConfiguration: Configuration \"{0}\" could not be set:",
             element.stringRepresentation()), e);
       }
     }
@@ -409,7 +409,7 @@ public class WollMuxSingleton
     }
 
     throw new IllegalArgumentException(L.m(
-        "The TYPE '{0}' is invalid. Valid are 'boolean', 'integer', 'float' and 'string'.",
+        "The TYPE \"{0}\" is invalid. Valid are 'boolean', 'integer', 'float' and 'string'.",
         type));
   }
 

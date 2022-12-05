@@ -122,12 +122,12 @@ public class VisibleTextFragmentList
         // Die Variable kann nicht ersetzt werden und wird auch nicht
         // ersetzt. Eine Exception muss deswegen nicht geworfen werden, es ist
         // aber sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
-        LOGGER.error(L.m("The variable '{0}' in the URL '{1}' is not defined.", key, string));
+        LOGGER.error(L.m("The variable \"{0}\" in the URL \"{1}\" is not defined.", key, string));
       }
     }
     if (count == MAXCOUNT)
       throw new EndlessLoopException(L.m(
-        "Infinite loop after replacing the variable in URL '{0}'.",
+        "Infinite loop after replacing the variable in URL \"{0}\".",
         node.toString()));
     return string;
   }
@@ -176,7 +176,7 @@ public class VisibleTextFragmentList
         }
         catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("FRAG_ID specification is missing in {0}",
+          LOGGER.error(L.m("FRAG_ID specification is missing in \"{0}\"",
             mappingConf.stringRepresentation()), e);
           continue;
         }
@@ -207,7 +207,7 @@ public class VisibleTextFragmentList
             {
               LOGGER.error(
                 L.m(
-                  "The URL for text fragment '{0}' with the FRAG_ID '{1}' is incorrect.",
+                  "The URL for text fragment \"{0}\" with the FRAG_ID \"{1}\" is incorrect.",
                   mappingConf.stringRepresentation(), fragId), e);
             }
           }

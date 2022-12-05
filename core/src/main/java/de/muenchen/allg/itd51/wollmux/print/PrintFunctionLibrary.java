@@ -159,7 +159,7 @@ public class PrintFunctionLibrary
           funcs.add(name, func);
         } catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("Print function '{0}' does not contain key EXTERN", name), e);
+          LOGGER.error(L.m("Print function \"{0}\" does not contain key EXTERN", name), e);
         } catch (ConfigurationErrorException e)
         {
           LOGGER.error(L.m("Error while parsing the print function \"{0}\"", name));

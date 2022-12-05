@@ -173,7 +173,7 @@ public abstract class AbstractExecutor implements DocumentCommand.Executor
    */
   public static void insertErrorField(DocumentCommand cmd, XTextDocument doc, java.lang.Exception e)
   {
-    String msg = L.m("Error at document command '{0}'", cmd.getBookmarkName());
+    String msg = L.m("Error at document command \"{0}\"", cmd.getBookmarkName());
     String property = msg + ":\n\n";
 
     // Meldung auch auf dem Logger ausgeben

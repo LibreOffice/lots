@@ -663,7 +663,7 @@ public class FormControlModel
     else
     {
       if (!isLegalID(id))
-        throw new SyntaxErrorException(L.m("'{0}' is not a correct ID",
+        throw new SyntaxErrorException(L.m("\"{0}\" is not a correct ID",
           id));
       if (idO == null)
       {
