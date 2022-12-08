@@ -27,12 +27,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import org.slf4j.LoggerFactory;
+import org.xnap.commons.i18n.I18n;
+import org.xnap.commons.i18n.I18nFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
-import gnu.gettext.GettextResource;
+
 
 /**
  * Localization functions
@@ -43,7 +44,7 @@ public class L
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(L.class);
 
   private static StringBuilder debugMessages;
-  private static ResourceBundle catalog;
+  private static I18n i18n = I18nFactory.getI18n(L.class);
 
   /**
    * Initialized for the current language and maps an original string to a translated string.
@@ -59,7 +60,7 @@ public class L
    */
   public static String m(String original)
   {
-    return GettextResource.gettext(catalog, original);
+    return i18n.tr(original);
   }
 
   /**
@@ -113,7 +114,7 @@ public class L
   /* Supports plural forms */
   public static String mn(String singular, String plural, int count)
   {
-    return GettextResource.ngettext(catalog, singular, plural, count);
+    return i18n.trn(singular, plural, count);
   }
 
   /**
@@ -131,11 +132,6 @@ public class L
       str = "";
 
     return str;
-  }
-
-  public static void initWollMuxTranslations()
-  {
-    catalog = ResourceBundle.getBundle("wollmux");
   }
 
   /**

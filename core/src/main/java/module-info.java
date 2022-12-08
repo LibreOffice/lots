@@ -133,7 +133,7 @@ module wollmux
   requires org.apache.pdfbox;
   requires javafx.graphics;
   requires org.jsoup;
-  requires libintl;
+  requires gettext.commons;
 
   uses ComponentRegistration;
   uses Dispatcher;

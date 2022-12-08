@@ -104,13 +104,8 @@ If suspend is set to `y`, LibreOffice waits until an external process connects b
 To get the latest Translation template file, run this command:
 
 ```bash
+cd core
 xgettext --default-domain=wollmux --output=i18n/wollmux.pot --language=java --from-code=UTF-8 --keyword --keyword=m $(find . -name "*.java")
 ```
 
-This creates the `i18n/wollmux.pot` template file.
-
-After translating, convert the `po` file to a ResourceBundle (you might need to set the `JAVAC` variable to `<jdk>/bin/javac`):
-
-```bash
-msgfmt -v --java2 i18n/de.po -d core/src/main/resources/i18n/
-```
+This creates the `core/i18n/wollmux.pot` template file. Translate it and place the translated po files in `core/i18n` folder. The build system will pick up the po files, convert and bundle them with WollMux.
