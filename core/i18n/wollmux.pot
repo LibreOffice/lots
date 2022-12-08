@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-05 13:24+0100\n"
+"POT-Creation-Date: 2022-12-08 14:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,7 +152,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:348
 #, java-format
 msgid ""
-"Data source \"{0}\": No key columns defined.  Automatic determination of key "
+"Data source \"{0}\": No key columns defined. Automatic determination of key "
 "column not possible."
 msgstr ""
 
@@ -295,13 +295,9 @@ msgid "Data set has more fields than the schema"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:75
-#, java-format
-msgid "SOURCE1 of data source \"{0}\" is missing "
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:76
 #, java-format
-msgid "SOURCE2 of data source \"{0}\" is missing "
+msgid "\"{0}\" of data source \"{1}\" is missing."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:125
@@ -896,7 +892,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:355
 msgid ""
 "For functions of type \"BIND\", \"FUNCTION\" must not be followed by a list, "
-"but only by a function name or a function"
+"but only by a function name or a function."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:367
@@ -1599,7 +1595,7 @@ msgid "A faulty bookmark was generated: \"{0}\""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:71
-msgid "Druckfunktion setzen"
+msgid "Print functions"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:122
@@ -1782,7 +1778,7 @@ msgid ""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1145
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:244
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:242
 msgid "unknown"
 msgstr ""
 
@@ -2063,49 +2059,49 @@ msgstr ""
 msgid "About WollMux"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:241
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:239
 msgid "none loaded"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:276
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:274
 msgid "NAME attribute is missing in 'Datenquellen'/'Registriere' section"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:287
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:285
 #, java-format
 msgid ""
 "URL attribute is missing in 'DatenquellenRegistriere' section for data "
 "source \"{0}\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:314
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:312
 #, java-format
 msgid ""
 "Error during checking whether the data source \"{0}\" is already registered"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:327
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:325
 #, java-format
-msgid "Error during registration of data source \"{0}\": Illegal URL: '{1}'"
+msgid "Error during registration of data source \"{0}\": Illegal URL: \"{1}\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:337
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:335
 msgid "Test access to data source \"{}\" failed after registration"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:341
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:339
 #, java-format
 msgid ""
 "Error during registration of data source \"{0}\". Make sure that the URL "
 "\"{1}\" is valid."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:371
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:369
 #, java-format
 msgid "OOoConfiguration: Configuration \"{0}\" could not be set:"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:412
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:410
 #, java-format
 msgid ""
 "The TYPE \"{0}\" is invalid. Valid are 'boolean', 'integer', 'float' and "
