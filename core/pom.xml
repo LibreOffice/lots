@@ -231,5 +231,9 @@
       <groupId>com.googlecode.gettext-commons</groupId>
       <artifactId>gettext-commons</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.googlecode.gettext-commons</groupId>
+      <artifactId>gettext-maven-plugin</artifactId>
+    </dependency>
   </dependencies>
 </project>
