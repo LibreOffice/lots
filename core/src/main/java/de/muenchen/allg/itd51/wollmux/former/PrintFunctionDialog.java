@@ -68,7 +68,7 @@ public class PrintFunctionDialog extends JDialog
     this.documentController = documentController;
     this.printFunctionLibrary = printFuncLib;
 
-    setTitle(L.m("Druckfunktion setzen"));
+    setTitle(L.m("Print functions"));
 
     createGui();
 

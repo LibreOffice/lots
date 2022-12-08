@@ -346,7 +346,7 @@ public class OOoDatasource extends Datasource
             catch (Exception x)
             {
               throw new ConfigurationErrorException(L.m("Data source \"{0}\": No key columns defined."
-                  + "  Automatic determination of key column not possible.", datasourceName), x);
+                  + " Automatic determination of key column not possible.", datasourceName), x);
             }
             // Test ob kein Schluessel vorhanden siehe weiter unten
           }

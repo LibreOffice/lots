@@ -353,7 +353,7 @@ public class FunctionFactory
         L.m("For functions of type \"BIND\" after \"FUNCTION\" a function name or a function must follow."));
     if (funcConf.count() > 1)
       throw new ConfigurationErrorException(L.m("For functions of type \"BIND\", "
-          + "\"FUNCTION\" must not be followed by a list, but only by a function name or a function"));
+          + "\"FUNCTION\" must not be followed by a list, but only by a function name or a function."));
 
     funcConf = funcConf.iterator().next(); // <Funktionsname>|<Funktion> - ...
 

@@ -322,7 +322,7 @@ public class WollMuxSingleton
       } catch (Exception x)
       {
         LOGGER.error(
-            L.m("Error during registration of data source \"{0}\": Illegal URL: '{1}'", name, urlStr),
+            L.m("Error during registration of data source \"{0}\": Illegal URL: \"{1}\"", name, urlStr),
             x);
         continue;
       }
