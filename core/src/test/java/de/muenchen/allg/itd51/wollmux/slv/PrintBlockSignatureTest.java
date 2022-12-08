@@ -27,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import de.muenchen.allg.itd51.wollmux.util.L;
-
 public class PrintBlockSignatureTest
 {
 
@@ -38,7 +36,7 @@ public class PrintBlockSignatureTest
     PrintBlockSignature signature = PrintBlockSignature.valueOfIgnoreCase("allversions");
     assertEquals("AllVersions", signature.getName());
     assertEquals("SLV_AllVersions", signature.getGroupName());
-    assertEquals(L.m("will always be printed"), signature.getMessage());
+    assertEquals("will always be printed", signature.getMessage());
     assertThrows(IllegalArgumentException.class, () -> PrintBlockSignature.valueOfIgnoreCase("foo"));
   }
 }
