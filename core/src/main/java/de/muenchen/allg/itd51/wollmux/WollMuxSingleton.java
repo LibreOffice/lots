@@ -81,6 +81,8 @@ public class WollMuxSingleton
   {
     this.ctx = ctx;
 
+    L.initTranslations();
+
     // init UNO helper class.
     try
     {

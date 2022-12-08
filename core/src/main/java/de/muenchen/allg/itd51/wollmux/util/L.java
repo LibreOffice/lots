@@ -44,7 +44,7 @@ public class L
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(L.class);
 
   private static StringBuilder debugMessages;
-  private static I18n i18n = I18nFactory.getI18n(L.class);
+  private static I18n i18n;
 
   /**
    * Initialized for the current language and maps an original string to a translated string.
@@ -60,6 +60,8 @@ public class L
    */
   public static String m(String original)
   {
+    if (i18n == null)
+      return original;
     return i18n.tr(original);
   }
 
@@ -114,6 +116,8 @@ public class L
   /* Supports plural forms */
   public static String mn(String singular, String plural, int count)
   {
+    if (i18n == null)
+      return singular;
     return i18n.trn(singular, plural, count);
   }
 
@@ -132,6 +136,15 @@ public class L
       str = "";
 
     return str;
+  }
+
+  public static void initTranslations()
+  {
+    try {
+      i18n = I18nFactory.getI18n(L.class);
+    } catch (Exception e) {
+      // in JUnit tests, no translations are available
+    }
   }
 
   /**
