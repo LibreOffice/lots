@@ -389,25 +389,25 @@ public class WollMuxFiles
         char[] arrWollmuxConfPath = new char[WinDef.MAX_PATH];
         shell.SHGetFolderPath(null, ShlObj.CSIDL_APPDATA, null,
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
-        searchPaths.add(Native.toString(arrWollmuxConfPath)
+        searchPaths.add(String.valueOf(arrWollmuxConfPath).trim()
           + "/.wollmux/wollmux.conf");
 
         arrWollmuxConfPath = new char[WinDef.MAX_PATH];
         shell.SHGetFolderPath(null, ShlObj.CSIDL_COMMON_APPDATA, null,
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
-        searchPaths.add(Native.toString(arrWollmuxConfPath)
+        searchPaths.add(String.valueOf(arrWollmuxConfPath).trim()
           + "/.wollmux/wollmux.conf");
 
         arrWollmuxConfPath = new char[WinDef.MAX_PATH];
         shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILESX86, null,
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
-        searchPaths.add(Native.toString(arrWollmuxConfPath)
+        searchPaths.add(String.valueOf(arrWollmuxConfPath).trim()
           + "/.wollmux/wollmux.conf");
 
         arrWollmuxConfPath = new char[WinDef.MAX_PATH];
         shell.SHGetFolderPath(null, ShlObj.CSIDL_PROGRAM_FILES, null,
           ShlObj.SHGFP_TYPE_CURRENT, arrWollmuxConfPath);
-        searchPaths.add(Native.toString(arrWollmuxConfPath)
+        searchPaths.add(String.valueOf(arrWollmuxConfPath).trim()
           + "/.wollmux/wollmux.conf");
 
       }
