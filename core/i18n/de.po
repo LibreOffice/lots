@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-08 14:10+0100\n"
+"POT-Creation-Date: 2022-12-12 12:59+0100\n"
 "PO-Revision-Date: 2022-12-08 14:31+0100\n"
 "Last-Translator: Samuel Mehrbrodt <samuel.mehrbrodt@allotropia.de>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
@@ -18,38 +18,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.1.1\n"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/Shortcuts.java:97
-#, java-format
-msgid "SHORTCUT specification is missing in \"{0}%\""
-msgstr "SHORTCUT Angabe fehlt in \"{0}%\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/Shortcuts.java:110
-#, java-format
-msgid "URL specification is missing in \"{0}\""
-msgstr "URL Angabe fehlt in \"{0}\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/Shortcuts.java:130
-msgid "Invalid shortcut \"{}\" in .conf section \"Tastenkuerzel\""
-msgstr ""
-"Ungültige Tastenkombination \"{}\" im .conf Abschnitt \"Tastenkuerzel\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/Datasources.java:74
-msgid "Data source without NAME or TYPE found"
-msgstr "Datenquelle ohne NAME oder TYPE gefunden"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/Datasources.java:111
-msgid "Unsupported data source type: {}"
-msgstr "Ununterstützter Datenquellentyp: {}"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/Datasources.java:116
-#, java-format
-msgid "Error during initialization of data source \"{0}\" (Type \"{1}\"):"
-msgstr "Fehler beim Initialisieren von Datenquelle \"{0}\" (Typ \"{1}\"):"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/Datasources.java:121
-msgid "Data source {} of type {} could not be initialized"
-msgstr "Datenquelle {} von Typ {} konnte nicht initialisiert werden"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -202,14 +170,6 @@ msgstr "Konnte kein RowSet erzeugen"
 msgid "Column {0} does not exist!"
 msgstr "Spalte \"{0}\" existiert nicht!"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/Datasource.java:134
-msgid "DATASOURCE_TIMEOUT has to be greater than 0"
-msgstr "DATASOURCE_TIMEOUT muss größer als 0 sein"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/Datasource.java:144
-msgid "DATASOURCE_TIMEOUT has to be an integer number"
-msgstr "DATASOURCE_TIMEOUT muss eine ganze Zahl sein"
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:83
 #, java-format
 msgid "OVER-Specification of data source {0} is missing"
@@ -217,8 +177,8 @@ msgstr "OVER-Angabe der Datenquelle {0} fehlt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:89
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:93
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:82
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:86
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:84
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:88
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/FunkyDatasource.java:92
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:118
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:122
@@ -319,13 +279,13 @@ msgstr "Datensatz hat Spalte \"{0}\", die nicht im Schema aufgeführt ist"
 msgid "Data set has more fields than the schema"
 msgstr "Datensatz hat mehr Felder als das Schema"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:75
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:76
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:78
 #, java-format
 msgid "\"{0}\" of data source \"{1}\" is missing."
 msgstr "\"{0}\" der Datenquelle \"{1}\" fehlt."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:125
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:127
 #, java-format
 msgid ""
 "In datasource \"{0}\" columns: {1} are missing and in datasource \"{2}\" "
@@ -537,19 +497,6 @@ msgstr ""
 "\n"
 "Die wollmux.log enthält nähere Informationen zu den betroffenen Pfaden."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:82
-msgid "The newest WollMux installation is located under:"
-msgstr "Die juengste WollMux-Installation liegt unter:"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:85
-msgid "Furthermore the following WollMux installations was found:"
-msgstr "Ausserdem wurden folgende WollMux-Installationen gefunden:"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:116
-msgid "Determination of the installation path for the WollMux package failed."
-msgstr ""
-"Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:99
 msgid "WollMux"
 msgstr "WollMux"
@@ -698,33 +645,32 @@ msgstr ""
 "Der Datensatz enthält keine gültige OID und wird daher nicht in die "
 "persönliche Absenderliste übernommen."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:310
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:311
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:73
 msgid "Copy"
 msgstr "Kopie"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:315
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 #, fuzzy
 msgid "Error copying sender"
 msgstr "Fehler beim Kopieren des Senders"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:315
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 #, fuzzy
 msgid "Sender could not be copied."
 msgstr "Sender konnte nicht kopiert werden."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:381
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:382
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:715
 #, fuzzy
 msgid "Search timeout"
 msgstr "Zeitüberschreitung bei der Suche"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:382
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:716
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:383
+#, fuzzy
 msgid ""
 "Processing your search query took too long and was therefore aborted.\n"
-"The reason for this could be a problem with the data source or with the "
-"used\n"
+"The reason for this could be a problem with the data source or with the used "
 "search term matching too many results.\n"
 "Please try another, more precise search query."
 msgstr ""
@@ -735,12 +681,12 @@ msgstr ""
 "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
 "Bitte versuchen Sie eine andere, präzisere Suchanfrage."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:389
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 #, fuzzy
 msgid "Search results"
 msgstr "Suchergebnisse"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:389
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "No results."
 msgstr "Keine Ergebnisse."
 
@@ -892,11 +838,6 @@ msgstr "Felder anpassen"
 #, java-format
 msgid "Missing argument for datasource of type \"{0}\":"
 msgstr "Fehlendes Argument für Datenquelle vom Typ \"{0}\":"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunction.java:111
-#, java-format
-msgid "Class \"{0}\" contains 2 methods named \"{1}\""
-msgstr "Klasse \"{0}\" enthält 2 Methoden namens \"{1}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunction.java:119
 #, java-format
@@ -1154,28 +1095,15 @@ msgstr "Drucke"
 msgid "{0} from {1}{2} steps"
 msgstr "{0} von {1}{2} Schritten"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DialogFactory.java:79
-#, java-format
-msgid ""
-"Function dialog \"{0}\" was defined more than once in the same "
-"'Funktionsdialoge' section"
-msgstr ""
-"Funktionsdialog \"{0}\" im selben Funktionsdialoge-Abschnitt mehrmals "
-"definiert"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DialogFactory.java:87
-#, java-format
-msgid "Error in Functiondialog {0}"
-msgstr "Fehler in Funktionsdialog {0}"
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DialogLibrary.java:66
 msgid "Neither dialog name nor the dialog itself must be null"
 msgstr "Weder Dialogname noch Dialog darf null sein"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:174
+#, fuzzy
 msgid ""
-"Error within the function dialogue: Section 'Spaltenumsetzung' (column "
-"replacement) could not be parsed!"
+"Error within the function dialogue: Section 'Spaltenumsetzung' could not be "
+"parsed!"
 msgstr ""
 "Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst "
 "werden!"
@@ -1207,40 +1135,24 @@ msgstr "Eingabe"
 msgid "<Dataset>>"
 msgstr "<Datensatz>"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:421
-msgid "Error while parsing the seciton 'Spaltenumsetzung'"
-msgstr "Fehler beim Parsen des Abschnitts 'Spaltenumsetzung'"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:537
-msgid "UI element with ID \"suchergebnis\" must be of TYPE \"listbox\"!"
-msgstr "UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!"
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:542
 msgid "<Dataset>"
 msgstr "<Datensatz>"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:642
-#, java-format
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:716
 msgid ""
-"Error within the section \"Spaltenumsetzung\" or \"Vorschau\". Column "
-"\"{0}\" is to be displayed in the preview, but is not defined in the section "
-"\"Spaltenumsetzung\"."
+"Processing your search query took too long and was therefore aborted.\n"
+"The reason for this could be a problem with the data source or with the "
+"used\n"
+"search term matching too many results.\n"
+"Please try another, more precise search query."
 msgstr ""
-"Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte \"{0}\" "
-"soll in Vorschau angezeigt werden ist aber nicht in der \"Spaltenumsetzung\" "
-"definiert."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:689
-msgid "Huh? This should not happen"
-msgstr "Huh? Dies sollte nicht passieren können"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:801
-msgid ""
-"Error while resolving the placeholder \"${{0}}\": Column for the dataset is "
-"not defined"
-msgstr ""
-"Fehler beim Auflösen des Platzhalters \"${{0}}\": Spalte für den Datensatz "
-"nicht definiert"
+"Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb "
+"abgebrochen.\n"
+"Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem "
+"verwendeten\n"
+"Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
+"Bitte versuchen Sie eine andere, präzisere Suchanfrage."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockCommand.java:125
 #, java-format
@@ -1252,7 +1164,6 @@ msgstr ""
 "\"{1}\" ist ungültig."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:35
-#: core/src/test/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignatureTest.java:41
 msgid "will always be printed"
 msgstr "wird immer gedruckt"
 
@@ -1691,11 +1602,6 @@ msgstr "Abbrechen"
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:297
-#, java-printf-format
-msgid "%d replacement made."
-msgstr "%d Ersetzung vorgenommen."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:309
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:535
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:625
@@ -1866,27 +1772,10 @@ msgstr "Nachträgliche Anpassung"
 msgid "Warning: Function not defined!"
 msgstr "Achtung: Funktion nicht definiert!"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/VisibleTextFragmentList.java:125
-#, java-format
-msgid "The variable \"{0}\" in the URL \"{1}\" is not defined."
-msgstr "Die Variable \"{0}\" in der URL \"{1}\" ist nicht definiert."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/VisibleTextFragmentList.java:130
 #, java-format
 msgid "Infinite loop after replacing the variable in URL \"{0}\"."
 msgstr "Endlosschleife ber der Ersetzung der Variablen in URL \"{0}\"."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/VisibleTextFragmentList.java:179
-#, java-format
-msgid "FRAG_ID specification is missing in \"{0}\""
-msgstr "FRAG_ID Angabe fehlt in \"{0}\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/VisibleTextFragmentList.java:210
-#, java-format
-msgid ""
-"The URL for text fragment \"{0}\" with the FRAG_ID \"{1}\" is incorrect."
-msgstr ""
-"Die URL zum Textfragment \"{0}\" mit der FRAG_ID \"{1}\" ist fehlerhaft."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:153
 msgid "!!!CHECK!!!"
@@ -1916,7 +1805,7 @@ msgstr ""
 "Kommando auf."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1145
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:242
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:244
 msgid "unknown"
 msgstr "unbekannt"
 
@@ -2026,11 +1915,6 @@ msgstr "Fehler in Dokumentkommando \"{0}\""
 msgid "<ERROR:  >"
 msgstr "<FEHLER:  >"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:197
-msgid "Cannot insert error field because InsertCursor could not be created."
-msgstr ""
-"Kann Fehler-Feld nicht einfügen, da kein InsertCursor erzeugt werden konnte."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/FrameController.java:238
 #, java-format
 msgid "Invalid ZOOM value \"{0}\""
@@ -2041,23 +1925,10 @@ msgstr "Ungültiger ZOOM-Wert \"{0}\""
 msgid "<ERROR: TRAFO \"{0}\" not defined>"
 msgstr "<FEHLER: TRAFO \"{0}\" nicht definiert>"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:795
-msgid "TRAFO \"{}\" is not defined."
-msgstr "Die TRAFO \"{}\" ist nicht definiert."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:823
-#, java-format
-msgid "ERROR: TRAFO \"{0}\" not defined."
-msgstr "FEHLER: TRAFO \"{0}\" ist nicht definiert."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:824
 #, java-format
 msgid "<ERROR: TRAFO \"{0}\" is not defined>"
 msgstr "<FEHLER: TRAFO \"{0}\" nicht definiert>"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1506
-msgid "This can not happen."
-msgstr "Dies kann nicht passieren."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1574
 msgid "The note associated with the form description is missing."
@@ -2069,7 +1940,8 @@ msgstr ""
 "Die zugehörige Notiz mit der Formularbeschreibung kann nicht gelesen werden."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1808
-msgid "No section ''Formular' in the' form description available"
+#, fuzzy
+msgid "Missing section \"Formular\" in the form description."
 msgstr "Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:145
@@ -2229,54 +2101,11 @@ msgstr ""
 msgid "About WollMux"
 msgstr "Info über Vorlagen und Formulare (WollMux)"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:239
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:241
 msgid "none loaded"
 msgstr "keine geladen"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:274
-msgid "NAME attribute is missing in 'Datenquellen'/'Registriere' section"
-msgstr "NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:285
-#, java-format
-msgid ""
-"URL attribute is missing in 'DatenquellenRegistriere' section for data "
-"source \"{0}\""
-msgstr ""
-"URL-Attribut fehlt in 'DatenquellenRegistriere'-Abschnitt für Datenquelle "
-"\"{0}\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:312
-#, java-format
-msgid ""
-"Error during checking whether the data source \"{0}\" is already registered"
-msgstr "Fehler beim Überprüfen, ob Datenquelle \"{0}\" bereits registriert ist"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:325
-#, fuzzy, java-format
-msgid "Error during registration of data source \"{0}\": Illegal URL: \"{1}\""
-msgstr ""
-"Fehler beim Registrieren von Datenquelle \"{0}\": Ungültige URL: \"{1}\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:335
-msgid "Test access to data source \"{}\" failed after registration"
-msgstr "Testzugriff auf Datenquelle \"{0}\" nach Registrierung fehlgeschlagen"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:339
-#, java-format
-msgid ""
-"Error during registration of data source \"{0}\". Make sure that the URL "
-"\"{1}\" is valid."
-msgstr ""
-"Fehler beim Registrieren von Datenquelle \"{0}\". Stellen Sie sicher, dass "
-"die URL \"{1}\" gültig ist."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:369
-#, java-format
-msgid "OOoConfiguration: Configuration \"{0}\" could not be set:"
-msgstr "OOoEinstellungen: Konnte Einstellung \"{0}\"nicht setzen:"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:410
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:403
 #, java-format
 msgid ""
 "The TYPE \"{0}\" is invalid. Valid are 'boolean', 'integer', 'float' and "
@@ -2285,34 +2114,35 @@ msgstr ""
 "Der TYPE \"{0}\" ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' "
 "und 'string'."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:203
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:204
+#, fuzzy
 msgid ""
-"One entry within the section \"ExterneAnwendungen\" (external Applications) "
-"contains an invalid PROGRAM-Specification."
+"One entry within the section \"ExterneAnwendungen\" contains an invalid "
+"PROGRAM-Specification."
 msgstr ""
 "Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige "
 "PROGRAM-Angabe."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:267
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:269
 #, fuzzy, java-format
 msgid "FILTER specification is missing for application \"{0}\""
 msgstr "FILTER-Angabe fehlt für Anwendung \"{0}\""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:308
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:310
 #, java-format
 msgid "Error when storing the file: {0}"
 msgstr "Fehler beim Speichern der Datei: {0}"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:323
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:325
 #, java-format
 msgid "Could not create a temporay file \"{0}\""
 msgstr "Konnte temporäre Datei \"{0}\" nicht anlegen"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:337
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:339
 msgid "setSource() was not called"
 msgstr "setSource() wurde nicht aufgerufen"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:354
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:356
 #, java-format
 msgid ""
 "Temporary directory\n"
@@ -2323,11 +2153,11 @@ msgstr ""
 "\"{0}\"\n"
 "existiert nicht oder kann nicht beschrieben werden!"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:369
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:371
 msgid "Could not create a temporary directory for the file download!"
 msgstr "Konnte kein temporäres Verzeichnis für den Download der Datei anlegen!"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:466
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:468
 #, java-format
 msgid ""
 "None of the programs configured for the extension \"{0}\" could be started!\n"
@@ -2337,13 +2167,170 @@ msgstr ""
 "gestartet werden!\n"
 "{1}"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:520
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:522
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
 msgstr "/loadComponentFromURL/ Parameter muss die Form \"Param=Wert\" haben"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/ui/UIElementConfig.java:235
 msgid "Incorrect element of the type \"combobox\""
 msgstr "Fehlerhaftes Element des Typs \"combobox\""
+
+#, java-printf-format
+#~ msgid "%d replacement made."
+#~ msgstr "%d Ersetzung vorgenommen."
+
+#, java-format
+#~ msgid "SHORTCUT specification is missing in \"{0}%\""
+#~ msgstr "SHORTCUT Angabe fehlt in \"{0}%\""
+
+#, java-format
+#~ msgid "URL specification is missing in \"{0}\""
+#~ msgstr "URL Angabe fehlt in \"{0}\""
+
+#~ msgid "Invalid shortcut \"{}\" in .conf section \"Tastenkuerzel\""
+#~ msgstr ""
+#~ "Ungültige Tastenkombination \"{}\" im .conf Abschnitt \"Tastenkuerzel\""
+
+#~ msgid "Data source without NAME or TYPE found"
+#~ msgstr "Datenquelle ohne NAME oder TYPE gefunden"
+
+#~ msgid "Unsupported data source type: {}"
+#~ msgstr "Ununterstützter Datenquellentyp: {}"
+
+#, java-format
+#~ msgid "Error during initialization of data source \"{0}\" (Type \"{1}\"):"
+#~ msgstr "Fehler beim Initialisieren von Datenquelle \"{0}\" (Typ \"{1}\"):"
+
+#~ msgid "Data source {} of type {} could not be initialized"
+#~ msgstr "Datenquelle {} von Typ {} konnte nicht initialisiert werden"
+
+#~ msgid "DATASOURCE_TIMEOUT has to be greater than 0"
+#~ msgstr "DATASOURCE_TIMEOUT muss größer als 0 sein"
+
+#~ msgid "DATASOURCE_TIMEOUT has to be an integer number"
+#~ msgstr "DATASOURCE_TIMEOUT muss eine ganze Zahl sein"
+
+#~ msgid "The newest WollMux installation is located under:"
+#~ msgstr "Die juengste WollMux-Installation liegt unter:"
+
+#~ msgid "Furthermore the following WollMux installations was found:"
+#~ msgstr "Ausserdem wurden folgende WollMux-Installationen gefunden:"
+
+#~ msgid ""
+#~ "Determination of the installation path for the WollMux package failed."
+#~ msgstr ""
+#~ "Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen."
+
+#, java-format
+#~ msgid "Class \"{0}\" contains 2 methods named \"{1}\""
+#~ msgstr "Klasse \"{0}\" enthält 2 Methoden namens \"{1}\""
+
+#, java-format
+#~ msgid ""
+#~ "Function dialog \"{0}\" was defined more than once in the same "
+#~ "'Funktionsdialoge' section"
+#~ msgstr ""
+#~ "Funktionsdialog \"{0}\" im selben Funktionsdialoge-Abschnitt mehrmals "
+#~ "definiert"
+
+#, java-format
+#~ msgid "Error in Functiondialog {0}"
+#~ msgstr "Fehler in Funktionsdialog {0}"
+
+#~ msgid "Error while parsing the seciton 'Spaltenumsetzung'"
+#~ msgstr "Fehler beim Parsen des Abschnitts 'Spaltenumsetzung'"
+
+#~ msgid "UI element with ID \"suchergebnis\" must be of TYPE \"listbox\"!"
+#~ msgstr "UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!"
+
+#, java-format
+#~ msgid ""
+#~ "Error within the section \"Spaltenumsetzung\" or \"Vorschau\". Column "
+#~ "\"{0}\" is to be displayed in the preview, but is not defined in the "
+#~ "section \"Spaltenumsetzung\"."
+#~ msgstr ""
+#~ "Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte "
+#~ "\"{0}\" soll in Vorschau angezeigt werden ist aber nicht in der "
+#~ "\"Spaltenumsetzung\" definiert."
+
+#~ msgid "Huh? This should not happen"
+#~ msgstr "Huh? Dies sollte nicht passieren können"
+
+#~ msgid ""
+#~ "Error while resolving the placeholder \"${{0}}\": Column for the dataset "
+#~ "is not defined"
+#~ msgstr ""
+#~ "Fehler beim Auflösen des Platzhalters \"${{0}}\": Spalte für den "
+#~ "Datensatz nicht definiert"
+
+#, java-format
+#~ msgid "The variable \"{0}\" in the URL \"{1}\" is not defined."
+#~ msgstr "Die Variable \"{0}\" in der URL \"{1}\" ist nicht definiert."
+
+#, java-format
+#~ msgid "FRAG_ID specification is missing in \"{0}\""
+#~ msgstr "FRAG_ID Angabe fehlt in \"{0}\""
+
+#, java-format
+#~ msgid ""
+#~ "The URL for text fragment \"{0}\" with the FRAG_ID \"{1}\" is incorrect."
+#~ msgstr ""
+#~ "Die URL zum Textfragment \"{0}\" mit der FRAG_ID \"{1}\" ist fehlerhaft."
+
+#~ msgid "Cannot insert error field because InsertCursor could not be created."
+#~ msgstr ""
+#~ "Kann Fehler-Feld nicht einfügen, da kein InsertCursor erzeugt werden "
+#~ "konnte."
+
+#~ msgid "TRAFO \"{}\" is not defined."
+#~ msgstr "Die TRAFO \"{}\" ist nicht definiert."
+
+#, java-format
+#~ msgid "ERROR: TRAFO \"{0}\" not defined."
+#~ msgstr "FEHLER: TRAFO \"{0}\" ist nicht definiert."
+
+#~ msgid "This can not happen."
+#~ msgstr "Dies kann nicht passieren."
+
+#~ msgid "NAME attribute is missing in 'Datenquellen'/'Registriere' section"
+#~ msgstr "NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt"
+
+#, java-format
+#~ msgid ""
+#~ "URL attribute is missing in 'DatenquellenRegistriere' section for data "
+#~ "source \"{0}\""
+#~ msgstr ""
+#~ "URL-Attribut fehlt in 'DatenquellenRegistriere'-Abschnitt für Datenquelle "
+#~ "\"{0}\""
+
+#, java-format
+#~ msgid ""
+#~ "Error during checking whether the data source \"{0}\" is already "
+#~ "registered"
+#~ msgstr ""
+#~ "Fehler beim Überprüfen, ob Datenquelle \"{0}\" bereits registriert ist"
+
+#, fuzzy, java-format
+#~ msgid ""
+#~ "Error during registration of data source \"{0}\": Illegal URL: \"{1}\""
+#~ msgstr ""
+#~ "Fehler beim Registrieren von Datenquelle \"{0}\": Ungültige URL: \"{1}\""
+
+#~ msgid "Test access to data source \"{}\" failed after registration"
+#~ msgstr ""
+#~ "Testzugriff auf Datenquelle \"{0}\" nach Registrierung fehlgeschlagen"
+
+#, java-format
+#~ msgid ""
+#~ "Error during registration of data source \"{0}\". Make sure that the URL "
+#~ "\"{1}\" is valid."
+#~ msgstr ""
+#~ "Fehler beim Registrieren von Datenquelle \"{0}\". Stellen Sie sicher, "
+#~ "dass die URL \"{1}\" gültig ist."
+
+#, java-format
+#~ msgid "OOoConfiguration: Configuration \"{0}\" could not be set:"
+#~ msgstr "OOoEinstellungen: Konnte Einstellung \"{0}\"nicht setzen:"
 
 #, java-format
 #~ msgid "SOURCE1 of data source \"{0}\" is missing "
