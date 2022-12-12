@@ -294,7 +294,7 @@ public class ConfigEditor extends JFrame implements SearchListener
       case REPLACE_ALL:
         result = SearchEngine.replaceAll(editor, event.getSearchContext());
         JOptionPane.showMessageDialog(null,
-          String.format(L.m("%d replacement made."), result.getCount()));
+          L.mn("{0} replacement made.", "{0} replacements made.", result.getCount()));
         break;
     }
 
