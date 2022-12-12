@@ -1,5 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -7,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.awt.PosSize;
+import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.XWindow;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.text.XTextDocument;
@@ -24,6 +27,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.Datas
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.FORMAT;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeController.SubmitArgument;
 import de.muenchen.allg.itd51.wollmux.sidebar.controls.UIElementAction;
+import javax.swing.Timer;
 
 public class MailmergeWizardController implements XWizardController
 {
@@ -46,6 +50,21 @@ public class MailmergeWizardController implements XWizardController
       this.path = path;
     }
   }
+
+  private short getLastPathValue()
+  {
+	if(currentPath == PATH.STANDRAD)
+	  return currentPath.path[PATH.STANDRAD.path.length - 1];
+	if(currentPath == PATH.DIRECT_PRINT)
+	  return currentPath.path[PATH.DIRECT_PRINT.path.length - 1];
+	if(currentPath == PATH.MAIL)
+	  return currentPath.path[PATH.MAIL.path.length - 1];
+	if(currentPath == PATH.SINGLE_FILES)
+	  return currentPath.path[PATH.SINGLE_FILES.path.length - 1];
+	return 0;
+  }
+
+  private Timer updateSizeTimer;
 
   private static final short[][] paths = { PATH.STANDRAD.path, PATH.DIRECT_PRINT.path, PATH.MAIL.path,
       PATH.SINGLE_FILES.path };
@@ -97,12 +116,24 @@ public class MailmergeWizardController implements XWizardController
   }
 
   XTextDocument doc;
+  private boolean initSize = true;
 
   public MailmergeWizardController(MailMergeController controller, XTextDocument doc)
   {
     arguments = new EnumMap<>(SubmitArgument.class);
     this.controller = controller;
     this.doc = doc;
+
+    updateSizeTimer = new Timer(50, new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        wizard.getDialogWindow().setPosSize(0, 0, 750, 600, PosSize.SIZE);
+        wizard.getDialogWindow().setVisible(true);
+      }
+    });
+    updateSizeTimer.setCoalesce(true);
+    updateSizeTimer.setRepeats(false);
   }
 
   @Override
@@ -167,7 +198,7 @@ public class MailmergeWizardController implements XWizardController
 
     boolean canAdvance = wizard.getCurrentPage().canAdvance();
 
-    short lastPathValue = currentPath.path[PATH.MAIL.path.length - 1];
+    short lastPathValue = getLastPathValue();
 
     if (canAdvance)
     {
@@ -181,6 +212,11 @@ public class MailmergeWizardController implements XWizardController
     } else
     {
       enableFinishButton(false);
+    }
+    if(initSize)
+    {
+      initSize = false;
+      updateSizeTimer.restart();
     }
   }
 
@@ -201,10 +237,12 @@ public class MailmergeWizardController implements XWizardController
     {
       controller.doMailMerge(currentActionType, format, datasetSelectionType, arguments);
     }
+    wizard.getDialogWindow().setPosSize(0, 0, 750, 600, PosSize.SIZE);
   }
 
   public void changePath(PATH newPath)
   {
+	wizard.getDialogWindow().setVisible(false);
     LOGGER.debug("Neuer Pfad {}", newPath);
     if (wizard != null)
     {
@@ -218,6 +256,7 @@ public class MailmergeWizardController implements XWizardController
         LOGGER.error("", e);
       }
     }
+    updateSizeTimer.restart();
   }
 
   public void activateNextButton(boolean activate)
