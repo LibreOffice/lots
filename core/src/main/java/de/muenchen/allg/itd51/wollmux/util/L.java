@@ -67,8 +67,6 @@ public class L
 
   /**
    * Translate user template strings (based on ConfigThingy translations, provided by user)
-   * @param original
-   * @return
    */
   public static String tm(String original)
   {
@@ -86,7 +84,7 @@ public class L
    */
   public static String m(String original, Object insertion1)
   {
-    return MessageFormat.format(m(original), new Object[] { insertion1 });
+    return MessageFormat.format(m(original), insertion1);
   }
 
   /**
@@ -96,24 +94,24 @@ public class L
    */
   public static String m(String original, Object insertion1, Object insertion2)
   {
-    return MessageFormat.format(m(original), new Object[] { insertion1, insertion2 });
+    return MessageFormat.format(m(original), insertion1, insertion2 );
   }
 
   public static String m(String original, Object insertion1, Object insertion2,
       Object insertion3)
   {
-    return MessageFormat.format(m(original), new Object[] { insertion1, insertion2,
-        insertion3});
+    return MessageFormat.format(m(original), insertion1, insertion2, insertion3);
   }
 
   public static String m(String original, Object insertion1, Object insertion2,
       Object insertion3, Object insertion4)
   {
-    return MessageFormat.format(m(original), new Object[] { insertion1, insertion2,
-        insertion3, insertion4});
+    return MessageFormat.format(m(original), insertion1, insertion2, insertion3, insertion4);
   }
 
-  /* Supports plural forms */
+  /**
+   * Translate string with plural form
+   */
   public static String mn(String singular, String plural, int count)
   {
     if (i18n == null)
@@ -138,6 +136,9 @@ public class L
     return str;
   }
 
+  /**
+   * Initialize translations
+   */
   public static void initTranslations()
   {
     try {
