@@ -76,9 +76,9 @@ public class ContentBasedDirectivePrintCollect extends PrintFunction
     } catch (IllegalArgumentException | UnknownPropertyException | PropertyVetoException | WrappedTargetException
         | IOException | com.sun.star.io.IOException | UnoHelperException e)
     {
-      LOGGER.error(L.m("Could not pick up the documents for the printing of the content based directive."), e);
-      InfoDialog.showInfoModal("Error collecting documents",
-          "Could not pick up the documents for the printing of the content based directive.");
+      LOGGER.error(L.m("Could not collect documents for printing content based directive."), e);
+      InfoDialog.showInfoModal(L.m("Error collecting documents"),
+          L.m("Could not collect documents for printing content based directive."));
       printModel.cancel();
     }
   }

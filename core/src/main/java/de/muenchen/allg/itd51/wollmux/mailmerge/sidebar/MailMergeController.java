@@ -615,7 +615,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       } catch (NoTableSelectedException ex)
       {
         LOGGER.debug("", ex);
-        InfoDialog.showInfoModal("Druck konnte nicht gestartet werden", ex.getMessage());
+        InfoDialog.showInfoModal(L.m("Printing could not be started."), ex.getMessage());
       }
     });
   }

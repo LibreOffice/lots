@@ -51,6 +51,7 @@ import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveDialog;
 import de.muenchen.allg.itd51.wollmux.slv.dialog.ContentBasedDirectiveSettings;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Print function for configuration of the content based directive print. It creates a GUI and
@@ -169,9 +170,9 @@ public class ContentBasedDirectivePrint extends PrintFunction
     } catch (IOException | IllegalArgumentException | UnknownPropertyException | PropertyVetoException
         | WrappedTargetException e)
     {
-      LOGGER.error("PDF Dokumente konnten nicht zusammengefügt werden.", e);
-      InfoDialog.showInfoModal("Sachleitende Verfügungen drucken",
-          "PDF Dokumente konnten nicht zusammengefügt werden.");
+      LOGGER.error(L.m("Could not merge PDF documents."), e);
+      InfoDialog.showInfoModal(L.m("Print content based directives"),
+          L.m("Could not merge PDF documents."));
     }
   }
 
