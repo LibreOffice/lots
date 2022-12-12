@@ -171,7 +171,7 @@ public class DatasourceSearchDialog implements Dialog
     if (schema.isEmpty())
     {
       throw new ConfigurationErrorException(
-          L.m("Error within the function dialogue: Section 'Spaltenumsetzung' (column replacement) could not be parsed!"));
+          L.m("Error within the function dialogue: Section 'Spaltenumsetzung' could not be parsed!"));
     }
     this.data = new HashMap<>();
   }

@@ -784,7 +784,8 @@ public class FunctionFactory
           trafos.put(name, func);
         } catch (ConfigurationErrorException e)
         {
-          LOGGER.error(L.m("Error during parsing of the column replacement function for the result column \"{0}\"", name), e);
+          LOGGER.error(L.m("Error during parsing of the column replacement "
+              + "function for the result column \"{0}\"", name), e);
         }
       }
     }

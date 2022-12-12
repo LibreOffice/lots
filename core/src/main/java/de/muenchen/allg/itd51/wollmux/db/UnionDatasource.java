@@ -72,8 +72,10 @@ public class UnionDatasource extends Datasource
       ConfigThingy sourceDesc, URL context)
   {
     name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
-    source1Name = parseConfig(sourceDesc, "SOURCE1", () -> L.m("\"{0}\" of data source \"{1}\" is missing.", "SOURCE1", name));
-    source2Name = parseConfig(sourceDesc, "SOURCE2", () -> L.m("\"{0}\" of data source \"{1}\" is missing.", "SOURCE2", name));
+    source1Name = parseConfig(sourceDesc, "SOURCE1", () ->
+      L.m("\"{0}\" of data source \"{1}\" is missing.", "SOURCE1", name));
+    source2Name = parseConfig(sourceDesc, "SOURCE2", () ->
+      L.m("\"{0}\" of data source \"{1}\" is missing.", "SOURCE2", name));
 
     source1 = nameToDatasource.get(source1Name);
     source2 = nameToDatasource.get(source2Name);

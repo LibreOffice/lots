@@ -168,7 +168,8 @@ public class OpenExt
         extConf = appConf.query("EXT");
         if (extConf.count() == 0)
         {
-          LOGGER.error("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige EXT-Angabe.");
+          LOGGER.error("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält "
+              + "keine gültige EXT-Angabe.");
           continue;
         }
 

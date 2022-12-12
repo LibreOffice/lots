@@ -291,7 +291,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     if (oid == null || oid.isEmpty() || "*".equals(oid))
     {
       InfoDialog.showInfoModal(L.m("Fehlende ID"),
-          L.m("The record does not contain a valid OID and therefore will not be included in the personal sender list."));
+          L.m("The record does not contain a valid OID and "
+              + "therefore will not be included in the personal sender list."));
     } else
     {
       senderList.add(sender);
@@ -380,7 +381,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       InfoDialog.showInfoModal(L.m("Search timeout"),
           L.m("Processing your search query took too long and was therefore aborted.\n"
-              + "The reason for this could be a problem with the data source or with the used\n"
+              + "The reason for this could be a problem with the data source or with the used "
               + "search term matching too many results.\n"
               + "Please try another, more precise search query."));
 
