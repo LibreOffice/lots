@@ -314,13 +314,13 @@ public class FunctionFactory
     if (name.length() == 0)
     {
       throw new ConfigurationErrorException(
-        L.m("Öffnende Klammer ohne voranstehenden Funktionsnamen gefunden. ")
+        L.m("Opening bracket without preceding function name found. ")
           + outputErrorPosition(conf));
     }
     else
     {
       throw new ConfigurationErrorException(L.m(
-        "\"%1\" ist keine unterstützte Grundfunktion. ", name)
+        "\"{0}\" is not a supported basic function. ", name)
         + outputErrorPosition(conf));
     }
   }
@@ -334,7 +334,7 @@ public class FunctionFactory
     String str = conf.stringRepresentation();
     int end = 100;
     if (str.length() < end) end = str.length();
-    return L.m("Text an der Fehlerstelle: %1", str.substring(0, end));
+    return L.m("Text at error position: {0}", str.substring(0, end));
   }
 
   private static Function parseBIND(ConfigThingy conf, FunctionLibrary funcLib,
@@ -344,16 +344,16 @@ public class FunctionFactory
     // FUNCTION - ...
     if (funcConf.count() != 1)
       throw new ConfigurationErrorException(
-        L.m("Funktion vom Typ \"BIND\" erfordert genau 1 Unterelement FUNCTION"));
+        L.m("Function of type \"BIND\" requires exactly one sub element FUNCTION"));
 
     Function func;
     funcConf = funcConf.iterator().next(); // funcConf = FUNCTION - ...
     if (funcConf.count() == 0)
       throw new ConfigurationErrorException(
-        L.m("Bei Funktionen vom Typ \"BIND\" muss nach \"FUNCTION\" ein Funktionsname oder eine Funktion folgen."));
+        L.m("For functions of type \"BIND\" after \"FUNCTION\" a function name or a function must follow."));
     if (funcConf.count() > 1)
-      throw new ConfigurationErrorException(L.m("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" "
-          + "keine Liste sondern nur ein Funktionsname oder eine Funktion folgen."));
+      throw new ConfigurationErrorException(L.m("For functions of type \"BIND\", "
+          + "\"FUNCTION\" must not be followed by a list, but only by a function name or a function."));
 
     funcConf = funcConf.iterator().next(); // <Funktionsname>|<Funktion> - ...
 
@@ -364,7 +364,7 @@ public class FunctionFactory
       func = funcLib.get(funcName);
       if (func == null)
         throw new ConfigurationErrorException(L.m(
-          "Funktion \"%1\" wird verwendet, bevor sie definiert ist", funcName));
+          "Function \"{0}\" is used before it was even defined", funcName));
     }
     else // d.h. es wurde eine ganze Funktion angegeben
     {
@@ -379,7 +379,7 @@ public class FunctionFactory
   {
     if (conf.count() != 2)
       throw new ConfigurationErrorException(L.m(
-        "Funktion vom Typ \"DIALOG\" erfordert genau 2 Parameter, nicht %1",
+        "Function of type \"DIALOG\" requires exacly 2 parameters, not {0}",
         conf.count()));
 
     String dialogName;
@@ -400,12 +400,12 @@ public class FunctionFactory
     Dialog dialog = dialogLib.get(dialogName);
     if (dialog == null)
       throw new ConfigurationErrorException(L.m(
-        "Dialog \"%1\" ist nicht definiert, aber wird in DIALOG-Funktion verwendet",
+        "Dialog \"{0}\" is not defined, but it is used by the DIALOG-Function",
         dialogName));
 
     if (context == null)
       throw new ConfigurationErrorException(
-        L.m("DIALOG-Funktion ist kontextabhängig und kann deshalb hier nicht verwendet werden."));
+        L.m("DIALOG-Function is context dependent and therefore cannot be used here."));
 
     return new DialogFunction(dialogName, dialog, dataName, context);
   }
@@ -417,11 +417,11 @@ public class FunctionFactory
     ConfigThingy elseConf = conf.query("ELSE");
     if (thenConf.count() > 1 || elseConf.count() > 1)
       throw new ConfigurationErrorException(
-        L.m("In IF darf maximal ein THEN und ein ELSE vorhanden sein"));
+        L.m("Within the IF statement there must not be more than one THEN and one ELSE"));
 
     if (conf.count() - thenConf.count() - elseConf.count() != 1)
       throw new ConfigurationErrorException(
-        L.m("IF muss genau eine Bedingung enthalten."));
+        L.m("IF must contain exactly one condition."));
 
     if (thenConf.count() == 0)
     {
@@ -456,7 +456,7 @@ public class FunctionFactory
   {
     if (conf.count() != 3)
       throw new ConfigurationErrorException(L.m(
-        "Funktion vom Typ \"REPLACE\" erfordert genau 3 Parameter, nicht %1",
+        "Function of type \"REPLACE\" requires exactly 3 parameters, not {0}",
         conf.count()));
 
     Function strFun;
@@ -476,7 +476,7 @@ public class FunctionFactory
     }
     catch (PatternSyntaxException x)
     {
-      throw new ConfigurationErrorException(L.m("Fehler in regex \"%1\"", regex), x);
+      throw new ConfigurationErrorException(L.m("Error in regex \"{0}\"", regex), x);
     }
     return new ReplaceFunction(strFun, p, repFun);
   }
@@ -486,7 +486,7 @@ public class FunctionFactory
   {
     if (conf.count() != 3)
       throw new ConfigurationErrorException(L.m(
-        "Funktion vom Typ \"SPLIT\" erfordert genau 3 Parameter, nicht %1",
+        "Function of type \"SPLIT\" requires exactly 3 parameters, not {0}",
         conf.count()));
 
     Function strFun;
@@ -512,7 +512,7 @@ public class FunctionFactory
     }
     if (idx < 0)
       throw new ConfigurationErrorException(L.m(
-        "Index-Argument von %1 muss \"<NichtNegativeGanzeZahl>\" sein",
+        "Index argument of {0} must not be negative.",
         conf.getName()));
 
     String regex = reFun.getResult(new Values.None());
@@ -523,7 +523,7 @@ public class FunctionFactory
     }
     catch (PatternSyntaxException x)
     {
-      throw new ConfigurationErrorException(L.m("Fehler in regex \"%1\"", regex), x);
+      throw new ConfigurationErrorException(L.m("Error in regex \"{0}\"", regex), x);
     }
     return new SplitFunction(strFun, p, idx);
   }
@@ -543,7 +543,7 @@ public class FunctionFactory
     catch (NodeNotFoundException x)
     {
       throw new ConfigurationErrorException(
-          L.m("Funktion vom Typ \"MATCH\" erfordert genau 2 Parameter, nicht %1", conf.count()), x);
+          L.m("Function of type \"MATCH\" requires exacly 2 parameters, not {0}", conf.count()), x);
     }
 
     String regex = reFun.getResult(new Values.None());
@@ -554,7 +554,7 @@ public class FunctionFactory
     }
     catch (PatternSyntaxException x)
     {
-      throw new ConfigurationErrorException(L.m("Fehler in regex \"%1\"", regex), x);
+      throw new ConfigurationErrorException(L.m("Error in regex \"{0}\"", regex), x);
     }
     return new MatchFunction(strFun, p);
   }
@@ -571,7 +571,7 @@ public class FunctionFactory
     catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException(L.m(
-          "Funktion vom Typ \"VALUE\" erfordert genau 1 Parameter, nicht %1",
+          "Function of type \"VALUE\" requires exacly 2 parameters, not {0}",
           conf.count()), e);
     }
 
@@ -594,14 +594,14 @@ public class FunctionFactory
         if (funConf.count() != 1)
         {
           throw new ConfigurationErrorException(L.m(
-            "BY-Angabe von %1 muss genau eine Funktion oder einen String enthalten",
+            "BY-specification of {0} has to contain exacly one function or one string",
             conf.getName()));
         }
 
         if (byFun != null)
         {
           throw new ConfigurationErrorException(L.m(
-            "%1-Funktion darf maximal eine BY-Angabe haben", conf.getName()));
+            "{0}-Function may only have one BY-specification", conf.getName()));
         }
 
         byFun = parseChildren(funConf, funcLib, dialogLib, context);
@@ -624,7 +624,7 @@ public class FunctionFactory
         if (num < 0)
         {
           throw new ConfigurationErrorException(L.m(
-            "MIN-Angabe von %1 muss \"<NichtNegativeGanzeZahl>\" sein",
+            "MIN-specification of {0} has to be \"<NonNegativeInteger>\"",
             conf.getName()));
         }
 
@@ -649,7 +649,7 @@ public class FunctionFactory
         if (num < 0)
         {
           throw new ConfigurationErrorException(L.m(
-            "MAX-Angabe von %1 muss \"<NichtNegativeGanzeZahl>\" sein",
+            "MAX-Angabe von {0} muss \"<NichtNegativeGanzeZahl>\" sein",
             conf.getName()));
         }
 
@@ -660,8 +660,8 @@ public class FunctionFactory
         if (dividendFun != null)
         {
           throw new ConfigurationErrorException(L.m(
-              "Bei %1-Funktion wurde mehr als eine unqualifizierte Funktion angegeben. Beachten Sie, "
-                  + "dass der Divisor mit BY(...) umschlossen sein muss.",
+              "For {0}-function more than one unqualified function was specified. "
+                  + "Note that the divisor must be enclosed with BY(...).",
               conf.getName()));
         }
         dividendFun = parse(funConf, funcLib, dialogLib, context);
@@ -671,7 +671,7 @@ public class FunctionFactory
     if (dividendFun == null)
     {
       throw new ConfigurationErrorException(L.m(
-        "Bei %1-Funktion muss genau eine unqualifizierte Funktion angegeben werden",
+        "For the {0}-function exactly one unqualified function must be specified",
         conf.getName()));
     }
 
@@ -687,7 +687,7 @@ public class FunctionFactory
       {
         throw new ConfigurationErrorException(
           L.m(
-            "%1 erfordert die Angabe MAX \"<NichtNegativeZahl>\", wenn mit BY ein Divisor angegeben wird",
+            "{0} requires specifying MAX \"<NonNegativeInteger>\", if specified with BY divisor",
             conf.getName()));
       }
     }
@@ -695,7 +695,7 @@ public class FunctionFactory
     if (maxScale < minScale)
     {
       throw new ConfigurationErrorException(L.m(
-        "Bei %1 muss MIN kleiner oder gleich MAX sein", conf.getName()));
+        "In case of {0} MIN must be smaller than or equal to MAX", conf.getName()));
     }
 
     return new DivideFunction(dividendFun, byFun, minScale, maxScale);
@@ -754,7 +754,7 @@ public class FunctionFactory
         catch (ConfigurationErrorException e)
         {
           LOGGER.error(L.m(
-            "Fehler beim Parsen der Funktion \"%1\" im Abschnitt \"%2\"", name,
+            "Error parsing the function \"{0}\" in section \"{1}\"", name,
             section), e);
         }
       }
@@ -780,11 +780,12 @@ public class FunctionFactory
           Function func = FunctionFactory.parseChildren(transConf, funcLib, dialogLib, context);
           if (func == null)
             throw new ConfigurationErrorException(
-                L.m("Leere Funktionsdefinition ist nicht erlaubt. Verwenden Sie stattdessen den leeren String \"\""));
+                L.m("Empty functions definition is not allowed. Instead use the empty string \"\""));
           trafos.put(name, func);
         } catch (ConfigurationErrorException e)
         {
-          LOGGER.error(L.m("Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"%1\"", name), e);
+          LOGGER.error(L.m("Error during parsing of the column replacement "
+              + "function for the result column \"{0}\"", name), e);
         }
       }
     }

@@ -287,6 +287,6 @@ public class PrintProgressBar
 
     progressBar.setRange(0, allMax);
     progressBar.setValue(allCurrent);
-    statusLabel.setText(L.m(" %1 von %2%3 Schritten", allCurrent, allMax, fromMaxString));
+    statusLabel.setText(L.m("{0} from {1}{2} steps", allCurrent, allMax, fromMaxString));
   }
 }

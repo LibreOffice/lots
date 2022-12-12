@@ -203,7 +203,7 @@ public class SectionModel
     }
     catch (Exception x)
     {
-      LOGGER.error(L.m("Fehler beim Versuch, Bereich zu entfernen: \"%1\"",
+      LOGGER.error(L.m("Error while trying to remove section: \"{0}\"",
         sectionNameComplete), x);
     }
   }
@@ -238,7 +238,7 @@ public class SectionModel
     }
     catch (Exception x)
     {
-      LOGGER.error(L.m("Fehler beim Versuch, Bereich zu updaten: \"%1\"",
+      LOGGER.error(L.m("Error while trying to update section: \"{0}\"",
         sectionNameComplete), x);
       return false;
     }
@@ -271,7 +271,7 @@ public class SectionModel
     {
       Object textSection = textSections.get(sectionNameComplete);
       if (textSection == null)
-        LOGGER.error("Bereich ist plötzlich verschwunden: \"{}\"", sectionNameComplete);
+        LOGGER.error("Section suddenly disappeared: \"{}\"", sectionNameComplete);
       else
         UnoProperty.setProperty(textSection, UnoProperty.IS_VISIBLE, Boolean.valueOf(visible));
     }

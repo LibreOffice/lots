@@ -161,7 +161,7 @@ public class ContentBasedDirectiveConfig
       return value;
     } catch (NumberFormatException e)
     {
-      LOGGER.error(L.m("Der angegebene Farbwert '%1' ist ungültig!", value));
+      LOGGER.error(L.m("The specified colour value in attribute \"{0}\" is invalid!", value));
       return defaultColor;
     }
   }

@@ -158,13 +158,13 @@ public class OOoBasedMailMerge implements AutoCloseable
   {
     this.pmod = pmod;
     this.type = type;
-    PrintModels.setStage(pmod, L.m("Seriendruck vorbereiten"));
+    PrintModels.setStage(pmod, L.m("Preparing mail merge"));
 
     createMailMergeTempdir();
     prepareDatasource();
     modifyLoadPrinterSetting(true);
     registerTempDatasouce();
-    LOGGER.debug("Temporäre Datenquelle: {}", dbName);
+    LOGGER.debug("Temporaray data source: {}", dbName);
 
     createAndAdjustInputFile();
   }
@@ -189,7 +189,7 @@ public class OOoBasedMailMerge implements AutoCloseable
     {
       return;
     }
-    PrintModels.setStage(pmod, L.m("Gesamtdokument erzeugen"));
+    PrintModels.setStage(pmod, L.m("Generating full document"));
 
     try
     {
@@ -220,7 +220,7 @@ public class OOoBasedMailMerge implements AutoCloseable
         mmProps.add(new NamedValue(UnoProperty.SINGLE_PRINT_JOBS, Boolean.FALSE));
       }
 
-      LOGGER.debug("Starting OOo-MailMerge in Verzeichnis {}", tmpDir);
+      LOGGER.debug("Starting OOo-MailMerge in directory {}", tmpDir);
 
       Object result = mailMerge.execute(mmProps.toArray(new NamedValue[mmProps.size()]));
 
@@ -239,7 +239,7 @@ public class OOoBasedMailMerge implements AutoCloseable
       }
     } catch (Exception e)
     {
-      throw new PrintException("OOo-MailMergeService fehlgeschlagen:", e);
+      throw new PrintException("OOo-MailMergeService failed:", e);
     }
   }
 
@@ -251,7 +251,7 @@ public class OOoBasedMailMerge implements AutoCloseable
       try
       {
         String unoURL = UNO.getParsedUNOUrl(outputFile.toURI().toString()).Complete;
-        LOGGER.debug("Öffne erzeugtes Gesamtdokument {}", unoURL);
+        LOGGER.debug("Opening generated full document {}", unoURL);
         UNO.loadComponentFromURL(unoURL, true, false);
       } catch (Exception e)
       {
@@ -259,8 +259,8 @@ public class OOoBasedMailMerge implements AutoCloseable
       }
     } else
     {
-      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
-          L.m("Leider konnte kein Gesamtdokument erstellt werden."));
+      InfoDialog.showInfoModal(L.m("WollMux mail merge"),
+          L.m("Unfortunately the full document could not be created."));
       pmod.cancel();
     }
     try
@@ -284,12 +284,12 @@ public class OOoBasedMailMerge implements AutoCloseable
     } catch (java.io.IOException ex)
     {
       throw new PrintException(
-          L.m("OOo-Based-MailMerge: kann Simulationsdatenquelle nicht erzeugen!"), ex);
+          L.m("OOo-Based-MailMerge: cannot generate simulation data source."), ex);
     }
     if (ds.getSize() == 0)
     {
       throw new PrintException(
-          "Der Seriendruck wurde abgebrochen, da Ihr Druckauftrag keine Datensätze enthält.");
+          "The mail merge was canceled because your print job does not contain any records.");
     }
   }
 
@@ -821,12 +821,12 @@ public class OOoBasedMailMerge implements AutoCloseable
           }
 
           pmod.setPrintProgressValue((short) ++count);
-          LOGGER.trace(L.m("OOo-MailMerger: verarbeite Datensatz %1 (%2 ms)", count,
+          LOGGER.trace(L.m("OOo-MailMerge: processing record {0} ({1} ms)", count,
               (System.currentTimeMillis() - start)));
           if (count >= maxDatasets && type == MailMergeType.PRINTER)
           {
             count = 0;
-            pmod.setPrintMessage(L.m("Sende Druckauftrag - bitte warten..."));
+            pmod.setPrintMessage(L.m("Send print job - please wait..."));
           }
         }
       });
@@ -852,8 +852,8 @@ public class OOoBasedMailMerge implements AutoCloseable
     {
       LOGGER.error("Can't create directory.", e);
       pmod.cancel();
-      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
-          "Es konnte kein Ordner für den Seriendruck erstellt werden.");
+      InfoDialog.showInfoModal(L.m("Mail merge"),
+          "Folder for mail merge could not be created.");
     }
   }
 

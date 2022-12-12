@@ -80,7 +80,7 @@ public class SimpleDataset implements Dataset
   public String get(String columnName) throws ColumnNotFoundException
   {
     if (!data.containsKey(columnName))
-      throw new ColumnNotFoundException(L.m("Datensatz kennt Spalte \"%1\" nicht!",
+      throw new ColumnNotFoundException(L.m("Data set does not know column \"{0}\"",
         columnName));
     return data.get(columnName);
   }

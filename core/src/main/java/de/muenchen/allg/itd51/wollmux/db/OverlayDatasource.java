@@ -116,9 +116,9 @@ public class OverlayDatasource extends Datasource
   public OverlayDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc,
       URL context)
   {
-    name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
+    name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
     String mode = parseConfig(sourceDesc, "MODE",
-        () -> L.m("MODE-Angabe der Datenquelle '%1' fehlt", name));
+        () -> L.m("MODE-specification of datasource \"{0}\" is missing", name));
 
     String lcMode = mode.toLowerCase();
     if ("so".equals(lcMode))
@@ -127,26 +127,26 @@ public class OverlayDatasource extends Datasource
       modeSO = false;
     else
       throw new ConfigurationErrorException(
-          L.m("Fehlerhafte MODE-Angabe bei Datenquelle '%1': MODE \"%2\" ist nicht erlaubt", name,
+          L.m("Incorrect MODE-specification in datasource  \"{0}\": MODE \"{1}\" is not allowed", name,
               mode));
 
     treatEmptyStringsAsNull = Character.isLowerCase(mode.charAt(1));
 
     source1Name = parseConfig(sourceDesc, "SOURCE",
-        () -> L.m("SOURCE der Datenquelle %1 fehlt", name));
+        () -> L.m("SOURCE of data source \"{0}\" is missing", name));
     source2Name = parseConfig(sourceDesc, "OVERLAY",
-        () -> L.m("OVERLAY-Angabe der Datenquelle %1 fehlt", name));
+        () -> L.m("OVERLAY-specification of data source \"{0}\" is missing", name));
 
     source1 = nameToDatasource.get(source1Name);
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
-          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source1Name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source1Name));
 
     if (source2 == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
-          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source2Name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source2Name));
 
     schema1 = new HashSet<>(source1.getSchema());
     schema2 = new HashSet<>(source2.getSchema());
@@ -158,7 +158,7 @@ public class OverlayDatasource extends Datasource
     int numMatches = matchesDesc.count();
     if (numMatches == 0)
       throw new ConfigurationErrorException(
-          L.m("Mindestens eine MATCH-Angabe muss bei Datenquelle \"%1\" gemacht werden", name));
+          L.m("At least one MATCH-specification has to be made in data source \"{0}\"", name));
 
     match1 = new String[numMatches];
     match2 = new String[numMatches];
@@ -170,7 +170,7 @@ public class OverlayDatasource extends Datasource
       ConfigThingy matchDesc = iter.next();
       if (matchDesc.count() != 2)
         throw new ConfigurationErrorException(
-            L.m("Fehlerhafte MATCH Angabe in Datenquelle \"%1\"", name));
+            L.m("Incorrect MATCH specification in data source \"{0}\"", name));
 
       String spalte1 = "";
       String spalte2 = "";
@@ -184,10 +184,10 @@ public class OverlayDatasource extends Datasource
       }
 
       if (!schema1.contains(spalte1))
-        throw new ConfigurationErrorException(L.m("Spalte \"%1\" ist nicht im Schema", spalte1));
+        throw new ConfigurationErrorException(L.m("Column \"{0}\" is not defined in schema", spalte1));
 
       if (!schema2.contains(spalte2))
-        throw new ConfigurationErrorException(L.m("Spalte \"%1\" ist nicht im Schema", spalte2));
+        throw new ConfigurationErrorException(L.m("Column \"{0}\" is not defined in schema", spalte2));
 
       match1[i] = spalte1;
       match2[i] = spalte2;
@@ -526,7 +526,7 @@ public class OverlayDatasource extends Datasource
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName))
-        throw new ColumnNotFoundException(L.m("Spalte \"%1\" ist nicht im Schema", columnName));
+        throw new ColumnNotFoundException(L.m("Column \"{0}\" is not defined in schema", columnName));
 
       Dataset ds1;
       Dataset ds2;

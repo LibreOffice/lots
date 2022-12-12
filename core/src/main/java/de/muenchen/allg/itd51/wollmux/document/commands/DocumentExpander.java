@@ -187,7 +187,7 @@ class DocumentExpander extends AbstractExecutor
       if (urls.isEmpty())
       {
         throw new ConfigurationErrorException(L.m(
-          "Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!",
+          "The textfragment with the FRAG_ID \"{0}\" is not defined!",
           cmd.getFragID()));
       }
 
@@ -198,7 +198,7 @@ class DocumentExpander extends AbstractExecutor
         try
         {
           URL url = WollMuxFiles.makeURL(urlStr);
-          LOGGER.debug("Füge Textfragment '{}' von URL '{}' ein.", cmd.getFragID(), url);
+          LOGGER.debug("Insert Textfragment \"{}\" with URL \"{}\".", cmd.getFragID(), url);
           if (cmd.importStylesOnly())
           {
             insertStylesFromURL(cmd, cmd.getStyles(), url);
@@ -233,13 +233,13 @@ class DocumentExpander extends AbstractExecutor
       {
         String msg =
           L.m(
-            "Der Textbaustein mit der Bezeichnung (FRAG_ID) '%1' %2 konnte nicht eingefügt werden:",
+            "The Textfragment with the identifier(FRAG_ID) \"{0}\" {1} could not be inserted:",
             cmd.getFragID(), (fragId.equals(cmd.getFragID()) ? "" : L.m(
-              "(Override für Fragment '%1')", fragId)));
+              "(Override for fragment \"{0}\")", fragId)));
 
         LOGGER.error(msg, e);
 
-        InfoDialog.showInfoModal(L.m("WollMux-Fehler"), msg);
+        InfoDialog.showInfoModal(L.m("WollMux error"), msg);
       }
       else
       {
@@ -264,7 +264,7 @@ class DocumentExpander extends AbstractExecutor
 
       try
       {
-        LOGGER.debug("Füge Textfragment von URL '{}' ein.", urlStr);
+        LOGGER.debug("Inserting textfragment from URL \"{}\".", urlStr);
 
         insertDocumentFromURL(cmd, WollMuxFiles.makeURL(urlStr));
       }
@@ -488,7 +488,7 @@ class DocumentExpander extends AbstractExecutor
     {
 
       String error =
-        (L.m("Es sind mehr Parameter angegeben als Platzhalter vorhanden sind"));
+        (L.m("There are more parameters specified than the number of placeholders"));
 
       LOGGER.error(error);
 

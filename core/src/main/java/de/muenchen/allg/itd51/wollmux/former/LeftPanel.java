@@ -97,12 +97,12 @@ public class LeftPanel implements View
 
     myTabbedPane =
       new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-    myTabbedPane.add(L.m("Formular-GUI"),
+    myTabbedPane.add(L.m("Form GUI"),
       allFormControlModelLineViewsPanel.getComponent());
-    myTabbedPane.add(L.m("Einfügungen"),
+    myTabbedPane.add(L.m("Insertion"),
       allInsertionModelLineViewsPanel.getComponent());
-    myTabbedPane.add(L.m("Sichtbarkeiten"), allGroupModelLineViewsPanel.getComponent());
-    myTabbedPane.add(L.m("Bereiche"), allSectionModelLineViewsPanel.getComponent());
+    myTabbedPane.add(L.m("Visibility"), allGroupModelLineViewsPanel.getComponent());
+    myTabbedPane.add(L.m("Sections"), allSectionModelLineViewsPanel.getComponent());
 
     myTabbedPane.addChangeListener(e -> tabSwitched());
   }

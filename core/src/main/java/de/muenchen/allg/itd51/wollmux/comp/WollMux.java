@@ -141,10 +141,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
     int myWmConfHash = WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
     if (myWmConfHash != wollmuxConfHashCode)
     {
-      InfoDialog.showInfoModal(L.m("WollMux-Fehler"),
-          L.m("Die Konfiguration des WollMux muss neu eingelesen werden.\n\n"
-              + "Bitte beenden Sie den WollMux und Office und schießen "
-              + "Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
+      InfoDialog.showInfoModal(L.m("WollMux error"),
+          L.m("The configuration of the Wollmux must be re-read.\n\n"
+              + "Please close Wollmux and LibreOffice and make sure "
+              + "no 'soffice.bin' processes are still running."));
     }
   }
 
@@ -226,7 +226,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   {
     deleteMenuButton("wollmux:Seriendruck", ".uno:ToolsMenu");
     deleteMenuButton(AboutDispatch.COMMAND, ".uno:HelpMenu");
-    WollMux.createMenuButton(AboutDispatch.COMMAND, L.m("Info über Vorlagen und Formulare (WollMux)"),
+    WollMux.createMenuButton(AboutDispatch.COMMAND, L.m("About WollMux"),
         ".uno:HelpMenu", ".uno:About");
   }
 

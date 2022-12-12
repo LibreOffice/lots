@@ -171,7 +171,7 @@ public class DatasourceSearchDialog implements Dialog
     if (schema.isEmpty())
     {
       throw new ConfigurationErrorException(
-          L.m("Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst werden!"));
+          L.m("Error within the function dialogue: Section 'Spaltenumsetzung' could not be parsed!"));
     }
     this.data = new HashMap<>();
   }
@@ -219,16 +219,16 @@ public class DatasourceSearchDialog implements Dialog
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;
 
-    String title = L.m("Datensatz Auswählen");
+    String title = L.m("Select dataset");
     try
     {
-      title = L.m(myConf.get("TITLE", 1).toString());
+      title = L.tm(myConf.get("TITLE", 1).toString());
     } catch (Exception x)
     {
       LOGGER.trace("", x);
     }
 
-    String type = L.m("<keiner>");
+    String type = L.m("<None>");
     try
     {
       type = myConf.get("TYPE", 1).toString();
@@ -238,11 +238,11 @@ public class DatasourceSearchDialog implements Dialog
     }
     if (!"dbSelect".equals(type))
       throw new ConfigurationErrorException(
-          L.m("Ununterstützter TYPE \"%1\" in Funktionsdialog \"%2\"", type, myConf.getName()));
+          L.m("Unsupported TYPE \"{0}\" in function dialog \"{1}\"", type, myConf.getName()));
 
     final ConfigThingy fensterDesc = myConf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1", myConf.getName()));
+      throw new ConfigurationErrorException(L.m("Key 'Fenster' is missing in {0}", myConf.getName()));
 
     try
     {
@@ -295,7 +295,7 @@ public class DatasourceSearchDialog implements Dialog
     short tabId = 1;
     for (ConfigThingy neuesFenster : fensterDesc)
     {
-      String tabTitle = L.m("Eingabe");
+      String tabTitle = L.m("Input");
       String tip = "";
       for (ConfigThingy childConf : neuesFenster)
       {
@@ -305,7 +305,7 @@ public class DatasourceSearchDialog implements Dialog
           tip = childConf.toString();
         } else if ("TITLE".equals(name))
         {
-          tabTitle = L.m(childConf.toString());
+          tabTitle = L.tm(childConf.toString());
         }
       }
 
@@ -374,7 +374,7 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * The template for showing the search results. Can contain variables like {@code ${name}}.
      */
-    private String displayTemplate = L.m("<Datensatz>");
+    private String displayTemplate = L.m("<Dataset>>");
 
     /**
      * The control containing the results.
@@ -418,7 +418,7 @@ public class DatasourceSearchDialog implements Dialog
             FunctionFactory.parseTrafos(conf, "Spaltenumsetzung", funcLib, dialogLib, context));
       } catch (ConfigurationErrorException x)
       {
-        LOGGER.error(L.m("Fehler beim Parsen des Abschnitts 'Spaltenumsetzung'"), x);
+        LOGGER.error("Error while parsing the section 'Spaltenumsetzung'", x);
       }
       dialogWindowSchema = columnTransformer.getSchema();
       layout = new VerticalLayout();
@@ -534,12 +534,12 @@ public class DatasourceSearchDialog implements Dialog
         resultsList = UNO.XListBox(uiElement);
         if (resultsList == null)
         {
-          LOGGER.error("UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!");
+          LOGGER.error("UI element with ID 'suchergebnis' must be of TYPE 'listbox'.");
         }
         displayTemplate = config.getDisplay();
         if (displayTemplate == null)
         {
-          displayTemplate = L.m("<Datensatz>");
+          displayTemplate = L.m("<Dataset>");
         }
       }
     }
@@ -639,8 +639,8 @@ public class DatasourceSearchDialog implements Dialog
           }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error("Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte \"{}\" soll in "
-              + "Vorschau angezeigt werden ist aber nicht in der Spaltenumsetzung definiert.", dbSpalte);
+          LOGGER.error("Error within the section 'Spaltenumsetzung' or 'Vorschau'. Column '{}' is to be "
+              + "displayed in the preview, but is not defined in the section 'Spaltenumsetzung'.", dbSpalte);
         }
       }
     }
@@ -686,7 +686,7 @@ public class DatasourceSearchDialog implements Dialog
             newData.put(columnName, ds.get(columnName));
           } catch (Exception x)
           {
-            LOGGER.error(L.m("Huh? Dies sollte nicht passieren können"), x);
+            LOGGER.error("Huh? This should not happen", x);
           }
         }
         data = newData;
@@ -712,11 +712,11 @@ public class DatasourceSearchDialog implements Dialog
         } catch (IllegalArgumentException x)
         {
           LOGGER.error("", x);
-          InfoDialog.showInfoModal(L.m("Timeout bei Suchanfrage"),
-              L.m("Das Bearbeiten Ihrer Suchanfrage hat zu lange gedauert und wurde deshalb abgebrochen.\n"
-                  + "Grund hierfür könnte ein Problem mit der Datenquelle sein oder mit dem verwendeten\n"
-                  + "Suchbegriff, der auf zu viele Ergebnisse zutrifft.\n"
-                  + "Bitte versuchen Sie eine andere, präzisere Suchanfrage."));
+          InfoDialog.showInfoModal(L.m("Search timeout"),
+              L.m("Processing your search query took too long and was therefore aborted.\n"
+                  + "The reason for this could be a problem with the data source or with the used\n"
+                  + "search term matching too many results.\n"
+                  + "Please try another, more precise search query."));
         }
         return r;
       }).thenAcceptAsync(r -> {
@@ -797,8 +797,7 @@ public class DatasourceSearchDialog implements Dialog
           }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error(
-              L.m("Fehler beim Auflösen des Platzhalters \"${%1}\": Spalte für den Datensatz nicht definiert", spalte));
+          LOGGER.error("Error while resolving the placeholder '${{}}': Column for the dataset is not defined", spalte);
         }
         display = display.substring(0, m.start()) + wert + display.substring(m.end());
         m = p.matcher(display);

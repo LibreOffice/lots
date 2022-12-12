@@ -58,8 +58,8 @@ public class ToShowOdtFile extends PrintFunction
       UNO.XTopWindow(result.getCurrentController().getFrame().getContainerWindow()).toFront();
     } else
     {
-      InfoDialog.showInfoModal(L.m("WollMux-Seriendruck"),
-          L.m("Das erzeugte Gesamtdokument kann leider nicht angezeigt werden."));
+      InfoDialog.showInfoModal(L.m("WollMux mail merge"),
+          L.m("The generated merged document can not be displayed."));
       printModel.cancel();
     }
   }

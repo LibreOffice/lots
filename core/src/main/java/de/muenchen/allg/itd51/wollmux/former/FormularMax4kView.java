@@ -143,9 +143,9 @@ public class FormularMax4kView extends JFrame
 
   private JMenu createMenuFormular()
   {
-    JMenu menu = new JMenu(L.m("Formular"));
+    JMenu menu = new JMenu(L.m("Form"));
 
-    JMenuItem menuItem = new JMenuItem(L.m("Formularfelder aus Vorlage einlesen"));
+    JMenuItem menuItem = new JMenuItem(L.m("Get form fields from template"));
     menuItem.addActionListener(e -> {
       controller.scan();
       controller.updateDocument();
@@ -153,9 +153,9 @@ public class FormularMax4kView extends JFrame
     });
     menu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Formulartitel setzen"));
+    menuItem = new JMenuItem(L.m("Set title of form"));
     menuItem.addActionListener(e -> {
-      String newTitle = JOptionPane.showInputDialog(FormularMax4kView.this, L.m("Bitte Formulartitel eingeben"),
+      String newTitle = JOptionPane.showInputDialog(FormularMax4kView.this, L.m("Please enter form title"),
           controller.getTitle());
 
       if (newTitle != null && !newTitle.isEmpty())
@@ -166,21 +166,21 @@ public class FormularMax4kView extends JFrame
     });
     menu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Druckfunktionen setzen"));
+    menuItem = new JMenuItem(L.m("Set print function"));
     menuItem.addActionListener(e -> {
       controller.setPrintFunction();
       setFrameSize();
     });
     menu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Dateiname vorgeben"));
+    menuItem = new JMenuItem(L.m("Enter file name"));
     menuItem.addActionListener(e -> {
       controller.setFilenameGeneratorFunction();
       setFrameSize();
     });
     menu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("WollMux-Formularmerkmale aus Vorlage entfernen"));
+    menuItem = new JMenuItem(L.m("Remove WollMux-form-elements from template"));
     menuItem.addActionListener(e -> controller.deForm());
     menu.add(menuItem);
 
@@ -191,12 +191,12 @@ public class FormularMax4kView extends JFrame
      */
     if (Integer.valueOf(3).equals(Integer.valueOf(0)))
     {
-      menuItem = new JMenuItem(L.m("Ladezeit des Dokuments optimieren"));
+      menuItem = new JMenuItem(L.m("Optimize document loading time"));
       menuItem.addActionListener(e -> controller.removeNonWMBookmarks());
       menu.add(menuItem);
     }
 
-    menuItem = new JMenuItem(L.m("Formularbeschreibung editieren"));
+    menuItem = new JMenuItem(L.m("Edit form description"));
     menuItem.addActionListener(e -> controller.editFormDescriptor());
     menu.add(menuItem);
     return menu;
@@ -204,7 +204,7 @@ public class FormularMax4kView extends JFrame
 
   private JMenu createMenuAnsicht()
   {
-    JMenu menu = new JMenu(L.m("Ansicht"));
+    JMenu menu = new JMenu(L.m("View"));
 
     final ViewVisibilityDescriptor viewVisibilityDescriptor =
       new ViewVisibilityDescriptor();
@@ -241,7 +241,7 @@ public class FormularMax4kView extends JFrame
     menuItem.setSelected(viewVisibilityDescriptor.isFormControlLineViewType());
     menu.add(menuItem);
 
-    menuItem = new JCheckBoxMenuItem(L.m("Elementspezifische Felder"));
+    menuItem = new JCheckBoxMenuItem(L.m("Element-specific fields"));
     menuItem.addActionListener(e -> {
       viewVisibilityDescriptor.setFormControlLineViewAdditional(((AbstractButton) e.getSource()).isSelected());
       controller.broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
@@ -275,7 +275,7 @@ public class FormularMax4kView extends JFrame
     menu.add(menuItem);
 
     menu.addSeparator();
-    menuItem = new JMenuItem(L.m("Funktionstester"));
+    menuItem = new JMenuItem(L.m("Function Tester"));
     menuItem.addActionListener(e -> controller.showFunctionTester());
     menu.add(menuItem);
     return menu;
@@ -283,9 +283,9 @@ public class FormularMax4kView extends JFrame
 
   private JMenu createMenuBearbeiten()
   {
-    JMenu menu = new JMenu(L.m("Bearbeiten"));
+    JMenu menu = new JMenu(L.m("Edit"));
 
-    JMenu submenu = new JMenu(L.m("Standardelemente einfügen"));
+    JMenu submenu = new JMenu(L.m("Insert main elements"));
 
     if (!createStandardelementeMenuNew(submenu))
       createStandardelementeMenuOld(submenu);
@@ -294,7 +294,7 @@ public class FormularMax4kView extends JFrame
 
     menu.addSeparator();
 
-    JMenuItem menuItem = new JMenuItem(L.m("Checkboxen zu ComboBox"));
+    JMenuItem menuItem = new JMenuItem(L.m("Checkboxes to ComboBox"));
     menuItem.addActionListener(e -> {
       ComboboxMergeDescriptor desc = leftPanel.mergeCheckboxesIntoCombobox();
       controller.mergeCheckBoxesIntoComboBox(desc);
@@ -306,17 +306,17 @@ public class FormularMax4kView extends JFrame
 
   private JMenu createMenuDatei()
   {
-    JMenu menu = new JMenu(L.m("Datei"));
+    JMenu menu = new JMenu(L.m("File"));
 
-    JMenuItem menuItem = new JMenuItem(L.m("Speichern"));
+    JMenuItem menuItem = new JMenuItem(L.m("Save"));
     menuItem.addActionListener(e -> controller.save());
     menu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Speichern unter..."));
+    menuItem = new JMenuItem(L.m("Save as..."));
     menuItem.addActionListener(e -> controller.saveAs());
     menu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Beenden"));
+    menuItem = new JMenuItem(L.m("Exit"));
     menuItem.addActionListener(e -> controller.abort());
 
     menu.add(menuItem);
@@ -421,7 +421,7 @@ public class FormularMax4kView extends JFrame
             ConfigThingy tabConf = conf.query("Tab", 1);
             if (tabConf.count() > 1)
               throw new ConfigurationErrorException(
-                L.m("Mehr als ein Tab-Abschnitt"));
+                L.m("More than one Tab section"));
             if (tabConf.count() == 1)
             {
               JMenuItem menuItem;
@@ -440,10 +440,10 @@ public class FormularMax4kView extends JFrame
               ConfigThingy buttonsConf = conf.query("Buttons", 1);
               if (buttonsConf.count() > 1)
                 throw new ConfigurationErrorException(
-                  L.m("Mehr als ein Buttons-Abschnitt"));
+                  L.m("More than one Buttons section"));
               if (buttonsConf.count() == 0)
                 throw new ConfigurationErrorException(
-                  L.m("Weder Tab noch Buttons-Abschnitt"));
+                  L.m("No Tab or Buttons section"));
 
               final ConfigThingy buttonsConfEntry = buttonsConf.getFirstChild();
 
@@ -459,7 +459,7 @@ public class FormularMax4kView extends JFrame
           catch (Exception x)
           {
             LOGGER.error(
-              L.m("Fehler beim Parsen des Abschnitts FormularMax4000/Standardelemente"),
+              L.m("Error while parsing the sections FormularMax4000/Standardelemente"),
               x);
           }
         }
@@ -478,8 +478,8 @@ public class FormularMax4kView extends JFrame
   private void createStandardelementeMenuOld(JMenu submenu)
   {
     JMenuItem menuItem;
-    menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
-
+    menuItem = new JMenuItem(L.m("Recipient Selection Tab"));
+    
     final URL EMPFAENGER_TAB_URL =
       this.getClass().getClassLoader().getResource(
             "default_buttons/empfaengerauswahl_controls.conf");
@@ -490,8 +490,8 @@ public class FormularMax4kView extends JFrame
     });
     submenu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
-
+    menuItem = new JMenuItem(L.m("Cancel, <-Back, Next->"));
+    
     final URL STANDARD_BUTTONS_MIDDLE_URL =
         this.getClass().getClassLoader().getResource("default_buttons/standardbuttons_mitte.conf");
 
@@ -501,7 +501,7 @@ public class FormularMax4kView extends JFrame
     });
     submenu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, PDF, Drucken"));
+    menuItem = new JMenuItem(L.m("Cancel, <-Back, PDF, Print"));
 
     final URL STANDARD_BUTTONS_LAST_URL =
       this.getClass().getClassLoader().getResource(
@@ -513,12 +513,12 @@ public class FormularMax4kView extends JFrame
     });
     submenu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Als E-Mail versenden, Drucken"));
+    menuItem = new JMenuItem(L.m("Cancel, <-Back, Send as Email, Print"));
 
     final URL STANDARD_BUTTONS_EMAIL =
     	      this.getClass().getClassLoader().getResource(
             "default_buttons/standardbuttons_email.conf");
-    	
+
     menuItem.addActionListener(e -> {
       controller.insertStandardButtons(null, STANDARD_BUTTONS_EMAIL, leftPanel.getButtonInsertionIndex());
       setFrameSize();

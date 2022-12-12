@@ -98,3 +98,14 @@ There are also some configuration changes for LibreOffice necessary. Go to **Too
 * `-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n`
 
 If suspend is set to `y`, LibreOffice waits until an external process connects before initializing.
+
+## Translations
+
+To update pot/po files from source, run these commands:
+
+```bash
+xgettext --default-domain=wollmux --output=core/i18n/wollmux.pot --language=java --from-code=UTF-8 --keyword --keyword=m $(find . -name "*.java")
+for i in core/i18n/*.po; do msgmerge -U $i core/i18n/wollmux.pot; done
+```
+
+This creates the `core/i18n/wollmux.pot` template file. Translate it and place the translated po files in `core/i18n` folder. The build system will pick up the po files, convert and bundle them with WollMux.

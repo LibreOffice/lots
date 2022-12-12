@@ -71,7 +71,7 @@ public class Datasources
       String type = sourceDesc.getString("TYPE");
       if (name == null || type == null)
       {
-        LOGGER.error("Datenquelle ohne NAME oder TYPE gefunden");
+        LOGGER.error("Data source without NAME or TYPE found");
         continue;
       }
 
@@ -108,17 +108,17 @@ public class Datasources
           ds = new FunkyDatasource(datasources, sourceDesc);
           break;
         default:
-          LOGGER.error("Ununterstützter Datenquellentyp: {}", type);
+          LOGGER.error("Unsupported data source type: {}", type);
           break;
         }
       } catch (Exception x)
       {
-        LOGGER.error(L.m("Fehler beim Initialisieren von Datenquelle \"%1\" (Typ \"%2\"):", name, type), x);
+        LOGGER.error("Error during initialization of data source '{}' (Type '{}'):", name, type, x);
       }
 
       if (ds == null)
       {
-        LOGGER.error("Datenquelle {} von Typ {} konnte nicht initialisiert werden", name, type);
+        LOGGER.error("Data source {} of type {} could not be initialized", name, type);
         /*
          * Falls schon eine alte Datenquelle name registriert ist, entferne diese Registrierung.
          * Ansonsten würde mit der vorher registrierten Datenquelle weitergearbeitet, was seltsame

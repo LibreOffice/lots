@@ -38,18 +38,18 @@ public class OnDumpInfo extends WollMuxEvent
   @Override
   protected void doit() throws WollMuxFehlerException
   {
-    final String title = L.m("Fehlerinfos erstellen");
+    final String title = L.m("Create error information");
     String name = WollMuxFiles.dumpInfo();
 
     if (name != null)
     {
       InfoDialog.showInfoModal(title, L.m(
-          "Die Fehlerinformationen des WollMux wurden erfolgreich in die Datei '%1' geschrieben.",
+          "The WollMux error information has been successfully written to file \"{0}\".",
           name));
     } else
     {
       InfoDialog.showInfoModal(title, L.m(
-          "Die Fehlerinformationen des WollMux konnten nicht geschrieben werden. Details siehe Datei wollmux.log!"));
+          "The WollMux error information could not be written. For details have a look at the file wollmux.log!"));
     }
   }
 }

@@ -22,14 +22,18 @@
  */
 package de.muenchen.allg.itd51.wollmux.util;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
+import org.xnap.commons.i18n.I18n;
+import org.xnap.commons.i18n.I18nFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
+
 
 /**
  * Localization functions
@@ -40,6 +44,7 @@ public class L
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(L.class);
 
   private static StringBuilder debugMessages;
+  private static I18n i18n;
 
   /**
    * Initialized for the current language and maps an original string to a translated string.
@@ -51,10 +56,25 @@ public class L
   {}
 
   /**
-   * If a translation is available for original, it will be returned,
-   * otherwise the original string.
+   * Translate string (based on gettext translations, provided by WollMux)
+   *
+   * @param original Untranslated string
+   * @return Translated string if translation is found, otherwise untranslated string.
    */
   public static String m(String original)
+  {
+    if (i18n == null)
+      return original;
+    return i18n.tr(original);
+  }
+
+  /**
+   * Translate user template strings (based on ConfigThingy translations, provided by user)
+   *
+   * @param original Untranslated string
+   * @return Translated string if translation is found, otherwise untranslated string.
+   */
+  public static String tm(String original)
   {
     String trans = mapMessageToTranslation.get(original.trim());
     if (trans == null)
@@ -64,60 +84,78 @@ public class L
   }
 
   /**
-   * If a translation is available for original, it will be returned,
-   * otherwise the original string.
-   * All occurrences of "%1" will be replaced by insertion1.
+   * Translate string (based on gettext translations, provided by WollMux).
+   * All occurrences of "{0}" will be replaced by insertion1.
+   *
+   * @param original Untranslated string
+   * @param insertion1 Insertion 1
+   * @return Translated string if translation is found, otherwise untranslated string.
    */
   public static String m(String original, Object insertion1)
   {
-    // do not use replaceAll because it interprets \ and $ specially
-    return replace(m(original), "%1", "" + insertion1);
+    return MessageFormat.format(m(original), insertion1);
   }
 
   /**
-   * If a translation is available for original, it will be returned,
-   * otherwise the original string.
-   * All occurrences of "%1" will be replaced by insertion1 and of "%2" by insertion2.
+   * Translate string (based on gettext translations, provided by WollMux).
+   * All occurrences of "{0}" will be replaced by insertion1, "{1}" by insertion2, etc.
+   *
+   * @param original Untranslated string
+   * @param insertion1 Insertion 1
+   * @param insertion2 Insertion 2
+   * @return Translated string if translation is found, otherwise untranslated string.
    */
   public static String m(String original, Object insertion1, Object insertion2)
   {
- // do not use replaceAll because it interprets \ and $ specially
-    return replace(m(original, insertion1), "%2", "" + insertion2);
-  }
-
-  public static String m(String original, Object insertion1, Object insertion2,
-      Object insertion3)
-  {
-    // do not use replaceAll because it interprets \ and $ specially
-    return replace(m(original, insertion1, insertion2), "%3", "" + insertion3);
-  }
-
-  public static String m(String original, Object insertion1, Object insertion2,
-      Object insertion3, Object insertion4)
-  {
-    // do not use replaceAll because it interprets \ and $ specially
-    return replace(m(original, insertion1, insertion2, insertion3), "%4", ""
-      + insertion4);
+    return MessageFormat.format(m(original), insertion1, insertion2 );
   }
 
   /**
-   * Replaces in where all occurrences of what by withWhat and returns the result returned.
+   * Translate string (based on gettext translations, provided by WollMux).
+   * All occurrences of "{0}" will be replaced by insertion1, "{1}" by insertion2, etc.
+   *
+   * @param original Untranslated string
+   * @param insertion1 Insertion 1
+   * @param insertion2 Insertion 2
+   * @param insertion3 Insertion 3
+   * @return Translated string if translation is found, otherwise untranslated string.
    */
-  private static String replace(String where, String what, String withWhat)
+  public static String m(String original, Object insertion1, Object insertion2,
+      Object insertion3)
   {
-    int i = where.indexOf(what);
-    if (i < 0 || what.length() == 0) {
-      return where;
-    }
+    return MessageFormat.format(m(original), insertion1, insertion2, insertion3);
+  }
 
-    StringBuilder buffy = new StringBuilder(where);
-    while (i >= 0)
-    {
-      buffy.replace(i, i + what.length(), withWhat);
-      i = buffy.indexOf(what, i + withWhat.length());
-    }
+  /**
+   * Translate string (based on gettext translations, provided by WollMux).
+   * All occurrences of "{0}" will be replaced by insertion1, "{1}" by insertion2, etc.
+   *
+   * @param original Untranslated string
+   * @param insertion1 Insertion 1
+   * @param insertion2 Insertion 2
+   * @param insertion3 Insertion 3
+   * @param insertion3 Insertion 4
+   * @return Translated string if translation is found, otherwise untranslated string.
+   */
+  public static String m(String original, Object insertion1, Object insertion2,
+      Object insertion3, Object insertion4)
+  {
+    return MessageFormat.format(m(original), insertion1, insertion2, insertion3, insertion4);
+  }
 
-    return buffy.toString();
+  /**
+   * Translate string with plural form
+   *
+   * @param singular Singular form
+   * @param plural Plural form
+   * @param count Number to evaluate
+   * @return Translated string
+   */
+  public static String mn(String singular, String plural, int count)
+  {
+    if (i18n == null)
+      return singular;
+    return i18n.trn(singular, plural, count);
   }
 
   /**
@@ -138,12 +176,24 @@ public class L
   }
 
   /**
-   * Initializes the translation map with l10n.
+   * Initialize translations
+   */
+  public static void initTranslations()
+  {
+    try {
+      i18n = I18nFactory.getI18n(L.class);
+    } catch (Exception e) {
+      // in JUnit tests, no translations are available
+    }
+  }
+
+  /**
+   * Initializes the translation map for template translations with l10n.
    *
    * @param l10n
    *          any node with "L10n" subnodes.
    */
-  public static void init(ConfigThingy l10n)
+  public static void initTemplateTranslations(ConfigThingy l10n)
   {
     try
     {

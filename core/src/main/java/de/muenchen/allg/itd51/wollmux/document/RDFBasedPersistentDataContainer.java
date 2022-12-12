@@ -142,7 +142,7 @@ public class RDFBasedPersistentDataContainer implements
     }
     catch (Exception e)
     {
-      LOGGER.error(L.m("Kann nicht auf den RDF-Graphen '%1' zugreifen.",
+      LOGGER.error(L.m("Cannot access the RDF graph \"{0}\".",
         WOLLMUX_DATEN_URI_STR), e);
     }
     return null;
@@ -169,7 +169,7 @@ public class RDFBasedPersistentDataContainer implements
     }
     catch (Exception e)
     {
-      LOGGER.error(L.m("Kann RDF-Graphen '%1' nicht erzeugen.",
+      LOGGER.error(L.m("Cannot create the RDF graph \"{0}\".",
         WOLLMUX_DATEN_URI_STR), e);
     }
     return null;
@@ -222,7 +222,7 @@ public class RDFBasedPersistentDataContainer implements
     }
     catch (Exception e)
     {
-      LOGGER.error(L.m("Kann RDF-Metadatum zur DataID '%1' nicht auslesen.",
+      LOGGER.error(L.m("Cannot read RDF metadata for DataID \"{0}\".",
         dataId), e);
     }
     return null;
@@ -262,7 +262,7 @@ public class RDFBasedPersistentDataContainer implements
     catch (Exception e)
     {
       LOGGER.error(
-        L.m("Kann RDF-Metadatum zur DataID '%1' nicht setzen.", dataId), e);
+        L.m("Cannot set RDF metadata for DataID \"{0}\".", dataId), e);
     }
   }
 
@@ -294,7 +294,7 @@ public class RDFBasedPersistentDataContainer implements
     catch (Exception e)
     {
       LOGGER.error(
-        L.m("Kann RDF-Metadatum zur DataID '%1' nicht löschen.", dataId), e);
+        L.m("Cannot delete RDF metadata for DataID \"{0}\".", dataId), e);
     }
   }
 
@@ -336,7 +336,7 @@ public class RDFBasedPersistentDataContainer implements
     }
     catch (Exception e)
     {
-      LOGGER.error(L.m("Kann RDF-Metadaten nicht persistieren."), e);
+      LOGGER.error(L.m("Cannot persist RDF metadata."), e);
     }
   }
 }

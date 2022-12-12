@@ -150,7 +150,7 @@ public class TextDocumentModel
    *
    * Has be passed as object because of == comparison.
    */
-  public static final String FISHY = L.m("!!!PRÜFEN!!!");
+  public static final String FISHY = L.m("!!!CHECK!!!");
 
   /**
    * Prefix of generated document local function names.
@@ -458,7 +458,7 @@ public class TextDocumentModel
       return;
     }
 
-    final String errmsg = L.m("Fehler beim Einlesen des Druckfunktionen-Abschnitts '%1':", data);
+    final String errmsg = L.m("Error while reading the 'Druckfunktionen' section \"{0}\":", data);
 
     ConfigThingy conf = new ConfigThingy("");
     try
@@ -515,7 +515,7 @@ public class TextDocumentModel
       conf = new ConfigThingy("", null, new StringReader(value));
     } catch (java.lang.Exception e)
     {
-      LOGGER.error(L.m("Die Formularbeschreibung ist fehlerhaft"), e);
+      LOGGER.error(L.m("The form description is incorrect"), e);
       return;
     }
 
@@ -577,7 +577,7 @@ public class TextDocumentModel
       werte = conf.get("WM").get("Formularwerte");
     } catch (NodeNotFoundException | IOException | SyntaxErrorException e)
     {
-      LOGGER.error(L.m("Formularwerte-Abschnitt ist fehlerhaft"), e);
+      LOGGER.error(L.m("The 'Formularwerte' section is incorrect"), e);
       return;
     }
 
@@ -662,8 +662,8 @@ public class TextDocumentModel
     @Override
     public String getMessage()
     {
-      return L.m("Mit overrideFrag können keine Ersetzungsketten definiert werden, das Fragment '%1' "
-          + "taucht jedoch bereits in einem anderen overrideFrag-Kommando auf.", fragId);
+      return L.m("With overrideFrag it is not possible to define replacement chains, the fragment \"{0}\" "
+          + "however appears in another overrideFrag command.", fragId);
     }
 
   }
@@ -1142,7 +1142,7 @@ public class TextDocumentModel
       return (String) printerInfo.getPropertyValue(UnoProperty.NAME);
     } catch (UnknownPropertyException e)
     {
-      return L.m("unbekannt");
+      return L.m("unknown");
     }
   }
 
@@ -1933,7 +1933,7 @@ public class TextDocumentModel
         alwaysActions.add(new ActionUIElementPair(action, alwaysConf));
       } catch (NodeNotFoundException x)
       {
-        LOGGER.error(L.m("Fehlerhafter ALWAYS-Angabe in Buttonanpassung-Abschnitt"), x);
+        LOGGER.error(L.m("Incorrect ALWAYS specification in 'Buttonanpassung-Section'"), x);
       }
     }
     return Pair.of(neverActions, alwaysActions);

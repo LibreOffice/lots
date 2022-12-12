@@ -179,7 +179,7 @@ public class TextModule
            */
           if (!processedAtLeastOneTBSuccessfully)
             throw new WollMuxFehlerException(
-              L.m("An der Einfügestelle befindet sich bereits ein Verweis auf einen Textbaustein."));
+              L.m("At the insertion point there is already a reference to a text block."));
           else
             break;
         }
@@ -210,7 +210,7 @@ public class TextModule
 
     if (!processedAtLeastOneTBSuccessfully)
       throw new WollMuxFehlerException(
-        L.m("An der Einfügestelle konnte kein Textbaustein gefunden werden."));
+        L.m("At the insertion place no text block could be found."));
   }
 
   /**
@@ -298,7 +298,7 @@ public class TextModule
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("FRAG_ID Angabe fehlt in %1",
+        LOGGER.error(L.m("FRAG_ID specification is missing in {0}",
           mappingConf.stringRepresentation()));
         continue;
       }
@@ -326,8 +326,8 @@ public class TextModule
           }
           catch (java.lang.Exception e)
           {
-            LOGGER.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet "
-                + "wird gibt es nicht in MATCH. "), e);
+            LOGGER.error(L.m("The regular expression grouping $<zahl> used by FRAG_ID "
+                + " does not exist in MATCH. "), e);
           }
           return args;
         }

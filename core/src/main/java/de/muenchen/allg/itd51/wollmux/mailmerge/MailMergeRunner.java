@@ -279,10 +279,10 @@ public class MailMergeRunner implements Runnable
       }
     } catch (NoSuchMethodException e)
     {
-      LOGGER.error("Eine notwendige Druckfunktion ist nicht definiert.", e);
-      InfoDialog.showInfoModal(L.m("Fehler beim Drucken"), L.m(
-          "Eine notwendige Druckfunktion ist nicht definiert. Bitte wenden Sie sich an Ihre Systemadministration "
-              + "damit Ihre Konfiguration entsprechend erweitert bzw. aktualisiert werden kann."));
+      LOGGER.error(L.m("A necessary print function is not defined.", e));
+      InfoDialog.showInfoModal(L.m("Error during printing"), L.m(
+          "A necessary print function is not defined. Please contact your system administrator "
+              + "so your configuration can be updated."));
       pmod.cancel();
     }
   }

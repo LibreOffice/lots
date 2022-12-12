@@ -791,8 +791,8 @@ public class TextDocumentController
         transformed = func.getResult(args);
       } else
       {
-        transformed = L.m("<FEHLER: TRAFO '%1' nicht definiert>", trafoName);
-        LOGGER.error("Die TRAFO '{}' ist nicht definiert.", trafoName);
+        transformed = L.m("<ERROR: TRAFO \"{0}\" not defined>", trafoName);
+        LOGGER.error("TRAFO '{}' is not defined.", trafoName);
       }
     }
     return transformed;
@@ -820,8 +820,8 @@ public class TextDocumentController
       return func.getResult(args);
     } else
     {
-      LOGGER.error("Die TRAFO '{}' ist nicht definiert.", trafoName);
-      return L.m("<FEHLER: TRAFO '%1' nicht definiert>", trafoName);
+      LOGGER.error("ERROR: TRAFO '{}' not defined.", trafoName);
+      return L.m("<ERROR: TRAFO \"{0}\" is not defined>", trafoName);
     }
   }
 
@@ -1503,7 +1503,7 @@ public class TextDocumentController
       }
     } catch (NodeNotFoundException e)
     {
-      LOGGER.error(L.m("Dies kann nicht passieren."), e);
+      LOGGER.error("This can not happen.", e);
     }
   }
 
@@ -1571,14 +1571,14 @@ public class TextDocumentController
     XTextContent annotationField = UNO.XTextContent(TextDocumentModel.findAnnotationFieldRecursive(range));
     if (annotationField == null)
     {
-      throw new ConfigurationErrorException(L.m("Die zugehörige Notiz mit der Formularbeschreibung fehlt."));
+      throw new ConfigurationErrorException(L.m("The note associated with the form description is missing."));
     }
 
     Object content = Utils.getProperty(annotationField, "Content");
     if (content == null)
     {
       throw new ConfigurationErrorException(
-          L.m("Die zugehörige Notiz mit der Formularbeschreibung kann nicht gelesen werden."));
+          L.m("The note associated with the form description can not be read."));
     }
 
     TextDocumentModel.addToFormDescription(model.getFormDescription(), content.toString());
@@ -1805,7 +1805,7 @@ public class TextDocumentController
         formConfig = new FormConfig(formConf, getWindowTitle());
       } catch (NodeNotFoundException e)
       {
-        throw new FormModelException(L.m("Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"));
+        throw new FormModelException(L.m("Missing section \"Formular\" in the form description."));
       }
     }
     return formConfig;

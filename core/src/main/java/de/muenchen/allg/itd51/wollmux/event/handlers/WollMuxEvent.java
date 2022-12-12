@@ -95,8 +95,8 @@ public abstract class WollMuxEvent
       return;
     }
 
-    InfoDialog.showInfoModal(L.m("WollMux-Fehler"), "Leider ist ein Fehler aufgetreten. "
-        + "Die genaue Fehlerbeschreibung steht im Log. Bitte wenden Sie sich an ihren Administrator.");
+    InfoDialog.showInfoModal(L.m("WollMux error"), L.m("Unfortunately an error happened. "
+        + "The exact error description can be found in the log file. Please contact your system administrator."));//TODO
   }
 
   /**

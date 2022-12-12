@@ -71,20 +71,22 @@ public class UnionDatasource extends Datasource
   public UnionDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, URL context)
   {
-    name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
-    source1Name = parseConfig(sourceDesc, "SOURCE1", () -> L.m("SOURCE1 der Datenquelle \"%1\" fehlt", name));
-    source2Name = parseConfig(sourceDesc, "SOURCE2", () -> L.m("SOURCE2 der Datenquelle \"%1\" fehlt", name));
+    name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
+    source1Name = parseConfig(sourceDesc, "SOURCE1", () ->
+      L.m("\"{0}\" of data source \"{1}\" is missing.", "SOURCE1", name));
+    source2Name = parseConfig(sourceDesc, "SOURCE2", () ->
+      L.m("\"{0}\" of data source \"{1}\" is missing.", "SOURCE2", name));
 
     source1 = nameToDatasource.get(source1Name);
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
-          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source1Name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source1Name));
 
     if (source2 == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
-          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source2Name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source2Name));
 
     /*
      * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
@@ -122,7 +124,7 @@ public class UnionDatasource extends Datasource
       }
       throw new ConfigurationErrorException(
         L.m(
-          "Datenquelle \"%1\" fehlen die Spalten: %2 und Datenquelle \"%3\" fehlen die Spalten: %4",
+          "In datasource \"{0}\" columns: {1} are missing and in datasource \"{2}\" columns: {3} are missing",
           source1Name, buf2, source2Name, buf1));
     }
 

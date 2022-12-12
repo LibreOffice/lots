@@ -70,7 +70,7 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
       FunctionLibrary funcLib, GroupModelList groupModelList,
       FormularMax4kController formularMax4000)
   {
-    super(L.m("Extra-View"));
+    super(L.m("Extra View"));
     this.funcLib = funcLib;
     this.groupModelList = groupModelList;
     formControlModelList.addListener(new MyItemListener());

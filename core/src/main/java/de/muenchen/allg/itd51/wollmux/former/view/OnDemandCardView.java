@@ -161,7 +161,7 @@ public abstract class OnDemandCardView implements View
 
     hbox = Box.createHorizontalBox();
     hbox.add(Box.createHorizontalGlue());
-    JButton button = new JButton(L.m("Aktivieren"));
+    JButton button = new JButton(L.m("Activate"));
     hbox.add(button);
     hbox.add(Box.createHorizontalGlue());
     inactivePanel.add(hbox);

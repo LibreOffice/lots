@@ -113,7 +113,7 @@ class MainProcessor extends AbstractExecutor
     }
     catch (SenderException e)
     {
-      value = L.m("<Fehler: Kein Absendre ausgewählt!>");
+      value = L.m("<ERROR: No sender selected!>");
     } catch (ColumnNotFoundException e)
     {
       AbstractExecutor.insertErrorField(cmd, documentCommandInterpreter.getModel().doc, e);

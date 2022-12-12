@@ -122,7 +122,7 @@ public class PrintBlockCommand extends DocumentCommand
         } catch (NumberFormatException | UnoHelperException e)
         {
           LOGGER.error(L.m(
-              "Fehler in Dokumentkommando '%1': Die Farbe HIGHLIGHT_COLOR mit dem Wert '%2' ist ungültig.",
+              "Error in document command \"{0}\": The color HIGHLIGHT_COLOR with the value \"{1}\" is invalid.",
               "" + this, highlightColor));
         }
       }

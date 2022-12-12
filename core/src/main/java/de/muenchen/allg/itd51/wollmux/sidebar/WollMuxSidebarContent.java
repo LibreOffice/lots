@@ -127,11 +127,12 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
    * Error message if no configuration can be found.
    */
   public static final String WOLLMUX_CONFIG_ERROR_MESSAGE = L
-      .m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden. "
-          + "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf "
-          + "der %include für die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und "
-          + "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler "
-          + "aufgetreten ist.");
+      .m("No section \"Symbolleisten\" could be read from your WollMux configuration.\n"
+          + "Therefore, the WollMux toolbar cannot be started. "
+          + "Please check if in your wollmux.conf the %include for the configuration "
+          + "of the WollMuxBar (e.g. wollmuxbar_standard.conf) is present "
+          + "and check with the wollmux.log if possibly an error occurred "
+          + "while processing a %include.");
 
   /**
    * The component in which the sidebar is visible.
@@ -249,8 +250,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
 
       if (WollMuxSingleton.getInstance().isNoConfig())
       {
-        String text = L.m("WollMux läuft ohne wollmux.conf !\n"
-            + "Aus diesem Grund ist leider nicht der komplette Funktionsumfang verfügbar.");
+        String text = L.m("WollMux is running without the WollMux configuration.\n"
+            + "For this reason, unfortunately, the complete range of functions is not available.");
         XControl txt = GuiFactory.createLabel(xMCF, context, text, new Rectangle(5, 15, 10, 80), null);
         controlContainer.addControl("txt", txt);
         layout.addControl(txt);
@@ -398,7 +399,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
           wollmuxbarConf = new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
         } catch (Exception x)
         {
-          LOGGER.error(L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
+          LOGGER.error(L.m("Error while reading \"{0}\"", wollmuxbarConfFile.toString()), x);
         }
       } else
       {
@@ -421,7 +422,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
       if (combinedConf.query("Symbolleisten").count() == 0)
       {
         LOGGER.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
-        InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"), WOLLMUX_CONFIG_ERROR_MESSAGE);
+        InfoDialog.showInfoModal(L.m("Incorrect configuration"), WOLLMUX_CONFIG_ERROR_MESSAGE);
       }
     } catch (Exception x)
     {
@@ -531,7 +532,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   @SuppressWarnings("java:S3776")
   private void createSearchbox(UIElementConfig element)
   {
-    String label = L.m("Suchen...");
+    String label = L.m("Search...");
 
     SortedMap<String, Object> props = new TreeMap<>();
     props.put("TextColor", SystemColor.textInactiveText.getRGB() & ~0xFF000000);
@@ -621,7 +622,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
 
           if (searchBox.getText().isEmpty())
           {
-            searchBox.setText(L.m("Suchen..."));
+            searchBox.setText(L.m("Search..."));
             XControlModel model = UNO.XControl(searchBox).getModel();
             UnoProperty.setProperty(model, UnoProperty.TEXT_COLOR, SystemColor.textInactiveText.getRGB() & ~0xFF000000);
           }
@@ -886,7 +887,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     } catch (IOException x)
     {
       LOGGER.error("", x);
-      showError(L.m("Fehler beim Download der Datei:\n%1", x.getMessage()));
+      showError(L.m("Error during download of file:\n{0}", x.getMessage()));
     } catch (Exception x)
     {
       LOGGER.error("", x);
@@ -902,7 +903,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
    */
   private void showError(String errorMsg)
   {
-    InfoDialog.showInfoModal(L.m("Fehlerhafte Konfiguration"),
-        L.m("%1\nVerständigen Sie Ihre Systemadministration.", errorMsg));
+    InfoDialog.showInfoModal(L.m("Incorrect configuration"),
+        L.m("{0}\nPlease contact your system administrator.", errorMsg));
   }
 }

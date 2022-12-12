@@ -40,7 +40,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 public class Shortcuts
 {
@@ -94,8 +93,7 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("SHORTCUT Angabe fehlt in '%1%'",
-          tastenkombination.stringRepresentation()));
+        LOGGER.error("SHORTCUT specification is missing in '{}'", tastenkombination.stringRepresentation());
         continue;
       }
 
@@ -107,8 +105,7 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("URL Angabe fehlt in '%1'",
-          tastenkombination.stringRepresentation()));
+        LOGGER.error("URL specification is missing in '{}'", tastenkombination.stringRepresentation());
         continue;
       }
 
@@ -127,7 +124,7 @@ public class Shortcuts
       }
       else
       {
-        LOGGER.error("Ungültige Tastenkombination '{}' im .conf Abschnitt Tastenkuerzel", shortcut);
+        LOGGER.error("Invalid shortcut '{}' in .conf section \"Tastenkuerzel\"", shortcut);
       }
     }
 

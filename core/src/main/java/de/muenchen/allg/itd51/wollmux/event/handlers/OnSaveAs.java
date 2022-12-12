@@ -83,7 +83,7 @@ public class OnSaveAs extends WollMuxEvent
         func = FunctionFactory.parse(funcConf, lib, null, null);
       } catch (ConfigurationErrorException e)
       {
-        LOGGER.error(L.m("Kann FilenameGeneratorFunction nicht parsen!"), e);
+        LOGGER.error(L.m("Cannot parse 'FilenameGeneratorFunction'."), e);
       }
     }
 
@@ -155,8 +155,8 @@ public class OnSaveAs extends WollMuxEvent
     } catch (com.sun.star.io.IOException e)
     {
       LOGGER.error("", e);
-      InfoDialog.showInfoModal(L.m("Fehler beim Speichern"), L.m(
-          "Das Speichern der Datei %1 ist fehlgeschlagen!", url));
+      InfoDialog.showInfoModal(L.m("Save Error"),
+          L.m("Saving the file \"{0}\" failed!", url));
     }
     return false;
   }

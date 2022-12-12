@@ -99,7 +99,7 @@ public class DebugExternalWollMux
       @Override
       public void notifyTermination(EventObject arg0)
       {
-        LOGGER.info(L.m("Desktop wurde geschlossen - beende DebugExternalWollMux"));
+        LOGGER.info(L.m("Desktop environment was closed - finish DebugExternalWollMux"));
         System.exit(0);
       }
     });

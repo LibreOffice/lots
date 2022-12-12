@@ -222,7 +222,7 @@ class SlavePrintModel extends WeakBase implements XPrintModel
       }
     } else
     {
-      throw new NoSuchMethodException(L.m("Druckfunktion '%1' nicht definiert.", functionName));
+      throw new NoSuchMethodException(L.m("Print function \"{0}\" is not defined.", functionName));
     }
   }
 

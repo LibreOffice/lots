@@ -78,20 +78,20 @@ public class PreferDatasource extends Datasource
   public PreferDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, URL context)
   {
-    name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
-    source1Name = parseConfig(sourceDesc, "SOURCE", () -> L.m("SOURCE der Datenquelle %1 fehlt", name));
-    source2Name = parseConfig(sourceDesc, "OVER", () -> L.m("OVER-Angabe der Datenquelle %1 fehlt", name));
+    name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
+    source1Name = parseConfig(sourceDesc, "SOURCE", () -> L.m("SOURCE of data source {0} is missing", name));
+    source2Name = parseConfig(sourceDesc, "OVER", () -> L.m("OVER-Specification of data source {0} is missing", name));
 
     source1 = nameToDatasource.get(source1Name);
     source2 = nameToDatasource.get(source2Name);
 
     if (source1 == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
-          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name));
 
     if (source2 == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": "
-          + "Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source2Name));
+      throw new ConfigurationErrorException(L.m("Error during initialization of datasource \"{0}\": "
+          + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source2Name));
 
     /*
      * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
@@ -128,9 +128,9 @@ public class PreferDatasource extends Datasource
         }
       }
       throw new ConfigurationErrorException(L.m(
-        "Datenquelle \"%1\" fehlen die Spalten: %2", source1Name, buf2)
-        + L.m(" und ")
-        + L.m("Datenquelle \"%1\" fehlen die Spalten: %2", source2Name, buf1));
+        "In datasource \"{0}\" columns: {1} are missing", source1Name, buf2)
+        + L.m(" and ")
+        + L.m("in datasource \"{0}\" columns: {1} are missing", source2Name, buf1));
     }
 
     schema = new ArrayList<>(schema1);

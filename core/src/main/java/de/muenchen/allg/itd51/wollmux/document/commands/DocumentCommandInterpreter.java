@@ -231,8 +231,9 @@ public class DocumentCommandInterpreter
     if (errors != 0)
     {
       throw new WMCommandsFailedException(
-          L.m("Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
-              ((errors == 1) ? "einen" : "" + errors)));
+          L.mn("The used template contains an error.", "The used template contains %d errors", errors)
+          + "\n\n"
+          + L.m("Please contact your system administrator."));
     }
   }
 

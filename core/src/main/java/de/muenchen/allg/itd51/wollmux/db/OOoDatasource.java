@@ -211,12 +211,12 @@ public class OOoDatasource extends Datasource
   public OOoDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, boolean noKey)
   {
-    datasourceName = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
+    datasourceName = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
     oooDatasourceName = parseConfig(sourceDesc, "SOURCE", () -> L.m(
-        "Datenquelle \"%1\": Name der OOo-Datenquelle muss als SOURCE angegeben werden", datasourceName));
+        "Data source \"{0}\": Name of OOo-data source has to be specified as SOURCE", datasourceName));
     oooTableName = parseConfig(sourceDesc, "TABLE",
-        () -> L.m("Datenquelle \"%1\": Name der Tabelle/Sicht innerhalb der "
-            + "OOo-Datenquelle muss als TABLE angegeben werden", datasourceName));
+        () -> L.m("Data source \"{0}\": Name of table/view within the "
+            + "OOo-Data Source has to be specified as TABLE", datasourceName));
 
     userName = sourceDesc.getString("USER", "");
     password = sourceDesc.getString("PASSWORD", "");
@@ -235,7 +235,7 @@ public class OOoDatasource extends Datasource
       sqlSyntax = SQL_SYNTAX_PERVASIVESQL;
     else
       throw new ConfigurationErrorException(L.m(
-        "SQL_SYNTAX \"%1\" nicht unterstützt", sqlSyntaxStr));
+        "SQL_SYNTAX \"{0}\" not supported", sqlSyntaxStr));
 
     schema = new ArrayList<>();
     ConfigThingy schemaConf = sourceDesc.query("Schema");
@@ -253,11 +253,11 @@ public class OOoDatasource extends Datasource
       }
       if (schema.isEmpty())
         throw new ConfigurationErrorException(L.m(
-          "Datenquelle \"%1\": Schema-Abschnitt ist leer", datasourceName));
+          "Data source \"{0}\": Schema-section is empty", datasourceName));
       ConfigThingy schluesselConf = sourceDesc.query("Schluessel");
       if (schluesselConf.count() == 0)
         throw new ConfigurationErrorException(L.m(
-          "Datenquelle \"%1\": Schluessel-Abschnitt fehlt", datasourceName));
+          "Data source \"{0}\": Key-section is missing", datasourceName));
 
       if (noKey)
       {
@@ -295,7 +295,7 @@ public class OOoDatasource extends Datasource
         catch (Exception x)
         {
           LOGGER.debug(L.m(
-            "Tabelle \"%1\" nicht gefunden. Versuche es als Namen einer Query zu nehmen",
+            "Table \"{0}\" not found. Try to use it as query name.",
               oooTableName), x);
           try
           {
@@ -306,8 +306,8 @@ public class OOoDatasource extends Datasource
           }
           catch (Exception y)
           {
-            throw new ConfigurationErrorException(L.m("Tabelle oder Abfrage \"%1\" existiert nicht in Datenquelle "
-                + "\"%2\" oder Fehler beim Bestimmen der Spalten ", oooTableName, oooDatasourceName), y);
+            throw new ConfigurationErrorException(L.m("Table or query \"{0}\" does not exist in data source "
+                + "\"{1}\" or error when determining the columns ", oooTableName, oooDatasourceName), y);
           }
         }
         Set<String> colNames = columns.keySet();
@@ -315,7 +315,7 @@ public class OOoDatasource extends Datasource
 
         if (schema.isEmpty())
           throw new ConfigurationErrorException(L.m(
-            "Datenquelle \"%1\": Tabelle \"%2\" hat keine Spalten", datasourceName,
+            "Data source \"{0}\": Table \"{1}\" has no columns", datasourceName,
             oooTableName));
 
         if (noKey)
@@ -345,8 +345,8 @@ public class OOoDatasource extends Datasource
             }
             catch (Exception x)
             {
-              throw new ConfigurationErrorException(L.m("Datenquelle \"%1\": Keine Schluessel-Spalten"
-                  + " definiert. Automatisches bestimmen der Schlüsselspalten nicht möglich", datasourceName), x);
+              throw new ConfigurationErrorException(L.m("Data source \"{0}\": No key columns defined."
+                  + " Automatic determination of key column not possible.", datasourceName), x);
             }
             // Test ob kein Schluessel vorhanden siehe weiter unten
           }
@@ -359,13 +359,13 @@ public class OOoDatasource extends Datasource
       catch (Exception x)
       {
         throw new ConfigurationErrorException(L.m(
-          "Konnte Schema der OOo-Datenquelle \"%1\" nicht auslesen.",
+          "Schema of OOo-datasource \"{0}\" could not be read.",
           oooDatasourceName), x);
       }
 
       if (keyColumns.length == 0)
         throw new ConfigurationErrorException(L.m(
-          "Datenquelle \"%1\": Keine Schluessel-Spalten definiert", datasourceName));
+          "Data source \"{0}\": No Key column defined", datasourceName));
     }
   }
 
@@ -387,10 +387,10 @@ public class OOoDatasource extends Datasource
       String column = iter.next().toString();
       if (!schema.contains(column))
         throw new ConfigurationErrorException(L.m(
-          "Schluessel-Spalte \"%1\" nicht im Schema enthalten", column));
+          "Key column \"{0}\" not defined in schema", column));
       if (columns.contains(column))
         throw new ConfigurationErrorException(L.m(
-          "Schluessel-Spalte \"%1\" ist im Schluessel-Abschnitt doppelt angegeben",
+          "Key column \"{0}\" was specified twice in the key section",
           column));
 
       columns.add(column);
@@ -527,7 +527,7 @@ public class OOoDatasource extends Datasource
       results = UNO.XRowSet(UnoComponent.createComponentWithContext(UnoComponent.CSS_SDB_ROW_SET));
 
       if (results == null)
-        throw new NullPointerException(L.m("Konnte kein RowSet erzeugen"));
+        throw new NullPointerException(L.m("Could not create RowSet"));
 
       UnoProperty.setProperty(results, UnoProperty.ACTIVE_CONNECTION, conn);
 
@@ -719,7 +719,7 @@ public class OOoDatasource extends Datasource
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName))
-        throw new ColumnNotFoundException(L.m("Spalte %1 existiert nicht!",
+        throw new ColumnNotFoundException(L.m("Column {0} does not exist!",
           columnName));
       return data.get(columnName);
     }

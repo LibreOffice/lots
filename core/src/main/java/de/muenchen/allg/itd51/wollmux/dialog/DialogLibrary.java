@@ -63,7 +63,7 @@ public class DialogLibrary
   {
     if (dialog == null || dlgName == null)
     {
-      throw new NullPointerException(L.m("Weder Dialogname noch Dialog darf null sein"));
+      throw new NullPointerException(L.m("Neither dialog name nor the dialog itself must be null"));
     }
     mapIdToDialog.put(dlgName, dialog);
   }
