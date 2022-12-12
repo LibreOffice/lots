@@ -42,6 +42,7 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeRunner;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Handles the wizard for configuring mail merge.
@@ -209,7 +210,7 @@ public class MailmergeWizardController implements XWizardController
   {
     wizard = Wizard.createMultiplePathsWizard(UNO.defaultContext, paths, this);
     wizard.enableButton(WizardButton.HELP, false);
-    wizard.setTitle("WollMux Seriendruck - Optionen");
+    wizard.setTitle(L.m("Mail merge options"));
 
     short result = wizard.execute();
     if (result == ExecutableDialogResults.OK)
@@ -220,7 +221,7 @@ public class MailmergeWizardController implements XWizardController
 	    .start();
       } catch (NoTableSelectedException e)
       {
-        InfoDialog.showInfoModal("Seriendruck fehlgeschlagen", e.getMessage());
+        InfoDialog.showInfoModal(L.m("Mail merge failed."), e.getMessage());
       }
     }
   }

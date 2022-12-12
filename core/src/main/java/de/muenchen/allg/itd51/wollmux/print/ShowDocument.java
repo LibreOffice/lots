@@ -43,6 +43,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Show a document with OS default view for the MIME-Type.
@@ -83,11 +84,11 @@ public class ShowDocument extends PrintFunction
           Desktop.getDesktop().open(outputPath.toFile());
         } else
         {
-          InfoDialog.showInfoModal("WollMux", "Dokument konnte nicht angezeigt werden.");
+          InfoDialog.showInfoModal("WollMux", L.m("Could not open document."));
         }
       } else
       {
-        InfoDialog.showInfoModal("WollMux", "Dokument konnte nicht angezeigt werden.");
+        InfoDialog.showInfoModal("WollMux", L.m("Could not open document."));
       }
     } catch (IOException | URISyntaxException e)
     {

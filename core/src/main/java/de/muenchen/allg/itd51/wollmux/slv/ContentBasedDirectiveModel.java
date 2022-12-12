@@ -159,14 +159,15 @@ public class ContentBasedDirectiveModel
           TextRangeRelation relation = TextRangeRelation.compareTextRanges(bm.getAnchor(), bm2.getAnchor());
           if (TextRangeRelation.A_MATCH_B != relation && !TextRangeRelation.DISTINCT.contains(relation))
           {
-            InfoDialog.showInfoModal("Überschneidende Druckblöcke",
-                "Das Verhalten bei sich überscheidenen Druckblöcken ist nicht definiert.\n"
-                    + "Das kann zu unerwartetem Verhalten führen. Bitte kontaktieren Sie den Ersteller der Vorlage.");
+            InfoDialog.showInfoModal(L.m("Overlapping printing blocks"),
+                L.m("The behavior with overlapping pressure blocks is not defined. "
+                    + "This can lead to unexpected behavior. "
+                    + "Please contact the template author."));
             return;
           }
         } catch (UnoHelperException e)
         {
-          LOGGER.debug("Can't find a book mark.", e);
+          LOGGER.debug("Can't find a bookmark.", e);
         }
       }
     }

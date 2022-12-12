@@ -845,9 +845,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
       }
     } else if (action.equals("open"))
     {
-      InfoDialog.showInfoModal("Multiformulare werden nicht mehr unterstützt",
-          "Multiformulare werden nicht mehr unterstützt. " + "Bitte kontaktieren Sie Ihren Administrator. "
-              + "Sie müssen jedes Formular einzeln öffnen und ausfüllen.");
+      InfoDialog.showInfoModal(L.m("Multi-forms no longer supported"),
+          L.m("Multi-forms are no longer supported. You need to open and fill each form individually."));
     } else if (action.equals("openExt"))
     {
       executeOpenExt(config.getExt(), config.getUrl());

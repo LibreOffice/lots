@@ -187,8 +187,8 @@ class DocumentExpander extends AbstractExecutor
       if (urls.isEmpty())
       {
         throw new ConfigurationErrorException(L.m(
-          "The textfragment with the FRAG_ID \"{0}\" is not defined!",
-          cmd.getFragID()));
+          "The textfragment with the identifier \"{0}\" \"{0}\" is not defined!",
+          "FRAG_ID", cmd.getFragID()));
       }
 
       Iterator<String> iter = urls.iterator();
@@ -198,7 +198,7 @@ class DocumentExpander extends AbstractExecutor
         try
         {
           URL url = WollMuxFiles.makeURL(urlStr);
-          LOGGER.debug("Insert Textfragment \"{}\" with URL \"{}\".", cmd.getFragID(), url);
+          LOGGER.debug("Inserting text fragment \"{}\" with URL \"{}\".", cmd.getFragID(), url);
           if (cmd.importStylesOnly())
           {
             insertStylesFromURL(cmd, cmd.getStyles(), url);
@@ -233,13 +233,14 @@ class DocumentExpander extends AbstractExecutor
       {
         String msg =
           L.m(
-            "The Textfragment with the identifier(FRAG_ID) \"{0}\" {1} could not be inserted:",
-            cmd.getFragID(), (fragId.equals(cmd.getFragID()) ? "" : L.m(
-              "(Override for fragment \"{0}\")", fragId)));
+            "The text fragment with the identifier \"{0}\" \"{1}\" {2} could not be inserted:",
+            "FRAG_ID",
+            cmd.getFragID(),
+            (fragId.equals(cmd.getFragID()) ? "" : L.m("(Override for fragment \"{0}\")", fragId)));
 
         LOGGER.error(msg, e);
 
-        InfoDialog.showInfoModal(L.m("WollMux error"), msg);
+        InfoDialog.showInfoModal(L.m("Error inserting fragment"), msg);
       }
       else
       {
@@ -507,7 +508,7 @@ class DocumentExpander extends AbstractExecutor
 
       if ("true".equals(message) || "on".equals(message) || "1".equals(message))
       {
-        InfoDialog.showInfoModal("WollMux", error);
+        InfoDialog.showInfoModal(L.m("Invalid parameters"), error);
       }
     }
   }
