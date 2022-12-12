@@ -271,8 +271,7 @@ public class OOoDatasource extends Datasource
     }
     else
     {
-      LOGGER.debug("Schema der Datenquelle {} nicht angegeben. Versuche, es von der Datenquelle zu erfragen.",
-          datasourceName);
+      LOGGER.debug("Schema of the data source {} not specified. Try to get it from the data source.", datasourceName);
       try
       {
         XDataSource ds =
@@ -294,9 +293,7 @@ public class OOoDatasource extends Datasource
         }
         catch (Exception x)
         {
-          LOGGER.debug(L.m(
-            "Table \"{0}\" not found. Try to use it as query name.",
-              oooTableName), x);
+          LOGGER.debug("Table '{}' not found. Try to use it as query name.", oooTableName, x);
           try
           {
             UnoDictionary<XColumnsSupplier> queries = UnoDictionary

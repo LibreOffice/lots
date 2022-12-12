@@ -201,8 +201,8 @@ public class OpenExt
         }
         catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("One entry within the section \"ExterneAnwendungen\""
-              + " contains an invalid PROGRAM-Specification."));
+          LOGGER.error("One entry within the section \"ExterneAnwendungen\""
+              + " contains an invalid PROGRAM-Specification.");
           continue;
         }
 

@@ -298,8 +298,7 @@ public class TextModule
       }
       catch (NodeNotFoundException e)
       {
-        LOGGER.error(L.m("FRAG_ID specification is missing in {0}",
-          mappingConf.stringRepresentation()));
+        LOGGER.error("FRAG_ID specification is missing in {}", mappingConf.stringRepresentation());
         continue;
       }
 
@@ -326,8 +325,7 @@ public class TextModule
           }
           catch (java.lang.Exception e)
           {
-            LOGGER.error(L.m("The regular expression grouping $<zahl> used by FRAG_ID "
-                + " does not exist in MATCH. "), e);
+            LOGGER.error("The regular expression grouping $<zahl> used by FRAG_ID does not exist in MATCH.", e);
           }
           return args;
         }
