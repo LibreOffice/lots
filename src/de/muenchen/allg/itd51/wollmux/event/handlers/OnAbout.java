@@ -62,7 +62,7 @@ public class OnAbout extends BasicEvent
       XFixedText introLabel = UNO.XFixedText(container.getControl("introLabel"));
       introLabel.setText("WollMux " + WollMuxSingleton.getVersion());
       XFixedText copyright = UNO.XFixedText(container.getControl("copyright"));
-      copyright.setText("Copyright (c) 2005-2019 Landeshauptstadt München");
+      copyright.setText("Copyright (c) 2005-2023 Landeshauptstadt München");
       XFixedText license = UNO.XFixedText(container.getControl("license"));
       license.setText("Lizenz: European Union Public License");
       XFixedText homepage = UNO.XFixedText(container.getControl("homepage"));

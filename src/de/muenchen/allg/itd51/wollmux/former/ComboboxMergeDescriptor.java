@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Beschreibt das Verschmelzen von Checkboxen zu einer ComboBox.
  * 
- * Copyright (c) 2008-2019 Landeshauptstadt München
+ * Copyright (c) 2008-2023 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
