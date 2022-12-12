@@ -57,6 +57,9 @@ public class L
 
   /**
    * Translate string (based on gettext translations, provided by WollMux)
+   *
+   * @param original Untranslated string
+   * @return Translated string if translation is found, otherwise untranslated string.
    */
   public static String m(String original)
   {
@@ -67,6 +70,9 @@ public class L
 
   /**
    * Translate user template strings (based on ConfigThingy translations, provided by user)
+   *
+   * @param original Untranslated string
+   * @return Translated string if translation is found, otherwise untranslated string.
    */
   public static String tm(String original)
   {
@@ -78,9 +84,12 @@ public class L
   }
 
   /**
-   * If a translation is available for original, it will be returned,
-   * otherwise the original string.
+   * Translate string (based on gettext translations, provided by WollMux).
    * All occurrences of "{0}" will be replaced by insertion1.
+   *
+   * @param original Untranslated string
+   * @param insertion1 Insertion 1
+   * @return Translated string if translation is found, otherwise untranslated string.
    */
   public static String m(String original, Object insertion1)
   {
@@ -88,21 +97,46 @@ public class L
   }
 
   /**
-   * If a translation is available for original, it will be returned,
-   * otherwise the original string.
-   * All occurrences of "{0}" will be replaced by insertion1 and of "{1}" by insertion2.
+   * Translate string (based on gettext translations, provided by WollMux).
+   * All occurrences of "{0}" will be replaced by insertion1, "{1}" by insertion2, etc.
+   *
+   * @param original Untranslated string
+   * @param insertion1 Insertion 1
+   * @param insertion2 Insertion 2
+   * @return Translated string if translation is found, otherwise untranslated string.
    */
   public static String m(String original, Object insertion1, Object insertion2)
   {
     return MessageFormat.format(m(original), insertion1, insertion2 );
   }
 
+  /**
+   * Translate string (based on gettext translations, provided by WollMux).
+   * All occurrences of "{0}" will be replaced by insertion1, "{1}" by insertion2, etc.
+   *
+   * @param original Untranslated string
+   * @param insertion1 Insertion 1
+   * @param insertion2 Insertion 2
+   * @param insertion3 Insertion 3
+   * @return Translated string if translation is found, otherwise untranslated string.
+   */
   public static String m(String original, Object insertion1, Object insertion2,
       Object insertion3)
   {
     return MessageFormat.format(m(original), insertion1, insertion2, insertion3);
   }
 
+  /**
+   * Translate string (based on gettext translations, provided by WollMux).
+   * All occurrences of "{0}" will be replaced by insertion1, "{1}" by insertion2, etc.
+   *
+   * @param original Untranslated string
+   * @param insertion1 Insertion 1
+   * @param insertion2 Insertion 2
+   * @param insertion3 Insertion 3
+   * @param insertion3 Insertion 4
+   * @return Translated string if translation is found, otherwise untranslated string.
+   */
   public static String m(String original, Object insertion1, Object insertion2,
       Object insertion3, Object insertion4)
   {
@@ -111,6 +145,11 @@ public class L
 
   /**
    * Translate string with plural form
+   *
+   * @param singular Singular form
+   * @param plural Plural form
+   * @param count Number to evaluate
+   * @return Translated string
    */
   public static String mn(String singular, String plural, int count)
   {

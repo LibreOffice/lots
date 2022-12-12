@@ -792,7 +792,7 @@ public class TextDocumentController
       } else
       {
         transformed = L.m("<ERROR: TRAFO \"{0}\" not defined>", trafoName);
-        LOGGER.error(L.m("TRAFO \"{}\" is not defined.", trafoName));
+        LOGGER.error("TRAFO '{}' is not defined.", trafoName);
       }
     }
     return transformed;
@@ -820,7 +820,7 @@ public class TextDocumentController
       return func.getResult(args);
     } else
     {
-      LOGGER.error(L.m("ERROR: TRAFO \"{0}\" not defined.", trafoName));
+      LOGGER.error("ERROR: TRAFO '{}' not defined.", trafoName);
       return L.m("<ERROR: TRAFO \"{0}\" is not defined>", trafoName);
     }
   }
@@ -1503,7 +1503,7 @@ public class TextDocumentController
       }
     } catch (NodeNotFoundException e)
     {
-      LOGGER.error(L.m("This can not happen."), e);
+      LOGGER.error("This can not happen.", e);
     }
   }
 
@@ -1805,7 +1805,7 @@ public class TextDocumentController
         formConfig = new FormConfig(formConf, getWindowTitle());
       } catch (NodeNotFoundException e)
       {
-        throw new FormModelException(L.m("No section ''Formular' in the' form description available"));
+        throw new FormModelException(L.m("Missing section \"Formular\" in the form description."));
       }
     }
     return formConfig;

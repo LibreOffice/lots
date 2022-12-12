@@ -222,7 +222,7 @@ public class DatasourceSearchDialog implements Dialog
     String title = L.m("Select dataset");
     try
     {
-      title = L.m(myConf.get("TITLE", 1).toString());
+      title = L.tm(myConf.get("TITLE", 1).toString());
     } catch (Exception x)
     {
       LOGGER.trace("", x);
@@ -305,7 +305,7 @@ public class DatasourceSearchDialog implements Dialog
           tip = childConf.toString();
         } else if ("TITLE".equals(name))
         {
-          tabTitle = L.m(childConf.toString());
+          tabTitle = L.tm(childConf.toString());
         }
       }
 
@@ -418,7 +418,7 @@ public class DatasourceSearchDialog implements Dialog
             FunctionFactory.parseTrafos(conf, "Spaltenumsetzung", funcLib, dialogLib, context));
       } catch (ConfigurationErrorException x)
       {
-        LOGGER.error(L.m("Error while parsing the seciton 'Spaltenumsetzung'"), x);
+        LOGGER.error("Error while parsing the section 'Spaltenumsetzung'", x);
       }
       dialogWindowSchema = columnTransformer.getSchema();
       layout = new VerticalLayout();
@@ -534,7 +534,7 @@ public class DatasourceSearchDialog implements Dialog
         resultsList = UNO.XListBox(uiElement);
         if (resultsList == null)
         {
-          LOGGER.error(L.m("UI element with ID \"suchergebnis\" must be of TYPE \"listbox\"!"));
+          LOGGER.error("UI element with ID 'suchergebnis' must be of TYPE 'listbox'.");
         }
         displayTemplate = config.getDisplay();
         if (displayTemplate == null)
@@ -639,8 +639,8 @@ public class DatasourceSearchDialog implements Dialog
           }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error(L.m("Error within the section \"Spaltenumsetzung\" or \"Vorschau\". Column \"{0}\" is to be "
-              + "displayed in the preview, but is not defined in the section \"Spaltenumsetzung\".", dbSpalte));
+          LOGGER.error("Error within the section 'Spaltenumsetzung' or 'Vorschau'. Column '{}' is to be "
+              + "displayed in the preview, but is not defined in the section 'Spaltenumsetzung'.", dbSpalte);
         }
       }
     }
@@ -686,7 +686,7 @@ public class DatasourceSearchDialog implements Dialog
             newData.put(columnName, ds.get(columnName));
           } catch (Exception x)
           {
-            LOGGER.error(L.m("Huh? This should not happen"), x);
+            LOGGER.error("Huh? This should not happen", x);
           }
         }
         data = newData;
@@ -797,8 +797,7 @@ public class DatasourceSearchDialog implements Dialog
           }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error(
-              L.m("Error while resolving the placeholder \"${{0}}\": Column for the dataset is not defined", spalte));
+          LOGGER.error("Error while resolving the placeholder '${{}}': Column for the dataset is not defined", spalte);
         }
         display = display.substring(0, m.start()) + wert + display.substring(m.end());
         m = p.matcher(display);

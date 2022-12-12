@@ -79,10 +79,11 @@ public class OnCheckInstallation extends WollMuxEvent
 
     if (recentInst.isPresent() && wmInsts.size() > 1)
     {
-      logMsg += "\n" + L.m("The newest WollMux installation is located under:")
+      logMsg += "\n"
+          + "The newest WollMux installation is located under:"
           + "\n "
           + recentInst.get().getLeft() + "\n"
-          + L.m("Furthermore the following WollMux installations was found:")
+          + "Furthermore the following WollMux installations were found:"
           + "\n" + otherInstsList;
       LOGGER.error(logMsg);
       InfoDialog.showInfoModal(title, msg);
@@ -113,7 +114,7 @@ public class OnCheckInstallation extends WollMuxEvent
 
       if (myPath == null || oooPath == null)
       {
-        LOGGER.error(L.m("Determination of the installation path for the WollMux package failed."));
+        LOGGER.error("Determination of the installation path for the WollMux package failed.");
         return wmInstallations;
       }
 
