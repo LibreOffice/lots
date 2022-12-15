@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 11:24+0100\n"
+"POT-Creation-Date: 2022-12-15 17:48+0100\n"
 "PO-Revision-Date: 2022-12-05 13:42+0100\n"
 "Last-Translator: Samuel Mehrbrodt <samuel.mehrbrodt@allotropia.de>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
@@ -770,6 +770,61 @@ msgstr "No es pot trobar el fitxer \"{0}\".\n"
 #, fuzzy, java-format
 msgid "Missing argument for datasource of type \"{0}\":"
 msgstr "Es falta l'argument per al font de dades tipus \"{0}\""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
+#, fuzzy
+msgid "<<Field names>>"
+msgstr "Nom de fitxer"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:307
+#, fuzzy
+msgid "Preview"
+msgstr "   Previsualització   "
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:343
+msgid "Choose data source"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:352
+#, fuzzy
+msgid "File ..."
+msgstr "Fitxer"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:357
+#, fuzzy
+msgid "New Calc Sheet"
+msgstr "Nou full de càlcul..."
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:362
+#, fuzzy
+msgid "Database ..."
+msgstr "Base de dades..."
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:382
+msgid "Edit sheet"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:388
+msgid "Complement table columns"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:394
+msgid "Adjust all fields"
+msgstr "Ajusta tots els camps"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:410
+#, fuzzy
+msgid "Mail merge field"
+msgstr "Camp de combinació de correu"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:426
+msgid "Special field"
+msgstr "Camp especial"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:449
+msgid "Print ..."
+msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunction.java:119
 #, java-format
@@ -2236,17 +2291,8 @@ msgstr ""
 #~ msgid "Mail merge (WollMux)"
 #~ msgstr "combinació de correu (WollMux)"
 
-#~ msgid "Special field"
-#~ msgstr "Camp especial"
-
-#~ msgid "   Preview    "
-#~ msgstr "   Previsualització   "
-
 #~ msgid "Add missing columns to table"
 #~ msgstr "Afegeix columnes que falten a la taula"
-
-#~ msgid "Adjust all fields"
-#~ msgstr "Ajusta tots els camps"
 
 #~ msgid "Table"
 #~ msgstr "Taula"
@@ -2277,15 +2323,6 @@ msgstr ""
 
 #~ msgid "Select the mail merge datasource:"
 #~ msgstr "On són les dades per a la combinació de correu?"
-
-#~ msgid "File..."
-#~ msgstr "Fitxer"
-
-#~ msgid "New Calc table..."
-#~ msgstr "Nou full de càlcul..."
-
-#~ msgid "Database..."
-#~ msgstr "Base de dades..."
 
 #~ msgid "Current table"
 #~ msgstr "Taula corrent"

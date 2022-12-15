@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 11:24+0100\n"
+"POT-Creation-Date: 2022-12-15 17:48+0100\n"
 "PO-Revision-Date: 2022-12-05 13:42+0100\n"
 "Last-Translator: Samuel Mehrbrodt <samuel.mehrbrodt@allotropia.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -770,6 +770,61 @@ msgstr "Bestand \"{0}\" kon niet worden gevonden.\n"
 #, fuzzy, java-format
 msgid "Missing argument for datasource of type \"{0}\":"
 msgstr "Ontbrekende argument voor databron van type \"{0}\""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
+#, fuzzy
+msgid "<<Field names>>"
+msgstr "Bestandsnaam"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:307
+#, fuzzy
+msgid "Preview"
+msgstr "   Preview    "
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:343
+msgid "Choose data source"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:352
+#, fuzzy
+msgid "File ..."
+msgstr "Bestand"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:357
+#, fuzzy
+msgid "New Calc Sheet"
+msgstr "Nieuw Calc-spreadsheet"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:362
+#, fuzzy
+msgid "Database ..."
+msgstr "Databank..."
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:382
+msgid "Edit sheet"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:388
+msgid "Complement table columns"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:394
+msgid "Adjust all fields"
+msgstr "Alle velden aanpassen"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:410
+#, fuzzy
+msgid "Mail merge field"
+msgstr "Samenvoegveld"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:426
+msgid "Special field"
+msgstr "Speciaal veld"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:449
+msgid "Print ..."
+msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunction.java:119
 #, java-format
@@ -2229,17 +2284,8 @@ msgstr ""
 #~ msgid "Mail merge (WollMux)"
 #~ msgstr "Afdruk samenvoegen (WollMux)"
 
-#~ msgid "Special field"
-#~ msgstr "Speciaal veld"
-
-#~ msgid "   Preview    "
-#~ msgstr "   Preview    "
-
 #~ msgid "Add missing columns to table"
 #~ msgstr "Ontbrekende tabelkolommen aanvullen"
-
-#~ msgid "Adjust all fields"
-#~ msgstr "Alle velden aanpassen"
 
 #~ msgid "Table"
 #~ msgstr "Tabel"
@@ -2270,15 +2316,6 @@ msgstr ""
 
 #~ msgid "Select the mail merge datasource:"
 #~ msgstr "Waar is uw data voor het samenvoegen van afdrukken?"
-
-#~ msgid "File..."
-#~ msgstr "Bestand"
-
-#~ msgid "New Calc table..."
-#~ msgstr "Nieuw Calc-spreadsheet"
-
-#~ msgid "Database..."
-#~ msgstr "Databank..."
 
 #~ msgid "Current table"
 #~ msgstr "actueel geselcteerd spreadsheet"
