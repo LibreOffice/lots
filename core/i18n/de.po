@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-12 12:59+0100\n"
+"POT-Creation-Date: 2022-12-15 11:24+0100\n"
 "PO-Revision-Date: 2022-12-08 14:31+0100\n"
 "Last-Translator: Samuel Mehrbrodt <samuel.mehrbrodt@allotropia.de>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
@@ -109,14 +109,7 @@ msgstr "Datenquelle \"{0}\": Schema-Abschnitt ist leer"
 msgid "Data source \"{0}\": Key-section is missing"
 msgstr "Datenquelle \"{0}\": Schluessel-Abschnitt fehlt"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:298
-#, java-format
-msgid "Table \"{0}\" not found. Try to use it as query name."
-msgstr ""
-"Tabelle \"{0}\" nicht gefunden. Versuchen Sie, es als Abfragenamen zu "
-"verwenden."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:309
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:306
 #, java-format
 msgid ""
 "Table or query \"{0}\" does not exist in data source \"{1}\" or error when "
@@ -125,12 +118,12 @@ msgstr ""
 "Tabelle oder Abfrage \"{0}\" existiert nicht in Datenquelle \"{1}\" oder "
 "Fehler beim Bestimmen der Spalten "
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:318
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:315
 #, java-format
 msgid "Data source \"{0}\": Table \"{1}\" has no columns"
 msgstr "Datenquelle \"{0}\": Tabelle \"{1}\" hat keine Spalten"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:348
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:345
 #, java-format
 msgid ""
 "Data source \"{0}\": No key columns defined. Automatic determination of key "
@@ -139,32 +132,32 @@ msgstr ""
 "Datenquelle \"{0}\": Keine Schlüsselspalten definiert. Automatisches "
 "Bestimmen der Schlüsselspalten nicht möglich."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:362
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:359
 #, java-format
 msgid "Schema of OOo-datasource \"{0}\" could not be read."
 msgstr "Konnte Schema der OOo-Datenquelle \"{0}\" nicht auslesen."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:368
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:365
 #, java-format
 msgid "Data source \"{0}\": No Key column defined"
 msgstr "Datenquelle \"{0}\": Keine Schluessel-Spalten definiert"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:390
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:387
 #, java-format
 msgid "Key column \"{0}\" not defined in schema"
 msgstr "Schluessel-Spalte \"{0}\" nicht im Schema enthalten"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:393
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:390
 #, java-format
 msgid "Key column \"{0}\" was specified twice in the key section"
 msgstr ""
 "Schluessel-Spalte \"{0}\" ist im Schluessel-Abschnitt doppelt angegeben"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:530
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:527
 msgid "Could not create RowSet"
 msgstr "Konnte kein RowSet erzeugen"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:722
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:719
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:320
 #, java-format
 msgid "Column {0} does not exist!"
@@ -381,7 +374,8 @@ msgid "Section 'Spalten' is missing."
 msgstr "Abschnitt 'Spalten' fehlt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
-msgid "Specification of DB-SPALTE is missing"
+#, fuzzy
+msgid "Specification of DB_SPALTE is missing"
 msgstr "DB_SPALTE Angabe fehlt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:223
@@ -395,8 +389,8 @@ msgid "Path specification is missing for column {0}"
 msgstr "PATH-Angabe fehlt für Spalte {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:239
-#, java-format
-msgid "Syntaxerror in path specification of {0}"
+#, fuzzy, java-format
+msgid "Syntax error in path specification of {0}"
 msgstr "Syntaxerror bei Pfadangabe von {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:248
@@ -430,11 +424,6 @@ msgstr ""
 "Spalte \"{0}\" ist nicht im Schema definiert und kann deshalb nicht als "
 "Schluesselspalte verwendet werden."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:496
-#, fuzzy
-msgid "Error in LDAP-Directory."
-msgstr "Fehler in LDAP-Verzeichnis."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1472
 #, java-format
 msgid "Error in data source definition of \"{0}\": "
@@ -461,7 +450,6 @@ msgstr ""
 "Details siehe Datei wollmux.log!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/WollMuxEvent.java:98
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:242
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:144
 msgid "WollMux error"
 msgstr "WollMux-Fehler"
@@ -506,7 +494,6 @@ msgid "No placeholder and no 'setJumpMark' flag available!"
 msgstr "Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:110
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:190
 #, java-format
 msgid "The textfragment with the FRAG_ID \"{0}\" is not defined!"
 msgstr "Das Textfragment mit der FRAG_ID \"{0}\" ist nicht definiert!"
@@ -699,9 +686,15 @@ msgstr "Persönliche Absenderliste konnte nicht aktualisiert werden."
 msgid "Cache-File {0} could not be read."
 msgstr "Cache-Datei {0} kann nicht gelesen werden."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/DebugExternalWollMux.java:102
-msgid "Desktop environment was closed - finish DebugExternalWollMux"
-msgstr "Desktop-Umgebung wurde geschlossen - DebugExternalWollMux beenden"
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:213
+#, fuzzy
+msgid "Mail merge options"
+msgstr "Seriendruck"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:224
+#, fuzzy
+msgid "Mail merge failed."
+msgstr "Serienbrieffeld"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/ds/CalcModel.java:357
 #, java-format
@@ -833,6 +826,11 @@ msgstr "Neue Belegung"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:479
 msgid "Adjust fields"
 msgstr "Felder anpassen"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:618
+#, fuzzy
+msgid "Printing could not be started."
+msgstr "Persönliche Absenderliste konnte nicht aktualisiert werden."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:729
 #, java-format
@@ -1090,6 +1088,12 @@ msgstr ""
 msgid "Printing"
 msgstr "Drucke"
 
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:87
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:91
+#, fuzzy
+msgid "Could not open document."
+msgstr "Konnte kein RowSet erzeugen"
+
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintProgressBar.java:290
 #, java-format
 msgid "{0} from {1}{2} steps"
@@ -1188,13 +1192,28 @@ msgstr "wird ausschließlich in Abdrucken gedruckt"
 msgid "The specified colour value in attribute \"{0}\" is invalid!"
 msgstr "Der angegebene Farbwert im Attribut \"{0}\" ist ungültig!"
 
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:173
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:175
+#, fuzzy
+msgid "Could not merge PDF documents."
+msgstr "Konnte kein RowSet erzeugen"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:174
+msgid "Print content based directives"
+msgstr ""
+
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:79
-msgid ""
-"Could not pick up the documents for the printing of the content based "
-"directive."
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:81
+#, fuzzy
+msgid "Could not collect documents for printing content based directive."
 msgstr ""
 "Konnte die Dokumente für den Druck der Sachleitenden Verfügung nicht "
 "aufsammeln."
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:80
+#, fuzzy
+msgid "Error collecting documents"
+msgstr "Fehler beim Zugriff auf Calc-Dokument"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:91
 msgid "Error"
@@ -1243,18 +1262,23 @@ msgstr "Block wurde markiert"
 msgid "The selected block {0}"
 msgstr "Der ausgewählte Block {0}"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:228
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:162
+msgid "Overlapping printing blocks"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:163
+msgid ""
+"The behavior with overlapping pressure blocks is not defined. This can lead "
+"to unexpected behavior. Please contact the template author."
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:229
 msgid " Original"
 msgstr " Original"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:229
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:230
 msgid "Recipient see recipient field"
 msgstr "Empfänger siehe Empfängerfeld"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/ConfClassLoader.java:167
-#, java-format
-msgid "Illegal CLASSPATH specified: \"{0}\""
-msgstr "Fehlerhafte CLASSPATH-Angabe: \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/config/InvalidIdentifierException.java:41
 #, java-format
@@ -1884,23 +1908,38 @@ msgstr "Fehlendes Attribut FUNCTION"
 msgid "<ERROR: No sender selected!>"
 msgstr "<FEHLER: Kein Absender ausgewählt!>"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:238
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:190
+#, fuzzy, java-format
+msgid "The textfragment with the identifier \"{0}\" \"{0}\" is not defined!"
+msgstr "Das Textfragment mit der FRAG_ID \"{0}\" ist nicht definiert!"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:239
 #, java-format
 msgid "(Override for fragment \"{0}\")"
 msgstr "(Override für Fragment \"{0}\")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:236
-#, java-format
+#, fuzzy, java-format
 msgid ""
-"The Textfragment with the identifier(FRAG_ID) \"{0}\" {1} could not be "
+"The text fragment with the identifier \"{0}\" \"{1}\" {2} could not be "
 "inserted:"
 msgstr ""
 "Der Textbaustein mit der Bezeichnung (FRAG_ID) \"{0}\" {1} konnte nicht "
 "eingefügt werden:"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:491
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:243
+#, fuzzy
+msgid "Error inserting fragment"
+msgstr "Fehler beim Drucken"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:492
 msgid "There are more parameters specified than the number of placeholders"
 msgstr "Es sind mehr Parameter angegeben als Platzhalter vorhanden sind"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:511
+#, fuzzy
+msgid "Invalid parameters"
+msgstr "Ungültige Empfängeradresse"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommandInterpreter.java:236
 msgid "Please contact your system administrator."
@@ -1981,10 +2020,6 @@ msgstr ""
 "Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden - deshalb läuft "
 "WollMux im NoConfig-Modus."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:579
-msgid "Error while creating the dump file"
-msgstr "Fehler beim Erstellen des Dumps"
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:637
 #, java-format
 msgid "File \"{0}\" could not be found.\n"
@@ -2009,19 +2044,6 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:213
 msgid "At the insertion place no text block could be found."
 msgstr "An der Einfügestelle konnte kein Textbaustein gefunden werden."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:301
-#, java-format
-msgid "FRAG_ID specification is missing in {0}"
-msgstr "FRAG_ID Angabe fehlt in {0}"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:329
-msgid ""
-"The regular expression grouping $<zahl> used by FRAG_ID  does not exist in "
-"MATCH. "
-msgstr ""
-"Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird "
-"gibt es nicht in MATCH. "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:130
 msgid ""
@@ -2054,11 +2076,22 @@ msgid "Error while reading \"{0}\""
 msgstr "Fehler beim Lesen von \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:425
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:906
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:905
 msgid "Incorrect configuration"
 msgstr "Fehlerhafte Konfiguration"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:890
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:848
+#, fuzzy
+msgid "Multi-forms no longer supported"
+msgstr "Markierung des Blockes aufgehoben"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:849
+msgid ""
+"Multi-forms are no longer supported. You need to open and fill each form "
+"individually."
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:889
 #, java-format
 msgid ""
 "Error during download of file:\n"
@@ -2067,7 +2100,7 @@ msgstr ""
 "Fehler beim Download der Datei:\n"
 "{0}"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:907
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:906
 #, java-format
 msgid ""
 "{0}\n"
@@ -2113,15 +2146,6 @@ msgid ""
 msgstr ""
 "Der TYPE \"{0}\" ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' "
 "und 'string'."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:204
-#, fuzzy
-msgid ""
-"One entry within the section \"ExterneAnwendungen\" contains an invalid "
-"PROGRAM-Specification."
-msgstr ""
-"Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige "
-"PROGRAM-Angabe."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:269
 #, fuzzy, java-format
@@ -2174,6 +2198,45 @@ msgstr "/loadComponentFromURL/ Parameter muss die Form \"Param=Wert\" haben"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/ui/UIElementConfig.java:235
 msgid "Incorrect element of the type \"combobox\""
 msgstr "Fehlerhaftes Element des Typs \"combobox\""
+
+#, java-format
+#~ msgid "Table \"{0}\" not found. Try to use it as query name."
+#~ msgstr ""
+#~ "Tabelle \"{0}\" nicht gefunden. Versuchen Sie, es als Abfragenamen zu "
+#~ "verwenden."
+
+#, fuzzy
+#~ msgid "Error in LDAP-Directory."
+#~ msgstr "Fehler in LDAP-Verzeichnis."
+
+#~ msgid "Desktop environment was closed - finish DebugExternalWollMux"
+#~ msgstr "Desktop-Umgebung wurde geschlossen - DebugExternalWollMux beenden"
+
+#, java-format
+#~ msgid "Illegal CLASSPATH specified: \"{0}\""
+#~ msgstr "Fehlerhafte CLASSPATH-Angabe: \"{0}\""
+
+#~ msgid "Error while creating the dump file"
+#~ msgstr "Fehler beim Erstellen des Dumps"
+
+#, java-format
+#~ msgid "FRAG_ID specification is missing in {0}"
+#~ msgstr "FRAG_ID Angabe fehlt in {0}"
+
+#~ msgid ""
+#~ "The regular expression grouping $<zahl> used by FRAG_ID  does not exist "
+#~ "in MATCH. "
+#~ msgstr ""
+#~ "Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird "
+#~ "gibt es nicht in MATCH. "
+
+#, fuzzy
+#~ msgid ""
+#~ "One entry within the section \"ExterneAnwendungen\" contains an invalid "
+#~ "PROGRAM-Specification."
+#~ msgstr ""
+#~ "Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige "
+#~ "PROGRAM-Angabe."
 
 #, java-printf-format
 #~ msgid "%d replacement made."
@@ -2442,9 +2505,6 @@ msgstr "Fehlerhaftes Element des Typs \"combobox\""
 
 #~ msgid "Text"
 #~ msgstr "Text"
-
-#~ msgid "Mail merge field"
-#~ msgstr "Serienbrieffeld"
 
 #~ msgid "not"
 #~ msgstr "nicht"
@@ -3319,9 +3379,6 @@ msgstr "Fehlerhaftes Element des Typs \"combobox\""
 #~ msgstr ""
 #~ "insertDocumentFromURL: TextRange des Dokumentkommandos \"{0}\" ist null "
 #~ "=> Bookmark verschwunden?"
-
-#~ msgid "Error while accessing Calc document"
-#~ msgstr "Fehler beim Zugriff auf Calc-Dokument"
 
 #~ msgid "Administrating the sender list..."
 #~ msgstr "Absenderliste verwalten..."
