@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Test;
 
 import com.sun.star.awt.FontDescriptor;
 
+import de.muenchen.allg.ui.HTMLElement;
+
 public class HTMLElementTest
 {
 

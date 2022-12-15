@@ -23,6 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.ui;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementType;
 
 /**
  * Types of control elements.

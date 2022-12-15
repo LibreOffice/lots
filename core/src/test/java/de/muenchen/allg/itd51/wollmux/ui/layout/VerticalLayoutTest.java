@@ -31,6 +31,9 @@ import org.junit.jupiter.api.Test;
 
 import com.sun.star.awt.Rectangle;
 
+import de.muenchen.allg.ui.layout.Layout;
+import de.muenchen.allg.ui.layout.VerticalLayout;
+
 public class VerticalLayoutTest
 {
 

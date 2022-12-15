@@ -43,9 +43,9 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoDictionary;
 import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
-import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
-import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
+import de.muenchen.allg.ui.layout.Layout;
+import de.muenchen.allg.ui.layout.VerticalLayout;
+import de.muenchen.allg.ui.GuiFactory;
 
 /**
  * A dialog for selecting a data source which is registered in LibreOffice as database.

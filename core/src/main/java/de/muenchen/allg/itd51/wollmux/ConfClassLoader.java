@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * ClassLoader which uses the classpath defined in the WollMux configuration. It's implemented as a
