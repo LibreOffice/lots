@@ -33,7 +33,6 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Interface für Datenquellen, die der DJ verwalten kann. ACHTUNG! Die Konstruktoren dieser Klasse
