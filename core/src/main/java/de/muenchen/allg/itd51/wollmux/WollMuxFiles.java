@@ -576,7 +576,7 @@ public class WollMuxFiles
       out.write("===================== END OOo datasources ==================\n");
     } catch (IOException | NumberFormatException | JMException x)
     {
-      LOGGER.error(L.m("Error while creating the dump file"), x);
+      LOGGER.error("Error while creating the dump file", x);
       return null;
     }
     return dumpFile.getAbsolutePath();

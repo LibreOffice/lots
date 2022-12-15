@@ -216,7 +216,7 @@ public class LDAPDatasource extends Datasource
       for (ConfigThingy spalteDesc : spaltenDesc)
       {
         String spalte = parseConfig(spalteDesc, "DB_SPALTE",
-            () -> errorMessage() + L.m("Specification of DB-SPALTE is missing"));
+            () -> errorMessage() + L.m("Specification of DB_SPALTE is missing"));
         if (!SPALTENNAME.matcher(spalte).matches())
         {
           throw new ConfigurationErrorException(errorMessage()
@@ -236,7 +236,7 @@ public class LDAPDatasource extends Datasource
         if (splitted.length != 2)
         {
           throw new ConfigurationErrorException(
-              errorMessage() + L.m("Syntaxerror in path specification of {0}", spalte));
+              errorMessage() + L.m("Syntax error in path specification of {0}", spalte));
         }
 
         try
@@ -493,7 +493,7 @@ public class LDAPDatasource extends Datasource
         }
       } catch (NamingException e)
       {
-        LOGGER.error(L.m("Error in LDAP-Directory."), e);
+        LOGGER.error("Error in LDAP-Directory.", e);
       }
     }
     return results;
