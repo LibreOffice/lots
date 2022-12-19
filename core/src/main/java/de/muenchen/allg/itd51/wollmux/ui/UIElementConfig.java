@@ -35,6 +35,8 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.former.FormMaxConstants;
 import de.muenchen.allg.itd51.wollmux.util.L;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementType;
 
 /**
  * Description of a control element (menu entry, button, input field, ...)

@@ -75,13 +75,13 @@ import de.muenchen.allg.itd51.wollmux.db.Search;
 import de.muenchen.allg.itd51.wollmux.db.SearchStrategy;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
-import de.muenchen.allg.itd51.wollmux.ui.layout.ControlLayout;
-import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
-import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
-import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
 import de.muenchen.allg.itd51.wollmux.util.L;
+import de.muenchen.allg.ui.GuiFactory;
+import de.muenchen.allg.ui.layout.ControlLayout;
+import de.muenchen.allg.ui.layout.HorizontalLayout;
+import de.muenchen.allg.ui.layout.Layout;
+import de.muenchen.allg.ui.layout.VerticalLayout;
 import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoProperty;
 

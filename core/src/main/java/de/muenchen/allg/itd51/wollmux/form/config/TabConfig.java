@@ -29,6 +29,7 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.former.FormMaxConstants;
+import de.muenchen.allg.itd51.wollmux.ui.UIElementType;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 
 /**

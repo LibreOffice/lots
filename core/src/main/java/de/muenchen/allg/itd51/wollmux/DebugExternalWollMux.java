@@ -40,7 +40,6 @@ import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.form.sidebar.FormFactory;
 import de.muenchen.allg.itd51.wollmux.mailmerge.sidebar.MailMergeFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.WollMuxSidebarFactory;
-import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.LogConfig;
 import de.muenchen.allg.util.UnoComponent;
 

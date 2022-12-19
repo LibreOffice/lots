@@ -100,7 +100,6 @@ module wollmux
   exports de.muenchen.allg.itd51.wollmux.slv.events;
   exports de.muenchen.allg.itd51.wollmux.slv.print;
   exports de.muenchen.allg.itd51.wollmux.ui;
-  exports de.muenchen.allg.itd51.wollmux.ui.layout;
   exports de.muenchen.allg.itd51.wollmux.util;
 
   requires transitive org.libreoffice.uno;

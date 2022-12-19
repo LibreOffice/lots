@@ -65,8 +65,8 @@ import de.muenchen.allg.dialog.adapter.AbstractItemListener;
 import de.muenchen.allg.dialog.adapter.AbstractKeyHandler;
 import de.muenchen.allg.dialog.adapter.AbstractMouseListener;
 import de.muenchen.allg.dialog.adapter.AbstractTextListener;
-import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
+import de.muenchen.allg.ui.GuiFactory;
 import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoProperty;
 
