@@ -22,9 +22,12 @@
  */
 package de.muenchen.allg.itd51.wollmux.sidebar;
 
+import java.awt.Desktop;
 import java.awt.SystemColor;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -250,11 +253,21 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
 
       if (WollMuxSingleton.getInstance().isNoConfig())
       {
-        String text = L.m("WollMux is running without the WollMux configuration.\n"
-            + "For this reason, unfortunately, the complete range of functions is not available.");
+        String text = L.m("No WollMux Configuration found.\n"
+            + "Please setup the WollMux Configuration\n"
+            + "as described on the WollMux website");
         XControl txt = GuiFactory.createLabel(xMCF, context, text, new Rectangle(5, 15, 10, 80), null);
         controlContainer.addControl("txt", txt);
         layout.addControl(txt);
+
+        XControl button = GuiFactory.createButton(UNO.xMCF, context, "Visit wollmux.org", null,
+            new Rectangle(0, 0, 100, 32), null);
+
+        XButton xbutton = UNO.XButton(button);
+        AbstractActionListener xButtonAction = event -> openInBrowser("https://wollmux.org");
+        xbutton.addActionListener(xButtonAction);
+        controlContainer.addControl("btn", button);
+        layout.addControl(button);
       } else
       {
         readWollMuxBarConf(allowUserConfig, conf);
@@ -891,6 +904,21 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     {
       LOGGER.error("", x);
       showError(x.getMessage());
+    }
+  }
+
+  private void openInBrowser(String url)
+  {
+    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+      try
+      {
+        Desktop.getDesktop().browse(new URI(url));
+      } catch (IOException | URISyntaxException e)
+      {
+        LOGGER.error("", e);
+      }
+    } else {
+      LOGGER.error("Opening URL {} in Browser failed.", url);
     }
   }
 
