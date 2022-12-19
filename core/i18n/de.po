@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 11:24+0100\n"
+"POT-Creation-Date: 2022-12-15 17:48+0100\n"
 "PO-Revision-Date: 2022-12-08 14:31+0100\n"
 "Last-Translator: Samuel Mehrbrodt <samuel.mehrbrodt@allotropia.de>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
@@ -836,6 +836,64 @@ msgstr "Persönliche Absenderliste konnte nicht aktualisiert werden."
 #, java-format
 msgid "Missing argument for datasource of type \"{0}\":"
 msgstr "Fehlendes Argument für Datenquelle vom Typ \"{0}\":"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
+#, fuzzy
+msgid "<<Field names>>"
+msgstr "<Feldname>"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:307
+#, fuzzy
+msgid "Preview"
+msgstr "   Vorschau   "
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:343
+#, fuzzy
+msgid "Choose data source"
+msgstr "Datenquelle"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:352
+#, fuzzy
+msgid "File ..."
+msgstr "Datei..."
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:357
+#, fuzzy
+msgid "New Calc Sheet"
+msgstr "Neue Calc-Tabelle..."
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:362
+#, fuzzy
+msgid "Database ..."
+msgstr "Datenbank..."
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:382
+#, fuzzy
+msgid "Edit sheet"
+msgstr "Absenderdaten bearbeiten"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:388
+msgid "Complement table columns"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:394
+msgid "Adjust all fields"
+msgstr "Alle Felder anpassen"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:410
+#, fuzzy
+msgid "Mail merge field"
+msgstr "Serienbrieffeld"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:426
+msgid "Special field"
+msgstr "Spezialfeld"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:449
+#, fuzzy
+msgid "Print ..."
+msgstr "Drucken"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunction.java:119
 #, java-format
@@ -2512,29 +2570,11 @@ msgstr "Fehlerhaftes Element des Typs \"combobox\""
 #~ msgid "Mail merge (WollMux)"
 #~ msgstr "Seriendruck (WollMux)"
 
-#~ msgid "Datasource"
-#~ msgstr "Datenquelle"
-
-#~ msgid "Special field"
-#~ msgstr "Spezialfeld"
-
-#~ msgid "   Preview    "
-#~ msgstr "   Vorschau   "
-
-#~ msgid "<Field name>"
-#~ msgstr "<Feldname>"
-
-#~ msgid "Print"
-#~ msgstr "Drucken"
-
 #~ msgid "Edit table"
 #~ msgstr "Tabelle bearbeiten"
 
 #~ msgid "Add missing columns to table"
 #~ msgstr "Tabellenspalten ergänzen"
-
-#~ msgid "Adjust all fields"
-#~ msgstr "Alle Felder anpassen"
 
 #~ msgid "All"
 #~ msgstr "Alle"
@@ -2568,15 +2608,6 @@ msgstr "Fehlerhaftes Element des Typs \"combobox\""
 
 #~ msgid "Select the mail merge datasource:"
 #~ msgstr "Wo sind Ihre Serienbriefdaten ?"
-
-#~ msgid "File..."
-#~ msgstr "Datei..."
-
-#~ msgid "New Calc table..."
-#~ msgstr "Neue Calc-Tabelle..."
-
-#~ msgid "Database..."
-#~ msgstr "Datenbank..."
 
 #~ msgid "Current table"
 #~ msgstr "Aktuell ausgewählte Tabelle"
@@ -2977,9 +3008,6 @@ msgstr "Fehlerhaftes Element des Typs \"combobox\""
 
 #~ msgid "Unsupported MODE for WollMuxBar-Window: \"{0}\""
 #~ msgstr "Ununterstützer MODE für WollMuxBar-Fenster: \"{0}\""
-
-#~ msgid "Edit sender data"
-#~ msgstr "Absenderdaten bearbeiten"
 
 #~ msgid ""
 #~ "Would you really like to discard your personal changes\n"

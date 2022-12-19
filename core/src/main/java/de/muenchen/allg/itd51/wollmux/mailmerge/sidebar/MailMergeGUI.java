@@ -58,6 +58,7 @@ import de.muenchen.allg.itd51.wollmux.ui.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.ui.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.Layout;
 import de.muenchen.allg.itd51.wollmux.ui.layout.VerticalLayout;
+import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoConfiguration;
 import de.muenchen.allg.util.UnoProperty;
@@ -269,7 +270,7 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     UNO.XWindow(jumpToLast).setEnable(enabled);
     UNO.XWindow(jumpToFirst).setEnable(enabled);
     UNO.XWindow(printCount).setEnable(enabled);
-    UNO.XButton(preview).setLabel(enabled ? "<<Field names>>" : "Preview");
+    UNO.XButton(preview).setLabel(enabled ? L.m("<<Field names>>") : L.m("Preview"));
   }
 
   /**
@@ -303,7 +304,7 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     Layout hLayout = new HorizontalLayout();
     SortedMap<String, Object> props = new TreeMap<>();
     props.put("Toggle", true);
-    preview = GuiFactory.createButton(xMCF, context, "Preview", controller::togglePreview,
+    preview = GuiFactory.createButton(xMCF, context, L.m("Preview"), controller::togglePreview,
         new Rectangle(0, 0, 100, 32), props);
     UNO.XWindow(preview).setEnable(false);
     controlContainer.addControl("preview", preview);
@@ -339,8 +340,8 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
   private void addDatasourcesControls()
   {
     Layout vLayout = new VerticalLayout();
-    XControl chooseLabel = GuiFactory.createLabel(xMCF, context, "Choose data source", new Rectangle(0, 0, 100, 20),
-        null);
+    XControl chooseLabel = GuiFactory.createLabel(xMCF, context, L.m("Choose data source"),
+        new Rectangle(0, 0, 100, 20), null);
     controlContainer.addControl("chooseLabel", chooseLabel);
     vLayout.addControl(chooseLabel);
 
@@ -348,17 +349,17 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     controlContainer.addControl("dsLine", dsLine);
     vLayout.addControl(dsLine);
 
-    XControl file = GuiFactory.createButton(xMCF, context, "File ...", controller::selectFileAsDatasource,
+    XControl file = GuiFactory.createButton(xMCF, context, L.m("File ..."), controller::selectFileAsDatasource,
         new Rectangle(0, 0, 100, 32), null);
     controlContainer.addControl("file", file);
     vLayout.addControl(file);
 
-    XControl newCalc = GuiFactory.createButton(xMCF, context, "New Calc Sheet",
+    XControl newCalc = GuiFactory.createButton(xMCF, context, L.m("New Calc Sheet"),
         controller::openAndselectNewCalcTableAsDatasource, new Rectangle(0, 0, 100, 32), null);
     controlContainer.addControl("dsList", newCalc);
     vLayout.addControl(newCalc);
 
-    XControl database = GuiFactory.createButton(xMCF, context, "Database ...", controller::openDatasourceDialog,
+    XControl database = GuiFactory.createButton(xMCF, context, L.m("Database ..."), controller::openDatasourceDialog,
         new Rectangle(0, 0, 100, 32), null);
     controlContainer.addControl("database", database);
     vLayout.addControl(database);
@@ -378,19 +379,19 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
   {
     Layout vLayout = new VerticalLayout();
 
-    editTable = GuiFactory.createButton(xMCF, context, "Edit sheet", controller::editDatasource,
+    editTable = GuiFactory.createButton(xMCF, context, L.m("Edit sheet"), controller::editDatasource,
         new Rectangle(0, 0, 100, 32), null);
     UNO.XWindow(editTable).setEnable(false);
     controlContainer.addControl("editTable", editTable);
     vLayout.addControl(editTable);
 
-    addColumns = GuiFactory.createButton(xMCF, context, "Complement table columns", controller::showAddColumnsDialog,
+    addColumns = GuiFactory.createButton(xMCF, context, L.m("Complement table columns"), controller::showAddColumnsDialog,
         new Rectangle(0, 0, 100, 32), null);
     UNO.XWindow(addColumns).setEnable(false);
     controlContainer.addControl("addColumns", addColumns);
     vLayout.addControl(addColumns);
 
-    changeAll = GuiFactory.createButton(xMCF, context, "Adjust all fields", controller::showModifyDocDialog,
+    changeAll = GuiFactory.createButton(xMCF, context, L.m("Adjust all fields"), controller::showModifyDocDialog,
         new Rectangle(0, 0, 100, 32), null);
     UNO.XWindow(changeAll).setEnable(false);
     controlContainer.addControl("changeAll", changeAll);
@@ -406,8 +407,8 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     Layout vLayout = new VerticalLayout();
     Layout hLayout = new HorizontalLayout();
 
-    XControl mailMergeLabel = GuiFactory.createLabel(xMCF, context, "Mail merge field", new Rectangle(0, 0, 100, 32),
-        null);
+    XControl mailMergeLabel = GuiFactory.createLabel(xMCF, context, L.m("Mail merge field"),
+        new Rectangle(0, 0, 100, 32), null);
     controlContainer.addControl("mailMergeLabel", mailMergeLabel);
     hLayout.addControl(mailMergeLabel, 4);
 
@@ -422,7 +423,8 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
     vLayout.addLayout(hLayout, 1);
 
     Layout hLayout2 = new HorizontalLayout();
-    XControl specialLabel = GuiFactory.createLabel(xMCF, context, "Special field", new Rectangle(0, 0, 100, 32), null);
+    XControl specialLabel = GuiFactory.createLabel(xMCF, context, L.m("Special field"),
+        new Rectangle(0, 0, 100, 32), null);
     controlContainer.addControl("specialLabel", specialLabel);
     hLayout2.addControl(specialLabel, 4);
 
@@ -444,7 +446,7 @@ public class MailMergeGUI extends AbstractSidebarPanel implements XToolPanel, XS
    */
   private void addPrintControls()
   {
-    print = GuiFactory.createButton(xMCF, context, "Print ...", controller::print, new Rectangle(0, 0, 100, 32), null);
+    print = GuiFactory.createButton(xMCF, context, L.m("Print ..."), controller::print, new Rectangle(0, 0, 100, 32), null);
     UNO.XWindow(print).setEnable(false);
     controlContainer.addControl("print", print);
     layout.addControl(print);
