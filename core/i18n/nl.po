@@ -1030,8 +1030,8 @@ msgid ""
 "column \"{0}\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SlavePrintModel.java:225
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/MasterPrintModel.java:142
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SecondaryPrintModel.java:225
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:142
 #, fuzzy, java-format
 msgid "Print function \"{0}\" is not defined."
 msgstr "TRAFO \"{}\" is niet gedefineerd."
@@ -1059,7 +1059,7 @@ msgstr ""
 "De waarde \"{0}\" van de sleutel ORDER in print-functie \"{1}\" is niet "
 "geldig"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/MasterPrintModel.java:115
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:115
 #, fuzzy
 msgid "Printing"
 msgstr "Afdrukken"

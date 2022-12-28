@@ -1115,8 +1115,8 @@ msgid ""
 msgstr ""
 "Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"{0}\""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SlavePrintModel.java:225
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/MasterPrintModel.java:142
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SecondaryPrintModel.java:225
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:142
 #, java-format
 msgid "Print function \"{0}\" is not defined."
 msgstr "Druckfunktion \"{0}\" nicht definiert."
@@ -1142,7 +1142,7 @@ msgid "The value of the key ORDER in the print function '{1}' is invalid."
 msgstr ""
 "Der Wert des Schlüssels ORDER in der Druckfunktion \"{1}\" ist ungültig."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/MasterPrintModel.java:115
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:115
 msgid "Printing"
 msgstr "Drucke"
 

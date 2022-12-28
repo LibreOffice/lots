@@ -1005,8 +1005,8 @@ msgid ""
 "column \"{0}\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SlavePrintModel.java:225
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/MasterPrintModel.java:142
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SecondaryPrintModel.java:225
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:142
 #, java-format
 msgid "Print function \"{0}\" is not defined."
 msgstr ""
@@ -1031,7 +1031,7 @@ msgstr ""
 msgid "The value of the key ORDER in the print function '{1}' is invalid."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/MasterPrintModel.java:115
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:115
 msgid "Printing"
 msgstr ""
 
