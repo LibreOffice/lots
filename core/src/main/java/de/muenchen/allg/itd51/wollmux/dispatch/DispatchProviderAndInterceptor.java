@@ -106,25 +106,25 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   }
 
   @Override
-  public XDispatchProvider getSecondaryDispatchProvider()
+  public XDispatchProvider getSlaveDispatchProvider()
   {
     return secondary;
   }
 
   @Override
-  public void setSecondaryDispatchProvider(XDispatchProvider secondary)
+  public void setSlaveDispatchProvider(XDispatchProvider secondary)
   {
     this.secondary = secondary;
   }
 
   @Override
-  public XDispatchProvider getPrimaryDispatchProvider()
+  public XDispatchProvider getMasterDispatchProvider()
   {
     return primary;
   }
 
   @Override
-  public void setPrimaryDispatchProvider(XDispatchProvider primary)
+  public void setMasterDispatchProvider(XDispatchProvider primary)
   {
     this.primary = primary;
   }
