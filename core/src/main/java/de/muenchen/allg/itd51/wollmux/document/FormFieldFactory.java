@@ -115,16 +115,16 @@ public final class FormFieldFactory
    *          The document.
    * @param textfield
    *          The text field.
-   * @param master
+   * @param propSet
    *          The TextFieldMaster of the text field. The property {@code textfield.TextFieldMaster}
    *          can't be used because it can't be modified. The TextFieldMaster has to be taken form
    *          {@code doc.getTextFieldMasters()}. The text field and its master belong together if
    *          {@code textfield.Content.equals(master.Name)} is true.
    * @return A form field.
    */
-  public static FormField createInputUserFormField(XTextDocument doc, XTextField textfield, XPropertySet master)
+  public static FormField createInputUserFormField(XTextDocument doc, XTextField textfield, XPropertySet propSet)
   {
-    return new InputUserFormField(doc, textfield, master);
+    return new InputUserFormField(doc, textfield, propSet);
   }
 
   /**
@@ -1089,13 +1089,13 @@ public final class FormFieldFactory
 
     private XTextField textfield;
 
-    private XPropertySet master;
+    private XPropertySet propSet;
 
-    public InputUserFormField(XTextDocument doc, XTextField textfield, XPropertySet master)
+    public InputUserFormField(XTextDocument doc, XTextField textfield, XPropertySet propSet)
     {
       this.doc = doc;
       this.textfield = textfield;
-      this.master = master;
+      this.propSet = propSet;
     }
 
     @Override
@@ -1103,7 +1103,7 @@ public final class FormFieldFactory
     {
       if (value != null && textfield != null && doc != null)
       {
-        Utils.setProperty(master, UnoProperty.CONTENT, value);
+        Utils.setProperty(propSet, UnoProperty.CONTENT, value);
       }
     }
 
@@ -1116,11 +1116,11 @@ public final class FormFieldFactory
     @Override
     public String getValue()
     {
-      if (master == null)
+      if (propSet == null)
       {
         return "";
       }
-      return "" + Utils.getProperty(master, UnoProperty.CONTENT);
+      return "" + Utils.getProperty(propSet, UnoProperty.CONTENT);
     }
 
     @Override

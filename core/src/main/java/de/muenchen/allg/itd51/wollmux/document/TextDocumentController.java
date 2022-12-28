@@ -500,12 +500,12 @@ public class TextDocumentController
       conf.add("FUNCTION").add(trafoName);
       String userFieldName = conf.stringRepresentation(false, '\'', false);
 
-      XPropertySet master = getUserFieldMaster(userFieldName);
-      if (master == null)
+      XPropertySet propSet = getUserFieldMaster(userFieldName);
+      if (propSet == null)
       {
-        master = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, model.doc));
-        UnoProperty.setProperty(master, UnoProperty.VALUE, Double.valueOf(0));
-        UnoProperty.setProperty(master, UnoProperty.NAME, userFieldName);
+        propSet = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, model.doc));
+        UnoProperty.setProperty(propSet, UnoProperty.VALUE, Double.valueOf(0));
+        UnoProperty.setProperty(propSet, UnoProperty.NAME, userFieldName);
       }
 
       XTextContent f = UNO.XTextContent(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_INPUT_USER, model.doc));
@@ -570,8 +570,8 @@ public class TextDocumentController
    */
   private void createTextFieldDataBase(XDependentTextField tf) throws UnoHelperException
   {
-    XPropertySet master = tf.getTextFieldMaster();
-    String id = (String) UnoProperty.getProperty(master, UnoProperty.DATA_COLUMN_NAME);
+    XPropertySet propSet = tf.getTextFieldMaster();
+    String id = (String) UnoProperty.getProperty(propSet, UnoProperty.DATA_COLUMN_NAME);
     if (id != null && id.length() > 0)
     {
       if (!model.getIdToTextFieldFormFields().containsKey(id))
@@ -602,8 +602,8 @@ public class TextDocumentController
       return;
     }
 
-    XPropertySet master = getUserFieldMaster(varName);
-    FormField f = FormFieldFactory.createInputUserFormField(model.doc, tf, master);
+    XPropertySet propSet = getUserFieldMaster(varName);
+    FormField f = FormFieldFactory.createInputUserFormField(model.doc, tf, propSet);
     Function func = getFunctionLibrary().get(funcName);
 
     if (func == null)
@@ -965,14 +965,14 @@ public class TextDocumentController
     {
       XDependentTextField field = UNO
           .XDependentTextField(UnoService.createService(UnoService.CSS_TEXT_TEXT_FIELD_DATABASE, model.doc));
-      XPropertySet master = UNO
+      XPropertySet propSet = UNO
           .XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_DATABASE, model.doc));
-      UnoProperty.setProperty(master, UnoProperty.DATA_BASE_NAME, "DataBase");
-      UnoProperty.setProperty(master, UnoProperty.DATA_TABLE_NAME, "Table");
-      UnoProperty.setProperty(master, UnoProperty.DATA_COLUMN_NAME, fieldId);
+      UnoProperty.setProperty(propSet, UnoProperty.DATA_BASE_NAME, "DataBase");
+      UnoProperty.setProperty(propSet, UnoProperty.DATA_TABLE_NAME, "Table");
+      UnoProperty.setProperty(propSet, UnoProperty.DATA_COLUMN_NAME, fieldId);
       if (!formFieldPreviewMode)
         UnoProperty.setProperty(field, UnoProperty.CONTENT, "<" + fieldId + ">");
-      field.attachTextFieldMaster(master);
+      field.attachTextFieldMaster(propSet);
 
       XTextCursor cursor = range.getText().createTextCursorByRange(range);
       cursor.getText().insertTextContent(cursor, field, true);

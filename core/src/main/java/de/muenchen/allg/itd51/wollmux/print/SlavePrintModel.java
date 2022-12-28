@@ -38,14 +38,14 @@ import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
- * A print model for the print functions maintained by {@link MasterPrintModel}. Each print
+ * A print model for the print functions maintained by {@link PrimaryPrintModel}. Each print
  * functions gets its own model.
  */
-class SlavePrintModel extends WeakBase implements XPrintModel
+class SecondaryPrintModel extends WeakBase implements XPrintModel
 {
   private int idx;
 
-  private MasterPrintModel master;
+  private PrimaryPrintModel primary;
 
   /**
    * Description of the print handled by this model.
@@ -53,23 +53,23 @@ class SlavePrintModel extends WeakBase implements XPrintModel
   private String stage;
 
   /**
-   * Create a new print model in the call hierarchy maintained by the master print model.
+   * Create a new print model in the call hierarchy maintained by the primary print model.
    *
-   * @param master
-   *          The master print model.
+   * @param primary
+   *          The primary print model.
    * @param idx
    *          Position in the call hierarchy.
    */
-  public SlavePrintModel(MasterPrintModel master, int idx)
+  public SecondaryPrintModel(PrimaryPrintModel primary, int idx)
   {
-    this.master = master;
+    this.primary = primary;
     this.idx = idx;
   }
 
   @Override
   public XTextDocument getTextDocument()
   {
-    return master.getTextDocument();
+    return primary.getTextDocument();
   }
 
   @Override
@@ -90,10 +90,10 @@ class SlavePrintModel extends WeakBase implements XPrintModel
     if (isCanceled())
       return;
 
-    PrintFunction f = master.getPrintFunction(idx + 1);
+    PrintFunction f = primary.getPrintFunction(idx + 1);
     if (f != null)
     {
-      XPrintModel pmod = new SlavePrintModel(master, idx + 1);
+      XPrintModel pmod = new SecondaryPrintModel(primary, idx + 1);
       Thread t = f.printAsync(pmod);
       try
       {
@@ -103,49 +103,49 @@ class SlavePrintModel extends WeakBase implements XPrintModel
         PrintModels.LOGGER.error("", e);
         Thread.currentThread().interrupt();
       }
-      master.setPrintProgressMaxValue(pmod, (short) 0);
+      primary.setPrintProgressMaxValue(pmod, (short) 0);
     } else
     {
-      master.finalPrint();
+      primary.finalPrint();
     }
     if (stage != null)
-      master.setStage(stage);
+      primary.setStage(stage);
   }
 
   @Override
   public void setFormValue(String arg0, String arg1)
   {
-    master.setFormValue(arg0, arg1);
+    primary.setFormValue(arg0, arg1);
   }
 
   @Override
   public boolean getDocumentModified()
   {
-    return master.getDocumentModified();
+    return primary.getDocumentModified();
   }
 
   @Override
   public void setDocumentModified(boolean arg0)
   {
-    master.setDocumentModified(arg0);
+    primary.setDocumentModified(arg0);
   }
 
   @Override
   public void collectNonWollMuxFormFields()
   {
-    master.collectNonWollMuxFormFields();
+    primary.collectNonWollMuxFormFields();
   }
 
   @Override
   public void setPrintBlocksProps(String arg0, boolean arg1, boolean arg2)
   {
-    master.setPrintBlocksProps(arg0, arg1, arg2);
+    primary.setPrintBlocksProps(arg0, arg1, arg2);
   }
 
   @Override
   public XPropertySetInfo getPropertySetInfo()
   {
-    return master.getPropertySetInfo();
+    return primary.getPropertySetInfo();
   }
 
   @Override
@@ -155,49 +155,49 @@ class SlavePrintModel extends WeakBase implements XPrintModel
     if (PrintModels.STAGE.equalsIgnoreCase(key) && val != null)
     {
       stage = val.toString();
-      master.setStage(stage);
+      primary.setStage(stage);
     }
-    master.setPropertyValue(key, val);
+    primary.setPropertyValue(key, val);
   }
 
   @Override
   public Object getPropertyValue(String arg0) throws UnknownPropertyException, WrappedTargetException
   {
-    return master.getPropertyValue(arg0);
+    return primary.getPropertyValue(arg0);
   }
 
   @Override
   public Object getProp(String arg0, Object arg1)
   {
-    return master.getProp(arg0, arg1);
+    return primary.getProp(arg0, arg1);
   }
 
   @Override
   public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1)
       throws UnknownPropertyException, WrappedTargetException
   {
-    master.addPropertyChangeListener(arg0, arg1);
+    primary.addPropertyChangeListener(arg0, arg1);
   }
 
   @Override
   public void removePropertyChangeListener(String arg0, XPropertyChangeListener arg1)
       throws UnknownPropertyException, WrappedTargetException
   {
-    master.removePropertyChangeListener(arg0, arg1);
+    primary.removePropertyChangeListener(arg0, arg1);
   }
 
   @Override
   public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
       throws UnknownPropertyException, WrappedTargetException
   {
-    master.addVetoableChangeListener(arg0, arg1);
+    primary.addVetoableChangeListener(arg0, arg1);
   }
 
   @Override
   public void removeVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
       throws UnknownPropertyException, WrappedTargetException
   {
-    master.removeVetoableChangeListener(arg0, arg1);
+    primary.removeVetoableChangeListener(arg0, arg1);
   }
 
   /**
@@ -211,14 +211,14 @@ class SlavePrintModel extends WeakBase implements XPrintModel
     PrintFunction newFunc = GlobalFunctions.getInstance().getGlobalPrintFunctions().get(functionName);
     if (newFunc != null)
     {
-      PrintFunction currentFunc = master.getPrintFunction(idx);
+      PrintFunction currentFunc = primary.getPrintFunction(idx);
       if (newFunc.compareTo(currentFunc) <= 0)
       {
         PrintModels.LOGGER.error("Druckfunktion '{}' muss einen höheren ORDER-Wert besitzen als die Druckfunktion '{}'",
             newFunc.getFunctionName(), currentFunc.getFunctionName());
       } else
       {
-        master.usePrintFunction(functionName);
+        primary.usePrintFunction(functionName);
       }
     } else
     {
@@ -229,36 +229,36 @@ class SlavePrintModel extends WeakBase implements XPrintModel
   @Override
   public void setGroupVisible(String arg0, boolean arg1)
   {
-    master.setGroupVisible(arg0, arg1);
+    primary.setGroupVisible(arg0, arg1);
   }
 
   @Override
   public boolean isCanceled()
   {
-    return master.isCanceled();
+    return primary.isCanceled();
   }
 
   @Override
   public void cancel()
   {
-    master.cancel();
+    primary.cancel();
   }
 
   @Override
   public void setPrintProgressMaxValue(short maxValue)
   {
-    master.setPrintProgressMaxValue(this, maxValue);
+    primary.setPrintProgressMaxValue(this, maxValue);
   }
 
   @Override
   public void setPrintProgressValue(short value)
   {
-    master.setPrintProgressValue(this, value);
+    primary.setPrintProgressValue(this, value);
   }
 
   @Override
   public void setPrintMessage(String value)
   {
-    master.setPrintMessage(value);
+    primary.setPrintMessage(value);
   }
 }

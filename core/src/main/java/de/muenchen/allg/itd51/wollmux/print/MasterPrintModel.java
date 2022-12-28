@@ -64,10 +64,10 @@ import de.muenchen.allg.util.UnoProperty;
  *
  * The {@link XPropertySet} interface is used to share data between the print functions.
  *
- * Each print function is executed with its own {@link SlavePrintModel} in a new thread. This class
+ * Each print function is executed with its own {@link SecondaryPrintModel} in a new thread. This class
  * has to do the synchronization.
  */
-class MasterPrintModel implements XPrintModel
+class PrimaryPrintModel implements XPrintModel
 {
   /**
    * Name of the property to configure if a dialog for copy counts should be displayed.
@@ -117,13 +117,13 @@ class MasterPrintModel implements XPrintModel
   private TextDocumentController documentController;
 
   /**
-   * Create a master print model for the document. The call hierarchy is empty. Use
+   * Create a primary print model for the document. The call hierarchy is empty. Use
    * {@link #usePrintFunction(String)} to add print functions to the call hierarchy.
    *
    * @param documentController
    *          The controller of the document.
    */
-  MasterPrintModel(TextDocumentController documentController)
+  PrimaryPrintModel(TextDocumentController documentController)
   {
     this.documentController = documentController;
     this.props = new HashMap<>();
@@ -182,7 +182,7 @@ class MasterPrintModel implements XPrintModel
     PrintFunction f = getPrintFunction(0);
     if (f != null)
     {
-      XPrintModel pmod = new SlavePrintModel(this, 0);
+      XPrintModel pmod = new SecondaryPrintModel(this, 0);
       Thread t = f.printAsync(pmod);
       try
       {
@@ -485,13 +485,13 @@ class MasterPrintModel implements XPrintModel
   @Override
   public void setPrintProgressMaxValue(short maxValue)
   {
-    // only useful with SlavePrintModels
+    // only useful with SecondaryPrintModels
   }
 
   @Override
   public void setPrintProgressValue(short value)
   {
-    // only useful with SlavePrintModels
+    // only useful with SecondaryPrintModels
   }
 
   /**

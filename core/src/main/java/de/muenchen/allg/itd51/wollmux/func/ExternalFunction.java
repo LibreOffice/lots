@@ -121,7 +121,7 @@ public class ExternalFunction
       }
       else
       {
-        script = UNO.masterScriptProvider.getScript(url);
+        script = UNO.mainScriptProvider.getScript(url);
       }
     }
     catch (ClassNotFoundException | ScriptFrameworkErrorException e)

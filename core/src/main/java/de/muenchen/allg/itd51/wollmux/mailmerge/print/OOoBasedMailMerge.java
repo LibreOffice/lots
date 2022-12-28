@@ -621,9 +621,9 @@ public class OOoBasedMailMerge implements AutoCloseable
         // update database fields
         if (UnoService.supportsService(tf, UnoService.CSS_TEXT_TEXT_FIELD_DATABASE))
         {
-          XPropertySet master = tf.getTextFieldMaster();
-          Utils.setProperty(master, UnoProperty.DATA_BASE_NAME, dbName);
-          Utils.setProperty(master, UnoProperty.DATA_TABLE_NAME, TABLE_NAME);
+          XPropertySet propSet = tf.getTextFieldMaster();
+          Utils.setProperty(propSet, UnoProperty.DATA_BASE_NAME, dbName);
+          Utils.setProperty(propSet, UnoProperty.DATA_TABLE_NAME, TABLE_NAME);
         }
 
         // update next record fields

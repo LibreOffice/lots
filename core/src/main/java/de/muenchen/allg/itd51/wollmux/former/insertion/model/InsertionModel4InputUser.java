@@ -190,13 +190,13 @@ public class InsertionModel4InputUser extends InsertionModel
       LOGGER.trace("", x);
     }
 
-    XPropertySet master = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, doc));
+    XPropertySet propSet = UNO.XPropertySet(UnoService.createService(UnoService.CSS_TEXT_FIELD_MASTER_USER, doc));
 
     try
     {
-      UnoProperty.setProperty(master, UnoProperty.VALUE, Double.valueOf(0));
-      UnoProperty.setProperty(master, UnoProperty.NAME, newName);
-      UnoProperty.setProperty(master, UnoProperty.CONTENT, content);
+      UnoProperty.setProperty(propSet, UnoProperty.VALUE, Double.valueOf(0));
+      UnoProperty.setProperty(propSet, UnoProperty.NAME, newName);
+      UnoProperty.setProperty(propSet, UnoProperty.CONTENT, content);
       UnoProperty.setProperty(textField, UnoProperty.CONTENT, newName);
     } catch (UnoHelperException e)
     {

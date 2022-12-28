@@ -61,7 +61,7 @@ public class PrintModels
    */
   public static XPrintModel createPrintModel(TextDocumentController documentController)
   {
-    return new MasterPrintModel(documentController);
+    return new PrimaryPrintModel(documentController);
   }
 
   /**

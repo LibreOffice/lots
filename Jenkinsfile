@@ -45,7 +45,7 @@ pipeline {
     stage('Quality Gate') {
       steps {
         script {
-          if (GIT_BRANCH == 'master' || GIT_BRANCH ==~ 'WollMux_[0-9]*.[0-9]*') {
+          if (GIT_BRANCH == 'main' || GIT_BRANCH ==~ 'WollMux_[0-9]*.[0-9]*') {
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',

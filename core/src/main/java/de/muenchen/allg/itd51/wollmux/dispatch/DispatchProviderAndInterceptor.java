@@ -65,9 +65,9 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   private static final Set<DispatchProviderAndInterceptor> documentDispatchProviderAndInterceptors =
       new HashSet<>();
 
-  private XDispatchProvider slave = null;
+  private XDispatchProvider secondary = null;
 
-  private XDispatchProvider master = null;
+  private XDispatchProvider primary = null;
 
   /**
    * If not null, this provider can handle file based dispatches.
@@ -106,27 +106,27 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   }
 
   @Override
-  public XDispatchProvider getSlaveDispatchProvider()
+  public XDispatchProvider getSecondaryDispatchProvider()
   {
-    return slave;
+    return secondary;
   }
 
   @Override
-  public void setSlaveDispatchProvider(XDispatchProvider slave)
+  public void setSecondaryDispatchProvider(XDispatchProvider secondary)
   {
-    this.slave = slave;
+    this.secondary = secondary;
   }
 
   @Override
-  public XDispatchProvider getMasterDispatchProvider()
+  public XDispatchProvider getPrimaryDispatchProvider()
   {
-    return master;
+    return primary;
   }
 
   @Override
-  public void setMasterDispatchProvider(XDispatchProvider master)
+  public void setPrimaryDispatchProvider(XDispatchProvider primary)
   {
-    this.master = master;
+    this.primary = primary;
   }
 
   @Override
@@ -163,7 +163,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   }
 
   /**
-   * Get the original dispatch of the registered slave dispatch provider (@see
+   * Get the original dispatch of the registered secondary dispatch provider (@see
    * {@link XDispatchProvider#queryDispatch(URL, String, int)})
    *
    * @param url
@@ -172,13 +172,13 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    *          The target frame.
    * @param fsFlag
    *          Optional search parameter for finding the frame.
-   * @return The original dispatch or null if there is no slave.
+   * @return The original dispatch or null if there is no secondary.
    */
   public XDispatch getOrigDispatch(URL url, String frameName,
       int fsFlag)
   {
-    if (slave != null)
-      return slave.queryDispatch(url, frameName, fsFlag);
+    if (secondary != null)
+      return secondary.queryDispatch(url, frameName, fsFlag);
     else
       return null;
   }

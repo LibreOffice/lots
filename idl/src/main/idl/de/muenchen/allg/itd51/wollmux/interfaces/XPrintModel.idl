@@ -66,7 +66,7 @@ interface XPrintModel
      * (dieses XPrintModel) übergeben.
      *
      * @param functionName
-     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
+     *          Name der Druckfunktion, die durch das PrimaryPrintModel verwaltet
      *          werden soll.
      * @throws NoSuchMethodException
      *           Wird geworfen, wenn die Druckfunktion nicht definiert ist.
