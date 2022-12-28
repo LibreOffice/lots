@@ -45,24 +45,24 @@ public class ConfClassLoader extends URLClassLoader
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfClassLoader.class);
 
-  protected ArrayList<String> blacklist;
+  protected ArrayList<String> denylist;
 
-  protected ArrayList<String> whitelist;
+  protected ArrayList<String> allowlist;
 
   protected static ConfClassLoader classLoader;
 
-  protected static final String[] DEFAULT_BLACKLIST = { "java.", "com.sun." };
+  protected static final String[] DEFAULT_DENYLIST = { "java.", "com.sun." };
 
   protected ConfClassLoader()
   {
     super(new URL[] {});
-    blacklist = new ArrayList<>();
-    for (String s : ConfClassLoader.DEFAULT_BLACKLIST)
+    denylist = new ArrayList<>();
+    for (String s : ConfClassLoader.DEFAULT_DENYLIST)
     {
-      addBlacklisted(s);
+      addDenylisted(s);
     }
-    whitelist = new ArrayList<>();
-    whitelist.add("com.sun.star.lib.loader"); // exception for classes in default configuration
+    allowlist = new ArrayList<>();
+    allowlist.add("com.sun.star.lib.loader"); // exception for classes in default configuration
   }
 
   @Override
@@ -72,14 +72,14 @@ public class ConfClassLoader extends URLClassLoader
   }
 
   /**
-   * Black list a classpath entry.
+   * Deny-list a classpath entry.
    *
    * @param name
    *          The classpath entry.
    */
-  public void addBlacklisted(String name)
+  public void addDenylisted(String name)
   {
-    blacklist.add(name);
+    denylist.add(name);
   }
 
   /**
@@ -88,9 +88,9 @@ public class ConfClassLoader extends URLClassLoader
    * @param name
    *          The classpath entry.
    */
-  public void addWhitelisted(String name)
+  public void addAllowlisted(String name)
   {
-    whitelist.add(name);
+    allowlist.add(name);
   }
 
   @Override
@@ -98,7 +98,7 @@ public class ConfClassLoader extends URLClassLoader
   {
     try
     {
-      if (isBlacklisted(name) && !isWhitelisted(name))
+      if (isDenylisted(name) && !isAllowlisted(name))
       {
         throw new ClassNotFoundException();
       }
@@ -113,9 +113,9 @@ public class ConfClassLoader extends URLClassLoader
     }
   }
 
-  private boolean isBlacklisted(String name)
+  private boolean isDenylisted(String name)
   {
-    for (String bl : blacklist)
+    for (String bl : denylist)
     {
       if (name.startsWith(bl))
       {
@@ -126,9 +126,9 @@ public class ConfClassLoader extends URLClassLoader
     return false;
   }
 
-  private boolean isWhitelisted(String name)
+  private boolean isAllowlisted(String name)
   {
-    for (String wl : whitelist)
+    for (String wl : allowlist)
     {
       if (name.startsWith(wl))
       {
@@ -176,10 +176,10 @@ public class ConfClassLoader extends URLClassLoader
       urllist.append("  ");
     }
 
-    ConfigThingy confWhitelist = WollMuxFiles.getWollmuxConf().query("CPWHITELIST", 1);
-    for (ConfigThingy w : confWhitelist)
+    ConfigThingy confAllowlist = WollMuxFiles.getWollmuxConf().query("CPALLOWLIST", 1);
+    for (ConfigThingy w : confAllowlist)
     {
-      getClassLoader().addWhitelisted(w.toString());
+      getClassLoader().addAllowlisted(w.toString());
     }
 
     LOGGER.debug("CLASSPATH={}", urllist);

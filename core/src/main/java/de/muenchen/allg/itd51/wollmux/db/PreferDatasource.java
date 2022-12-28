@@ -171,7 +171,7 @@ public class PreferDatasource extends Datasource
   {
     private int size;
 
-    private Set<String> keyBlacklist = new HashSet<>();
+    private Set<String> keyDenylist = new HashSet<>();
 
     private QueryResults overrideResults;
 
@@ -202,15 +202,15 @@ public class PreferDatasource extends Datasource
        * Datensätze für die ein Korrekturdatensatz vorliegt, dieaber nicht in
        * overrideResults auftauchen (weil die Korrektur dafür gesorgt hat, dass die
        * Suchbedingung nicht mehr passt) müssen auch mit ihrem Schlüssel auf die
-       * Blacklist. Deswegen müssen wir diese Datensätze suchen.
+       * Denylist. Deswegen müssen wir diese Datensätze suchen.
        */
-      QueryResults blacklistResults =
+      QueryResults denylistResults =
           override.getDatasetsByKey(keyToCount.keySet());
 
       size += overrideResults.size();
 
       QueryResults[] oResults = new QueryResults[] {
-        overrideResults, blacklistResults };
+        overrideResults, denylistResults };
 
       for (int i = 0; i < oResults.length; ++i)
       {
@@ -225,7 +225,7 @@ public class PreferDatasource extends Datasource
           {
             size -= count[0];
             count[0] = 0;
-            keyBlacklist.add(key);
+            keyDenylist.add(key);
           }
         }
       }
@@ -298,7 +298,7 @@ public class PreferDatasource extends Datasource
         do
         {
           ds = iter.next();
-        } while (keyBlacklist.contains(ds.getKey()));
+        } while (keyDenylist.contains(ds.getKey()));
 
         return ds;
       }

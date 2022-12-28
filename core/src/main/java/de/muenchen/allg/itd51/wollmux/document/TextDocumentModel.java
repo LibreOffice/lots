@@ -1522,13 +1522,13 @@ public class TextDocumentModel
 
   /**
    * Collect information about fields used in InsertFormValue-commands, mail merge fields, user
-   * fields or TRAFOs not blacklisted in the schema.
+   * fields or TRAFOs not denylisted in the schema.
    *
-   * @param blacklist
+   * @param denylist
    *          Don't collect information about the fields with an ID in this set.
    * @return Array of information per field ordered alphabetically.
    */
-  public ReferencedFieldID[] getReferencedFieldIDsThatAreNotInSchema(Set<String> blacklist)
+  public ReferencedFieldID[] getReferencedFieldIDsThatAreNotInSchema(Set<String> denylist)
   {
     ArrayList<ReferencedFieldID> list = new ArrayList<>();
 
@@ -1536,7 +1536,7 @@ public class TextDocumentModel
     Collections.sort(sortedIDs);
     for (String id : sortedIDs)
     {
-      if (blacklist.contains(id))
+      if (denylist.contains(id))
       {
         continue;
       }
