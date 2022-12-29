@@ -146,9 +146,10 @@ public class OnMarkBlock extends WollMuxEvent
   }
 
   /**
-   * The list of bookmarks is deleted if it contains only bookmarks with the same command. Otherwise
-   * the bookmarks arent'deleted and the user is request to confirm, that he wants to create a
-   * possibly conflicting command.
+   * The list of bookmarks is deleted if it contains only bookmarks
+   * with the same command. Otherwise the bookmarks are not deleted
+   * and the user is request to confirm, that a possibly conflicting
+   * command is about to be created.
    *
    * @param range
    *          The range of the new bookmark.
