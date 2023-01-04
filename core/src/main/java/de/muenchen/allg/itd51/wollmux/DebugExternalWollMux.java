@@ -44,14 +44,16 @@ import de.muenchen.allg.itd51.wollmux.util.LogConfig;
 import de.muenchen.allg.util.UnoComponent;
 
 /**
- * Über diese Klasse kann der WollMux zum Debuggen in der lokalen JVM gestartet
- * werden, ohne dass die Extension in Office installiert ist. Bisher
- * haben wir für diesen Zweck die WollMuxBar mit der Konfigurationsoption
- * ALLOW_EXTERNAL_WOLLMUX "true" verwendet. Damit das Debuggen auch ohne WollMuxBar
- * möglich ist, wurde diese Klasse eingefügt. Zusammen mit dem neuen ant build-target
- * WollMux.oxt-ButtonsOnly kann so das Debugging vereinfacht werden.
+ * With this class, WollMux can be started for debugging in the local JVM
+ * without installing the extension.
  *
- * Verwendung: Diese Main-Methode einfach per Debugger starten.
+ * The debugging is also possible with the WollMuxBar with the configuration
+ * option ALLOW_EXTERNAL_WOLLMUX set to "true".
+ * This class is helpful for making the debugging possible without WollMuxBar.
+ * The debuging can be simpliefied together with the new ant build-target
+ * WollMux.oxt-ButtonsOnly.
+ *
+ * Usage: Simply run this main method via debugger.
  *
  * @author Christoph
  *
@@ -73,8 +75,8 @@ public class DebugExternalWollMux
   @SuppressWarnings("java:S106")
   public static void main(String[] args) throws Exception
   {
-    // Logger zum Debuggen auf stdout initialisieren und die zukünftigen
-    // Logger-Einstellungen aus der wollmuxconfig ignorieren.
+    // Initialize logger to stdout for debugging and ignore any future
+    // logger settings from wollmuxconfig.
     LogConfig.init(new OutputStreamWriter(System.out), Level.DEBUG);
     LogConfig.setIgnoreInit(true);
 
