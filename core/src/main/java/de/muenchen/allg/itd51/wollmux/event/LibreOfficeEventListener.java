@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * A listener for LibreOffice events of documents like OnNew or OnLoad. <a href=
- * "https://wiki.openoffice.org/wiki/Documentation/DevGuide/WritingUNO/Jobs/List_of_Supported_Events">List
+ * "https://wiki.documentfoundation.org/Documentation/DevGuide/Writing_UNO_Components#List_of_Supported_Events">List
  * of supported events</a>
  *
  * The processing state of all documents should be recorded by this listener.

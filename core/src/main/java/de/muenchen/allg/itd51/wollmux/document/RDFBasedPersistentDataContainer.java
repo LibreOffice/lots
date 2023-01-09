@@ -47,8 +47,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 /**
  * Implementiert die neue Zugriffsmethode auf persistente Daten im neuen
  * RDF-Metadatenframework
- * (http://wiki.services.openoffice.org/wiki/Documentation/DevGuide
- * /OfficeDev/RDF_metadata).
+ * (https://wiki.documentfoundation.org/Documentation/DevGuide/Office_Development#RDF_metadata).
  *
  * @author Christoph Lutz (D-III-ITD-D101)
  */
