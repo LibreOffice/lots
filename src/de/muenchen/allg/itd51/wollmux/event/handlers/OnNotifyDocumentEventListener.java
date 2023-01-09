@@ -1,5 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Method;
@@ -159,6 +160,7 @@ public class OnNotifyDocumentEventListener extends BasicEvent
       LOGGER.debug("", e);
     }
 
+    Dimension dimFrame = formController.getFrameSize();
     java.awt.Rectangle frameB = formController.getFrameBounds();
     java.awt.Rectangle maxWindowBounds = formController.getMaxWindowBounds();
     Insets windowInsets = formController.getWindowInsets();
@@ -177,6 +179,7 @@ public class OnNotifyDocumentEventListener extends BasicEvent
       docWidth = maxWindowBounds.width;
     }
     int docY = maxWindowBounds.y + windowInsets.top;
+    docX = (int) (dimFrame.width * formController.getScalingFactor());
     /*
      * Das Subtrahieren von 2*windowInsets.bottom ist ebenfalls eine Heuristik. (siehe weiter oben)
      */
