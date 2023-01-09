@@ -3,6 +3,8 @@ package de.muenchen.allg.itd51.wollmux.form.dialog;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,6 +16,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -975,4 +978,17 @@ public class GUI
       });
     }
   }
+
+  public Dimension getFrameSize()
+  {
+    return myFrame.getBounds().getSize();
+  }
+
+  public double getScalingFactor()
+  {
+	  GraphicsConfiguration gc = myFrame.getGraphicsConfiguration();
+	  AffineTransform df = gc.getDefaultTransform();
+	  return df.getScaleX();
+  }
+
 }

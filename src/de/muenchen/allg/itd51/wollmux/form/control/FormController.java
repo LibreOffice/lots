@@ -1,5 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.form.control;
 
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionListener;
@@ -77,6 +78,16 @@ public class FormController
   public Rectangle getMaxWindowBounds()
   {
     return maxWindowBounds;
+  }
+
+  public Dimension getFrameSize()
+  {
+    return gui.getFrameSize();
+  }
+
+  public double getScalingFactor()
+  {
+    return gui.getScalingFactor();
   }
 
   public Insets getWindowInsets()
