@@ -40,7 +40,7 @@ import com.sun.star.lang.EventObject;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 
 /**
  * A dispatch provider and interceptor for LibreOffice dispatches.

@@ -36,16 +36,16 @@ import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoProperty;
-import de.muenchen.allg.util.UnoService;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoService;
 
 public class InsertionModel4InputUser extends InsertionModel
 {

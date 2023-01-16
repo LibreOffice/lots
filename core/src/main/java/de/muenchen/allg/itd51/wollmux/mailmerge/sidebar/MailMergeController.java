@@ -57,9 +57,9 @@ import com.sun.star.ui.dialogs.XFilePicker3;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoCollection;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
@@ -86,7 +86,7 @@ import de.muenchen.allg.itd51.wollmux.mailmerge.ifthenelse.IfThenElseModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.print.SetFormValue;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Controller of the sidebar.

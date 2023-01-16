@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XStorable;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;

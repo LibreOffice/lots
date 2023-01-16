@@ -33,7 +33,7 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InsertFormValue;
@@ -49,8 +49,8 @@ import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.UpdateFi
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockCommand;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoProperty;
-import de.muenchen.allg.util.UnoService;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoService;
 
 /**
  * Implementiert einen leer-Executor, von dem abgeleitet werden kann, um konkrete

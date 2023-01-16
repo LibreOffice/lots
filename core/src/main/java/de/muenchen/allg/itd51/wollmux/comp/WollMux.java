@@ -42,9 +42,9 @@ import com.sun.star.ui.XModuleUIConfigurationManagerSupplier;
 import com.sun.star.ui.XUIConfigurationManager;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoList;
-import de.muenchen.allg.afid.UnoProps;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoList;
+import org.libreoffice.ext.unohelper.common.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
@@ -59,8 +59,8 @@ import de.muenchen.allg.itd51.wollmux.interfaces.XWollMuxDocument;
 import de.muenchen.allg.itd51.wollmux.sender.SenderException;
 import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoComponent;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * The main service of WollMux. It treats all Dispatches starting with "wollmux:" and is the

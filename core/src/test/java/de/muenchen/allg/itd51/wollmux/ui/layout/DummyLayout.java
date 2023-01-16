@@ -28,7 +28,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.sun.star.awt.Rectangle;
 
-import de.muenchen.allg.ui.layout.Layout;
+import org.libreoffice.ext.unohelper.ui.layout.Layout;
 
 public class DummyLayout implements Layout
 {

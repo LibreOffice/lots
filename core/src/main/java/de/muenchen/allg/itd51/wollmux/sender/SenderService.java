@@ -44,7 +44,7 @@ import com.sun.star.lang.EventObject;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;

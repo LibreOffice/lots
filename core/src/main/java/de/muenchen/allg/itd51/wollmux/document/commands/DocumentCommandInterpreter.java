@@ -37,8 +37,8 @@ import com.sun.star.style.XStyle;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.document.text.StyleService;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.document.text.StyleService;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.document.WMCommandsFailedException;

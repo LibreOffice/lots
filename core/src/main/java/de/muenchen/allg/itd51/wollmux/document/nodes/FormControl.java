@@ -22,7 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.document.nodes;
 
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 
 /**
  * Wird von Nodes implementiert, die Formularsteuerelemente darstellen.

@@ -58,17 +58,17 @@ import com.sun.star.lang.IndexOutOfBoundsException;
 import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.uno.AnyConverter;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.dialog.adapter.AbstractKeyHandler;
-import de.muenchen.allg.dialog.adapter.AbstractMouseListener;
-import de.muenchen.allg.dialog.adapter.AbstractTextListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractItemListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractKeyHandler;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractMouseListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.ui.GuiFactory;
-import de.muenchen.allg.util.UnoComponent;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.ui.GuiFactory;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Dialog for creating if-then-else fields.

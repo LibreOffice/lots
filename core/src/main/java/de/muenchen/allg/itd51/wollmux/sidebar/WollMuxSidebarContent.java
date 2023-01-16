@@ -76,14 +76,14 @@ import com.sun.star.ui.XToolPanel;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
-import de.muenchen.allg.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.dialog.adapter.AbstractMenuListener;
-import de.muenchen.allg.dialog.adapter.AbstractMouseListener;
-import de.muenchen.allg.dialog.adapter.AbstractTextListener;
-import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractFocusListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractItemListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractMenuListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractMouseListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTextListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -96,14 +96,14 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnKill;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnOpenDocument;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.sender.SenderService;
-import de.muenchen.allg.ui.layout.Layout;
-import de.muenchen.allg.ui.layout.VerticalLayout;
+import org.libreoffice.ext.unohelper.ui.layout.Layout;
+import org.libreoffice.ext.unohelper.ui.layout.VerticalLayout;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.ui.GuiFactory;
+import org.libreoffice.ext.unohelper.ui.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementType;
-import de.muenchen.allg.util.UnoComponent;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Create the window of the WollMuxBar. It contains the tree to access the templates and several

@@ -22,7 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.document.nodes;
 
-import de.muenchen.allg.document.text.Bookmark;
+import org.libreoffice.ext.unohelper.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 
 public class GroupBookmarkNode extends WollmuxBookmarkNode

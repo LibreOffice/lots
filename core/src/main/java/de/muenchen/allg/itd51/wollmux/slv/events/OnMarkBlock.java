@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.awt.MessageBoxResults;
 import com.sun.star.text.XTextCursor;
 
-import de.muenchen.allg.afid.TextRangeRelation;
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.document.text.Bookmark;
+import org.libreoffice.ext.unohelper.common.TextRangeRelation;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
@@ -47,7 +47,7 @@ import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveConfig;
 import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveModel;
 import de.muenchen.allg.itd51.wollmux.slv.PrintBlockSignature;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * An event that inserts a bookmark with name {@code WM(CMD '<blockname>')}at the current cursor

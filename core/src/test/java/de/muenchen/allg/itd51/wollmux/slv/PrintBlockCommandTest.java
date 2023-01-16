@@ -35,15 +35,15 @@ import org.junit.jupiter.api.Test;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.afid.TextRangeRelation;
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.document.text.Bookmark;
+import org.libreoffice.ext.unohelper.common.TextRangeRelation;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 public class PrintBlockCommandTest extends OfficeTest
 {

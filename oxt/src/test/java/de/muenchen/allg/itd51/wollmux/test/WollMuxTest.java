@@ -45,11 +45,11 @@ import com.sun.star.document.XEventListener;
 import com.sun.star.lang.XComponent;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.interfaces.XWollMux;
-import de.muenchen.allg.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
 
 @Tag("de.muenchen.allg.itd51.wollmux.test.WollMuxTest")
 public abstract class WollMuxTest

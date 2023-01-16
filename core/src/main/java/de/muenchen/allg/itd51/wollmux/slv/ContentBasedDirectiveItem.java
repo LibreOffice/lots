@@ -35,9 +35,9 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.AnyConverter;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * A content based directive line. This class provides utility functions for modifying the

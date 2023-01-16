@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.ui;
 
 import com.sun.star.awt.XComboBox;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 
 /**
  * A wrapper for adding items to a {@link XComboBox}.

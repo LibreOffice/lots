@@ -35,9 +35,9 @@ import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.document.text.TextDocument;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.document.text.TextDocument;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;

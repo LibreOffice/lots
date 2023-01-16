@@ -45,10 +45,10 @@ import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
-import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractSidebarPanel;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModelListener;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
@@ -56,12 +56,12 @@ import de.muenchen.allg.itd51.wollmux.mailmerge.ui.MailMergeField;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ui.SpecialField;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.ui.layout.HorizontalLayout;
-import de.muenchen.allg.ui.layout.Layout;
-import de.muenchen.allg.ui.layout.VerticalLayout;
-import de.muenchen.allg.ui.GuiFactory;
-import de.muenchen.allg.util.UnoConfiguration;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.ui.layout.HorizontalLayout;
+import org.libreoffice.ext.unohelper.ui.layout.Layout;
+import org.libreoffice.ext.unohelper.ui.layout.VerticalLayout;
+import org.libreoffice.ext.unohelper.ui.GuiFactory;
+import org.libreoffice.ext.unohelper.util.UnoConfiguration;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * The content of the sidebar.

@@ -32,7 +32,7 @@ import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager.Info;

@@ -49,9 +49,9 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoDictionary;
-import de.muenchen.allg.afid.UnoList;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoDictionary;
+import org.libreoffice.ext.unohelper.common.UnoList;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.Common;
@@ -62,8 +62,8 @@ import de.muenchen.allg.itd51.wollmux.former.section.model.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoProperty;
-import de.muenchen.allg.util.UnoService;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoService;
 
 /**
  * Enthält alle OneSectionLineViews.

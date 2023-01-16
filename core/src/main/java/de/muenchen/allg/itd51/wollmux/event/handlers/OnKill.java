@@ -22,7 +22,7 @@
  */
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 
 /**

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.util.XModifiable;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 
 /**
  * Implementiert den DatenContainer für den rdf-Modus. Dieser Modus verhält sich

@@ -48,10 +48,10 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
-import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractFocusListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.db.ThingyDatasource;
@@ -71,7 +71,7 @@ import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ConnectionModel;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * The controller of the form sidebar.

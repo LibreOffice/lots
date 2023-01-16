@@ -52,12 +52,12 @@ import com.sun.star.awt.XWindowPeer;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractAdjustmentListener;
-import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
-import de.muenchen.allg.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.dialog.adapter.AbstractTextListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractAdjustmentListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractFocusListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractItemListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 

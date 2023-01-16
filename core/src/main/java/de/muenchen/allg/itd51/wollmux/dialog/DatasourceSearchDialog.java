@@ -59,11 +59,11 @@ import com.sun.star.awt.tab.XTabPageContainer;
 import com.sun.star.awt.tab.XTabPageContainerModel;
 import com.sun.star.lang.EventObject;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.dialog.adapter.AbstractTabPageContainerListener;
-import de.muenchen.allg.dialog.adapter.AbstractTopWindowListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractItemListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTabPageContainerListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTopWindowListener;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
@@ -77,13 +77,13 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.ui.GuiFactory;
-import de.muenchen.allg.ui.layout.ControlLayout;
-import de.muenchen.allg.ui.layout.HorizontalLayout;
-import de.muenchen.allg.ui.layout.Layout;
-import de.muenchen.allg.ui.layout.VerticalLayout;
-import de.muenchen.allg.util.UnoComponent;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.ui.GuiFactory;
+import org.libreoffice.ext.unohelper.ui.layout.ControlLayout;
+import org.libreoffice.ext.unohelper.ui.layout.HorizontalLayout;
+import org.libreoffice.ext.unohelper.ui.layout.Layout;
+import org.libreoffice.ext.unohelper.ui.layout.VerticalLayout;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Dialog for searching data sources.

@@ -36,7 +36,7 @@ import com.sun.star.ui.dialogs.XWizardController;
 import com.sun.star.ui.dialogs.XWizardPage;
 import com.sun.star.util.InvalidStateException;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.mailmerge.MailMergeRunner;

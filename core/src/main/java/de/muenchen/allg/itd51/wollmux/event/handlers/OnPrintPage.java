@@ -29,15 +29,15 @@ import com.sun.star.text.XPageCursor;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.view.XPrintable;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.afid.UnoHelperRuntimeException;
-import de.muenchen.allg.afid.UnoProps;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UnoHelperRuntimeException;
+import org.libreoffice.ext.unohelper.common.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.util.UnoConfiguration;
-import de.muenchen.allg.util.UnoProperty;
-import de.muenchen.allg.util.UnoService;
+import org.libreoffice.ext.unohelper.util.UnoConfiguration;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoService;
 
 /**
  * Event for printing the current visible page.

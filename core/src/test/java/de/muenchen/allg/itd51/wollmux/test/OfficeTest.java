@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Tag;
 
 import com.sun.star.lang.XComponent;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 
 @Tag("de.muenchen.allg.itd51.wollmux.test.OfficeTest")
 public abstract class OfficeTest

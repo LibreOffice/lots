@@ -30,9 +30,9 @@ import com.sun.star.awt.XDialog;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.util.UnoComponent;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
 
 /**
  * An authentication dialog.

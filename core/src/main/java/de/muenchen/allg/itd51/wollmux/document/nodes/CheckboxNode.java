@@ -31,12 +31,12 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.document.text.Bookmark;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.document.DocumentTreeVisitor;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 public class CheckboxNode implements FormControl, Node
 {

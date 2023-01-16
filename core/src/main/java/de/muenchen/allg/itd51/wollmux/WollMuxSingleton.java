@@ -33,10 +33,10 @@ import com.sun.star.document.XEventBroadcaster;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoDictionary;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.afid.UnoProps;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoDictionary;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UnoProps;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -47,7 +47,7 @@ import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.LogConfig;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoConfiguration;
+import org.libreoffice.ext.unohelper.util.UnoConfiguration;
 
 /**
  * Diese Klasse ist ein Singleton, welches den WollMux initialisiert und alle zentralen

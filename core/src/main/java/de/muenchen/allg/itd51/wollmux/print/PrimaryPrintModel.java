@@ -43,8 +43,8 @@ import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Type;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoProps;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoProps;
 import de.muenchen.allg.itd51.wollmux.GlobalFunctions;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -56,7 +56,7 @@ import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.print.PageRange.PageRangeType;
 import de.muenchen.allg.itd51.wollmux.slv.events.OnSetPrintBlocksPropsViaPrintModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * This model maintains the call hierarchy of all print functions. The hierarchy is defined by the

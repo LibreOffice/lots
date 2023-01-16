@@ -39,13 +39,13 @@ import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.lang.EventObject;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.dialog.adapter.AbstractTextListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractItemListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.print.PageRange.PageRangeType;
-import de.muenchen.allg.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
 
 /**
  * Dialog for configuring a print.

@@ -25,7 +25,7 @@ package de.muenchen.allg.itd51.wollmux;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 
 /**
  * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der

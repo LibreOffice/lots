@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.afid.UnoProps;
+import org.libreoffice.ext.unohelper.common.UnoProps;
 import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;

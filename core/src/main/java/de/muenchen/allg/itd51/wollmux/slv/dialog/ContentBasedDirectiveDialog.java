@@ -47,15 +47,15 @@ import com.sun.star.awt.XWindowPeer;
 import com.sun.star.ui.dialogs.ExecutableDialogResults;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperRuntimeException;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractAdjustmentListener;
-import de.muenchen.allg.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.dialog.adapter.AbstractSpinListener;
-import de.muenchen.allg.dialog.adapter.AbstractTextListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperRuntimeException;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractAdjustmentListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractItemListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractSpinListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTextListener;
 import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirective;
-import de.muenchen.allg.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
 
 /**
  * A dialog for printing documents with content based directives.

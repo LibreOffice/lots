@@ -40,12 +40,12 @@ import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoDictionary;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.ui.layout.Layout;
-import de.muenchen.allg.ui.layout.VerticalLayout;
-import de.muenchen.allg.ui.GuiFactory;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoDictionary;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.ui.layout.Layout;
+import org.libreoffice.ext.unohelper.ui.layout.VerticalLayout;
+import org.libreoffice.ext.unohelper.ui.GuiFactory;
 
 /**
  * A dialog for selecting a data source which is registered in LibreOffice as database.

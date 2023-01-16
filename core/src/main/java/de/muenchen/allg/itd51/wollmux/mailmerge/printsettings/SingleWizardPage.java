@@ -39,10 +39,10 @@ import com.sun.star.ui.dialogs.XFolderPicker2;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractTextListener;
-import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTextListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractXWizardPage;
 
 /**
  * A page of the mail merge wizard. Settings for printing each record in a single file are made

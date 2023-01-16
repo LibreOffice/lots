@@ -105,7 +105,7 @@ module wollmux
   requires transitive org.libreoffice.uno;
   requires transitive org.libreoffice.unoloader;
 
-  requires transitive unohelper;
+  requires transitive org.libreoffice.ext.unohelper;
   requires transitive wollmux.interfaces;
 
   requires transitive org.apache.logging.log4j;

@@ -33,10 +33,10 @@ import com.sun.star.text.XTextSection;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Diese Klasse repräsentiert einen Textbereich (TextSection), dessen Namen um den

@@ -33,7 +33,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 
 /**
  * A dispatch executed by WollMux. Registered Listeners are notified after completion.

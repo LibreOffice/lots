@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.afid.UnoIterator;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UnoIterator;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 public class Utils
 {

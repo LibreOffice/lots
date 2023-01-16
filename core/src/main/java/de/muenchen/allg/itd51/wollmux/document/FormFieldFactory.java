@@ -42,14 +42,14 @@ import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.afid.UnoIterator;
-import de.muenchen.allg.document.text.Bookmark;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoCollection;
+import org.libreoffice.ext.unohelper.common.UnoIterator;
+import org.libreoffice.ext.unohelper.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoProperty;
-import de.muenchen.allg.util.UnoService;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoService;
 
 /**
  * Factory for creating form fields from book marks with name WM(CMD 'insertFormValue' ...).

@@ -46,13 +46,13 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextSection;
 import com.sun.star.uno.AnyConverter;
 
-import de.muenchen.allg.afid.TextRangeRelation;
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.afid.UnoDictionary;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.document.text.Bookmark;
-import de.muenchen.allg.document.text.StyleService;
+import org.libreoffice.ext.unohelper.common.TextRangeRelation;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoCollection;
+import org.libreoffice.ext.unohelper.common.UnoDictionary;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.document.text.Bookmark;
+import org.libreoffice.ext.unohelper.document.text.StyleService;
 import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -62,8 +62,8 @@ import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirective;
 import de.muenchen.allg.itd51.wollmux.slv.print.ContentBasedDirectivePrint;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.ooo.TextDocument;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.common.TextDocument;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 
 /**

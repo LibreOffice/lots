@@ -36,7 +36,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XStorable;
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 

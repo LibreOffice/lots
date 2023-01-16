@@ -28,8 +28,8 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.ui.XUIElement;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractSidebarFactory;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractSidebarFactory;
 
 /**
  * Factory for the WollMux sidebar. It's mentioned in Factories.xcu.

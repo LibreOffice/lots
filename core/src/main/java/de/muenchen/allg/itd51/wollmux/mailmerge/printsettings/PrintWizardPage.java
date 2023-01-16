@@ -28,9 +28,9 @@ import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.Exception;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.dispatch.AbstractDispatchResultListener;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel;
 
