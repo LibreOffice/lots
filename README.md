@@ -11,7 +11,7 @@ WollMux is licensed under the [European Union Public Licence (EUPL)](https://joi
 WollMux is separated into 3 modules:
 * wollmux: All main classes of the extension
 * [wollmux-interfaces](idl/): UNO API Interfaces
-* [unohelper](https://github.com/WollMux/UNOHelper): Support classes for using UNO
+* [unohelper](https://github.com/LibreOffice/UNOHelper): Support classes for using UNO
 
 The following applications have to be installed to compile WollMux:
 * JAVA Development Kit (e.g. [Adoptium](https://adoptium.net)) (at least Java 11)
@@ -39,14 +39,14 @@ Afterwards the property `UNO_PATH` has to be set in the maven settings.
 Before building WollMux, you need to install UNOHelper to your local maven repo (the prebuilt package is currently not available):
 
 ```
-git clone https://github.com/WollMux/UNOHelper.git
+git clone https://github.com/LibreOffice/UNOHelper.git
 mvn install
 ```
 
 Then run the following commands to download and build WollMux:
 
 ```
-git clone https://github.com/WollMux/WollMux.git
+git clone https://github.com/LibreOffice/WollMux.git
 mvn clean package
 ```
 
