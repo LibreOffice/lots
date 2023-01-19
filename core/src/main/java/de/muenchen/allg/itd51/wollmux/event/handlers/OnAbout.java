@@ -28,8 +28,9 @@ import org.slf4j.LoggerFactory;
 import com.sun.star.awt.XContainerWindowProvider;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XDialog;
+import com.sun.star.awt.XFixedHyperlink;
 import com.sun.star.awt.XFixedText;
-import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
 import com.sun.star.deployment.PackageInformationProvider;
@@ -40,6 +41,7 @@ import de.muenchen.allg.afid.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import de.muenchen.allg.util.UnoComponent;
 import de.muenchen.allg.util.UnoProperty;
@@ -63,26 +65,29 @@ public class OnAbout extends WollMuxEvent
           UnoComponent.createComponentWithContext(UnoComponent.CSS_AWT_CONTAINER_WINDOW_PROVIDER));
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.about?location=application", "", peer, null);
+      XDialog dialog = UNO.XDialog(window);
+      dialog.setTitle(L.m("Über WollMux"));
       XControlContainer container = UNO.XControlContainer(window);
 
       // allgemeiner Teil
       XFixedText introLabel = UNO.XFixedText(container.getControl("introLabel"));
       introLabel.setText("WollMux " + WollMuxSingleton.getVersion());
       XFixedText copyright = UNO.XFixedText(container.getControl("copyright"));
-      copyright.setText("Copyright (c) 2005-2019 Landeshauptstadt München");
+      copyright.setText("Copyright (c) 2005-2022 Landeshauptstadt München");
+      XFixedText copyright2 = UNO.XFixedText(container.getControl("copyright2"));
+      copyright2.setText("Copyright (c) 2022-2023 The Document Foundation");
       XFixedText license = UNO.XFixedText(container.getControl("license"));
-      license.setText("Lizenz: European Union Public License");
-      XFixedText homepage = UNO.XFixedText(container.getControl("homepage"));
-      homepage.setText("Homepage: www.wollmux.org");
+      license.setText(L.m("License: European Union Public License"));
+      XFixedHyperlink homepage = UNO.XFixedHyperlink(container.getControl("homepage"));
+      homepage.setText(L.m("Visit website"));
+      homepage.setURL("https://wollmux.org");
+      XFixedHyperlink credits = UNO.XFixedHyperlink(container.getControl("credits"));
+      credits.setText(L.m("Credits"));
+      credits.setURL("https://github.com/LibreOffice/WollMux/graphs/contributors");
       XControl logo = UNO.XControl(container.getControl("logo"));
       XPackageInformationProvider xPackageInformationProvider = PackageInformationProvider.get(UNO.defaultContext);
       String location = xPackageInformationProvider.getPackageLocation(EXTENSION_ID);
       UnoProperty.setProperty(logo.getModel(), UnoProperty.IMAGE_URL, location + IMAGE_URL);
-
-      // Autoren
-      XListBox authors = UNO.XListBox(container.getControl("authors"));
-      authors.addItems(new String[] { "Matthias S. Benkmann", "Christoph Lutz", "Daniel Benkmann",
-          "Bettina Bauer", "Andor Ertsey", "Max Meier" }, (short) 0);
 
       // Info
       XFixedText wmVersion = UNO.XFixedText(container.getControl("wmVersion"));
@@ -97,7 +102,7 @@ public class OnAbout extends WollMuxEvent
       UNO.XDialog(window).execute();
     } catch (UnoHelperException e)
     {
-      LOGGER.error("Info-Dialog konnte nicht angezeigt werden.", e);
+      LOGGER.error("Could not show about dialog.", e);
     }
   }
 
