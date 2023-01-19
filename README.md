@@ -59,14 +59,6 @@ The compiled extension can be found at oxt/target/WollMux.oxt
 mvn license:update-file-header
 ```
 
-## Translations
-
-<a href="https://translations.documentfoundation.org/engage/wollmux/">
-<img src="https://translations.documentfoundation.org/widgets/wollmux/-/wollmux/multi-auto.svg" alt="Translation status" />
-</a>
-
-[Translate WollMux](https://translations.documentfoundation.org/engage/wollmux)
-
 ## Debugging
 ### External WollMux (Eclipse)
 WollMux.oxt extension is not installed in LibreOffice, but is loaded from external by starting a debug session in eclipse. There exist an additional extension **WollMux_ButtonsOnly.oxt**, which only contains the toolbars and dialogs. This extension must be installed in LibreOffice. Therefore call
@@ -109,6 +101,12 @@ If suspend is set to `y`, LibreOffice waits until an external process connects b
 
 ## Translations
 
+<a href="https://translations.documentfoundation.org/engage/wollmux/">
+<img src="https://translations.documentfoundation.org/widgets/wollmux/-/wollmux/multi-auto.svg" alt="Translation status" />
+</a>
+
+[Translate WollMux](https://translations.documentfoundation.org/engage/wollmux)
+
 To update pot/po files from source, run these commands:
 
 ```bash
@@ -116,4 +114,6 @@ xgettext --default-domain=wollmux --output=core/i18n/wollmux.pot --language=java
 for i in core/i18n/*.po; do msgmerge -U $i core/i18n/wollmux.pot; done
 ```
 
-This creates the `core/i18n/wollmux.pot` template file. Translate it and place the translated po files in `core/i18n` folder. The build system will pick up the po files, convert and bundle them with WollMux.
+This creates the `core/i18n/wollmux.pot` template file. Translate it [using Weblate](https://translations.documentfoundation.org/projects/wollmux/#languages). 
+
+The translations will be committed to this repository from time to time. The build system will then pick up the po files, and convert and bundle them with WollMux.
