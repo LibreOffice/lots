@@ -469,7 +469,7 @@ msgstr "El fragment de text amb el FRAG_ID \"{0}\" no està definit!"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:153
 #, java-format
 msgid "The URL \"{0}\" is invalid:"
-msgstr ""
+msgstr "L'URL «{0}» no és vàlid:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:167
 #, fuzzy, java-format
@@ -497,20 +497,19 @@ msgid "Insertion failed"
 msgstr "insercions"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnFunctionDialog.java:86
-#, fuzzy, java-format
+#, java-format
 msgid "Function dialog \"{0}\" is not defined."
-msgstr "TRAFO \"{}\" no està definit."
+msgstr "No s'ha definit el diàleg de la funció «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/CantStartDialogException.java:44
-#, fuzzy
 msgid ""
 "The dialog could not be started!\n"
 "\n"
 "Please contact your system administrator."
 msgstr ""
-"La plantilla utilitzada conté {0} errors.\n"
+"No s'ha pogut iniciar el diàleg.\n"
 "\n"
-"Sisplau contacta amb el teu administrador de sistema."
+"Contacteu amb el personal administratiu del sistema."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:86
 msgid "Cannot parse 'FilenameGeneratorFunction'."
@@ -545,9 +544,8 @@ msgid ""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:85
-#, fuzzy
 msgid "WollMux Info"
-msgstr "Error WollMux"
+msgstr "Informació quant al WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/ByJavaPropertyFinder.java:46
 #, java-format
@@ -612,11 +610,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "Search results"
-msgstr ""
+msgstr "Resultats de la cerca"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "No results."
-msgstr ""
+msgstr "No hi ha cap resultat."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderService.java:550
 msgid "Personal sender list could not be updated."
@@ -638,9 +636,9 @@ msgid "Mail merge failed."
 msgstr "Camp de combinació de correu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/ds/CalcModel.java:357
-#, fuzzy, java-format
+#, java-format
 msgid "Cannot add column \"{0}\""
-msgstr "Ordre desconegut \"{0}\""
+msgstr "No s'ha pogut afegir la columna «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:282
 msgid "A necessary print function is not defined."
@@ -697,7 +695,7 @@ msgstr "Combinació de correu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToShowOdtFile.java:62
 msgid "The generated merged document can not be displayed."
-msgstr ""
+msgstr "No es pot mostrar el document combinat generat."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:116
 #, fuzzy
@@ -765,9 +763,8 @@ msgid "Adjust fields"
 msgstr "Ajusta camps"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:618
-#, fuzzy
 msgid "Printing could not be started."
-msgstr "No es pot trobar el fitxer \"{0}\".\n"
+msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:729
 #, fuzzy, java-format
@@ -781,13 +778,12 @@ msgstr "Nom de fitxer"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:307
-#, fuzzy
 msgid "Preview"
-msgstr "   Previsualització   "
+msgstr "Previsualització"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:343
 msgid "Choose data source"
-msgstr ""
+msgstr "Trieu la font de dades"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:352
 #, fuzzy
@@ -806,7 +802,7 @@ msgstr "Base de dades..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:382
 msgid "Edit sheet"
-msgstr ""
+msgstr "Edita el full"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:388
 msgid "Complement table columns"
@@ -837,7 +833,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunction.java:130
 #, java-format
 msgid "Script \"{0}\" not available"
-msgstr ""
+msgstr "L'script «{0}» no està disponible"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/IsErrorFunction.java:48
 #, java-format
@@ -1342,18 +1338,16 @@ msgid "Expandable"
 msgstr "Editar taula"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:507
-#, fuzzy
 msgid "New value"
-msgstr "nova etiqueta"
+msgstr "Valor nou"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:524
-#, fuzzy
 msgid "Delete value"
-msgstr "suprimir"
+msgstr "Suprimeix el valor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:735
 msgid "Rows number"
-msgstr ""
+msgstr "Nombre de files"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:783
 msgid "Automatic word wrapping"
@@ -1366,7 +1360,7 @@ msgstr "element de control"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/model/FormControlModel.java:666
 #, java-format
 msgid "\"{0}\" is not a correct ID"
-msgstr ""
+msgstr "«{0}» no és un identificador correcte"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlExtViewsPanel.java:73
 msgid "Extra View"
@@ -1436,20 +1430,19 @@ msgstr "<Expert>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:86
 msgid "<Code>"
-msgstr ""
+msgstr "<Codi>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:92
 msgid "<Value>"
-msgstr ""
+msgstr "<Valor>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:98
 msgid "[not hardwired]"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:221
-#, fuzzy
 msgid "Function"
-msgstr "Provador de funcions"
+msgstr "Funció"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:169
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:278
@@ -1548,7 +1541,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:384
 msgid "Evaluate"
-msgstr ""
+msgstr "Calcula"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:421
 msgid "Illegal or missing parameter!"
@@ -1556,11 +1549,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:103
 msgid "Close the Editor without saving?"
-msgstr ""
+msgstr "Voleu tancar l'editor sense desar els canvis?"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:104
 msgid "Close Editor"
-msgstr ""
+msgstr "Tanca l'editor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:197
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:309
@@ -1580,22 +1573,22 @@ msgstr "Error en parsear la funció d'imprimir \"{0}\""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:215
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:185
 msgid "Cancel"
-msgstr "Cancel·lar"
+msgstr "Cancel·la"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:221
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:286
 msgid "Edit"
-msgstr "Editar"
+msgstr "Edita"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:309
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:548
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:638
 msgid "Search..."
-msgstr ""
+msgstr "Cerca..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:331
 msgid "Replace..."
-msgstr ""
+msgstr "Reemplaça..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:172
 msgid "Generated by FormularMax 4000"
@@ -1619,32 +1612,29 @@ msgid "A faulty bookmark was generated: \"{0}\""
 msgstr "S'ha generat una adreça d'interès defectuosa: \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:71
-#, fuzzy
 msgid "Print functions"
-msgstr "posar funció d'imprimir"
+msgstr "Funcions d'impressió"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:122
 msgid "Add"
-msgstr "Afegir"
+msgstr "Afegeix"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:125
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:200
 msgid "OK"
-msgstr "OK"
+msgstr "D'acord"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:61
 msgid "Cut"
-msgstr ""
+msgstr "Retalla"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:85
-#, fuzzy
 msgid "Insert"
-msgstr "insercions"
+msgstr "Insereix"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:98
-#, fuzzy
 msgid "Select all"
-msgstr "selecció"
+msgstr "Selecciona-ho tot"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:146
 msgid "Form"
@@ -1682,7 +1672,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:199
 msgid "Edit form description"
-msgstr "Editar descripció de formulari"
+msgstr "Edita la descripció del formulari"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:207
 msgid "View"
@@ -1702,7 +1692,7 @@ msgstr "Caselles de selecció a quadre combinat"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:315
 msgid "Save as..."
-msgstr "Desa com a..."
+msgstr "Anomena i desa..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:319
 msgid "Exit"
@@ -1862,8 +1852,8 @@ msgstr "Falta l'atribut TYPE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1353
 msgid ""
-"Specified TYPE is invalid or incorrectly written. Expect "
-"\"templateTemplate\", \"normalTemplate\" or \"formDocument\"!"
+"Specified TYPE is invalid or incorrectly written. Expect \"templateTemplate"
+"\", \"normalTemplate\" or \"formDocument\"!"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1461
@@ -1990,7 +1980,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:637
 #, java-format
 msgid "File \"{0}\" could not be found.\n"
-msgstr "No es pot trobar el fitxer \"{0}\".\n"
+msgstr "No s'ha pogut trobar el fitxer «{0}».\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:640
 #, java-format
@@ -2028,9 +2018,9 @@ msgid ""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:415
-#, fuzzy, java-format
+#, java-format
 msgid "Error while reading \"{0}\""
-msgstr "Error en crear el fitxer 'dump'"
+msgstr "S'ha produït un error en llegir «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:438
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:933
@@ -2053,16 +2043,17 @@ msgid ""
 "Error during download of file:\n"
 "{0}"
 msgstr ""
+"S'ha produït un error en baixar el fitxer:\n"
+"{0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:934
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "{0}\n"
 "Please contact your system administrator."
 msgstr ""
-"La plantilla utilitzada conté {0} errors.\n"
-"\n"
-"Sisplau contacta amb el teu administrador de sistema."
+"{0}\n"
+"Contacteu amb el personal administratiu del sistema."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/form/config/FormConfig.java:79
 #, fuzzy
@@ -2084,7 +2075,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:229
 msgid "About WollMux"
-msgstr "Sobre WollMux"
+msgstr "Quant al WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:241
 msgid "none loaded"
@@ -2103,18 +2094,18 @@ msgid "FILTER specification is missing for application \"{0}\""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:310
-#, fuzzy, java-format
+#, java-format
 msgid "Error when storing the file: {0}"
-msgstr "Error en crear el fitxer 'dump'"
+msgstr "S'ha produït un error en emmagatzemar el fitxer: {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:325
 #, java-format
 msgid "Could not create a temporay file \"{0}\""
-msgstr ""
+msgstr "No s'ha pogut crear el fitxer temporal «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:339
 msgid "setSource() was not called"
-msgstr ""
+msgstr "No s'ha cridat setSource()"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:356
 #, java-format
@@ -2123,6 +2114,9 @@ msgid ""
 "\"{0}\"\n"
 "does not exist or it cannot be written!"
 msgstr ""
+"La carpeta temporal\n"
+"«{0}»\n"
+"no existeix o no s'hi pot escriure."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:371
 msgid "Could not create a temporary directory for the file download!"
