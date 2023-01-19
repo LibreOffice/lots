@@ -1856,8 +1856,8 @@ msgstr "Ontbrekende attribuut TYPE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1353
 msgid ""
-"Specified TYPE is invalid or incorrectly written. Expect "
-"\"templateTemplate\", \"normalTemplate\" or \"formDocument\"!"
+"Specified TYPE is invalid or incorrectly written. Expect \"templateTemplate"
+"\", \"normalTemplate\" or \"formDocument\"!"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1461
@@ -2204,8 +2204,8 @@ msgstr ""
 #~ "No main data source selected via SENDER_SOURCE directive! Defaulting to "
 #~ "SENDER_SOURCE=\"\"."
 #~ msgstr ""
-#~ "Geen databron via SENDER_SOURCE gedefineerd! Ik zet dus "
-#~ "SENDER_SOURCE=\"\"."
+#~ "Geen databron via SENDER_SOURCE gedefineerd! Ik zet dus SENDER_SOURCE="
+#~ "\"\"."
 
 #~ msgid "Meaningless FONT_ZOOM value specified: {0}"
 #~ msgstr "Zinloze waarde vermeldt voor FONT_ZOOM: {0}"
