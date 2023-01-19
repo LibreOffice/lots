@@ -59,6 +59,14 @@ The compiled extension can be found at oxt/target/WollMux.oxt
 mvn license:update-file-header
 ```
 
+## Translations
+
+<a href="https://translations.documentfoundation.org/engage/wollmux/">
+<img src="https://translations.documentfoundation.org/widgets/wollmux/-/wollmux/multi-auto.svg" alt="Translation status" />
+</a>
+
+[Translate WollMux](https://translations.documentfoundation.org/engage/wollmux)
+
 ## Debugging
 ### External WollMux (Eclipse)
 WollMux.oxt extension is not installed in LibreOffice, but is loaded from external by starting a debug session in eclipse. There exist an additional extension **WollMux_ButtonsOnly.oxt**, which only contains the toolbars and dialogs. This extension must be installed in LibreOffice. Therefore call
