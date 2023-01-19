@@ -290,7 +290,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     String oid = sender.get("OID");
     if (oid == null || oid.isEmpty() || "*".equals(oid))
     {
-      InfoDialog.showInfoModal(L.m("Fehlende ID"),
+      InfoDialog.showInfoModal(L.m("Missing ID"),
           L.m("The record does not contain a valid OID and "
               + "therefore will not be included in the personal sender list."));
     } else
