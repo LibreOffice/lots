@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 17:48+0100\n"
+"POT-Creation-Date: 2023-01-19 10:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -560,7 +560,7 @@ msgid ""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:293
-msgid "Fehlende ID"
+msgid "Missing ID"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:294
@@ -1005,12 +1005,6 @@ msgid ""
 "column \"{0}\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SecondaryPrintModel.java:225
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:142
-#, java-format
-msgid "Print function \"{0}\" is not defined."
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintModels.java:112
 #, java-format
 msgid "Cannot set stage to \"{0}\""
@@ -1033,6 +1027,12 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:115
 msgid "Printing"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:142
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SecondaryPrintModel.java:225
+#, java-format
+msgid "Print function \"{0}\" is not defined."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:87
@@ -1153,23 +1153,23 @@ msgstr ""
 msgid "Please select an area to be marked."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:171
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:209
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:172
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:210
 msgid "Block is no longer marked"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:172
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:210
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:173
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:211
 msgid ""
 "The selected block already contained a marker 'Block {0}'. The existing "
 "marker has been removed."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:176
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:177
 msgid "Different blocks"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:177
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:178
 msgid ""
 "The selected block already contains another marker.\n"
 "Should the new block is really to be created?\n"
@@ -1177,11 +1177,11 @@ msgid ""
 " when opening the file."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:270
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:271
 msgid "Block was marked"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:270
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:271
 #, java-format
 msgid "The selected block {0}"
 msgstr ""
@@ -1539,8 +1539,8 @@ msgid "Edit"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:309
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:535
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:625
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:548
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:638
 msgid "Search..."
 msgstr ""
 
@@ -1880,32 +1880,32 @@ msgstr ""
 msgid "Missing section \"Formular\" in the form description."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:145
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:144
 #, java-format
 msgid "Cannot access the RDF graph \"{0}\"."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:172
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:171
 #, java-format
 msgid "Cannot create the RDF graph \"{0}\"."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:225
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:224
 #, java-format
 msgid "Cannot read RDF metadata for DataID \"{0}\"."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:265
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:264
 #, java-format
 msgid "Cannot set RDF metadata for DataID \"{0}\"."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:297
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:296
 #, java-format
 msgid "Cannot delete RDF metadata for DataID \"{0}\"."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:339
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:338
 msgid "Cannot persist RDF metadata."
 msgstr ""
 
@@ -1938,7 +1938,7 @@ msgstr ""
 msgid "At the insertion place no text block could be found."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:130
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:133
 msgid ""
 "No section \"Symbolleisten\" could be read from your WollMux configuration.\n"
 "Therefore, the WollMux toolbar cannot be started. Please check if in your "
@@ -1947,41 +1947,41 @@ msgid ""
 "possibly an error occurred while processing a %include."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:253
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:256
 msgid ""
-"WollMux is running without the WollMux configuration.\n"
-"For this reason, unfortunately, the complete range of functions is not "
-"available."
+"No WollMux Configuration found.\n"
+"Please setup the WollMux Configuration\n"
+"as described on the WollMux website"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:402
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:415
 #, java-format
 msgid "Error while reading \"{0}\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:425
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:905
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:438
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:933
 msgid "Incorrect configuration"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:848
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:861
 msgid "Multi-forms no longer supported"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:849
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:862
 msgid ""
 "Multi-forms are no longer supported. You need to open and fill each form "
 "individually."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:889
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:902
 #, java-format
 msgid ""
 "Error during download of file:\n"
 "{0}"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:906
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:934
 #, java-format
 msgid ""
 "{0}\n"
@@ -2062,6 +2062,6 @@ msgstr ""
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/ui/UIElementConfig.java:235
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/ui/UIElementConfig.java:237
 msgid "Incorrect element of the type \"combobox\""
 msgstr ""
