@@ -51,9 +51,10 @@ pipeline {
               mavenLocalRepo: '.repo',
               mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
               publisherStrategy: 'EXPLICIT') {
-              withSonarQubeEnv('SonarQube') {
+              withSonarQubeEnv('sonarcloud') {
               sh "mvn $SONAR_MAVEN_GOAL \
-                -Dsonar.projectKey=de.muenchen:wollmux \
+                -Dsonar.organization=libreoffice-sonarcloud \
+                -Dsonar.projectKey=LibreOffice_WollMux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.java.source=11 \
                 -Dsonar.java.target=11 \
@@ -68,9 +69,10 @@ pipeline {
               mavenLocalRepo: '.repo',
               mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1441715654272',
               publisherStrategy: 'EXPLICIT') {
-              withSonarQubeEnv('SonarQube') {
+              withSonarQubeEnv('sonarcloud') {
               sh "mvn $SONAR_MAVEN_GOAL \
-                -Dsonar.projectKey=de.muenchen:wollmux \
+                -Dsonar.organization=libreoffice-sonarcloud \
+                -Dsonar.projectKey=LibreOffice_WollMux \
                 -Dsonar.branch.name=${GIT_BRANCH} \
                 -Dsonar.branch.target=${env.CHANGE_TARGET} \
                 -Dsonar.java.source=11 \
