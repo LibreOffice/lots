@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-19 10:54+0100\n"
-"PO-Revision-Date: 2023-01-17 14:05+0000\n"
-"Last-Translator: Christian Lohmaier <cloph@documentfoundation.org>\n"
+"PO-Revision-Date: 2023-01-23 12:21+0000\n"
+"Last-Translator: Christian Kühl <kuehl.christian@googlemail.com>\n"
 "Language-Team: German <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/de/>\n"
 "Language: de\n"
@@ -615,9 +615,8 @@ msgstr ""
 "speichern?"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:293
-#, fuzzy
 msgid "Missing ID"
-msgstr "Fehlendes Attribut ID"
+msgstr "Fehlende ID"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:294
 msgid ""
@@ -2097,6 +2096,9 @@ msgid ""
 "Please setup the WollMux Configuration\n"
 "as described on the WollMux website"
 msgstr ""
+"Keine WollMux-Konfiguration gefunden.\n"
+"Bitte richten Sie die WollMux-Konfiguration\n"
+"wie auf der WollMux-Website beschrieben ein."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:415
 #, java-format
