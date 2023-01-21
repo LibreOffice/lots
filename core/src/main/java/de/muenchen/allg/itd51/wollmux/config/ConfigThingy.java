@@ -319,7 +319,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   /**
    * Chases all characters forbidden in URLs through
    * URLEncoder,encode(ch,{@link #CHARSET}).
-   * The space character gets a special treatment (conversion to {1}0),
+   * The space character gets a special treatment (conversion to %20),
    * because URLEncoder.encode() would convert it to "+",
    * which does not lead to the desired result, at least on some web servers.
    */
@@ -333,7 +333,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       {
         char ch = url.charAt(i);
         if (ch == ' ')
-          buffy.append("{1}0");
+          buffy.append("%20");
         else if ((('a' <= ch) && (ch <= 'z')) || (('A' <= ch) && (ch <= 'Z'))
           || (('0' <= ch) && (ch <= '9')) || ch == ';' || ch == '/' || ch == '?'
           || ch == ':' || ch == '@' || ch == '&' || ch == '=' || ch == '+'
