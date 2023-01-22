@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-19 10:54+0100\n"
-"PO-Revision-Date: 2023-01-17 13:23+0000\n"
+"PO-Revision-Date: 2023-01-23 12:21+0000\n"
 "Last-Translator: Adolfo Jayme Barrientos <fito@libreoffice.org>\n"
 "Language-Team: Catalan <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/ca/>\n"
@@ -29,13 +29,13 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:119
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:158
 msgid "NAME of data source is missing"
-msgstr ""
+msgstr "Falta el NAME de la font de dades"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:85
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:82
 #, java-format
 msgid "SOURCE of data source {0} is missing"
-msgstr ""
+msgstr "Falta la SOURCE de la font de dades {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:90
 #, java-format
@@ -43,6 +43,8 @@ msgid ""
 "Error during initialization of datasource \"{0}\":  Referenced datasource "
 "\"{1}\" missing or defined incorrectly"
 msgstr ""
+"S'ha produït un error en inicialitzar la font de dades «{0}». La font de "
+"dades «{1}» a la qual es fa referència no hi és o s'ha definit incorrectament"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:122
 #, java-format
@@ -56,24 +58,24 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:190
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:529
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1493
-#, fuzzy, java-format
+#, java-format
 msgid "Column \"{0}\" is not defined in schema"
-msgstr "TRAFO \"{}\" no està definit."
+msgstr "No s'ha definit la columna «{0}» a l'esquema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:142
 #, java-format
 msgid "\"{1}\" is not a valid column name"
-msgstr ""
+msgstr "«{1}» no és un nom de columna vàlid"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:161
-#, fuzzy, java-format
+#, java-format
 msgid "\"{0}\" is not a valid column name"
-msgstr "URL \"{0}\" no és cap full de càlcul"
+msgstr "«{0}» no és un nom de columna vàlid"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:260
-#, fuzzy, java-format
+#, java-format
 msgid "Column \"{0}\" does not exist!"
-msgstr "Columne {0} no existeix!"
+msgstr "La columna «{0}» no existeix."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:216
 #, java-format
@@ -130,17 +132,18 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:365
 #, java-format
 msgid "Data source \"{0}\": No Key column defined"
-msgstr ""
+msgstr "Font de dades «{0}»: no s'ha trobat cap columna clau"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:387
 #, java-format
 msgid "Key column \"{0}\" not defined in schema"
-msgstr ""
+msgstr "La columna clau «{0}» no s'ha definit a l'esquema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:390
 #, java-format
 msgid "Key column \"{0}\" was specified twice in the key section"
 msgstr ""
+"La columna clau «{0}» s'ha especificat dues vegades a la secció de claus"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:527
 msgid "Could not create RowSet"
@@ -432,7 +435,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:61
 msgid "Multiple WollMux installations"
-msgstr ""
+msgstr "Múltiples instal·lacions del WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:62
 msgid ""
@@ -670,7 +673,7 @@ msgstr "Combinació de correu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:192
 msgid "Generating full document"
-msgstr ""
+msgstr "S'està generant el document sencer"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:263
 msgid "Unfortunately the full document could not be created."
@@ -708,9 +711,9 @@ msgid "The sender address \"{0}\" is invalid."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:154
-#, fuzzy, java-format
+#, java-format
 msgid "Sending to {0}"
-msgstr "Escanejo cèl·lula {0}"
+msgstr "S'està enviant a {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:157
 msgid "Invalid recipient address"
@@ -767,14 +770,13 @@ msgid "Printing could not be started."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:729
-#, fuzzy, java-format
+#, java-format
 msgid "Missing argument for datasource of type \"{0}\":"
-msgstr "Es falta l'argument per al font de dades tipus \"{0}\""
+msgstr "Falta l'argument per a la font de dades tipus «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
-#, fuzzy
 msgid "<<Field names>>"
-msgstr "Nom de fitxer"
+msgstr "<<Noms dels camps>>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:307
@@ -884,7 +886,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:323
 #, fuzzy, java-format
 msgid "\"{0}\" is not a supported basic function. "
-msgstr "URL \"{0}\" no és cap full de càlcul"
+msgstr "«{0}» no és una funció bàsica admesa. "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:337
 #, java-format
@@ -1089,9 +1091,8 @@ msgid "Select dataset"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:231
-#, fuzzy
 msgid "<None>"
-msgstr "<cap>"
+msgstr "<Cap>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:241
 #, java-format
@@ -1324,9 +1325,8 @@ msgid "Sections"
 msgstr "seccions"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:434
-#, fuzzy
 msgid "Field type"
-msgstr "<Nom del camp>"
+msgstr "Tipus de camp"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:469
 msgid "Input list"
@@ -1658,9 +1658,8 @@ msgid "Set print function"
 msgstr "posar funció d'imprimir"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:176
-#, fuzzy
 msgid "Enter file name"
-msgstr "Modificar nom de fitxer"
+msgstr "Introduïu el nom del fitxer"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:183
 msgid "Remove WollMux-form-elements from template"
@@ -1733,18 +1732,16 @@ msgstr "Cancel·la, <-Enrere, PDF, Imprimeix"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:97
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:135
-#, fuzzy
 msgid "File name"
-msgstr "Nom de fitxer"
+msgstr "Nom del fitxer"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:131
 msgid "ID"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:142
-#, fuzzy
 msgid "-- none --"
-msgstr "--cap--"
+msgstr "-- cap --"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:157
 msgid "Supplemental Mods"
@@ -1985,7 +1982,7 @@ msgstr "No s'ha pogut trobar el fitxer «{0}».\n"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:640
 #, java-format
 msgid "JVM-Settings can not be determined: {0}\n"
-msgstr "Les JVM-Settings no es poden determinar: {0}\n"
+msgstr "No s'han pogut determinar els paràmetres de la JVM: {0}\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:728
 #, fuzzy, java-format
@@ -2056,9 +2053,8 @@ msgstr ""
 "Contacteu amb el personal administratiu del sistema."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/form/config/FormConfig.java:79
-#, fuzzy
 msgid "Unknown form"
-msgstr "Tipus de control de formulari desconegut"
+msgstr "Formulari desconegut"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dispatch/WollMuxDispatch.java:166
 #, fuzzy, java-format
@@ -2072,6 +2068,10 @@ msgid ""
 "Please close Wollmux and LibreOffice and make sure no 'soffice.bin' "
 "processes are still running."
 msgstr ""
+"S'ha de tornar a llegir la configuració del Wollmux.\n"
+"\n"
+"Tanqueu el Wollmux i el LibreOffice i assegureu-vos que no hi ha cap procés "
+"«soffice.bin» encara en execució."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:229
 msgid "About WollMux"
@@ -2120,7 +2120,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:371
 msgid "Could not create a temporary directory for the file download!"
-msgstr ""
+msgstr "No s'ha pogut crear un directori temporal per a la baixada de fitxers."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:468
 #, java-format
