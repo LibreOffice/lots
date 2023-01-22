@@ -8,14 +8,16 @@ msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-19 10:54+0100\n"
-"PO-Revision-Date: 2022-12-05 13:42+0100\n"
-"Last-Translator: Samuel Mehrbrodt <samuel.mehrbrodt@allotropia.de>\n"
-"Language-Team: Dutch <vertaling@vrijschrift.org>\n"
+"PO-Revision-Date: 2023-01-23 12:21+0000\n"
+"Last-Translator: kees538 <kees538@gmail.com>\n"
+"Language-Team: Dutch <https://translations.documentfoundation.org/projects/"
+"wollmux/wollmux/nl/>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.12.2\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -27,13 +29,13 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:119
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:158
 msgid "NAME of data source is missing"
-msgstr ""
+msgstr "NAME van gegevensbron ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:85
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:82
 #, java-format
 msgid "SOURCE of data source {0} is missing"
-msgstr ""
+msgstr "SOURCE van gegevensbron {0} ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:90
 #, java-format
@@ -41,11 +43,13 @@ msgid ""
 "Error during initialization of datasource \"{0}\":  Referenced datasource "
 "\"{1}\" missing or defined incorrectly"
 msgstr ""
+"Fout tijdens initialisatie van gegevensbron '{0}': gegevensbron waarnaar "
+"wordt verwezen '{1}' ontbreekt of is onjuist gedefinieerd"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:122
 #, java-format
 msgid "Incorrect RENAME specification in data source \"{0}\""
-msgstr ""
+msgstr "Onjuiste RENAME-specificatie in gegevensbron '{0}'"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:138
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:179
@@ -54,30 +58,32 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:190
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:529
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1493
-#, fuzzy, java-format
+#, java-format
 msgid "Column \"{0}\" is not defined in schema"
-msgstr "TRAFO \"{}\" is niet gedefineerd."
+msgstr "Kolom '{0}' is niet gedefinieerd in schema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:142
 #, java-format
 msgid "\"{1}\" is not a valid column name"
-msgstr ""
+msgstr "'{1}' is geen geldige kolomnaam"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:161
-#, fuzzy, java-format
+#, java-format
 msgid "\"{0}\" is not a valid column name"
-msgstr "URL \"{0}\" is geen spreadsheet"
+msgstr "'{0}' is geen geldige kolomnaam"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:260
-#, fuzzy, java-format
+#, java-format
 msgid "Column \"{0}\" does not exist!"
-msgstr "Kolom {0} bestaat niet"
+msgstr "Kolom '{0}' bestaat niet"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:216
 #, java-format
 msgid ""
 "Data source \"{0}\": Name of OOo-data source has to be specified as SOURCE"
 msgstr ""
+"Gegevensbron '{0}': Naam van OOo-gegevensbron moet worden opgegeven als "
+"SOURCE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:218
 #, java-format
@@ -85,21 +91,23 @@ msgid ""
 "Data source \"{0}\": Name of table/view within the OOo-Data Source has to be "
 "specified as TABLE"
 msgstr ""
+"Gegevensbron '{0}': naam van tabel/view binnen de OOo-gegevensbron moet "
+"worden opgegeven als TABLE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:238
 #, java-format
 msgid "SQL_SYNTAX \"{0}\" not supported"
-msgstr ""
+msgstr "SQL_SYNTAX '{0}' niet ondersteund"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:256
 #, java-format
 msgid "Data source \"{0}\": Schema-section is empty"
-msgstr ""
+msgstr "Gegevensbron '{0}': Schema-sectie is leeg"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:260
 #, java-format
 msgid "Data source \"{0}\": Key-section is missing"
-msgstr ""
+msgstr "Gegevensbron '{0}': Sleutelsectie ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:306
 #, java-format
@@ -107,11 +115,13 @@ msgid ""
 "Table or query \"{0}\" does not exist in data source \"{1}\" or error when "
 "determining the columns "
 msgstr ""
+"Tabel of query '{0}' bestaat niet in gegevensbron '{1}' of fout bij het "
+"bepalen van de kolommen "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:315
 #, java-format
 msgid "Data source \"{0}\": Table \"{1}\" has no columns"
-msgstr ""
+msgstr "Gegevensbron '{0}': Tabel '{1}' heeft geen kolommen"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:345
 #, java-format
@@ -119,30 +129,32 @@ msgid ""
 "Data source \"{0}\": No key columns defined. Automatic determination of key "
 "column not possible."
 msgstr ""
+"Gegevensbron '{0}': geen sleutelkolommen gedefinieerd. Automatische bepaling "
+"van sleutelkolom niet mogelijk."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:359
 #, java-format
 msgid "Schema of OOo-datasource \"{0}\" could not be read."
-msgstr ""
+msgstr "Schema van OOo-gegevensbron '{0}' kon niet worden gelezen."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:365
 #, java-format
 msgid "Data source \"{0}\": No Key column defined"
-msgstr ""
+msgstr "Gegevensbron '{0}': geen sleutelkolom gedefinieerd"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:387
 #, java-format
 msgid "Key column \"{0}\" not defined in schema"
-msgstr ""
+msgstr "Sleutelkolom '{0}' niet gedefinieerd in schema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:390
 #, java-format
 msgid "Key column \"{0}\" was specified twice in the key section"
-msgstr ""
+msgstr "Sleutelkolom '{0}' is twee keer opgegeven in het sleutelgedeelte"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:527
 msgid "Could not create RowSet"
-msgstr ""
+msgstr "Kan RowSet niet maken"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:719
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:320
@@ -153,7 +165,7 @@ msgstr "Kolom {0} bestaat niet"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:83
 #, java-format
 msgid "OVER-Specification of data source {0} is missing"
-msgstr ""
+msgstr "OVER-specificatie van gegevensbron {0} ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:89
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:93
@@ -169,25 +181,27 @@ msgid ""
 "Error during initialization of datasource \"{0}\": Referenced datasource "
 "\"{1}\" missing or defined incorrectly"
 msgstr ""
+"Fout tijdens initialisatie van gegevensbron '{0}': gegevensbron waarnaar "
+"wordt verwezen '{1}' ontbreekt of is onjuist gedefinieerd"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:131
 #, java-format
 msgid "In datasource \"{0}\" columns: {1} are missing"
-msgstr ""
+msgstr "In gegevensbron '{0}' ontbreken kolommen: {1}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:132
 msgid " and "
-msgstr ""
+msgstr " en "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:133
 #, java-format
 msgid "in datasource \"{0}\" columns: {1} are missing"
-msgstr ""
+msgstr "in gegevensbron '{0}' kolommen: {1} ontbreken"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:67
 #, java-format
 msgid "URL of data source \"{0}\" is missing"
-msgstr ""
+msgstr "URL van gegevensbron '{0}' ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:85
 #, java-format
@@ -195,6 +209,8 @@ msgid ""
 "Error in definition of data source {0}: Column \"{1}\" does not comply with "
 "the syntax of identifiers"
 msgstr ""
+"Fout in definitie van gegevensbron {0}: kolom '{1}' voldoet niet aan de "
+"syntaxis van identifiers"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:91
 #, java-format
@@ -202,27 +218,30 @@ msgid ""
 "Error in Defition of data source {0}: Column \"{1}\" was defined twice in "
 "schema"
 msgstr ""
+"Fout in definitie van gegevensbron {0}: kolom '{1}' is twee keer "
+"gedefinieerd in schema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:107
 #, java-format
 msgid "Error in Conf-File of data source {0}: Section 'Schema' is missing"
 msgstr ""
+"Fout in configuratiebestand van gegevensbron {0}: sectie 'Schema' ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:113
 #, java-format
 msgid "Error in Conf-file of data source {0}: Error in URL \"{1}\": "
-msgstr ""
+msgstr "Fout in Conf-bestand van gegevensbron {0}: Fout in URL '{1}': "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:120
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:139
-#, fuzzy, java-format
+#, java-format
 msgid "Error in Conf-file of data source {0}: "
-msgstr "Fout in functiesdialoog {0}"
+msgstr "Fout in Conf-bestand van gegevensbron {0}: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:144
 #, java-format
 msgid "Error in Conf-file of data source {0}: Section 'Daten' is missing"
-msgstr ""
+msgstr "Fout in Conf-bestand van gegevensbron {0}: Sectie 'Daten' ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:165
 #, java-format
@@ -230,31 +249,33 @@ msgid ""
 "Error in Conf-file of data source {0}: Key column \"{1}\" is not defined in "
 "schema"
 msgstr ""
+"Fout in Conf-bestand van gegevensbron {0}: sleutelkolom '{1}' is niet "
+"gedefinieerd in schema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:172
 #, java-format
 msgid "Missing or incorrect key(...) specification for data source {0}"
-msgstr ""
+msgstr "Ontbrekende of onjuiste sleutel(...)-specificatie voor gegevensbron {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:197
 #, java-format
 msgid "\"{0}\" awaits a preceding open bracket"
-msgstr ""
+msgstr "\"{0}\" wacht op een voorafgaand open haakje"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:233
 #, java-format
 msgid "Data set has column \"{0}\" which is not defined within the schema"
-msgstr ""
+msgstr "Dataset heeft kolom '{0}' die niet is gedefinieerd in het schema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:252
 msgid "Data set has more fields than the schema"
-msgstr ""
+msgstr "Dataset heeft meer velden dan het schema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:76
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:78
 #, java-format
 msgid "\"{0}\" of data source \"{1}\" is missing."
-msgstr ""
+msgstr "'{0}' van gegevensbron '{1}' ontbreekt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:127
 #, java-format
@@ -262,49 +283,53 @@ msgid ""
 "In datasource \"{0}\" columns: {1} are missing and in datasource \"{2}\" "
 "columns: {3} are missing"
 msgstr ""
+"In gegevensbron '{0}' kolommen: {1} ontbreken en in gegevensbron '{2}' "
+"kolommen: {3} ontbreken"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/FunkyDatasource.java:86
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:136
 #, java-format
 msgid "SOURCE of data source \"{0}\" is missing"
-msgstr ""
+msgstr "SOURCE van gegevensbron '{0}' ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SimpleDataset.java:83
 #, java-format
 msgid "Data set does not know column \"{0}\""
-msgstr ""
+msgstr "Dataset kent kolom '{0}' niet"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:111
 #, java-format
 msgid "SOURCE1 of data source \"{0}\" is missing"
-msgstr ""
+msgstr "SOURCE1 van gegevensbron '{0}' ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:113
 #, java-format
 msgid "ATTACH specification of data source {0} is missing"
-msgstr ""
+msgstr "ATTACH-specificatie van gegevensbron {0} ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:136
 #, java-format
 msgid "Collision with column \"{0}\" from data source \"{1}\""
-msgstr ""
+msgstr "Conflict met kolom '{0}' uit gegevensbron '{1}'"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:145
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:161
 #, java-format
 msgid "At least one MATCH-specification has to be made in data source \"{0}\""
 msgstr ""
+"Er moet ten minste één MATCH-specificatie worden gemaakt in gegevensbron "
+"'{0}'"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:156
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:173
 #, java-format
 msgid "Incorrect MATCH specification in data source \"{0}\""
-msgstr ""
+msgstr "Onjuiste MATCH-specificatie in gegevensbron '{0}'"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:121
 #, java-format
 msgid "MODE-specification of datasource \"{0}\" is missing"
-msgstr ""
+msgstr "MODE-specificatie van gegevensbron '{0}' ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:130
 #, java-format
@@ -312,110 +337,116 @@ msgid ""
 "Incorrect MODE-specification in datasource  \"{0}\": MODE \"{1}\" is not "
 "allowed"
 msgstr ""
+"Onjuiste MODE-specificatie in gegevensbron '{0}': MODE '{1}' is niet "
+"toegestaan"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:138
 #, java-format
 msgid "OVERLAY-specification of data source \"{0}\" is missing"
-msgstr ""
+msgstr "OVERLAY-specificatie van gegevensbron '{0}' ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:159
 msgid "URL of LDAP-Server is missing."
-msgstr ""
+msgstr "URL van LDAP-server ontbreekt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:166
 msgid "Error in LDAP-URL "
-msgstr ""
+msgstr "Fout in LDAP-URL "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:170
 msgid "BASE_DN of LDAP-Server is missing."
-msgstr ""
+msgstr "BASE_DN van LDAP-Server ontbreekt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:173
 msgid "BASE_DN-value is invalid: "
-msgstr ""
+msgstr "BASE_DN-waarde is ongeldig: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:177
 msgid "No OBJECT_CLASS defined."
-msgstr ""
+msgstr "Geen OBJECT_CLASS gedefinieerd."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:181
 msgid "OBJECT_CLASS contains of forbidden characters: "
-msgstr ""
+msgstr "OBJECT_CLASS bevat verboden tekens: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:208
 msgid "Section 'Spalten' is missing."
-msgstr ""
+msgstr "Rubriek 'Spalten' ontbreekt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
 msgid "Specification of DB_SPALTE is missing"
-msgstr ""
+msgstr "Specificatie van DB_SPALTE ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:223
 #, java-format
 msgid "Column \"{0}\" does not match the syntax of an identifier"
-msgstr ""
+msgstr "Kolom '{0}' komt niet overeen met de syntaxis van een ID"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:227
 #, java-format
 msgid "Path specification is missing for column {0}"
-msgstr ""
+msgstr "Padspecificatie ontbreekt voor kolom {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:239
-#, fuzzy, java-format
+#, java-format
 msgid "Syntax error in path specification of {0}"
-msgstr "Ignoreer databron van onbekende type \"{0}\""
+msgstr "Gegevensbron van onbekend type '{0}' negeren"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:248
 #, java-format
 msgid "Syntaxerror in specification of the relative path of {0}"
-msgstr ""
+msgstr "Syntaxisfout in specificatie van het relatieve pad van {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:254
-#, fuzzy, java-format
+#, java-format
 msgid "Illegal attribute identifier: \"{0}\""
-msgstr "Illegale CLASSPATH vermeldt: \"{0}\""
+msgstr "Illegale CLASSPATH vermeldt: '{0}'"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:271
 msgid "Schluessel section is missing."
-msgstr ""
+msgstr "Sleutelgedeelte ontbreekt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:282
 msgid "Impossible. Count() was checked before."
-msgstr ""
+msgstr "Onmogelijk. Count() is eerder gecontroleerd."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:290
 msgid "No Key column specified."
-msgstr ""
+msgstr "Geen sleutelkolom opgegeven."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:306
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Column \"{0}\" was not defined in the schema and therefore it cannot be used "
 "as a key column."
 msgstr ""
-"De TRAFO \"{0}\" is in dit document niet gedefineerd, en kan dus niet "
-"verandert worden"
+"Kolom '0}' is niet gedefinieerd in het schema en kan daarom niet als "
+"sleutelkolom worden gebruikt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1472
-#, fuzzy, java-format
+#, java-format
 msgid "Error in data source definition of \"{0}\": "
-msgstr "Ignoreer databron van onbekende type \"{0}\""
+msgstr ""
+"Kolom '{0}' is niet gedefinieerd in het schema en kan daarom niet als "
+"sleutelkolom worden gebruikt. "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:41
 msgid "Create error information"
-msgstr ""
+msgstr "Maak foutinformatie aan"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:47
 #, java-format
 msgid ""
 "The WollMux error information has been successfully written to file \"{0}\"."
-msgstr ""
+msgstr "De WollMux-foutinformatie is met succes naar bestand '{0}' geschreven."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:52
 msgid ""
 "The WollMux error information could not be written. For details have a look "
 "at the file wollmux.log!"
 msgstr ""
+"De WollMux-foutinformatie kon niet worden geschreven. Kijk voor details in "
+"het bestand wollmux.log!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/WollMuxEvent.java:98
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:144
@@ -427,10 +458,12 @@ msgid ""
 "Unfortunately an error happened. The exact error description can be found in "
 "the log file. Please contact your system administrator."
 msgstr ""
+"Helaas is er een fout opgetreden. De exacte foutbeschrijving is te vinden in "
+"het logbestand. Neem contact op met uw systeembeheerder."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:61
 msgid "Multiple WollMux installations"
-msgstr ""
+msgstr "Meerdere WollMux-installaties"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:62
 msgid ""
@@ -443,15 +476,21 @@ msgid ""
 "More information regarding the affected paths can be found in the wollmux."
 "log."
 msgstr ""
+"Er is een systeembrede en een lokale WollMux-installatie gevonden (of de "
+"overblijfselen van een onvolledige de-installatie).\n"
+"Deze constellatie kan onduidelijke fouten veroorzaken.\n"
+"\n"
+"Verwijder een van de twee installaties.\n"
+"\n"
+"Meer informatie over de getroffen paden is te vinden op wollmux.log."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:99
-#, fuzzy
 msgid "WollMux"
-msgstr "WollMux-fout"
+msgstr "WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:100
 msgid "No placeholder and no 'setJumpMark' flag available!"
-msgstr ""
+msgstr "Geen plaatsaanduider en geen 'setJumpMark' vlag beschikbaar!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:110
 #, java-format
@@ -459,78 +498,75 @@ msgid "The textfragment with the FRAG_ID \"{0}\" is not defined!"
 msgstr "Het textfragment met de FRAG_ID \"{0}\" is niet gedefineerd!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:123
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "The URL for the text fragment with the FRAG_ID \"{0}\" cannot be determined:"
-msgstr "Het textfragment met de FRAG_ID \"{0}\" is niet gedefineerd!"
+msgstr ""
+"De URL voor het tekstfragment met FRAG_ID \"{0}\" kan niet worden bepaald:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:153
 #, java-format
 msgid "The URL \"{0}\" is invalid:"
-msgstr ""
+msgstr "De URL '{0}' is ongeldig:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:167
-#, fuzzy, java-format
+#, java-format
 msgid "The text fragment with the FRAG_ID \"{0}\" cannot be resolved:"
-msgstr "Het textfragment met de FRAG_ID \"{0}\" is niet gedefineerd!"
+msgstr "Het tekstfragment met de FRAG_ID '{0}' kan niet worden hersteld:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:199
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/DocumentLoader.java:100
-#, fuzzy, java-format
+#, java-format
 msgid "The template with the URL \"{0}\" could not be opened."
-msgstr "Het textfragment met de FRAG_ID \"{0}\" is niet gedefineerd!"
+msgstr "De sjabloon met de URL '{0}' kon niet worden geopend."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
-#, fuzzy
 msgid "Insertion succesful"
-msgstr "invoegsels"
+msgstr "Invoegen gelukt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
 msgid "The text block reference was inserted."
-msgstr ""
+msgstr "De verwijzing naar het tekstblok is ingevoegd."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:82
-#, fuzzy
 msgid "Insertion failed"
-msgstr "invoegsels"
+msgstr "Invoegen mislukt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnFunctionDialog.java:86
-#, fuzzy, java-format
+#, java-format
 msgid "Function dialog \"{0}\" is not defined."
-msgstr "TRAFO \"{}\" is niet gedefineerd."
+msgstr "Functiedialoog '{0}' is niet gedefinieerd."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/CantStartDialogException.java:44
-#, fuzzy
 msgid ""
 "The dialog could not be started!\n"
 "\n"
 "Please contact your system administrator."
 msgstr ""
-"Het gebruikte sjabloon bevat %11 fouten.\n"
+"De dialoog kon niet worden gestart!!\n"
 "\n"
-"a.u.b. contact opnemen met jouw systeemadministratie."
+"Neem contact op met uw systeembeheerder."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:86
 msgid "Cannot parse 'FilenameGeneratorFunction'."
-msgstr ""
+msgstr "Kan 'FilenameGeneratorFunction' niet ontleden."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:158
 msgid "Save Error"
-msgstr ""
+msgstr "Fout tijdens het opslaan"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:159
 #, java-format
 msgid "Saving the file \"{0}\" failed!"
-msgstr ""
+msgstr "Het opslaan van het bestand '{0}' is mislukt!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/LibreOfficeEventListener.java:270
 msgid "DispatchInterceptor could not be registered:"
 msgstr "Kan de DispatchInterceptor niet registreren"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:67
-#, fuzzy
 msgid "Select sender"
-msgstr "selectie"
+msgstr "Afzender selecteren"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:82
 #, java-format
@@ -541,45 +577,53 @@ msgid ""
 "If this problem persists, you might want to delete these data sets from your "
 "sender list and add them again!"
 msgstr ""
+"De volgende datasets konden niet worden bijgewerkt vanuit de database:\n"
+"\n"
+"{0}\n"
+"Als dit probleem aanhoudt, wilt u misschien deze datasets uit je "
+"afzenderlijst verwijderen en opnieuw toevoegen!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:85
-#, fuzzy
 msgid "WollMux Info"
-msgstr "WollMux-fout"
+msgstr "WollMux-info"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/ByJavaPropertyFinder.java:46
 #, java-format
 msgid "Value for JavaProperty \"{0}\" could not be determined:"
-msgstr ""
+msgstr "Waarde voor JavaProperty '{0}' kan niet worden bepaald:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/Sender.java:204
 msgid "Override can not be null"
-msgstr ""
+msgstr "Overschrijven kan niet null zijn"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/ByOOoUserProfileFinder.java:46
 #, java-format
 msgid "Value for the key \"{0}\" of OOoUserProfil could not be determined:"
 msgstr ""
+"Waarde voor de sleutel '{0}' van OOoUserProfil kon niet worden vastgesteld:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:275
 msgid "Personal sender list"
-msgstr ""
+msgstr "Persoonlijke afzenderlijst"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:276
 msgid ""
 "Data record already exists in the sender list, save data record again anyway?"
 msgstr ""
+"Gegevensrecord bestaat al in de afzenderlijst, gegevensrecord toch opnieuw "
+"opslaan?"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:293
-#, fuzzy
 msgid "Missing ID"
-msgstr "Ontbrekende attribuut ID"
+msgstr "Ontbrekende ID"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:294
 msgid ""
 "The record does not contain a valid OID and therefore will not be included "
 "in the personal sender list."
 msgstr ""
+"Het record bevat geen geldig OID en wordt daarom niet opgenomen in de "
+"persoonlijke afzenderlijst."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:311
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:73
@@ -588,17 +632,16 @@ msgstr "Afdruk"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 msgid "Error copying sender"
-msgstr ""
+msgstr "Fout bij kopiëren van afzender"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
-#, fuzzy
 msgid "Sender could not be copied."
-msgstr "Bestand \"{0}\" kon niet worden gevonden.\n"
+msgstr "Afzender kon niet worden gekopieerd."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:382
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:715
 msgid "Search timeout"
-msgstr ""
+msgstr "Time-out zoekopdracht"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:383
 msgid ""
@@ -607,14 +650,18 @@ msgid ""
 "search term matching too many results.\n"
 "Please try another, more precise search query."
 msgstr ""
+"Het verwerken van uw zoekopdracht duurde te lang en is daarom afgebroken.\n"
+"De reden hiervoor kan een probleem zijn met de gegevensbron of met de "
+"gebruikte zoekterm die overeenkomt met te veel resultaten.\n"
+"Probeer een andere, nauwkeurigere zoekopdracht."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "Search results"
-msgstr ""
+msgstr "Zoekresultaten"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "No results."
-msgstr ""
+msgstr "Geen resultaten."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderService.java:550
 msgid "Personal sender list could not be updated."
