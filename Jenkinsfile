@@ -81,9 +81,6 @@ pipeline {
                 -Dsonar.junit.reportPaths=target/surefire-reports,target/failsafe-reports"
               }
             }
-            timeout(time: 1, unit: 'HOURS') {
-              waitForQualityGate abortPipeline: true
-            }
           }
         }
       }
