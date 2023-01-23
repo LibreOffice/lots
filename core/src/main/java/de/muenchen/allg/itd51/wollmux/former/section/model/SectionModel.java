@@ -37,14 +37,14 @@ import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextSection;
 import com.sun.star.text.XTextSectionsSupplier;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoDictionary;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoDictionary;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
 import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Stellt einen Bereich da (Format/Bereiche...)

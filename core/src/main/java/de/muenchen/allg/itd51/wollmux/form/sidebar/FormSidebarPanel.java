@@ -57,29 +57,29 @@ import com.sun.star.ui.XSidebarPanel;
 import com.sun.star.ui.XToolPanel;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.dialog.adapter.AbstractFocusListener;
-import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
-import de.muenchen.allg.dialog.adapter.AbstractTabPageContainerListener;
-import de.muenchen.allg.dialog.adapter.AbstractWindowListener;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractFocusListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractSidebarPanel;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTabPageContainerListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.form.config.FormConfig;
 import de.muenchen.allg.itd51.wollmux.form.config.TabConfig;
 import de.muenchen.allg.itd51.wollmux.form.model.Control;
 import de.muenchen.allg.itd51.wollmux.form.model.FormModel;
-import de.muenchen.allg.ui.layout.ControlLayout;
-import de.muenchen.allg.ui.layout.FixedVerticalLayout;
-import de.muenchen.allg.ui.layout.HorizontalLayout;
-import de.muenchen.allg.ui.layout.Layout;
-import de.muenchen.allg.ui.layout.TabLayout;
-import de.muenchen.allg.ui.layout.VerticalLayout;
-import de.muenchen.allg.ui.GuiFactory;
-import de.muenchen.allg.ui.HTMLElement;
+import org.libreoffice.ext.unohelper.ui.layout.ControlLayout;
+import org.libreoffice.ext.unohelper.ui.layout.FixedVerticalLayout;
+import org.libreoffice.ext.unohelper.ui.layout.HorizontalLayout;
+import org.libreoffice.ext.unohelper.ui.layout.Layout;
+import org.libreoffice.ext.unohelper.ui.layout.TabLayout;
+import org.libreoffice.ext.unohelper.ui.layout.VerticalLayout;
+import org.libreoffice.ext.unohelper.ui.GuiFactory;
+import org.libreoffice.ext.unohelper.ui.HTMLElement;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementConfig;
 import de.muenchen.allg.itd51.wollmux.ui.UIElementType;
-import de.muenchen.allg.util.UnoConfiguration;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoConfiguration;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * form UI in sidebar.

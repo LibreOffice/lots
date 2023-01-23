@@ -132,7 +132,7 @@
       <artifactId>unoloader</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.muenchen</groupId>
+      <groupId>org.libreoffice.ext</groupId>
       <artifactId>unohelper</artifactId>
     </dependency>
     <dependency>

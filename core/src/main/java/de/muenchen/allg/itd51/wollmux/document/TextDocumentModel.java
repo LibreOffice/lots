@@ -76,9 +76,9 @@ import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XModifiable2;
 import com.sun.star.view.XPrintable;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.afid.UnoProps;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoCollection;
+import org.libreoffice.ext.unohelper.common.UnoProps;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
@@ -92,8 +92,8 @@ import de.muenchen.allg.itd51.wollmux.sender.SenderException;
 import de.muenchen.allg.itd51.wollmux.sender.SenderService;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoProperty;
-import de.muenchen.allg.util.UnoService;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoService;
 
 /**
  * Model of an opened text document.

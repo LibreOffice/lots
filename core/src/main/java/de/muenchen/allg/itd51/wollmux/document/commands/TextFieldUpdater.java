@@ -27,11 +27,11 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.text.XTextRange;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoCollection;
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoCollection;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand.UpdateFields;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Dieser Executor hat die Aufgabe alle updateFields-Befehle zu verarbeiten.

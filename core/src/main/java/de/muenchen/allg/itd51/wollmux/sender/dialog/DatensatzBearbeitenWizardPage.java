@@ -40,16 +40,16 @@ import com.sun.star.awt.XWindow;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.uno.Exception;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.dialog.adapter.AbstractActionListener;
-import de.muenchen.allg.dialog.adapter.AbstractTextListener;
-import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractActionListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractTextListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.sender.Sender;
 import de.muenchen.allg.itd51.wollmux.sender.SenderException;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Pages for modifying the content of a data set.

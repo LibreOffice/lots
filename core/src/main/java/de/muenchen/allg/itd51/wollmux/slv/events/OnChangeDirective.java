@@ -27,7 +27,7 @@ import java.util.List;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;

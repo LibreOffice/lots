@@ -34,7 +34,7 @@ import com.sun.star.script.provider.ScriptFrameworkErrorException;
 import com.sun.star.script.provider.XScript;
 import com.sun.star.uno.AnyConverter;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.util.L;

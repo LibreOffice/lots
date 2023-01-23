@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.test.OfficeTest;
 
 public class DocumentTreeTest extends OfficeTest

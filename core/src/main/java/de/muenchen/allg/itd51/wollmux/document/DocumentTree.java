@@ -48,9 +48,9 @@ import com.sun.star.text.XTextFramesSupplier;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextTable;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoIterator;
-import de.muenchen.allg.document.text.Bookmark;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoIterator;
+import org.libreoffice.ext.unohelper.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommands;
 import de.muenchen.allg.itd51.wollmux.document.nodes.CheckboxNode;
@@ -64,7 +64,7 @@ import de.muenchen.allg.itd51.wollmux.document.nodes.ParagraphNode;
 import de.muenchen.allg.itd51.wollmux.document.nodes.TextRangeNode;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * Stellt die interessanten Teile eines Textdokuments als Baum zur Verfügung.

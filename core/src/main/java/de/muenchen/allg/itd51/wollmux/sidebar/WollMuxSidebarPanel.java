@@ -25,7 +25,7 @@ package de.muenchen.allg.itd51.wollmux.sidebar;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.dialog.adapter.AbstractSidebarPanel;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractSidebarPanel;
 
 /**
  * The panel of the WollMux Bar.

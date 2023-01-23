@@ -24,7 +24,7 @@ package de.muenchen.allg.itd51.wollmux.mailmerge.print;
 
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;

@@ -39,9 +39,9 @@ import com.sun.star.rdf.XRepository;
 import com.sun.star.rdf.XURI;
 import com.sun.star.text.XTextDocument;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
-import de.muenchen.allg.afid.UnoIterator;
+import org.libreoffice.ext.unohelper.common.UnoIterator;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**

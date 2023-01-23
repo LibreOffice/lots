@@ -36,7 +36,7 @@ import com.sun.star.ui.dialogs.TemplateDescription;
 import com.sun.star.ui.dialogs.XFilePicker3;
 import com.sun.star.uno.AnyConverter;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.WollMuxFehlerException;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
@@ -49,8 +49,8 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.Values;
 import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
-import de.muenchen.allg.util.UnoComponent;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * If a FilenameGeneratorFunction is present the default name of the file is set.

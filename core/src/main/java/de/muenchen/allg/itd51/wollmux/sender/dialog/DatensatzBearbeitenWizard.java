@@ -35,7 +35,7 @@ import com.sun.star.ui.dialogs.XWizard;
 import com.sun.star.ui.dialogs.XWizardController;
 import com.sun.star.ui.dialogs.XWizardPage;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.sender.Sender;
 
 /**

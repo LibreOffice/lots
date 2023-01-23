@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 import com.sun.star.awt.XComboBox;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.ds.DatasourceModel;
 

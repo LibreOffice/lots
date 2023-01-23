@@ -32,9 +32,9 @@ import com.sun.star.awt.XRadioButton;
 import com.sun.star.awt.XWindow;
 import com.sun.star.uno.Exception;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.dialog.adapter.AbstractItemListener;
-import de.muenchen.allg.dialog.adapter.AbstractXWizardPage;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractItemListener;
+import org.libreoffice.ext.unohelper.dialog.adapter.AbstractXWizardPage;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.MailmergeWizardController.PATH;
 import de.muenchen.allg.itd51.wollmux.mailmerge.printsettings.PrintSettings.ACTION;

@@ -26,7 +26,7 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 
 /**
  * Es gibt viele Möglichkeiten wie zwei Textbereiche (XTextRange-Objekte)

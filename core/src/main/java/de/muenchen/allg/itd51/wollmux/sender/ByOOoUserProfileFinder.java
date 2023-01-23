@@ -23,7 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.sender;
 
 import de.muenchen.allg.itd51.wollmux.util.L;
-import de.muenchen.allg.util.UnoConfiguration;
+import org.libreoffice.ext.unohelper.util.UnoConfiguration;
 
 /**
  * A {@link SenderFinder} using LibreOffice's user data.

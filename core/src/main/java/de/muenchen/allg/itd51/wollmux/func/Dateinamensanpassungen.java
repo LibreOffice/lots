@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.star.uno.AnyConverter;
 
-import de.muenchen.allg.afid.UnoHelperException;
-import de.muenchen.allg.util.UnoComponent;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 public class Dateinamensanpassungen
 {

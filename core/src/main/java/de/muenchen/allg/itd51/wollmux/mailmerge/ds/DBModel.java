@@ -48,14 +48,14 @@ import com.sun.star.sdbcx.XColumnsSupplier;
 import com.sun.star.util.XCloseListener;
 import com.sun.star.util.XModifyListener;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoDictionary;
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoDictionary;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
-import de.muenchen.allg.util.UnoComponent;
-import de.muenchen.allg.util.UnoProperty;
+import org.libreoffice.ext.unohelper.util.UnoComponent;
+import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
  * A data source model based on LibreOffice Base.

@@ -36,8 +36,8 @@ import com.sun.star.awt.KeyModifier;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.ui.XAcceleratorConfiguration;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoHelperException;
+import org.libreoffice.ext.unohelper.common.UNO;
+import org.libreoffice.ext.unohelper.common.UnoHelperException;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 

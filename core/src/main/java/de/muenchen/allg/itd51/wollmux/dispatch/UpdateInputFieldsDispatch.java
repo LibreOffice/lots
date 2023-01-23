@@ -28,7 +28,7 @@ import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.event.handlers.WollMuxEvent;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnUpdateInputFields;
 

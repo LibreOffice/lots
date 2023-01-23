@@ -39,7 +39,7 @@ import com.sun.star.ui.dialogs.FilePicker;
 import com.sun.star.ui.dialogs.TemplateDescription;
 import com.sun.star.ui.dialogs.XFilePicker3;
 
-import de.muenchen.allg.afid.UNO;
+import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.func.print.PrintFunction;
 import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
