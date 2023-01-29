@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-19 10:54+0100\n"
-"PO-Revision-Date: 2023-01-23 12:21+0000\n"
+"PO-Revision-Date: 2023-02-02 12:24+0000\n"
 "Last-Translator: Adolfo Jayme Barrientos <fito@libreoffice.org>\n"
 "Language-Team: Catalan <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/ca/>\n"
@@ -115,7 +115,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:315
 #, java-format
 msgid "Data source \"{0}\": Table \"{1}\" has no columns"
-msgstr ""
+msgstr "Font de dades «{0}»: la taula «{1}» no té columnes"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:345
 #, java-format
@@ -123,11 +123,13 @@ msgid ""
 "Data source \"{0}\": No key columns defined. Automatic determination of key "
 "column not possible."
 msgstr ""
+"Font de dades «{0}»: no s'ha definit cap columna clau. No és possible fer "
+"una determinació automàtica de la columna clau."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:359
 #, java-format
 msgid "Schema of OOo-datasource \"{0}\" could not be read."
-msgstr ""
+msgstr "No s'ha pogut llegir l'esquema de la font de dades OOo «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:365
 #, java-format
@@ -153,7 +155,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:320
 #, java-format
 msgid "Column {0} does not exist!"
-msgstr "Columne {0} no existeix!"
+msgstr "La columna {0} no existeix pas."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:83
 #, java-format
@@ -450,9 +452,8 @@ msgid ""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:99
-#, fuzzy
 msgid "WollMux"
-msgstr "Error WollMux"
+msgstr "WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:100
 msgid "No placeholder and no 'setJumpMark' flag available!"
@@ -574,9 +575,8 @@ msgid ""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:293
-#, fuzzy
 msgid "Missing ID"
-msgstr "Falta l'atribut ID"
+msgstr "Falta l'identificador"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:294
 msgid ""
@@ -629,14 +629,12 @@ msgid "Cache-File {0} could not be read."
 msgstr "No es pot trobar el fitxer \"{0}\".\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:213
-#, fuzzy
 msgid "Mail merge options"
-msgstr "Combinació de correu"
+msgstr "Opcions de combinació de correu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:224
-#, fuzzy
 msgid "Mail merge failed."
-msgstr "Camp de combinació de correu"
+msgstr "Ha fallat la combinació de correu."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/ds/CalcModel.java:357
 #, java-format
@@ -662,14 +660,12 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:262
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToShowOdtFile.java:61
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToOdtFile.java:64
-#, fuzzy
 msgid "WollMux mail merge"
-msgstr "Combinació de correu"
+msgstr "Combinació de correu del WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:161
-#, fuzzy
 msgid "Preparing mail merge"
-msgstr "Combinació de correu"
+msgstr "S'està preparant la combinació de correu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:192
 msgid "Generating full document"
@@ -701,9 +697,8 @@ msgid "The generated merged document can not be displayed."
 msgstr "No es pot mostrar el document combinat generat."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:116
-#, fuzzy
 msgid "Error while sending e-mail"
-msgstr "Error en crear el fitxer 'dump'"
+msgstr "S'ha produït un error en enviar els correus"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:144
 #, java-format
@@ -788,9 +783,8 @@ msgid "Choose data source"
 msgstr "Trieu la font de dades"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:352
-#, fuzzy
 msgid "File ..."
-msgstr "Fitxer"
+msgstr "Fitxer…"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:357
 #, fuzzy
@@ -798,9 +792,8 @@ msgid "New Calc Sheet"
 msgstr "Nou full de càlcul..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:362
-#, fuzzy
 msgid "Database ..."
-msgstr "Base de dades..."
+msgstr "Base de dades…"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:382
 msgid "Edit sheet"
@@ -815,7 +808,6 @@ msgid "Adjust all fields"
 msgstr "Ajusta tots els camps"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:410
-#, fuzzy
 msgid "Mail merge field"
 msgstr "Camp de combinació de correu"
 
@@ -1055,9 +1047,8 @@ msgstr ""
 "vàlid"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:115
-#, fuzzy
 msgid "Printing"
-msgstr "Imprimir"
+msgstr "Impressió"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:142
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SecondaryPrintModel.java:225
@@ -1068,7 +1059,7 @@ msgstr "TRAFO \"{}\" no està definit."
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:87
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:91
 msgid "Could not open document."
-msgstr ""
+msgstr "No s'ha pogut obrir el document."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintProgressBar.java:290
 #, java-format
@@ -1107,7 +1098,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:298
 msgid "Input"
-msgstr ""
+msgstr "Entrada"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:377
 #, fuzzy
@@ -1139,7 +1130,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:35
 msgid "will always be printed"
-msgstr ""
+msgstr "sempre s'imprimirà"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:39
 msgid "will only be printed in the original"
@@ -1215,12 +1206,12 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:271
 msgid "Block was marked"
-msgstr ""
+msgstr "El bloc s'ha seleccionat"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:271
 #, java-format
 msgid "The selected block {0}"
-msgstr ""
+msgstr "El bloc seleccionat {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:162
 msgid "Overlapping printing blocks"
@@ -1261,13 +1252,13 @@ msgid "Can not happen"
 msgstr "no pot passar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/model/InsertionModel4InputUser.java:166
-#, fuzzy, java-format
+#, java-format
 msgid "FieldMaster \"{0}\" does not exist."
-msgstr "Adreça d'interès '%{0}' no existeix."
+msgstr "El camp mestre «%{0}» no existeix."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/AllInsertionLineViewsPanel.java:143
 msgid "Remove (DeMux)"
-msgstr "Treure (DeMux)"
+msgstr "Elimina (DeMux)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionExtViewsPanel.java:62
 msgid "GROUPS View"
@@ -1276,13 +1267,12 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:167
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:119
 msgid "Remove"
-msgstr "Treure"
+msgstr "Elimina"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:172
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/AllGroupLineViewsPanel.java:155
-#, fuzzy
 msgid "New"
-msgstr "nova pestanya"
+msgstr "Nou"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:177
 msgid "New (whole page)"
@@ -1322,7 +1312,7 @@ msgstr "visibilitats"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:105
 msgid "Sections"
-msgstr "seccions"
+msgstr "Seccions"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:434
 msgid "Field type"
@@ -1355,7 +1345,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/model/FormControlModel.java:205
 msgid "Control element"
-msgstr "element de control"
+msgstr "Element de control"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/model/FormControlModel.java:666
 #, java-format
@@ -1891,7 +1881,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:511
 msgid "Invalid parameters"
-msgstr ""
+msgstr "Els paràmetres no són vàlids"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommandInterpreter.java:236
 #, fuzzy
@@ -1902,9 +1892,9 @@ msgstr ""
 "Sisplau contacta amb el teu administrador de sistema."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:176
-#, fuzzy, java-format
+#, java-format
 msgid "Error at document command \"{0}\""
-msgstr "Error a l'ordre de document \"{0}\""
+msgstr "S'ha produït un error a l'ordre de document «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:190
 msgid "<ERROR:  >"
@@ -2068,7 +2058,7 @@ msgid ""
 "Please close Wollmux and LibreOffice and make sure no 'soffice.bin' "
 "processes are still running."
 msgstr ""
-"S'ha de tornar a llegir la configuració del Wollmux.\n"
+"Cal tornar a llegir la configuració del Wollmux.\n"
 "\n"
 "Tanqueu el Wollmux i el LibreOffice i assegureu-vos que no hi ha cap procés "
 "«soffice.bin» encara en execució."
