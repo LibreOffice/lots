@@ -36,6 +36,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -254,6 +255,11 @@ public class PrintModels
     private TextDocumentController documentController;
 
     /**
+     * Speichert die Gruppensichtbarkeiten des originalen Dokumentes vor Start des Druckens.
+     */
+    private Map<String, Boolean> mapGroupIdToVisibilityState;
+
+    /**
      * Erzeugt ein neues MasterPrintModel-Objekt für das Dokument model, das einen
      * Druckvorgang repräsentiert, der mit einer leeren Aufrufkette (Liste von
      * Druckfunktionen) und einer leeren HashMap für den Informationsaustausch
@@ -263,11 +269,13 @@ public class PrintModels
      * 
      * @param documentController
      */
+
     private MasterPrintModel(TextDocumentController documentController)
     {
       this.documentController = documentController;
       this.props = new HashMap<String, Object>();
       this.functions = new TreeSet<PrintFunction>();
+      this.mapGroupIdToVisibilityState = documentController.getModel().getMapGroupIdToVisibilityState();
     }
 
     /**
@@ -348,6 +356,21 @@ public class PrintModels
     public XTextDocument getTextDocument()
     {
       return documentController.getModel().doc;
+    }
+
+    /**
+     * Diese Methode reinitialisiert das Dokument mit den originalen
+     * Gruppen-Sichtbarkeiten.
+     *
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupsVisibilityState()
+     */
+    @Override
+    public void setGroupsVisibilityState()
+    {
+      for (Map.Entry<String, Boolean> entry : mapGroupIdToVisibilityState.entrySet())
+      {
+        setGroupVisible(entry.getKey(), entry.getValue());
+      }
     }
 
     /**
@@ -1056,6 +1079,17 @@ public class PrintModels
       return master.getTextDocument();
     }
 
+    /**
+     * Diese Methode reinitialisiert das Dokument mit den originalen
+     * Gruppen-Sichtbarkeiten.
+     *
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupsVisibilityState()
+     */
+    @Override
+    public void setGroupsVisibilityState()
+    {
+      master.setGroupsVisibilityState();
+    }
     /*
      * (non-Javadoc)
      * 
@@ -1079,7 +1113,6 @@ public class PrintModels
     public void printWithProps()
     {
       if (isCanceled()) return;
-
       PrintFunction f = master.getPrintFunction(idx + 1);
       if (f != null)
       {

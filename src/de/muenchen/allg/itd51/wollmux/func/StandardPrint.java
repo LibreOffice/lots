@@ -230,6 +230,8 @@ public class StandardPrint
     for (VerfuegungspunktInfo v : settings)
     {
       if (pmod.isCanceled()) return;
+      pmod.setGroupsVisibilityState();
+
       if (v.getCopyCount() > 0)
       {
         SachleitendeVerfuegung.printVerfuegungspunkt(pmod, v.verfPunktNr, v.isDraft,

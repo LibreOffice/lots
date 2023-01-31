@@ -242,7 +242,13 @@ interface XPrintModel
      *          Der anzuzeigende String.
      */
 	void setPrintMessage([in] string value);
-};
+
+	/**
+     * Diese Methode initiiert beim Iterieren über Verfügungspunkte die
+     * Gruppen-Sichtbarkeiten neu.
+     * 
+     */
+	void setGroupsVisibilityState();};
 
 }; }; }; }; };
  
