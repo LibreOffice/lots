@@ -13,22 +13,72 @@
 		<relativePath />
 	</parent>
 
+	<properties>
+		<libreoffice.sdk>${UNO_PATH}/../sdk</libreoffice.sdk>
+	</properties>
+
 	<build>
+		<resources>
+			<resource>
+				<directory>${project.build.directory}/generated-sources/idl</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.openoffice.dev</groupId>
-				<artifactId>ooo-maven-plugin</artifactId>
-				<version>1.1.2-SNAPSHOT</version>
-				<configuration>
-					<idlDir>${basedir}/src/main/idl</idlDir>
-					<ooo>${ooo}</ooo>
-					<sdk>${sdk}</sdk>
-				</configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
+						<id>idl</id>
 						<phase>generate-sources</phase>
+						<configuration>
+							<target>
+								<property name="idlcOutput" value="${project.build.directory}/generated-sources/urd/de/muenchen/allg/itd51/wollmux" />
+								<fail unless="UNO_PATH" message="No UNO_PATH set! Set UNO_PATH as property in maven settings." />
+								<echo message="Using UNO_PATH: ${UNO_PATH}" />
+								<echo message="Create urd files" />
+								<exec executable="${libreoffice.sdk}/bin/idlc" failonerror="true">
+									<arg value="-verbose" />
+									<arg value="-O${idlcOutput}" />
+									<arg value="-I${libreoffice.sdk}/idl;src/main/idl" />
+									<arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/XPALChangeEventBroadcaster.idl" />
+									<arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/XPALChangeEventListener.idl" />
+									<arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/XPALProvider.idl" />
+									<arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/XPrintModel.idl" />
+									<arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/XWollMux.idl" />
+									<arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/XWollMuxDocument.idl" />
+								</exec>
+								<echo message="Create registry library" />
+								<exec executable="${UNO_PATH}/regmerge" failonerror="true">
+									<arg value="-v" />
+									<arg value="target/WollMux.rdb" />
+									<arg value="/UCR" />
+									<arg value="${idlcOutput}/XPALChangeEventBroadcaster.urd" />
+									<arg value="${idlcOutput}/XPALChangeEventListener.urd" />
+									<arg value="${idlcOutput}/XPALProvider.urd" />
+									<arg value="${idlcOutput}/XPrintModel.urd" />
+									<arg value="${idlcOutput}/XWollMux.urd" />
+									<arg value="${idlcOutput}/XWollMuxDocument.urd" />
+								</exec>
+								<echo message="Create class files" />
+								<exec executable="${libreoffice.sdk}/bin/javamaker" failonerror="true">
+									<arg value="-Tde.muenchen.allg.itd51.wollmux.*" />
+									<arg value="-nD" />
+									<arg value="-Gc" />
+									<arg value="-O${project.build.directory}/generated-sources/idl" />
+									<arg value="-X${UNO_PATH}/types.rdb" />
+									<arg value="-X${UNO_PATH}/types/offapi.rdb" />
+									<arg value="${project.build.directory}/WollMux.rdb" />
+								</exec>
+							</target>
+						</configuration>
 						<goals>
-							<goal>build-idl</goal>
+							<goal>run</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -56,5 +106,35 @@
 				</executions>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings
+				only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-antrun-plugin</artifactId>
+										<versionRange>[1.8,)</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>
