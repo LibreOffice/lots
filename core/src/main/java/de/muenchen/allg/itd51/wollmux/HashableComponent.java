@@ -28,19 +28,19 @@ import com.sun.star.uno.XInterface;
 import de.muenchen.allg.afid.UNO;
 
 /**
- * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
- * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den sicheren
- * UNO-Vergleich UnoRuntime.areSame(...). Die Methode hashCode verwendet die sichere
- * Oid, die UnoRuntime.generateOid(...) liefert.
+ * Helper class that allows to store UNO components in HashMaps;
+ * the comparison of two HashableComponents with equals(...) uses the secure
+ * UNO comparison UnoRuntime.areSame(...) for this purpose.
+ * The hashCode method uses the safe Oid provided by UnoRuntime.generateOid(...).
  */
 public class HashableComponent
 {
   private XInterface compo;
 
   /*
-   * Anmerkung: Es mag ineffizient wirken, hier ein Object zu nehmen und immer in
-   * XInterface zu casten, aber wegen Bugs in OOo ist es die einzig sichere Methode,
-   * auch wenn man schon ein X... Objekt hat, das von XInterface abgeleitet ist.
+   * Note: It may seem inefficient to take an object here and always cast to
+   * XInterface, but because of bugs in OOo it is the only safe method,
+   * even if you already have an X Object derived from XInterface.
    */
   public HashableComponent(Object compo)
   {
@@ -52,7 +52,7 @@ public class HashableComponent
   }
 
   /**
-   * Liefert die Komponente, die durch diese {@link HashableComponent} gewrappt ist.
+   * Returns the component wrapped by this {@link HashableComponent}.
    */
   public XInterface getComponent()
   {
