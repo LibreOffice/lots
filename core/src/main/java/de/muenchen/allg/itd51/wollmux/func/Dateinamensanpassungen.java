@@ -49,12 +49,12 @@ public class Dateinamensanpassungen
   }
 
   /**
-   * Dieser Funktion kann eine durch Pipe ('|') getrennte Liste mit
-   * Pfaden/Dateinamen übergeben werden, wovon der erste Eintrag dieser Liste
-   * zurückgegeben wird, dessen Pfad-Anteil tatsächlich verfügbar ist.
-   * Innerhalb eines Pfades/Dateinamens kann vor der Verfügbarkeitsprüfung mit
-   * ${&lt;name&gt;} der Wert einer Java-Systemproperty in den Dateinamen eingefügt
-   * werden.
+   * This function can take a pipe ('|') separated list with
+   * Paths/filenames are passed, of which the first entry in this list
+   * is returned whose path portion is actually available.
+   * Within a path/filename, prior to the availability check, with
+   * ${&lt;name&gt;} the value of a Java system property inserted into the filename
+   * become.
    */
   public static String verfuegbarenPfadVerwenden(String fileName)
   {
@@ -78,26 +78,26 @@ public class Dateinamensanpassungen
   }
 
   /**
-   * Arbeitet wie
-   * {@link Dateinamensanpassungen#verfuegbarenPfadVerwenden(String)} und
-   * nimmt zusätzlich die folgenden LHM-spezifischen Dateinamensanpassungen
-   * vor:
+   * works like
+   * {@link Filename Customizations#UseavailablePath(String)} and
+   * additionally takes the following LHM-specific file name adjustments
+   * before:
    *
-   * a. Substituiert werden ß in ss ä in ae ö in oe ü in ue, Ä in Ae, Ü in ue,
-   * Ö in Oe
+   * a. ß in ss ä in ae ö in oe ü in ue, Ä in Ae, Ü in ue,
+   * O to Oe
    *
-   * b. Alle Sonderzeichen, Satzzeichen etc. sollen durch _ ersetzt werden,
-   * außer dem Punkt vor der Dateiendung (.odt)
+   * b. All special characters, punctuation marks etc. should be replaced by _,
+   * except for the dot in front of the file extension (.odt)
    *
-   * c. Damit sind im Dateinamen nur noch die Zahlen von 0-9, die Buchstaben
-   * von a-z und A-Z und der Unterstrich _ vorhanden
+   * c. This means that only the numbers from 0-9, the letters, are left in the file name
+   * from a-z and A-Z and the underscore _ present
    *
-   * d. Die Länge des Dateinamens wird auf maximal 240 Zeichen (inkl. Pfad)
-   * begrenzt; ist der ermittelte Dateiname länger, so wird er nach 240
-   * Zeichen abgeschnitten (genau genommen wird nach 236 Zeichen abgeschnitten
-   * und dann wird die Endung .odt angehängt).
+   * i.e. The length of the file name is limited to a maximum of 240 characters (incl. path)
+   * limited; if the determined file name is longer, it becomes after 240
+   * Characters truncated (actually truncated after 236 characters
+   * and then the extension .odt is appended).
    *
-   * Arbeitsverzeichnispfad in LibreOffice wird an Dateiname angehängt, falls spezifizierte Dateiname nicht absolut ist.
+   * Working directory path in LibreOffice is appended to filename if specified filename is not absolute.
    */
   public static String lhmDateinamensanpassung(String fileName)
   {
@@ -107,7 +107,7 @@ public class Dateinamensanpassungen
     {
       try
       {
-        // holt den Arbeitsverzeichnispfad aus LO
+        // gets the working directory path from LO
         Object ps = UnoComponent.createComponentWithContext(UnoComponent.CSS_UTIL_PATH_SETTINGS);
         URL dir = new URL(AnyConverter.toString(UnoProperty.getProperty(ps, UnoProperty.WORK)));
         f = new File(dir.getPath(), fileName);
@@ -155,7 +155,7 @@ public class Dateinamensanpassungen
 
   private static String replaceProperties(final String fileName)
   {
-    // alle ${<prop>} durch evaluierten Inhalt ersetzen
+    // replace all ${<prop>} with evaluated content
     Matcher m = PROP.matcher(fileName);
     StringBuffer buf = new StringBuffer();
     while (m.find())

@@ -77,22 +77,22 @@ public class BindFunction implements Function
         setFunc.getFunctionDialogReferences(functionDialogReferences);
 
         /*
-         * name wurde gebunden, wird also nicht mehr als Parameter benötigt, außer wenn eine der
-         * setFuncs den Parameter benötigt. In diesem Fall ist der Parameter in setFuncParams
-         * erfasst und wird nachher wieder zu myparams hinzugefügt.
+         * name has been bound so is no longer required as a parameter unless one of the
+         * setFuncs requires the parameter. In this case the parameter is in setFuncParams
+         * is captured and added back to myparams afterwards.
          */
         myParams.remove(name);
       }
       catch (NodeNotFoundException x)
       {
-        // kann nicht passieren, hab count() getestet
+        // can't happen, tested count()
       }
 
     }
 
     /*
-     * Parameter der setFuncs den benötigten Parametern hinzufügen und in String[]
-     * konvertieren.
+     * Add the parameters of the setFuncs to the required parameters and in String[]
+     * convert.
      */
     myParams.addAll(setFuncParams);
     params = myParams.toArray(new String[0]);
@@ -144,16 +144,16 @@ public class BindFunction implements Function
     public boolean hasValue(String id)
     {
       /*
-       * ACHTUNG! Wenn die id an eine Funktion gebunden ist, dann liefern wir immer
-       * true, auch wenn die Funktion evtl. einen Fehler liefert. Es gäbe 2
-       * alternative Verhaltensweisen: - nur true liefern, wenn
-       * values.hasValue(id2) == true für alle Parameter, die die Funktion
-       * erwartet. Nachteil: Zu strikt bei Funktionen, bei denen manche Argumente
-       * optional sind - die Funktion ausführen und sehen, ob sie einen Fehler
-       * liefert Nachteil: Die Funktion wird zu einem Zeitpunkt ausgeführt, zu dem
-       * dies evtl. nicht erwartet wird. Außerdem wird die Funktion einmal mehr
-       * ausgeführt. Bei externen Funktionen (insbes. Basic-Makros) ist dies nicht
-       * wünschenswert.
+       * DANGER! If the id is bound to a function, then we always return
+       * true, even if the function may return an error. there would be 2
+       * alternative behaviors: - only return true if
+       * values.hasValue(id2) == true for all parameters of the function
+       * expected. Disadvantage: Too strict on functions that take some arguments
+       * are optional - run the function and see if it returns an error
+       * provides disadvantage: the function is executed at a time when
+       * this may not be expected. In addition, the function is once more
+       * executed. This is not the case with external functions (especially basic macros).
+       * desirable.
        */
       if (mapParamNameToSetFunction.containsKey(id)) return true;
       return (values.hasValue(id));

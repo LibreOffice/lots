@@ -50,32 +50,32 @@ abstract class NumberFunction extends MultiFunction
   }
 
   /**
-   * Startet eine neue Auswertung der Funktion für Parameter parameters. Im Falle
-   * einer Summen-Funktion würde dies den Summenzähler mit 0 initialisieren.
+   * Starts a new evaluation of the function for parameters parameters. In the event of
+   * a sum function, this would initialize the sum counter to 0.
    *
-   * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
-   *         (z.B. Function.ERROR, wenn ein benötigter Parameter nicht in
-   *         parameters übergeben wurde), so wird dieses zurückgeliefert, ansonsten
+   * @return If a result can already be determined at this point
+   *         (e.g. Function.ERROR if a required parameter is not in
+   *         parameters was passed), this is returned, otherwise
    *         null.
    */
   protected abstract String initComputation(Values parameters);
 
   /**
-   * Fügt den Wert num der aktuellen Berechnung hinzu. Im Falle einer
-   * Summen-Funktion würde er auf den Summen-Zähler addiert. Darf eine Exception
-   * werfen. In diesem Fall wird die Funktion Function.ERROR zurückliefern.
+   * Adds the value num to the current calculation. In case of a
+   * Sum function it would be added to the sum counter. May throw an exception
+   * throw. In this case the function will return Function.ERROR.
    *
-   * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
-   *         (z.B. im Falle einer Vergleichsfunktion, die Kurzschlussauswertung
-   *         macht), so wird dieses zurückgeliefert, ansonsten null.
+   * @return If a result can already be determined at this point
+   *         (e.g. in the case of a comparison function, the short-circuit evaluation
+   *         does), this is returned, otherwise null.
    */
   protected abstract String addToComputation(BigDecimal num);
 
   /**
-   * Wird aufgerufen, nachdem der letzte Wert mittels addComputation() verarbeitet
-   * wurde, wenn jeder addComputation()-Aufruf null geliefert hat.
+   * Called after the last value is processed using addComputation()
+   * became if every addComputation() call returned null.
    *
-   * @return das Endergebnis der Berechnung. null ist NICHT erlaubt.
+   * @return the end result of the calculation. null is NOT allowed.
    */
   protected abstract String computationResult();
 
@@ -107,12 +107,12 @@ abstract class NumberFunction extends MultiFunction
   protected BigDecimal makeBigDecimal(String str)
   {
     /*
-     * Falls der Dezimaltrenner nicht '.' ist, ersetzte alle '.' durch etwas, das
-     * kein Dezimaltrenner ist, um eine NumberFormatException beim Konvertieren zu
-     * provozieren. Dies ist eine Vorsichtsmaßnahme, da '.' zum Beispiel in
-     * Deutschland alls Gruppierungszeichen verwendet wird und wir wollen nicht
-     * fälschlicher weise "100.000" als 100 interpretieren, wenn die eingebende
-     * Person 100000 gemeint hat.
+     * If the decimal separator is not '.' is replaced all '.' through something that
+     * is not a decimal separator in order to throw a NumberFormatException when converting
+     * provoke. This is a precaution because '.' for example in
+     * Germany alls grouping character is used and we don't want it
+     * incorrectly interpreting "100,000" as 100 when entering
+     * person meant 100000.
      */
     if (decimalPoint != '.') str = str.replace('.', 'ß');
 
@@ -120,14 +120,14 @@ abstract class NumberFunction extends MultiFunction
   }
 
   /**
-   * Liefert eine Stringrepräsentation von num
+   * Returns a string representation of num
    */
   protected String formatBigDecimal(BigDecimal num)
   {
     /*
-     * Workaround für Bug
+     * Workaround for bug
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539
-     * stripTrailingZeros() funktioniert nicht für 0.
+     * stripTrailingZeros() does not work for 0.
      */
     String result;
     if (num.compareTo(BigDecimal.ZERO) == 0)

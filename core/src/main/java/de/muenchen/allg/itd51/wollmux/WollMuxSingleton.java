@@ -50,10 +50,10 @@ import de.muenchen.allg.itd51.wollmux.util.Utils;
 import org.libreoffice.ext.unohelper.util.UnoConfiguration;
 
 /**
- * Diese Klasse ist ein Singleton, welches den WollMux initialisiert und alle zentralen
- * WollMux-Methoden zur Verfügung stellt. Selbst der WollMux-Service
- * de.muenchen.allg.itd51.wollmux.comp.WollMux, der früher zentraler Anlaufpunkt war, bedient sich
- * größtenteils aus den zentralen Methoden des Singletons.
+ * This class is a singleton, which initializes the WollMux and all central
+ * Provides WollMux methods. Even the WollMux service
+ * de.muenchen.allg.itd51.wollmux.comp.WollMux, which used to be the central contact point, is used
+ * mostly from the central methods of the singleton.
  */
 public class WollMuxSingleton
 {
@@ -63,19 +63,19 @@ public class WollMuxSingleton
   private static WollMuxSingleton singletonInstance = null;
 
   /**
-   * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo) läuft.
+   * Contains the default XComponentContext in which WollMux (or OOo) runs.
    */
   private XComponentContext ctx;
 
   /**
-   * Verwaltet Informationen zum NoConfig mode.
+   * Manages information about the NoConfig mode.
    */
   private boolean noConfig;
 
   private boolean menusCreated = false;
 
   /**
-   * Die WollMux-Hauptklasse ist als singleton realisiert.
+   * The WollMux main class is implemented as a singleton.
    */
   private WollMuxSingleton(XComponentContext ctx)
   {
@@ -122,16 +122,16 @@ public class WollMuxSingleton
     LOGGER.debug("CONF_VERSION: {}", getConfVersionInfo());
 
     /*
-     * Datenquellen/Registriere Abschnitte verarbeiten. ACHTUNG! Dies muss vor getDatasourceJoiner()
-     * geschehen, da die entsprechenden Datenquellen womöglich schon für WollMux-Datenquellen
-     * benötigt werden.
+     * Process data sources/register sections. DANGER! This must be done before getDatasourceJoiner()
+     * done because the corresponding data sources may already be for WollMux data sources
+     * are required.
      */
     registerDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles.getDefaultContext());
 
-    // Versuchen, den DJ zu initialisieren
+    // Try to initialize the DJ
     if (SenderService.getInstance() != null)
     {
-      // Initialisiere EventProcessor
+      // Initialize EventProcessor
       WollMuxEventHandler.getInstance().setAcceptEvents(true);
 
       // register global EventListener
@@ -146,7 +146,7 @@ public class WollMuxSingleton
         LOGGER.error("", e);
       }
 
-      // setzen von shortcuts
+      // set shortcuts
       ConfigThingy tastenkuerzel = new ConfigThingy("");
       try
       {
@@ -164,8 +164,8 @@ public class WollMuxSingleton
         LOGGER.error("", e);
       }
 
-      // Setzen der in den Abschnitten OOoEinstellungen eingestellten
-      // Konfigurationsoptionen
+      // Set the settings set in the OOoSettings sections
+      // configuration options
       this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
     }
   }
@@ -179,10 +179,10 @@ public class WollMuxSingleton
   }
 
   /**
-   * Diese Methode liefert die Instanz des WollMux-Singletons. Ist der WollMux noch nicht
-   * initialisiert, so liefert die Methode null!
+   * This method returns the instance of the WollMux singleton. Is not the WollMux yet
+   * initialized, the method returns null!
    *
-   * @return Instanz des WollMuxSingletons oder null.
+   * @return instance of WollMuxSingleton or null.
    */
   public static WollMuxSingleton getInstance()
   {
@@ -200,8 +200,8 @@ public class WollMuxSingleton
   }
 
   /**
-   * Diese Methode initialisiert das WollMuxSingleton (nur dann, wenn es noch nicht initialisiert
-   * wurde)
+   * This method initializes the WollMuxSingleton (only if it's not already initialized
+   * became)
    */
   public static synchronized void initialize(XComponentContext ctx)
   {
@@ -212,7 +212,7 @@ public class WollMuxSingleton
   }
 
   /**
-   * Liefert die Versionsnummer des WollMux (z.B. "5.9.2") zurück.
+   * Returns the version number of WollMux (e.g. "5.9.2").
    */
   public static String getVersion()
   {
@@ -220,13 +220,13 @@ public class WollMuxSingleton
   }
 
   /**
-   * Diese Methode liefert die Versionsinformation der aktuell verwendeten wollmux-Konfiguration
-   * (z.B. "wollmux-standard-config-2.2.1") als String zurück, wenn in der Konfiguration ein
-   * entsprechender CONF_VERSION-Schlüssel definiert ist, oder "unbekannt", falls der dieser
-   * Schlüssel nicht existiert.
+   * This method returns the version information of the Wollmux configuration currently in use
+   * (e.g. "wollmux-standard-config-2.2.1") as a string if in the configuration a
+   * corresponding CONF_VERSION key is defined, or "unknown" if that
+   * Key does not exist.
    *
-   * @return Der Versionsinformation der aktuellen WollMux-Konfiguration (falls definiert) oder
-   *         "unbekannt", falls nicht.
+   * @return The version information of the current WollMux configuration (if defined) or
+   * "unknown" if not.
    */
   public String getConfVersionInfo()
   {
@@ -255,11 +255,11 @@ public class WollMuxSingleton
   }
 
   /**
-   * Verarbeitet alle Datenquellen/Registriere-Unterabschnitte von conf und registriert die
-   * entsprechenden Datenquellen in OOo, falls dort noch nicht vorhanden.
+   * Processes all data sources/register subsections of conf and registers the
+   * Corresponding data sources in OOo, if not already available there.
    *
    * @param context
-   *          gibt an relativ zu was relative URLs aufgelöst werden sollen.
+   *          indicates relative to what relative URLs should be resolved.
    */
   private static void registerDatasources(ConfigThingy conf, URL context)
   {
@@ -298,8 +298,8 @@ public class WollMuxSingleton
               continue;
             }
 
-            // hierher (und damit weiter ohne continue) kommen wir nur, wenn
-            // ein REFRESH-Abschnitt vorhanden ist und "true" enthält.
+            // we only come here (and thus continue without continue) if
+            // there is a REFRESH section and it contains "true".
           } catch (NodeNotFoundException x)
           {
             continue;
@@ -339,11 +339,11 @@ public class WollMuxSingleton
   }
 
   /**
-   * Setzt die im ConfigThingy übergebenen OOoEinstellungen-Abschnitt enthaltenen Einstellungen in
-   * der OOo-Registry.
+   * Sets the settings contained in the ConfigThingy passed OOoSettings section to
+   * the OOo registry.
    *
-   * @param oooEinstellungenConf
-   *          Der Knoten OOoEinstellungen eines solchen Abschnitts.
+   * @param oooSettingsConf
+   *          The OOoSettings node of such a section.
    */
   private static void setConfigurationValues(ConfigThingy oooEinstellungenConf)
   {
@@ -366,16 +366,16 @@ public class WollMuxSingleton
   }
 
   /**
-   * Konvertiert den als String übergebenen Wert value in ein Objekt vom Typ type oder liefert eine
-   * IllegalArgumentException, wenn die Werte nicht konvertiert werden können.
+   * Converts the value passed as a string into an object of type type or returns a
+   * IllegalArgumentException if the values ​​cannot be converted.
    *
    * @param type
-   *          Der Typ in den konvertiert werden soll ('boolean', 'integer', 'float', 'string').
+   *          The type to convert to ('boolean', 'integer', 'float', 'string').
    * @param value
-   *          Der zu konvertierende Wert.
-   * @return Das neue Objekt vom entsprechenden Typ.
+   *          The value to convert.
+   * @return The new object of the appropriate type.
    * @throws IllegalArgumentException
-   *           type oder value sind ungültig oder fehlerhaft.
+   *           type or value is invalid or contains errors.
    */
   private static Object getObjectByType(String type, String value)
   {
@@ -405,15 +405,15 @@ public class WollMuxSingleton
   }
 
   /**
-   * Setzt eine Einstellung value in der OOo-Registry, wobei die Position im Registry-Baum durch
-   * node und prop beschrieben wird.
+   * Sets a setting value in the OOo registry, taking its position in the registry tree through
+   * node and prop is described.
    *
    * @param node
-   *          z.B. "/org.openoffice.Inet/Settings"
+   *          e.g. "/org.openoffice.inet/settings"
    * @param prop
-   *          z.B. "ooInetProxyType"
+   *          e.g. "ooInetProxyType"
    * @param value
-   *          der zu setzende Wert als Objekt vom entsprechenden Typ.
+   *          the value to be set as an object of the appropriate type.
    */
   private static void setConfigurationValue(String node, String prop, Object value)
   {
@@ -427,10 +427,10 @@ public class WollMuxSingleton
   }
 
   /**
-   * Überprüft, ob von url gelesen werden kann und wirft eine IOException, falls nicht.
+   * Checks if url is readable and throws an IOException if not.
    *
    * @throws IOException
-   *           falls von url nicht gelesen werden kann.
+   *           if url is not readable.
    */
   public static void checkURL(URL url) throws IOException
   {

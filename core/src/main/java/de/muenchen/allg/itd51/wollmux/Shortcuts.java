@@ -52,12 +52,12 @@ public class Shortcuts
   }
 
   /**
-   * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus, löscht
-   * alle bisher vorhandenen Tastenkombinationen deren URL mit "wollmux:" beginnt und
-   * setzt neue Tastenkombination in OOo-Writer.
+   * Reads all attributes SHORTCUT and URL from key combinationsConf, deletes
+   * all existing key combinations whose URL begins with "wollmux:" and
+   * sets new keyboard shortcut in OOo-Writer.
    *
-   * @param tastenkombinationenConf
-   *          .conf Abschnitt Tastenkuerzel mit allen Knoten
+   * @param key combinationsConf
+   *          .conf section shortcuts with all nodes
    */
   public static void createShortcuts(ConfigThingy tastenkombinationenConf)
   {
@@ -72,13 +72,13 @@ public class Shortcuts
       return;
     }
 
-    // löschen aller KeyEvents die mit "wollmux:" beginnen
+    // Delete all KeyEvents that start with "wollmux:".
     removeComandFromAllKeyEvents(shortcutManager);
 
-    // lesen des Knoten SHORTCUT
+    // read the node SHORTCUT
     ConfigThingy shortcutConf = tastenkombinationenConf.queryByChild("SHORTCUT");
 
-    // Iterieren über die Knoten SHORTCUT
+    // Iterate over the SHORTCUT nodes
     Iterator<ConfigThingy> iterShortcut = shortcutConf.iterator();
     while (iterShortcut.hasNext())
     {
@@ -86,7 +86,7 @@ public class Shortcuts
       ConfigThingy tastenkombination = iterShortcut.next();
 
       String shortcut = null;
-      // lesen der Knoten SHORTCUT
+      // read the node SHORTCUT
       try
       {
         shortcut = tastenkombination.get("SHORTCUT").toString();
@@ -98,7 +98,7 @@ public class Shortcuts
       }
 
       String url = null;
-      // lesen der Knoten URL
+      // read the node url
       try
       {
         url = tastenkombination.get("URL").toString();
@@ -112,7 +112,7 @@ public class Shortcuts
       KeyEvent keyEvent = createKeyEvent(shortcut);
       if (keyEvent != null)
       {
-        // setzen der Tastenkombination mit KeyEvent und WollMux-Url
+        // set the key combination with KeyEvent and WollMux-Url
         try
         {
           shortcutManager.setKeyEvent(keyEvent, url);
@@ -128,7 +128,7 @@ public class Shortcuts
       }
     }
 
-    // Änderung Persistent machen
+    // Make change persistent
     try
     {
       if (UNO.XUIConfigurationPersistence(shortcutManager) != null)
@@ -143,32 +143,32 @@ public class Shortcuts
   }
 
   /**
-   * Wenn es Tastenkuerzel mit einer UNO-url beginnent mit "wollmux:" gibt, werden
-   * diese gelöscht. Workaround wegen nicht funktionierendem
+   * If there are keyboard shortcuts with a UNO url starting with "wollmux:", they will
+   * these deleted. Workaround for not working
    * xAcceleratorConfiguration.removeCommandFromAllKeyEvents(). OOo Issue #72558
    *
    * @param xAcceleratorConfiguration
-   *          AcceleratorConfiguration (muß danach noch mit store() persistent
-   *          gemacht werden)
+   * AcceleratorConfiguration (must be persistent afterwards with store()
+   *          be made)
    */
   private static void removeComandFromAllKeyEvents(
       XAcceleratorConfiguration xAcceleratorConfiguration)
   {
-    // lesen aller gesetzten Tastenkombinationen
+    // read all set key combinations
     KeyEvent[] keys = xAcceleratorConfiguration.getAllKeyEvents();
 
-    // Wenn es Tastenkombinationen mit der UNO-url beginnent mit "wollmux:"
-    // gibt, werden diese gelöscht. Workaround wegen nicht funktionierendem
+    // If there are key combinations with the UNO url starting with "wollmux:"
+    // exist, these are deleted. Workaround for not working
     // xAcceleratorConfiguration.removeCommandFromAllKeyEvents().
     for (int i = 0; i < keys.length; i++)
     {
       try
       {
         String event = xAcceleratorConfiguration.getCommandByKeyEvent(keys[i]);
-        // wenn die UNO-url mit "wollmux:" beginnt, wird sie gelöscht
+        // if the UNO-url starts with "wollmux:" it will be deleted
         if (event.startsWith("wollmux:"))
         {
-          // löschen der Tastenkombination
+          // delete the key combination
           xAcceleratorConfiguration.removeKeyEvent(keys[i]);
         }
       }
@@ -180,7 +180,7 @@ public class Shortcuts
   }
 
   /**
-   * Gibt alle KeyEvents mit Modifier, KeyCode und Command aus
+   * Outputs all KeyEvents with Modifier, KeyCode and Command
    *
    * @param xac
    *          AcceleratorConfigurator
@@ -208,12 +208,12 @@ public class Shortcuts
   }
 
   /**
-   * Erzeugt ein Object KeyEvent
+   * Generates an Object KeyEvent
    *
    * @param shortcutWithSeparator
-   *          Tastenkombination mit "+" als Separator
-   * @return gibt ein KeyEvent zurück oder null wenn kein keyCode sondern nur
-   *         keyModifier verwendet werden
+   *          Key combination with "+" as separator
+   * @return returns a KeyEvent or null if not a keyCode but only
+   *         keyModifier are used
    */
   private static KeyEvent createKeyEvent(String shortcutWithSeparator)
   {
@@ -253,11 +253,11 @@ public class Shortcuts
   }
 
   /**
-   * Gibt die Konstante com.sun.star.awt.Key für die entsprechende Taste zurück
+   * Returns the constant com.sun.star.awt.Key for the corresponding key
    *
    * @param shortcut
-   *          Taste
-   * @return Key der entsprechenden Taste
+   *          button
+   * @return key of the corresponding key
    */
   private static Short returnKeyCode(String shortcut)
   {
@@ -384,12 +384,12 @@ public class Shortcuts
   }
 
   /**
-   * Gibt die Konstante com.sun.star.awt.KeyModifier für die entsprechende Taste
-   * zurück
+   * Returns the constant com.sun.star.awt.KeyModifier for the corresponding key
+   * return
    *
    * @param shortcut
-   *          Taste
-   * @return KeyModifier der entsprechenden Taste
+   * button
+   * @return KeyModifier of the corresponding key
    */
   private static Short returnKeyModifier(String shortcut)
   {

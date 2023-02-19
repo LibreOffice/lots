@@ -44,7 +44,7 @@ public class DivideFunction implements Function
   private String[] params;
 
   /**
-   * Wenn divisorFunction null ist wird 1 angenommen.
+   * If divisorFunction is zero, 1 is assumed.
    */
   public DivideFunction(Function dividendFunction, Function divisorFunction,
       int minScale, int maxScale)
@@ -95,12 +95,12 @@ public class DivideFunction implements Function
     if (divisor == FunctionLibrary.ERROR) return FunctionLibrary.ERROR;
 
     /*
-     * Falls der Dezimaltrenner nicht '.' ist, ersetzte alle '.' durch etwas, das
-     * kein Dezimaltrenner ist, um eine NumberFormatException beim Konvertieren zu
-     * provozieren. Dies ist eine Vorsichtsmaßnahme, da '.' zum Beispiel in
-     * Deutschland alls Gruppierungszeichen verwendet wird und wir wollen nicht
-     * fälschlicher weise "100.000" als 100 interpretieren, wenn die eingebende
-     * Person 100000 gemeint hat.
+     * If the decimal separator is not '.' is replaced all '.' through something that
+     * is not a decimal separator in order to throw a NumberFormatException when converting
+     * provoke. This is a precaution because '.' for example in
+     * Germany alls grouping character is used and we don't want it
+     * incorrectly interpreting "100,000" as 100 when entering
+     * person meant 100000.
      */
     if (decimalPoint != '.')
     {
@@ -122,14 +122,14 @@ public class DivideFunction implements Function
     }
 
     /*
-     * NumberFormat kann leider nicht zum formatieren verwendet werden, da es nur
-     * die Genauigkeit von double hat (laut Java Doc).
+     * Unfortunately, NumberFormat cannot be used for formatting, since it is only
+     * has the precision of double (according to Java Doc).
      */
 
     /*
-     * Workaround für Bug
+     * Workaround for bug
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539
-     * stripTrailingZeros() funktioniert nicht für 0.
+     * stripTrailingZeros() does not work for 0.
      */
     String result;
     if (bigResult.compareTo(BigDecimal.ZERO) == 0)

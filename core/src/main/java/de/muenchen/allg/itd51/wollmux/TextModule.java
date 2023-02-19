@@ -54,7 +54,7 @@ import org.libreoffice.ext.unohelper.common.TextDocument;
 import org.libreoffice.ext.unohelper.util.UnoService;
 
 /**
- * Klasse enthält statische Methoden die für das Textbausteinsystem benötigt werden
+ * Class contains static methods that are required for the text block system
  *
  * @author bettina.bauer
  */
@@ -64,7 +64,7 @@ public class TextModule
   private static final Logger LOGGER = LoggerFactory.getLogger(TextModule.class);
 
   /**
-   * Pattern, das insertFrag-Bookmarks matcht.
+   * Pattern matching insertFrag bookmarks.
    */
   private static final Pattern INSERTFRAG_PATTERN =
     DocumentCommands.getPatternForCommand("insertFrag");
@@ -75,38 +75,38 @@ public class TextModule
   }
 
   /**
-   * Sucht ab der Stelle range rückwarts nach gültigen Textfragmentbezeichnern mit
-   * Argumenten, legt um jeden einzufügenden Textbaustein ein Dokumentkommando
-   * 'insertFrag' mit den gefundenen Argumenten. Aufgehört wird beim ersten Absatz in
-   * dem kein Textbausteinbezeichner identifiziert werden konnte oder wo bereits ein
-   * insertFrag vorhanden war.
+   * Searches backwards from range for valid text fragment identifiers
+   * Arguments, puts a document command around each text module to be inserted
+   * 'insertFrag' with the arguments found. It stops at the first paragraph in
+   * where no snippet identifier could be identified or where already one
+   * insertFrag was present.
    *
    * @param doc
-   *          Aktuelle Textdocument in dem gesucht werden soll
+   *          Current text document in which to search
    * @param range
-   *          Stelle in der nach Textfragmentbezeichnern gesucht werden soll. Die
-   *          Stelle kann ein markierter Bereich sein oder ein kollabierter Cursor
-   *          von dem rückwärts bis zur ersten Zeile die kein Textfragment enthält
-   *          gesucht wird. Meistens handelt es sich um den viewCursor.
+   *          Position in which to search for text fragment identifiers. The
+   *          Location can be a marked area or a collapsed cursor
+   *          from the back to the first line that does not contain a text fragment
+   *          is searched for. Most often it is the viewCursor.
    * @param isManual
-   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt
-   *          den optionalen Knoten MODE = "manual"
+   *          denotes insertions that have been made manually. Puts
+   *          the optional node MODE = "manual"
    *
-   * @throws WollMuxFehlerException
-   *           falls ein Problem aufgetreten ist (z.B. kein Textbaustein erkannt oder
-   *           bereits ein insertFrag-Befehl vorhanden). Eine Exception wird genau
-   *           dann geworfen, wenn gar kein Textbausteinverweis eingefügt werden
-   *           konnte. Wurde mindestens einer eingefügt, wird keine Exception
-   *           geworfen, sondern an der Fehlerstelle mit dem Scan aufgehört.
+   * @throws WollMuxErrorException
+   *          if a problem has occurred (e.g. no text module recognized or
+   *          an insertFrag command already exists). An exception becomes exact
+   *          then thrown if no text module reference is inserted
+   *          could. If at least one was inserted, no exception is thrown
+   *          thrown, but stopped the scan at the error point.
    */
   public static void createInsertFragFromIdentifier(XTextDocument doc,
       XTextRange range, boolean isManual) throws WollMuxFehlerException
   {
     ConfigThingy conf = WollMuxFiles.getWollmuxConf();
 
-    // holt sich Textbausteine aus .conf und sammelt sie in umgekehrter
-    // Reihenfolge in der LinkedList tbListe. Damit später definierte
-    // Textbaustein Abschnitte immer Vorrang haben.
+    // fetches text modules from .conf and collects them in reverse
+    // Order in LinkedList tbList. So later defined
+    // Text module sections always take precedence.
     LinkedList<ConfigThingy> tbListe = new LinkedList<>();
     ConfigThingy tbConf = conf.query("Textbausteine");
     Iterator<ConfigThingy> iter = tbConf.iterator();
@@ -119,11 +119,11 @@ public class TextModule
     XParagraphCursor cursor =
       UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
 
-    // Sonderbehandlung, wenn der viewCursor bereits eine Bereich markiert.
-    // In diesem Fall soll ausschließlich der Inhalt des Bereichs evaluiert
-    // werden. Über einen Vergleich von completeContent und collectedContent
-    // kann festgestellt werden, ob cursor den Bereich abdeckt (siehe
-    // unten).
+    // Special treatment when the viewCursor already marks an area.
+    // In this case, only the content of the area should be evaluated
+    // become. By comparing completeContent and collectedContent
+    // can be determined whether cursor covers the area (see
+    // below).
     String completeContent = cursor.getString();
     String collectedContent = "";
     if (!completeContent.equals("")) cursor.collapseToEnd();
@@ -143,9 +143,9 @@ public class TextModule
         foundAtLeastOneTBInCurrentParagraph = true;
 
         /*
-         * Schauen, ob bereits ein insertFrag-Befehl vorhanden ist, um zu verhindern,
-         * dass ein zweiter darüber gelegt wird, da dies diverses Fehlverhalten
-         * produzieren kann.
+         * See if an insertFrag command already exists to prevent
+         * that a second one is placed over it, as this is various misconduct
+         * can produce.
          */
         Set<String> bms =
           TextDocument.getBookmarkNamesMatching(INSERTFRAG_PATTERN, cursor);
@@ -155,27 +155,27 @@ public class TextModule
           createInsertFrag(doc, cursor, results, isManual);
           processedAtLeastOneTBSuccessfully = true;
 
-          // Cursor kollabieren, damit beim Weitersuchen nicht der gerade schon
-          // verarbeitete Textbausteinbezeichner noch als Teil des nächsten
-          // Bezeichners verwendet wird.
-          // Die Textbausteinsuche verhält sich also im Gegensatz zur üblichen Art
-          // des Matchens von regulären Ausdrücken NICHT greedy, sondern wir nehmen
-          // den kürzesten matchenden Bezeichner
+          // Cursor collapses so that when you continue searching, it doesn't just happen
+          // processed phrase identifier still as part of next
+          // identifier is used.
+          // So the text module search behaves in contrast to the usual way
+          // of regular expression matching NOT greedy, but we take
+          // the shortest matching identifier
           cursor.collapseToStart();
         }
         else
         {
           /*
-           * Es wurde bereits ein insertFrag-Kommando an der aktuellen Cursorposition
-           * gefunden.
+           * An insertFrag command has already been issued at the current cursor position
+           * found.
            *
-           * Wir werfen nur dann einen Fehler, wenn wir noch gar keinen Textbaustein
-           * verarbeitet haben. Ansonsten hören wir einfach nur auf ohne Fehler. Es
-           * ist ein absolut legitimer Anwendungsfall, dass ein Anwender erst "TB1"
-           * tippt und dann "TextbausteinVERWEIS einfügen" (man beachte: nur beim
-           * Einfügen eines VERWEISEs ist es möglich, dass ein insertFrag Bookmark
-           * existiert.) macht und dann einen Absatz runtergeht und "TB2" tippt und
-           * wieder "Textbausteinverweis einfügen" macht.
+           * We only throw an error if we don't have any boilerplate
+           * have processed. Otherwise we just stop without error. It
+           * is an absolutely legitimate use case that a user first "TB1"
+           * type and then "insert text moduleLINK" (note: only with the
+           * Inserting a REFERENCES it is possible that an insertFrag bookmark
+           * exists.) and then go down one paragraph and type "TB2" and
+           * does "insert snippet link" again.
            */
           if (!processedAtLeastOneTBSuccessfully)
             throw new WollMuxFehlerException(
@@ -187,23 +187,23 @@ public class TextModule
 
       if (cursor.isStartOfParagraph())
       {
-        // Falls wir in der ganzen Zeile nichts gefunden haben, dann aufhören.
+        // If we haven't found anything in the whole line, then stop.
         if (!foundAtLeastOneTBInCurrentParagraph) break;
 
-        // zum vorherigen Absatz weiter schalten, dabei matchedInLine zurücksetzen.
+        // go to the previous paragraph, resetting matchedInLine.
         cursor.goLeft((short) 1, false);
         foundAtLeastOneTBInCurrentParagraph = false;
       }
       else
       {
-        // ein Zeichen nach links gehen (dabei Cursorrange wachsen lassen) und weiter
-        // machen.
+        // move one character to the left (allowing the cursor range to increase) and continue
+        // make.
         cursor.goLeft((short) 1, true);
       }
 
-      // Hier der Vergleich completeContent<->collectedContent: wenn beide
-      // übereinstimmen, kann abgebrochen werden, da der Bereich dann
-      // vollständig evaluiert wurde.
+      // Here is the comparison completeContent<->collectedContent: if both
+      // match can be aborted because the range then
+      // has been fully evaluated.
       if (completeContent.length() > 0 && completeContent.equals(collectedContent))
         break;
     }
@@ -214,20 +214,20 @@ public class TextModule
   }
 
   /**
-   * Parsed den übergebenen identifierWithArgs nach allen Abbildungen der Form (MATCH
-   * ... FRAG_ID ...), die in den Textbausteine-Abschnitten in tbListe enthalten sind
-   * und liefert null zurück, wenn es keine Übereinstimmung mit den MATCHes gab oder
-   * falls es eine Übereinstimmung gab ein Array, das an der ersten Stelle die neue
-   * frag_id enthält und in den folgenden Stellen die Argumente.
+   * Parses the supplied identifierWithArgs for all mappings of the form (MATCH
+   * ... FRAG_ID ...) contained in the boilerplate sections in tbList
+   * and returns null if there was no match on the MATCHes or
+   * if there was a match, an array with the new one in the first position
+   * contains frag_id and the arguments in the following places.
    *
    * @param identifierWithArgs
-   *          Ein String in der Form "<identifier>#arg1#...#argN", wobei der
-   *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
-   *          werden kann.
-   * @param tbListe
-   *          Eine Liste, die die Textbausteine-Abschnitte in der Reihenfolge
-   *          enthält, in der sie ausgewertet werden sollen.
-   * @return Stringarray mit (frag_id + args) oder null
+   *          A string of the form "<identifier>#arg1#...#argN" where the
+   *          Changed the separator "#" to text modules via the SEPARATOR key
+   *          can be.
+   * @param tbList
+   *          A list showing the boilerplate sections in order
+   *          contains in which they are to be evaluated.
+   * @return array of strings with (frag_id + args) or null
    */
   private static String[] parseIdentifier(String identifierWithArgs,
       List<ConfigThingy> tbListe)
@@ -245,25 +245,25 @@ public class TextModule
   }
 
   /**
-   * Parsed den übergebenen identifierWithArgs nach allen Abbildungen der Form (MATCH
-   * ... FRAG_ID ...), die in textbausteine (=ein einzelner Textbausteine-Abschnitt)
-   * enthalten sind und liefert null zurück, wenn es keine Übereinstimmung mit den
-   * MATCHes gab oder falls es eine Übereinstimmung gab ein Array, das an der ersten
-   * Stelle die neue frag_id enthält und in den folgenden Stellen die Argumente.
+   * Parses the supplied identifierWithArgs for all mappings of the form (MATCH
+   * ... FRAG_ID ...), which is written in text modules (=a single text module section)
+   * are included and returns null if there is no match with the
+   * MATCHes were or if there was a match an array that is at the first
+   * Place containing the new frag_id and in the following places the arguments.
    *
    * @param identifierWithArgs
-   *          Ein String in der Form "&lt;identifier&gt;#arg1#...#argN", wobei der
-   *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
-   *          werden kann.
-   * @param textbausteine
-   *          Beschreibung eines Textbausteinabschnittes in der Form
-   *          "Textbausteine(SEPARATOR ... Kuerzel(...))"
-   * @return Stringarray mit (frag_id + args) oder null
+   *          A string of the form "&lt;identifier&gt;#arg1#...#argN" where the
+   *          Changed the separator "#" to text modules via the SEPARATOR key
+   *          can be.
+   * @param text modules
+   *          Description of a boilerplate section in the form
+   *          "Text modules(SEPARATOR ... abbreviation(...))"
+   * @return array of strings with (frag_id + args) or null
    */
   public static String[] parseIdentifierInTextbausteine(String identifierWithArgs,
       ConfigThingy textbausteine)
   {
-    // Separator für diesen Textbaustein-Block bestimmen
+    // Determine the separator for this text module block
     String separatorString = "#";
     ConfigThingy separator = textbausteine.query("SEPARATOR");
     if (separator.count() > 0)
@@ -278,13 +278,13 @@ public class TextModule
       }
     }
 
-    // identifierWithArgs splitten und erstes Argument holen, wenn am Schuß
-    // SEPERATOR steht wird -1 noch ein weiteres leeres Element in args[]
-    // erzeugt
+    // Split identifierWithArgs and get first argument when on end
+    // SEPERATOR -1 is another empty element in args[]
+    // generated
     String[] args = identifierWithArgs.split(separatorString, -1);
     String first = args[0];
 
-    // Iterieren über alle Knoten der Form "(MATCH ... FRAG_ID ...)"
+    // Iterate over all nodes of the form "(MATCH ... FRAG_ID ...)"
     ConfigThingy mappingsConf = textbausteine.queryByChild("MATCH");
     Iterator<ConfigThingy> iterMappings = mappingsConf.iterator();
     while (iterMappings.hasNext())
@@ -309,7 +309,7 @@ public class TextModule
       }
       catch (NodeNotFoundException e)
       {
-        // kommt nicht vor, da obiger queryByChild immer MATCH liefert
+        // does not occur because the above queryByChild always returns MATCH
         continue;
       }
 
@@ -331,29 +331,29 @@ public class TextModule
         }
       }
     }
-    return null; // wenn nix drin
+    return null; // if nothing in it
   }
 
   /**
-   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '&lt;args[0]&gt;'
-   * ARGS('&lt;args[1]&gt;' '...' '&lt;args[n]&gt;')" im Dokument doc an der Stelle range.
+   * Creates a bookmark of type "WM(CMD'insertFrag' FRAG_ID '&lt;args[0]&gt;'
+   * ARGS('&lt;args[1]&gt;' '...' '&lt;args[n]&gt;')" in the document doc at position range.
    *
    * @param doc
-   *          Aktuelles Textdokument
-   * @param range
-   *          Stelle an der das Bookmark gesetzt werden soll
+   *          Current text document
+   * @paramrange
+   *          Place where the bookmark should be set
    * @param args
-   *          Übergebene Parameter
+   *          Parameters passed
    * @param isManual
-   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt den optinalen
-   *          Knoten MODE = "manual"
+   *          denotes insertions that have been made manually. Sets the optional
+   *          node MODE = "manual"
    */
   public static void createInsertFrag(XTextDocument doc, XTextRange range,
       String[] args, boolean isManual)
 
   {
 
-    // Neues ConfigThingy für "insertFrag Textbaustein" erzeugen:
+    // Create new ConfigThingy for "insertFrag text module":
     ConfigThingy root = new ConfigThingy("");
     ConfigThingy werte = new ConfigThingy("WM");
     root.addChild(werte);
@@ -404,20 +404,20 @@ public class TextModule
   }
 
   /**
-   * Methode springt ab dem aktuellen viewCursor von einem Platzhalterfeld zum
-   * nächsten und fängt dann nochmal von vorne an
+   * Method jumps from a placeholder field to the current viewCursor
+   * next and then starts again from the beginning
    *
    * @param viewCursor
-   *          Aktueller ViewCursor im Dokument
+   *          Current ViewCursor in the document
    */
   public static void jumpPlaceholders(XTextDocument doc, XTextCursor viewCursor)
   {
     XTextCursor oldPos = viewCursor.getText().createTextCursorByRange(viewCursor);
 
-    // Nächsten Platzhalter anspringen. Dabei berücksichtigen, dass
-    // .uno:GotoNextPlacemarker nicht automatisch zu einem evtl. direkt am
-    // View-Cursor angrenzenden Platzhalter springt, sondern dann gleich zum
-    // nächsten.
+    // Jump to next placeholder. In doing so, take into account that
+    // .uno:GotoNextPlacemarker not automatically to a possibly directly on
+    // View cursor jumps to the adjacent placeholder, but then straight to
+    // next.
     XTextField nearPlacemarker = null;
     if (viewCursor.isCollapsed())
       nearPlacemarker = getPlacemarkerStartingWithRange(doc, viewCursor);
@@ -426,14 +426,14 @@ public class TextModule
     else
       UNO.dispatchAndWait(doc, ".uno:GotoNextPlacemarker");
 
-    // Keinen weiteren Platzhalter gefunden? Dies erkenne ich daran, dass entwder der
-    // View-Cursor (falls er bereits auf dem letzten Platzhalter des Dokuments stand)
-    // kollabiert wurde oder der View-Cursor auf der selben Stelle wie früher stehen
-    // geblieben ist.
+    // Didn't find another placeholder? I recognize this by the fact that either the
+    // view cursor (if it was already on the last placeholder of the document)
+    // was collapsed or the view cursor is where it was before
+    // stayed.
     if (viewCursor.isCollapsed()
       || new TextRangeRelation(oldPos, viewCursor).followsOrderscheme8888())
     {
-      // Proiere nochmal ab dem Anfang des Dokuments
+      // Try again from the beginning of the document
       viewCursor.gotoRange(doc.getText().getStart(), false);
       nearPlacemarker = null;
       if (viewCursor.isCollapsed())
@@ -443,23 +443,23 @@ public class TextModule
       else
         UNO.dispatchAndWait(doc, ".uno:GotoNextPlacemarker");
 
-      // Falls immer noch kein Platzhalter gefunden wurde wird zur Marke
-      // 'setJumpMark' gesprungen falls vorhanden sonst kommt eine Fehlermeldung
+      // If still no placeholder was found becomes to mark
+      // 'setJumpMark' jumped if available otherwise an error message appears
       if (new TextRangeRelation(doc.getText().getStart(), viewCursor).followsOrderscheme8888())
       {
-        // ViewCursor wieder auf Ausgangsposition setzen.
+        // Set the view cursor back to its original position.
         viewCursor.gotoRange(oldPos, false);
 
-        // und handle jumpToMark aufrufen.
+        // and call handle jumpToMark.
         new OnJumpToMark(doc, true).emit();
       }
     }
   }
 
   /**
-   * Liefert aus dem Dokument doc das erste Text-Field Objekt vom Typ Placemarker,
-   * das gemeinsam mit range an der selben Position startet, oder null falls ein
-   * solches Objekt nicht gefunden wird.
+   * Returns the first text field object of type placemarker from the document doc,
+   * which starts at the same position as range, or null if one
+   * such object is not found.
    */
   private static XTextField getPlacemarkerStartingWithRange(XTextDocument doc,
       XTextCursor range)

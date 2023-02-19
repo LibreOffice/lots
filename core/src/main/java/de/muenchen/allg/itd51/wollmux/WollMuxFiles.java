@@ -337,8 +337,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt der wollmux,conf zurück, die gelesen wurde (kann z,B, auch die aus
-   * /etc/wollmux/ sein). Darf erst nach setupWollMuxDir() aufgerufen werden.
+   * Returns the file object of the wollmux,conf that was read (can also be the one from
+   * be /etc/wollmux/). May only be called after setupWollMuxDir().
    */
   public static File getWollMuxConfFile()
   {
@@ -349,10 +349,10 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück. Darf erst nach
-   * setupWollMuxDir() aufgerufen werden.
+   * Returns the file object of the LocalOverrideStorage cache. May only after
+   * setupWollMuxDir() to be called.
    *
-   * @return das File-Objekt des LocalOverrideStorage Caches.
+   * @return the file object of the LocalOverrideStorage cache.
    */
   public static File getLosCacheFile()
   {
@@ -363,7 +363,7 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert den Inhalt der wollmux,conf zurück.
+   * Returns the content of wollmux,conf.
    */
   public static ConfigThingy getWollmuxConf()
   {

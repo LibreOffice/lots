@@ -40,8 +40,8 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
- * Eine durch ein ConfigThingy beschriebene externe (d,h, nicht als ConfigThingy
- * definierte) Funktion.
+ * An external described by a ConfigThingy (i.e. not as a ConfigThingy
+ * defined) function.
  */
 public class ExternalFunction
 {
@@ -50,29 +50,29 @@ public class ExternalFunction
       .getLogger(ExternalFunction.class);
 
   /**
-   * Falls die Funktion eine Funktion des Scripting Frameworks ist, ist hier die
-   * Referenz auf das Skript gespeichert.
+   * If the function is a Scripting Framework function, here is it
+   * Reference saved to the script.
    */
   private XScript script = null;
 
   /**
-   * Falls die Funktion eine statische Java-Methode ist, so wird hier die Referenz
-   * auf diese gespeichert.
+   * If the function is a static Java method, then here is the reference
+   * stored on this.
    */
   private Method method = null;
 
   /**
-   * Die Namen der Parameter, die die Funktion erwartet.
+   * The names of the parameters that the function expects.
    */
   private String[] params;
 
   /**
-   * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
-   * ExternalFunction, wobei zum Laden von Java-Klassen der selbe ClassLoader wie für
-   * das Laden dieser Klasse verwendet wird.
+   * Generates a ConfigThingy (the EXTERN node is transferred).
+   * ExternalFunction, using the same ClassLoader for loading Java classes as for
+   * loading this class is used.
    *
    * @throws ConfigurationErrorException
-   *           falls die Spezifikation in conf fehlerhaft ist. TESTED
+   *           if the specification in conf is wrong. TESTED
    */
   public ExternalFunction(ConfigThingy conf)
   {
@@ -80,11 +80,11 @@ public class ExternalFunction
   }
 
   /**
-   * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
-   * ExternalFunction, wobei zum Laden von Java-Klassen classLoader verwendet wird.
+   * Generates a ConfigThingy (the EXTERN node is transferred).
+   * ExternalFunction, using classLoader to load Java classes.
    *
    * @throws ConfigurationErrorException
-   *           falls die Spezifikation in conf fehlerhaft ist. TESTED
+   *           if the specification in conf is wrong. TESTED
    */
   public ExternalFunction(ConfigThingy conf, ClassLoader classLoader)
   {
@@ -146,7 +146,7 @@ public class ExternalFunction
   }
 
   /**
-   * Liefert die Namen der Parameter, die die Funktion erwartet.
+   * Returns the names of the parameters expected by the function.
    */
   public String[] parameters()
   {
@@ -154,15 +154,15 @@ public class ExternalFunction
   }
 
   /**
-   * Ruft die Funktion auf mit den String-Parametern aus parameters.
+   * Calls the function with the string parameters from parameters.
    *
    * @param parameters
-   *          sollte zu jedem der von {@link #parameters()} gelieferten Namen einen
-   *          String-Wert enthalten.
-   * @return den Wert des Funktionsaufrufs oder null falls es ein Problem gab, das
-   *         nicht zu einer Exception geführt hat.
+   *          should be one for each of the names returned by {@link #parameters()}
+   *          String value included.
+   * @return the value of the function call, or null if there was a problem that
+   *         did not result in an exception.
    * @throws Exception
-   *           falls ein Problem auftritt
+   *           if there is a problem
    */
   public Object invoke(Values parameters) throws Exception
   {
@@ -173,15 +173,15 @@ public class ExternalFunction
   }
 
   /**
-   * Ruft die Funktion auf mit den Argumenten args.
+   * Calls the function with arguments args.
    *
    * @param args
-   *          muss für jeden der von {@link #parameters()} gelieferten Namen einen
-   *          Wert enthalten.
-   * @return den Wert des Funktionsaufrufs oder null falls es ein Problem gab, das
-   *         nicht zu einer Exception geführt hat.
+   *          must be one for each of the names returned by {@link #parameters()}
+   *          Value included.
+   * @return the value of the function call, or null if there was a problem that
+   *         did not result in an exception.
    * @throws Exception
-   *           falls ein Problem auftritt
+   *           if there is a problem
    */
   public Object invoke(Object[] args) throws Exception
   {

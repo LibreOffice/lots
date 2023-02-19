@@ -26,34 +26,34 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Diese Klasse vereinfacht die Synchronisation verschiedener Threads über einen
- * ActionListener. Die Anwendung erfolgt in der Regel in folgenden Schritten:
+ * This class simplifies the synchronization of different threads over one
+ * ActionListener. The application usually takes place in the following steps:
  *
  * SyncActionListener s = new SyncActionListener();
- * aufrufEinerMethodeDieEinenActionListenerErwartet(..., s); EventObject result =
+ * calling a method that expects an action listener (..., s); EventObject result =
  * s.synchronize();
  *
- * Es ist sicher gestellt, dass s.synchronize() erst zurück kehrt, wenn der
- * ActionListener benachrichtigt wurde. Dabei wird das EventObject zurück gegeben,
- * mit dem {@link #actionPerformed(ActionEvent)} des Listeners aufgerufen wurde.
+ * It is ensured that s.synchronize() does not return until the
+ * ActionListener was notified. The EventObject is returned,
+ * was called with the listener's {@link #actionPerformed(ActionEvent)} .
  *
  * @author Christoph Lutz (D-III-ITD-D101)
  */
 public class SyncActionListener implements ActionListener
 {
   /**
-   * Das lock-Flag über das die Synchronisierung erfolgt.
+   * The lock flag over which synchronization is done.
    */
   private boolean[] lock = new boolean[] { true };
 
   /**
-   * Enthält nach erfolgter Syncronisierung das zurückgegebene ActionEvent
+   * Contains the returned ActionEvent after synchronization has taken place
    */
   private ActionEvent result = null;
 
   /**
-   * Kehrt erst zurück, wenn {@link #actionPerformed(ActionEvent)} des Listeners
-   * aufgerufen wurde und liefert das dabei übermittelte EventObject zurück.
+   * Returns only when the listener's {@link #actionPerformed(ActionEvent)}
+   * was called and returns the EventObject that was transmitted.
    */
   public ActionEvent synchronize()
   {

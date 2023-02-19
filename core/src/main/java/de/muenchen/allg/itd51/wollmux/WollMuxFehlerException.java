@@ -23,8 +23,8 @@
 package de.muenchen.allg.itd51.wollmux;
 
 /**
- * Repräsentiert einen Fehler, der benutzersichtbar in einem Fehlerdialog angezeigt
- * wird.
+ * Represents an error that is displayed user-visibly in an error dialog
+ * becomes.
  *
  * @author christoph.lutz
  */

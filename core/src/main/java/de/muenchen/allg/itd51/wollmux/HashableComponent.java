@@ -28,19 +28,19 @@ import com.sun.star.uno.XInterface;
 import org.libreoffice.ext.unohelper.common.UNO;
 
 /**
- * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
- * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den sicheren
- * UNO-Vergleich UnoRuntime.areSame(...). Die Methode hashCode verwendet die sichere
- * Oid, die UnoRuntime.generateOid(...) liefert.
+ * Helper class that makes it possible to store UNO components in HashMaps; the
+ * Comparing two HashableComponents with equals(...) uses the safe one
+ * UNO comparison UnoRuntime.areSame(...). The hashCode method uses the safe one
+ * Oid that UnoRuntime.generateOid(...) returns.
  */
 public class HashableComponent
 {
   private XInterface compo;
 
   /*
-   * Anmerkung: Es mag ineffizient wirken, hier ein Object zu nehmen und immer in
-   * XInterface zu casten, aber wegen Bugs in OOo ist es die einzig sichere Methode,
-   * auch wenn man schon ein X... Objekt hat, das von XInterface abgeleitet ist.
+   * Note: It may seem inefficient to take an Object here and always in
+   * Cast XInterface, but because of bugs in OOo it's the only safe way
+   * even if you already have an X... object derived from XInterface.
    */
   public HashableComponent(Object compo)
   {
@@ -52,7 +52,7 @@ public class HashableComponent
   }
 
   /**
-   * Liefert die Komponente, die durch diese {@link HashableComponent} gewrappt ist.
+   * Returns the component wrapped by this {@link HashableComponent}.
    */
   public XInterface getComponent()
   {
