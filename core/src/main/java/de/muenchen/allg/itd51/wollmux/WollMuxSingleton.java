@@ -339,11 +339,11 @@ public class WollMuxSingleton
   }
 
   /**
-   * Sets the settings contained in the ConfigThingy passed OOoSettings section to
-   * the OOo registry.
+   * Sets the settings contained in the ConfigThingy passed OOoEinstellungen section to
+   * the OOo-Registry.
    *
-   * @param oooSettingsConf
-   *          The OOoSettings node of such a section.
+   * @param oooEinstellungenConf
+   *          The OOoEinstellungen node of such a section.
    */
   private static void setConfigurationValues(ConfigThingy oooEinstellungenConf)
   {
@@ -409,7 +409,7 @@ public class WollMuxSingleton
    * node and prop is described.
    *
    * @param node
-   *          e.g. "/org.openoffice.inet/settings"
+   *          z.B. "/org.openoffice.Inet/Settings"
    * @param prop
    *          e.g. "ooInetProxyType"
    * @param value

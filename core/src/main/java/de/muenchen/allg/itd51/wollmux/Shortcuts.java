@@ -56,8 +56,8 @@ public class Shortcuts
    * all existing key combinations whose URL begins with "wollmux:" and
    * sets new keyboard shortcut in OOo-Writer.
    *
-   * @param key combinationsConf
-   *          .conf section shortcuts with all nodes
+   * @param tastenkombinationenConf
+   *          .conf section Tastenkuerzel with all nodes
    */
   public static void createShortcuts(ConfigThingy tastenkombinationenConf)
   {
