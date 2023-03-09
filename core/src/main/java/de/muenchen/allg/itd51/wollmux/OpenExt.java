@@ -225,10 +225,10 @@ public class OpenExt
   }
 
   /**
-   * Specifies URL as the file with which the external application shall be started.
+   * Specifies `url` as the file with which the external application shall be started.
    * Whether the URL itself is passed as a parameter to the program or whether the
    * contents of the url are downloaded and saved to a file whose path is passed as
-   * a parameter is determined by the download specification in the external
+   * a parameter is determined by the `DOWNLOAD` specification in the external
    * application definition in wollmux.conf.
    *
    * @see #setSource(XStorable)
@@ -245,17 +245,17 @@ public class OpenExt
    * Defines doc as the file to start the external application with.
    * The file is always exported to a temporary file before the external
    * application is started.
-   * The format in which the file is saved is determined by the filter
+   * The format in which the file is saved is determined by the `FILTER`
    * specification in the definition of the external application.
    * Whether the file is passed to the external application as path or as
-   * file: URL to the external application is determined by the download
+   * file: URL to the external application is determined by the `DOWNLOAD`
    * specification. The file extension for the temporary file is the ext
    * passed to the constructor.
    * If multiple setSource() functions are called, the last one wins.
    *
    * @throws ConfigurationErrorException
    *
-   *           if the filter specification is missing in the external
+   *           if the `FILTER` specification is missing in the external
    *           application definition.
    *
    * @see #setSource(URL)
