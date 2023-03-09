@@ -45,7 +45,6 @@ import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.insertion.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * Verwaltet eine Liste von InsertionModels
@@ -173,7 +172,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
           }
           catch (UnknownIDException e)
           {
-            LOGGER.error(L.m("Application error"), e);
+            LOGGER.error("Application error", e);
             return;
           }
 
@@ -247,7 +246,7 @@ public class InsertionModelList implements Iterable<InsertionModel>
         }
         catch (NodeNotFoundException e)
         {
-          LOGGER.error(L.m("Can not happen"), e);
+          LOGGER.error("Can not happen", e);
           return;
         }
 

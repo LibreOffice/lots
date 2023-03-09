@@ -35,7 +35,6 @@ import com.sun.star.lang.IllegalArgumentException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * The configuration for content based directives.
@@ -161,7 +160,7 @@ public class ContentBasedDirectiveConfig
       return value;
     } catch (NumberFormatException e)
     {
-      LOGGER.error(L.m("The specified colour value in attribute \"{0}\" is invalid!", value));
+      LOGGER.error("The specified color value in attribute \"{}\" is invalid!", value);
       return defaultColor;
     }
   }

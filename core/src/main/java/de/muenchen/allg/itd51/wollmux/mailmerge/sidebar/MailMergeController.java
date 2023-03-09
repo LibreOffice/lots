@@ -66,7 +66,6 @@ import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.InfoDialog;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
-import de.muenchen.allg.itd51.wollmux.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -726,7 +725,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
       }
     } catch (NodeNotFoundException e)
     {
-      LOGGER.error(L.m("Missing argument for datasource of type \"{0}\":", type), e);
+      LOGGER.error("Missing argument for datasource of type \"{}\":", type, e);
     } catch (NoTableSelectedException ex)
     {
       LOGGER.error("Die Tabelle existiert nicht", ex);

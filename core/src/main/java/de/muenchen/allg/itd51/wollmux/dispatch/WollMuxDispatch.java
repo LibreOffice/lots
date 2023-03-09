@@ -38,7 +38,6 @@ import com.sun.star.frame.XStatusListener;
 import com.sun.star.util.URL;
 
 import org.libreoffice.ext.unohelper.common.UNO;
-import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import org.libreoffice.ext.unohelper.util.UnoProperty;
 
@@ -163,7 +162,7 @@ public abstract class WollMuxDispatch implements XDispatch
       arg = URLDecoder.decode(arg, StandardCharsets.UTF_8.name());
     } catch (UnsupportedEncodingException e)
     {
-      LOGGER.error(L.m("Error in dispatch URL \"{0}\":", origUrl.Complete), e);
+      LOGGER.error("Error in dispatch URL \"{}\":", origUrl.Complete, e);
     }
     return arg;
   }

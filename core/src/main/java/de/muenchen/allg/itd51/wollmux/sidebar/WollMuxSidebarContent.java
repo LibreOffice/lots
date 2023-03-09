@@ -412,7 +412,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
           wollmuxbarConf = new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
         } catch (Exception x)
         {
-          LOGGER.error(L.m("Error while reading \"{0}\"", wollmuxbarConfFile.toString()), x);
+          LOGGER.error("Error while reading \"{}\"", wollmuxbarConfFile.toString(), x);
         }
       } else
       {

@@ -40,7 +40,6 @@ import de.muenchen.allg.itd51.wollmux.event.handlers.OnCheckInstallation;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnInitialize;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnNotifyDocumentEventListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnTextDocumentClosed;
-import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * A listener for LibreOffice events of documents like OnNew or OnLoad. <a href=
@@ -267,7 +266,7 @@ public class LibreOfficeEventListener implements XEventListener
     }
     catch (java.lang.Exception e)
     {
-      LOGGER.error(L.m("DispatchInterceptor could not be registered:"), e);
+      LOGGER.error("DispatchInterceptor could not be registered:", e);
     }
 
     // update toolbar
