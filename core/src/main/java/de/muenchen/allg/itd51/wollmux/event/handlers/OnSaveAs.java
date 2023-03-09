@@ -83,7 +83,7 @@ public class OnSaveAs extends WollMuxEvent
         func = FunctionFactory.parse(funcConf, lib, null, null);
       } catch (ConfigurationErrorException e)
       {
-        LOGGER.error(L.m("Cannot parse 'FilenameGeneratorFunction'."), e);
+        LOGGER.error("Cannot parse 'FilenameGeneratorFunction'.", e);
       }
     }
 

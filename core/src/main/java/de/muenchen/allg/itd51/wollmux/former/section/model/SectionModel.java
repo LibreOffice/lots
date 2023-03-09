@@ -43,7 +43,6 @@ import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4kController;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
 import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
-import de.muenchen.allg.itd51.wollmux.util.L;
 import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
@@ -203,8 +202,7 @@ public class SectionModel
     }
     catch (Exception x)
     {
-      LOGGER.error(L.m("Error while trying to remove section: \"{0}\"",
-        sectionNameComplete), x);
+      LOGGER.error("Error while trying to remove section: \"{}\"", sectionNameComplete, x);
     }
   }
 
@@ -238,8 +236,7 @@ public class SectionModel
     }
     catch (Exception x)
     {
-      LOGGER.error(L.m("Error while trying to update section: \"{0}\"",
-        sectionNameComplete), x);
+      LOGGER.error("Error while trying to update section: \"{}\"", sectionNameComplete, x);
       return false;
     }
   }

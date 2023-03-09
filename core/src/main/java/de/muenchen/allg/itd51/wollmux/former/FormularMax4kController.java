@@ -36,8 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import javax.swing.JOptionPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1012,7 +1010,7 @@ public class FormularMax4kController
     }
     catch (Exception x)
     {
-      LOGGER.error(L.m("Error during the scanning process"), x);
+      LOGGER.error("Error during the scanning process", x);
     }
   }
 
@@ -1209,7 +1207,7 @@ public class FormularMax4kController
       }
       catch (IllegalArgumentException e)
       {
-        LOGGER.error(L.m("Selection cannot be transformed into an object"), e);
+        LOGGER.error("Selection cannot be transformed into an object", e);
       }
     }
 

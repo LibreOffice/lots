@@ -32,7 +32,6 @@ import org.libreoffice.ext.unohelper.document.text.Bookmark;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommand;
-import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import org.libreoffice.ext.unohelper.util.UnoProperty;
 
@@ -121,9 +120,9 @@ public class PrintBlockCommand extends DocumentCommand
           UnoProperty.setPropertyToDefault(cursor, UnoProperty.CHAR_BACK_COLOR);
         } catch (NumberFormatException | UnoHelperException e)
         {
-          LOGGER.error(L.m(
-              "Error in document command \"{0}\": The color HIGHLIGHT_COLOR with the value \"{1}\" is invalid.",
-              "" + this, highlightColor));
+          LOGGER.error("Error in document command \"{}\": "
+              + "The color HIGHLIGHT_COLOR with the value \"{}\" is invalid.",
+              "" + this, highlightColor);
         }
       }
       else

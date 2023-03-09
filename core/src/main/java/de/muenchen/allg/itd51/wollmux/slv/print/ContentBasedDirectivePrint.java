@@ -170,7 +170,7 @@ public class ContentBasedDirectivePrint extends PrintFunction
     } catch (IOException | IllegalArgumentException | UnknownPropertyException | PropertyVetoException
         | WrappedTargetException e)
     {
-      LOGGER.error(L.m("Could not merge PDF documents."), e);
+      LOGGER.error("Could not merge PDF documents.", e);
       InfoDialog.showInfoModal(L.m("Print content based directives"),
           L.m("Could not merge PDF documents."));
     }

@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.google.common.math.DoubleMath;
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.frame.XModel;
@@ -62,7 +61,6 @@ import org.libreoffice.ext.unohelper.common.UNO;
 import de.muenchen.allg.itd51.wollmux.config.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.mailmerge.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.mailmerge.NoTableSelectedException;
-import de.muenchen.allg.itd51.wollmux.util.L;
 import org.libreoffice.ext.unohelper.util.UnoProperty;
 
 /**
@@ -354,7 +352,7 @@ public class CalcModel implements DatasourceModel
 
       } catch (Exception x)
       {
-        LOGGER.error(L.m("Cannot add column \"{0}\"", fieldId), x);
+        LOGGER.error("Cannot add column \"{}\"", fieldId, x);
       }
     }
   }

@@ -753,9 +753,7 @@ public class FunctionFactory
         }
         catch (ConfigurationErrorException e)
         {
-          LOGGER.error(L.m(
-            "Error parsing the function \"{0}\" in section \"{1}\"", name,
-            section), e);
+          LOGGER.error("Error parsing the function \"{}\" in section \"{}\"", name, section, e);
         }
       }
     }
@@ -784,8 +782,8 @@ public class FunctionFactory
           trafos.put(name, func);
         } catch (ConfigurationErrorException e)
         {
-          LOGGER.error(L.m("Error during parsing of the column replacement "
-              + "function for the result column \"{0}\"", name), e);
+          LOGGER.error("Error during parsing of the column replacement function for the result column \"{}\"",
+              name, e);
         }
       }
     }
