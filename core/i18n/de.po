@@ -1806,8 +1806,8 @@ msgstr "Fehlendes Attribut TYPE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1353
 msgid ""
-"Specified TYPE is invalid or incorrectly written. Expect "
-"\"templateTemplate\", \"normalTemplate\" or \"formDocument\"!"
+"Specified TYPE is invalid or incorrectly written. Expect \"templateTemplate"
+"\", \"normalTemplate\" or \"formDocument\"!"
 msgstr ""
 "Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte "
 "\"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!"
