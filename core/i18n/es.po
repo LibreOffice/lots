@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-19 10:54+0100\n"
+"POT-Creation-Date: 2023-03-13 10:15+0100\n"
 "PO-Revision-Date: 2023-03-11 16:33+0000\n"
 "Last-Translator: Adolfo Jayme Barrientos <fito@libreoffice.org>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
@@ -503,10 +503,6 @@ msgid ""
 "Please contact your system administrator."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:86
-msgid "Cannot parse 'FilenameGeneratorFunction'."
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:158
 msgid "Save Error"
 msgstr ""
@@ -516,8 +512,20 @@ msgstr ""
 msgid "Saving the file \"{0}\" failed!"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/LibreOfficeEventListener.java:270
-msgid "DispatchInterceptor could not be registered:"
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:69
+msgid "Über WollMux"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:80
+msgid "License: European Union Public License"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:82
+msgid "Visit website"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:85
+msgid "Credits"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:67
@@ -622,15 +630,6 @@ msgstr ""
 msgid "Mail merge failed."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/ds/CalcModel.java:357
-#, java-format
-msgid "Cannot add column \"{0}\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:282
-msgid "A necessary print function is not defined."
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:283
 msgid "Error during printing"
 msgstr ""
@@ -662,11 +661,6 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:287
 msgid "OOo-Based-MailMerge: cannot generate simulation data source."
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:824
-#, java-format
-msgid "OOo-MailMerge: processing record {0} ({1} ms)"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:829
@@ -721,37 +715,32 @@ msgstr ""
 msgid "Send email failed."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:447
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:446
 msgid "Column"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:448
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:447
 msgid "Assignment (initial)"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:448
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:447
 msgid "Add columns"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:478
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:477
 msgid "Old field"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:479
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:478
 msgid "New assignment"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:479
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:478
 msgid "Adjust fields"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:618
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:617
 msgid "Printing could not be started."
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:729
-#, java-format
-msgid "Missing argument for datasource of type \"{0}\":"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
@@ -990,41 +979,9 @@ msgstr ""
 msgid "In case of {0} MIN must be smaller than or equal to MAX"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:757
-#, java-format
-msgid "Error parsing the function \"{0}\" in section \"{1}\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:783
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:781
 msgid ""
 "Empty functions definition is not allowed. Instead use the empty string \"\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:787
-#, java-format
-msgid ""
-"Error during parsing of the column replacement function for the result "
-"column \"{0}\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintModels.java:112
-#, java-format
-msgid "Cannot set stage to \"{0}\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintFunctionLibrary.java:162
-#, java-format
-msgid "Print function \"{0}\" does not contain key EXTERN"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintFunctionLibrary.java:165
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintFunctionLibrary.java:166
-#, java-format
-msgid "Error while parsing the print function \"{0}\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintFunctionLibrary.java:170
-msgid "The value of the key ORDER in the print function '{1}' is invalid."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:115
@@ -1097,13 +1054,6 @@ msgid ""
 "Please try another, more precise search query."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockCommand.java:125
-#, java-format
-msgid ""
-"Error in document command \"{0}\": The color HIGHLIGHT_COLOR with the value "
-"\"{1}\" is invalid."
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:35
 msgid "will always be printed"
 msgstr ""
@@ -1124,27 +1074,20 @@ msgstr ""
 msgid "will only be printed in copies"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveConfig.java:164
-#, java-format
-msgid "The specified colour value in attribute \"{0}\" is invalid!"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:173
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:175
-msgid "Could not merge PDF documents."
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:174
 msgid "Print content based directives"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:79
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:81
-msgid "Could not collect documents for printing content based directive."
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:175
+msgid "Could not merge PDF documents."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:80
 msgid "Error collecting documents"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:81
+msgid "Could not collect documents for printing content based directive."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:91
@@ -1217,14 +1160,6 @@ msgstr ""
 msgid "TRAFO View"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/model/InsertionModelList.java:176
-msgid "Application error"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/model/InsertionModelList.java:250
-msgid "Can not happen"
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/model/InsertionModel4InputUser.java:166
 #, java-format
 msgid "FieldMaster \"{0}\" does not exist."
@@ -1254,16 +1189,6 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:302
 msgid "Visibility Section"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/model/SectionModel.java:206
-#, java-format
-msgid "Error while trying to remove section: \"{0}\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/model/SectionModel.java:241
-#, java-format
-msgid "Error while trying to update section: \"{0}\""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/model/IdModel.java:174
@@ -1550,20 +1475,12 @@ msgstr ""
 msgid "Replace..."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:172
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:170
 msgid "Generated by FormularMax 4000"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:193
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:191
 msgid "Tab"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:1015
-msgid "Error during the scanning process"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:1212
-msgid "Selection cannot be transformed into an object"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/document/ScanVisitor.java:306
@@ -1714,60 +1631,27 @@ msgstr ""
 msgid "Infinite loop after replacing the variable in URL \"{0}\"."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:153
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:151
 msgid "!!!CHECK!!!"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:461
-#, java-format
-msgid "Error while reading the 'Druckfunktionen' section \"{0}\":"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:518
-msgid "The form description is incorrect"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:580
-msgid "The 'Formularwerte' section is incorrect"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:665
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:663
 #, java-format
 msgid ""
 "With overrideFrag it is not possible to define replacement chains, the "
 "fragment \"{0}\" however appears in another overrideFrag command."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1145
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1143
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:244
 msgid "unknown"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1936
-msgid "Incorrect ALWAYS specification in 'Buttonanpassung-Section'"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/DocumentTree.java:322
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/DocumentTree.java:344
-#, java-format
-msgid "Incorrect WM()-Bookmark: \"{0}\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:621
-msgid "Warning: inconsistent bookmark detected:"
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:668
-#, java-format
-msgid ""
-"The textarea with the name \"{0}\" contains an incorrect GROUPS attribute."
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:711
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:708
 msgid "Missing CMD-attribute"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:778
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:775
 #, java-format
 msgid "Unknown command \"{0}\""
 msgstr ""
@@ -1882,35 +1766,6 @@ msgstr ""
 msgid "Missing section \"Formular\" in the form description."
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:144
-#, java-format
-msgid "Cannot access the RDF graph \"{0}\"."
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:171
-#, java-format
-msgid "Cannot create the RDF graph \"{0}\"."
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:224
-#, java-format
-msgid "Cannot read RDF metadata for DataID \"{0}\"."
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:264
-#, java-format
-msgid "Cannot set RDF metadata for DataID \"{0}\"."
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:296
-#, java-format
-msgid "Cannot delete RDF metadata for DataID \"{0}\"."
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:338
-msgid "Cannot persist RDF metadata."
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
 msgid ""
 "No WollMux configuration (wollmux.conf) found - therefore WollMux runs in "
@@ -1956,11 +1811,6 @@ msgid ""
 "as described on the WollMux website"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:415
-#, java-format
-msgid "Error while reading \"{0}\""
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:438
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:933
 msgid "Incorrect configuration"
@@ -1994,11 +1844,6 @@ msgstr ""
 msgid "Unknown form"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dispatch/WollMuxDispatch.java:166
-#, java-format
-msgid "Error in dispatch URL \"{0}\":"
-msgstr ""
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:145
 msgid ""
 "The configuration of the Wollmux must be re-read.\n"
@@ -2027,21 +1872,21 @@ msgstr ""
 msgid "FILTER specification is missing for application \"{0}\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:310
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:309
 #, java-format
 msgid "Error when storing the file: {0}"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:325
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:324
 #, java-format
 msgid "Could not create a temporay file \"{0}\""
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:339
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:338
 msgid "setSource() was not called"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:356
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:354
 #, java-format
 msgid ""
 "Temporary directory\n"
@@ -2049,21 +1894,17 @@ msgid ""
 "does not exist or it cannot be written!"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:371
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:369
 msgid "Could not create a temporary directory for the file download!"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:468
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:464
 #, java-format
 msgid ""
 "None of the programs configured for the extension \"{0}\" could be started!\n"
 "{1}"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:522
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:517
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
-msgstr ""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/ui/UIElementConfig.java:237
-msgid "Incorrect element of the type \"combobox\""
 msgstr ""

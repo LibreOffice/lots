@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-19 10:54+0100\n"
+"POT-Creation-Date: 2023-03-13 10:15+0100\n"
 "PO-Revision-Date: 2023-02-02 12:24+0000\n"
 "Last-Translator: kees538 <kees538@gmail.com>\n"
 "Language-Team: Dutch <https://translations.documentfoundation.org/projects/"
@@ -255,7 +255,8 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:172
 #, java-format
 msgid "Missing or incorrect key(...) specification for data source {0}"
-msgstr "Ontbrekende of onjuiste sleutel(...)-specificatie voor gegevensbron {0}"
+msgstr ""
+"Ontbrekende of onjuiste sleutel(...)-specificatie voor gegevensbron {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:197
 #, java-format
@@ -547,10 +548,6 @@ msgstr ""
 "\n"
 "Neem contact op met uw systeembeheerder."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:86
-msgid "Cannot parse 'FilenameGeneratorFunction'."
-msgstr "Kan 'FilenameGeneratorFunction' niet ontleden."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:158
 msgid "Save Error"
 msgstr "Fout tijdens het opslaan"
@@ -560,9 +557,23 @@ msgstr "Fout tijdens het opslaan"
 msgid "Saving the file \"{0}\" failed!"
 msgstr "Het opslaan van het bestand '{0}' is mislukt!"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/LibreOfficeEventListener.java:270
-msgid "DispatchInterceptor could not be registered:"
-msgstr "Kan de DispatchInterceptor niet registreren"
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:69
+#, fuzzy
+msgid "Über WollMux"
+msgstr "WollMux"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:80
+msgid "License: European Union Public License"
+msgstr ""
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:82
+#, fuzzy
+msgid "Visit website"
+msgstr "zichtbaarheden"
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:85
+msgid "Credits"
+msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:67
 msgid "Select sender"
@@ -680,15 +691,6 @@ msgstr "Opties voor standaardbrief"
 msgid "Mail merge failed."
 msgstr "Standaardbrief mislukt"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/ds/CalcModel.java:357
-#, java-format
-msgid "Cannot add column \"{0}\""
-msgstr "Kan kolom \"{0}\" niet toevoegen"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:282
-msgid "A necessary print function is not defined."
-msgstr "Een noodzakelijke afdrukfunctie is niet gedefinieerd."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:283
 msgid "Error during printing"
 msgstr "Fout tijdens afdrukken"
@@ -723,11 +725,6 @@ msgstr "Helaas kon het volledige document niet worden gemaakt."
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:287
 msgid "OOo-Based-MailMerge: cannot generate simulation data source."
 msgstr "OOo-Based-Standaardbrief: kan geen simulatiegegevensbron genereren."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:824
-#, java-format
-msgid "OOo-MailMerge: processing record {0} ({1} ms)"
-msgstr "OOo-MailMerge: verwerken record {0} ({1} ms)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:829
 msgid "Send print job - please wait..."
@@ -786,38 +783,33 @@ msgstr ""
 msgid "Send email failed."
 msgstr "E-mail verzenden mislukt."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:447
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:446
 msgid "Column"
 msgstr "Kolom"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:448
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:447
 msgid "Assignment (initial)"
 msgstr "Initiale toewijzing"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:448
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:447
 msgid "Add columns"
 msgstr "Kolommen toevoegen"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:478
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:477
 msgid "Old field"
 msgstr "Oud veld"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:479
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:478
 msgid "New assignment"
 msgstr "Nieuwe opdracht"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:479
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:478
 msgid "Adjust fields"
 msgstr "Velden aanpassen"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:618
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:617
 msgid "Printing could not be started."
 msgstr "Het afdrukken kon niet worden gestart."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:729
-#, java-format
-msgid "Missing argument for datasource of type \"{0}\":"
-msgstr "Ontbrekend argument voor gegevensbron van type \"{0}\":"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:273
 msgid "<<Field names>>"
@@ -1072,47 +1064,12 @@ msgstr ""
 msgid "In case of {0} MIN must be smaller than or equal to MAX"
 msgstr "In het geval van {0} moet MIN kleiner zijn dan of gelijk zijn aan MAX"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:757
-#, java-format
-msgid "Error parsing the function \"{0}\" in section \"{1}\""
-msgstr "Fout bij het ontleden van de functie '{0}' in sectie '{1}'"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:783
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:781
 msgid ""
 "Empty functions definition is not allowed. Instead use the empty string \"\""
 msgstr ""
 "Definitie van lege functies is niet toegestaan. Gebruik in plaats daarvan de "
 "lege tekenreeks \"\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:787
-#, java-format
-msgid ""
-"Error during parsing of the column replacement function for the result "
-"column \"{0}\""
-msgstr ""
-"Fout tijdens het ontleden van de kolomvervangingsfunctie voor de "
-"resultaatkolom '{0}'"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintModels.java:112
-#, java-format
-msgid "Cannot set stage to \"{0}\""
-msgstr "Kan Stage niet instellen op '{0}'"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintFunctionLibrary.java:162
-#, java-format
-msgid "Print function \"{0}\" does not contain key EXTERN"
-msgstr "Afdrukfunctie '{0}' heeft geen sleutel EXTERN"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintFunctionLibrary.java:165
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintFunctionLibrary.java:166
-#, java-format
-msgid "Error while parsing the print function \"{0}\""
-msgstr "Fout bij het Parsen van afdrukfunctie \"{0}\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintFunctionLibrary.java:170
-msgid "The value of the key ORDER in the print function '{1}' is invalid."
-msgstr ""
-"De waarde '{0}' van de sleutel ORDER in afdrukfunctie '{1}' is niet geldig"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:115
 msgid "Printing"
@@ -1193,15 +1150,6 @@ msgstr ""
 "zoekterm komt overeen met te veel resultaten.\n"
 "Probeer een andere, nauwkeurigere zoekopdracht."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockCommand.java:125
-#, java-format
-msgid ""
-"Error in document command \"{0}\": The color HIGHLIGHT_COLOR with the value "
-"\"{1}\" is invalid."
-msgstr ""
-"Fout in document-commando \"{0}\": De kleur HIGHLIGHT_COLOR met waarde "
-"\"{1}\" is niet geldig."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:35
 msgid "will always be printed"
 msgstr "wordt altijd afgedrukt"
@@ -1222,30 +1170,23 @@ msgstr "wordt alleen in het concept afgedrukt"
 msgid "will only be printed in copies"
 msgstr "wordt alleen in kopieën afgedrukt"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveConfig.java:164
-#, java-format
-msgid "The specified colour value in attribute \"{0}\" is invalid!"
-msgstr "De opgegeven kleurwaarde in kenmerk '{0}' is ongeldig!"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:173
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:175
-msgid "Could not merge PDF documents."
-msgstr "Kan PDF-documenten niet samenvoegen."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:174
 msgid "Print content based directives"
 msgstr "Op inhoud gebaseerde richtlijnen afdrukken"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:79
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:175
+msgid "Could not merge PDF documents."
+msgstr "Kan PDF-documenten niet samenvoegen."
+
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:80
+msgid "Error collecting documents"
+msgstr "Fout bij het verzamelen van documenten"
+
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:81
 msgid "Could not collect documents for printing content based directive."
 msgstr ""
 "Kon geen documenten verzamelen voor het afdrukken van op inhoud gebaseerde "
 "richtlijnen."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:80
-msgid "Error collecting documents"
-msgstr "Fout bij het verzamelen van documenten"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:91
 msgid "Error"
@@ -1327,14 +1268,6 @@ msgstr ""
 msgid "TRAFO View"
 msgstr "Weergave TRAFO"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/model/InsertionModelList.java:176
-msgid "Application error"
-msgstr "Toepassingsfout"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/model/InsertionModelList.java:250
-msgid "Can not happen"
-msgstr "mag niet gebeuren"
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/model/InsertionModel4InputUser.java:166
 #, java-format
 msgid "FieldMaster \"{0}\" does not exist."
@@ -1365,16 +1298,6 @@ msgstr "nieuw (hele pagina)"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:302
 msgid "Visibility Section"
 msgstr "nieuwe zichtbaarheidssectie"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/model/SectionModel.java:206
-#, java-format
-msgid "Error while trying to remove section: \"{0}\""
-msgstr "Fout tijdens het verwijderen van sectie: '{0}'"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/model/SectionModel.java:241
-#, java-format
-msgid "Error while trying to update section: \"{0}\""
-msgstr "Fout bij het bijwerken van sectie: '{0}'"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/model/IdModel.java:174
 #, java-format
@@ -1670,21 +1593,13 @@ msgstr "Zoeken..."
 msgid "Replace..."
 msgstr "Vervangen..."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:172
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:170
 msgid "Generated by FormularMax 4000"
 msgstr "gegenereerd door FormularMax 4000"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:193
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:191
 msgid "Tab"
 msgstr "ruiter"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:1015
-msgid "Error during the scanning process"
-msgstr "Fout tijdens het scan-proces"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:1212
-msgid "Selection cannot be transformed into an object"
-msgstr "Kan Selection in object niet omzetten"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/document/ScanVisitor.java:306
 #, java-format
@@ -1834,24 +1749,11 @@ msgstr "Waarschuwing: Functie niet gedefinieerd!"
 msgid "Infinite loop after replacing the variable in URL \"{0}\"."
 msgstr "Oneindige lus na het vervangen van de variabele in URL '{0}'."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:153
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:151
 msgid "!!!CHECK!!!"
 msgstr "!!!CONTROLEER!!!"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:461
-#, java-format
-msgid "Error while reading the 'Druckfunktionen' section \"{0}\":"
-msgstr "Fout bij het lezen van de 'Druckfunktionen' (print-funcites) \"{0}\""
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:518
-msgid "The form description is incorrect"
-msgstr "De formulierbeschrijving is niet goed"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:580
-msgid "The 'Formularwerte' section is incorrect"
-msgstr "De 'Formularwerte' sectie (formulierwaarden) is niet goed"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:665
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:663
 #, java-format
 msgid ""
 "With overrideFrag it is not possible to define replacement chains, the "
@@ -1860,36 +1762,16 @@ msgstr ""
 "Met overrideFrag is het niet mogelijk om vervangingskettingen to defineren, "
 "maar het fragment \"{0}\" duikt op in een ander overrideFrag commando"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1145
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1143
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:244
 msgid "unknown"
 msgstr "onbekend"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1936
-msgid "Incorrect ALWAYS specification in 'Buttonanpassung-Section'"
-msgstr "Onjuiste specificatie ALWAYS in 'Buttonanpassung-Section'"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/DocumentTree.java:322
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/DocumentTree.java:344
-#, java-format
-msgid "Incorrect WM()-Bookmark: \"{0}\""
-msgstr "Onjuiste WM()-Bladwijzer: '{0}'"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:621
-msgid "Warning: inconsistent bookmark detected:"
-msgstr "Attentie: Niet consistente bladwijzer ontdekt:"
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:668
-#, java-format
-msgid ""
-"The textarea with the name \"{0}\" contains an incorrect GROUPS attribute."
-msgstr "De textdeel met de naam \"{0}\" bevat een foutief GROUPS-attribuut."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:711
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:708
 msgid "Missing CMD-attribute"
 msgstr "Ontbrekend CMD-attribuut"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:778
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:775
 #, java-format
 msgid "Unknown command \"{0}\""
 msgstr "Onbekend commando \"{0}\""
@@ -1924,8 +1806,8 @@ msgstr "Ontbrekende attribuut TYPE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1353
 msgid ""
-"Specified TYPE is invalid or incorrectly written. Expect \"templateTemplate"
-"\", \"normalTemplate\" or \"formDocument\"!"
+"Specified TYPE is invalid or incorrectly written. Expect "
+"\"templateTemplate\", \"normalTemplate\" or \"formDocument\"!"
 msgstr ""
 "Opgegeven TYPE is ongeldig of onjuist geschreven. Verwacht "
 "'templateTemplate', 'normalTemplate' of 'formDocument'!"
@@ -2010,35 +1892,6 @@ msgstr ""
 msgid "Missing section \"Formular\" in the form description."
 msgstr "Ontbrekende sectie 'Formular' in de formulierbeschrijving."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:144
-#, java-format
-msgid "Cannot access the RDF graph \"{0}\"."
-msgstr "Geen toegang tot de RDF-grafiek '{0}'."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:171
-#, java-format
-msgid "Cannot create the RDF graph \"{0}\"."
-msgstr "Kan de RDF-grafiek '{0}' niet maken."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:224
-#, java-format
-msgid "Cannot read RDF metadata for DataID \"{0}\"."
-msgstr "Kan RDF-metadata voor DataID '{0}' niet lezen."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:264
-#, java-format
-msgid "Cannot set RDF metadata for DataID \"{0}\"."
-msgstr "Kan RDF-metadata niet instellen voor DataID '{0}'."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:296
-#, java-format
-msgid "Cannot delete RDF metadata for DataID \"{0}\"."
-msgstr "Kan RDF-metadata voor DataID '{0}' niet verwijderen."
-
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/RDFBasedPersistentDataContainer.java:338
-msgid "Cannot persist RDF metadata."
-msgstr "Kan RDF-metadata niet behouden."
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
 msgid ""
 "No WollMux configuration (wollmux.conf) found - therefore WollMux runs in "
@@ -2096,11 +1949,6 @@ msgstr ""
 "Stel de WollMux-configuratie in\n"
 "zoals beschreven op de WollMux-website"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:415
-#, java-format
-msgid "Error while reading \"{0}\""
-msgstr "Fout bij het bouwen van dump-bestand"
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:438
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:933
 msgid "Incorrect configuration"
@@ -2140,11 +1988,6 @@ msgstr ""
 msgid "Unknown form"
 msgstr "Onbekend formulier"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/dispatch/WollMuxDispatch.java:166
-#, java-format
-msgid "Error in dispatch URL \"{0}\":"
-msgstr "Fout in dispatch-url '{0}':"
-
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:145
 msgid ""
 "The configuration of the Wollmux must be re-read.\n"
@@ -2179,21 +2022,21 @@ msgstr ""
 msgid "FILTER specification is missing for application \"{0}\""
 msgstr "FILTER-specificatie ontbreekt voor applicatie '{0}'"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:310
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:309
 #, java-format
 msgid "Error when storing the file: {0}"
 msgstr "Fout bij het opslaan van het bestand: {0}"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:325
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:324
 #, java-format
 msgid "Could not create a temporay file \"{0}\""
 msgstr "Kan geen tijdelijk bestand '{0}' maken"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:339
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:338
 msgid "setSource() was not called"
 msgstr "setSource() is niet aangeroepen"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:356
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:354
 #, java-format
 msgid ""
 "Temporary directory\n"
@@ -2204,11 +2047,11 @@ msgstr ""
 "\"{0}\"\n"
 "bestaat niet of kan niet worden beschreven!"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:371
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:369
 msgid "Could not create a temporary directory for the file download!"
 msgstr "Kon geen tijdelijke map maken voor het downloaden van het bestand!"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:468
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:464
 #, java-format
 msgid ""
 "None of the programs configured for the extension \"{0}\" could be started!\n"
@@ -2218,13 +2061,150 @@ msgstr ""
 "gestart!\n"
 "{1}"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:522
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:517
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
 msgstr "/loadComponentFromURL/ parameter moet de vorm \"Param=Value\" hebben"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/ui/UIElementConfig.java:237
-msgid "Incorrect element of the type \"combobox\""
-msgstr "Onjuist element van het type 'combobox'"
+#~ msgid "Cannot parse 'FilenameGeneratorFunction'."
+#~ msgstr "Kan 'FilenameGeneratorFunction' niet ontleden."
+
+#~ msgid "DispatchInterceptor could not be registered:"
+#~ msgstr "Kan de DispatchInterceptor niet registreren"
+
+#, java-format
+#~ msgid "Cannot add column \"{0}\""
+#~ msgstr "Kan kolom \"{0}\" niet toevoegen"
+
+#~ msgid "A necessary print function is not defined."
+#~ msgstr "Een noodzakelijke afdrukfunctie is niet gedefinieerd."
+
+#, java-format
+#~ msgid "OOo-MailMerge: processing record {0} ({1} ms)"
+#~ msgstr "OOo-MailMerge: verwerken record {0} ({1} ms)"
+
+#, java-format
+#~ msgid "Missing argument for datasource of type \"{0}\":"
+#~ msgstr "Ontbrekend argument voor gegevensbron van type \"{0}\":"
+
+#, java-format
+#~ msgid "Error parsing the function \"{0}\" in section \"{1}\""
+#~ msgstr "Fout bij het ontleden van de functie '{0}' in sectie '{1}'"
+
+#, java-format
+#~ msgid ""
+#~ "Error during parsing of the column replacement function for the result "
+#~ "column \"{0}\""
+#~ msgstr ""
+#~ "Fout tijdens het ontleden van de kolomvervangingsfunctie voor de "
+#~ "resultaatkolom '{0}'"
+
+#, java-format
+#~ msgid "Cannot set stage to \"{0}\""
+#~ msgstr "Kan Stage niet instellen op '{0}'"
+
+#, java-format
+#~ msgid "Print function \"{0}\" does not contain key EXTERN"
+#~ msgstr "Afdrukfunctie '{0}' heeft geen sleutel EXTERN"
+
+#, java-format
+#~ msgid "Error while parsing the print function \"{0}\""
+#~ msgstr "Fout bij het Parsen van afdrukfunctie \"{0}\""
+
+#~ msgid "The value of the key ORDER in the print function '{1}' is invalid."
+#~ msgstr ""
+#~ "De waarde '{0}' van de sleutel ORDER in afdrukfunctie '{1}' is niet geldig"
+
+#, java-format
+#~ msgid ""
+#~ "Error in document command \"{0}\": The color HIGHLIGHT_COLOR with the "
+#~ "value \"{1}\" is invalid."
+#~ msgstr ""
+#~ "Fout in document-commando \"{0}\": De kleur HIGHLIGHT_COLOR met waarde "
+#~ "\"{1}\" is niet geldig."
+
+#, java-format
+#~ msgid "The specified colour value in attribute \"{0}\" is invalid!"
+#~ msgstr "De opgegeven kleurwaarde in kenmerk '{0}' is ongeldig!"
+
+#~ msgid "Application error"
+#~ msgstr "Toepassingsfout"
+
+#~ msgid "Can not happen"
+#~ msgstr "mag niet gebeuren"
+
+#, java-format
+#~ msgid "Error while trying to remove section: \"{0}\""
+#~ msgstr "Fout tijdens het verwijderen van sectie: '{0}'"
+
+#, java-format
+#~ msgid "Error while trying to update section: \"{0}\""
+#~ msgstr "Fout bij het bijwerken van sectie: '{0}'"
+
+#~ msgid "Error during the scanning process"
+#~ msgstr "Fout tijdens het scan-proces"
+
+#~ msgid "Selection cannot be transformed into an object"
+#~ msgstr "Kan Selection in object niet omzetten"
+
+#, java-format
+#~ msgid "Error while reading the 'Druckfunktionen' section \"{0}\":"
+#~ msgstr ""
+#~ "Fout bij het lezen van de 'Druckfunktionen' (print-funcites) \"{0}\""
+
+#~ msgid "The form description is incorrect"
+#~ msgstr "De formulierbeschrijving is niet goed"
+
+#~ msgid "The 'Formularwerte' section is incorrect"
+#~ msgstr "De 'Formularwerte' sectie (formulierwaarden) is niet goed"
+
+#~ msgid "Incorrect ALWAYS specification in 'Buttonanpassung-Section'"
+#~ msgstr "Onjuiste specificatie ALWAYS in 'Buttonanpassung-Section'"
+
+#, java-format
+#~ msgid "Incorrect WM()-Bookmark: \"{0}\""
+#~ msgstr "Onjuiste WM()-Bladwijzer: '{0}'"
+
+#~ msgid "Warning: inconsistent bookmark detected:"
+#~ msgstr "Attentie: Niet consistente bladwijzer ontdekt:"
+
+#, java-format
+#~ msgid ""
+#~ "The textarea with the name \"{0}\" contains an incorrect GROUPS attribute."
+#~ msgstr "De textdeel met de naam \"{0}\" bevat een foutief GROUPS-attribuut."
+
+#, java-format
+#~ msgid "Cannot access the RDF graph \"{0}\"."
+#~ msgstr "Geen toegang tot de RDF-grafiek '{0}'."
+
+#, java-format
+#~ msgid "Cannot create the RDF graph \"{0}\"."
+#~ msgstr "Kan de RDF-grafiek '{0}' niet maken."
+
+#, java-format
+#~ msgid "Cannot read RDF metadata for DataID \"{0}\"."
+#~ msgstr "Kan RDF-metadata voor DataID '{0}' niet lezen."
+
+#, java-format
+#~ msgid "Cannot set RDF metadata for DataID \"{0}\"."
+#~ msgstr "Kan RDF-metadata niet instellen voor DataID '{0}'."
+
+#, java-format
+#~ msgid "Cannot delete RDF metadata for DataID \"{0}\"."
+#~ msgstr "Kan RDF-metadata voor DataID '{0}' niet verwijderen."
+
+#~ msgid "Cannot persist RDF metadata."
+#~ msgstr "Kan RDF-metadata niet behouden."
+
+#, java-format
+#~ msgid "Error while reading \"{0}\""
+#~ msgstr "Fout bij het bouwen van dump-bestand"
+
+#, java-format
+#~ msgid "Error in dispatch URL \"{0}\":"
+#~ msgstr "Fout in dispatch-url '{0}':"
+
+#~ msgid "Incorrect element of the type \"combobox\""
+#~ msgstr "Onjuist element van het type 'combobox'"
 
 #, java-format
 #~ msgid "Illegal CLASSPATH specified: \"{0}\""
@@ -2295,8 +2275,8 @@ msgstr "Onjuist element van het type 'combobox'"
 #~ "No main data source selected via SENDER_SOURCE directive! Defaulting to "
 #~ "SENDER_SOURCE=\"\"."
 #~ msgstr ""
-#~ "Geen databron via SENDER_SOURCE gedefineerd! Ik zet dus SENDER_SOURCE="
-#~ "\"\"."
+#~ "Geen databron via SENDER_SOURCE gedefineerd! Ik zet dus "
+#~ "SENDER_SOURCE=\"\"."
 
 #~ msgid "Meaningless FONT_ZOOM value specified: {0}"
 #~ msgstr "Zinloze waarde vermeldt voor FONT_ZOOM: {0}"
