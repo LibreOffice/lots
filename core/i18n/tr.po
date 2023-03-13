@@ -8,13 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 10:15+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2023-03-14 21:33+0000\n"
+"Last-Translator: Ayhan YALÇINSOY <ayhanyalcinsoy@gmail.com>\n"
+"Language-Team: Turkish <https://translations.documentfoundation.org/projects/"
+"wollmux/wollmux/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.15.2\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -111,11 +114,13 @@ msgid ""
 "Table or query \"{0}\" does not exist in data source \"{1}\" or error when "
 "determining the columns "
 msgstr ""
+"\"{0}\" tablosu veya sorgusu \"{1}\" veri kaynağında mevcut değil veya "
+"sütunları belirlerken hata oluştu "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:315
 #, java-format
 msgid "Data source \"{0}\": Table \"{1}\" has no columns"
-msgstr ""
+msgstr "Veri kaynağı \"{0}\": \"{1}\" tablosunda sütun yok"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:345
 #, java-format
@@ -123,11 +128,13 @@ msgid ""
 "Data source \"{0}\": No key columns defined. Automatic determination of key "
 "column not possible."
 msgstr ""
+"Veri kaynağı \"{0}\": Tanımlanmış anahtar sütun yok. Anahtar sütunun "
+"otomatik olarak belirlenmesi mümkün değil."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:359
 #, java-format
 msgid "Schema of OOo-datasource \"{0}\" could not be read."
-msgstr ""
+msgstr "OOo-datasource \"{0}\" şeması okunamadı."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:365
 #, java-format
