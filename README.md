@@ -107,13 +107,12 @@ If suspend is set to `y`, LibreOffice waits until an external process connects b
 
 [Translate WollMux](https://translations.documentfoundation.org/engage/wollmux)
 
-To update pot/po files from source, run these commands:
+To update pot files from source, run these commands:
 
 ```bash
 xgettext --default-domain=wollmux --output=core/i18n/wollmux.pot --language=java --from-code=UTF-8 --keyword --keyword=m $(find . -name "*.java")
-for i in core/i18n/*.po; do msgmerge -U $i core/i18n/wollmux.pot; done
 ```
 
-This creates the `core/i18n/wollmux.pot` template file. Translate it [using Weblate](https://translations.documentfoundation.org/projects/wollmux/#languages). 
+This creates the `core/i18n/wollmux.pot` template file. It will be picked up by Weblate, and the po files will be updated accordingly.
 
 The translations will be committed to this repository from time to time. The build system will then pick up the po files, and convert and bundle them with WollMux.

@@ -62,7 +62,6 @@ import de.muenchen.allg.itd51.wollmux.document.nodes.InsertionBookmarkNode;
 import de.muenchen.allg.itd51.wollmux.document.nodes.Node;
 import de.muenchen.allg.itd51.wollmux.document.nodes.ParagraphNode;
 import de.muenchen.allg.itd51.wollmux.document.nodes.TextRangeNode;
-import de.muenchen.allg.itd51.wollmux.util.L;
 import de.muenchen.allg.itd51.wollmux.util.Utils;
 import org.libreoffice.ext.unohelper.util.UnoProperty;
 
@@ -319,7 +318,7 @@ public class DocumentTree
       }
       catch (Exception x)
       {
-        LOGGER.error(L.m("Incorrect WM()-Bookmark: \"{0}\"", name), x);
+        LOGGER.error("Incorrect WM()-Bookmark: \"{}\"", name, x);
         return;
       }
       return;
@@ -341,7 +340,7 @@ public class DocumentTree
       }
       catch (Exception x)
       {
-        LOGGER.error(L.m("Incorrect WM()-Bookmark: \"{0}\"", name), x);
+        LOGGER.error("Incorrect WM()-Bookmark: \"{}\"", name, x);
         return;
       }
     }

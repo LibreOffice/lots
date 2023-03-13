@@ -618,7 +618,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
       // Paragraphen im GarbageCollector. Ich habe bereits probiert, einen
       // minimalen Testfall ohne WollMux für dieses Problem zu extrahieren, war
       // aber damit nicht erfolgreich.
-      LOGGER.debug(L.m("Warning: inconsistent bookmark detected:"), e);
+      LOGGER.debug("Warning: inconsistent bookmark detected:", e);
     }
     catch (Exception e)
     {
@@ -663,10 +663,7 @@ public class DocumentCommands implements Iterable<DocumentCommand>
     }
     catch (IOException | SyntaxErrorException | NodeNotFoundException e)
     {
-      LOGGER.error(
-        L.m(
-          "The textarea with the name \"{0}\" contains an incorrect GROUPS attribute.",
-          name), e);
+      LOGGER.error("The textarea \"{}\" contains an incorrect GROUPS attribute.", name, e);
     }
 
     try

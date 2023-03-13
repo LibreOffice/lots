@@ -27,9 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.net.URLConnection;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -458,7 +456,7 @@ public class TextDocumentModel
       return;
     }
 
-    final String errmsg = L.m("Error while reading the 'Druckfunktionen' section \"{0}\":", data);
+    final String errmsg = String.format("Error while reading the 'Druckfunktionen' section \"%s\":", data);
 
     ConfigThingy conf = new ConfigThingy("");
     try
@@ -515,7 +513,7 @@ public class TextDocumentModel
       conf = new ConfigThingy("", null, new StringReader(value));
     } catch (java.lang.Exception e)
     {
-      LOGGER.error(L.m("The form description is incorrect"), e);
+      LOGGER.error("The form description is incorrect", e);
       return;
     }
 
@@ -577,7 +575,7 @@ public class TextDocumentModel
       werte = conf.get("WM").get("Formularwerte");
     } catch (NodeNotFoundException | IOException | SyntaxErrorException e)
     {
-      LOGGER.error(L.m("The 'Formularwerte' section is incorrect"), e);
+      LOGGER.error("The 'Formularwerte' section is incorrect", e);
       return;
     }
 
@@ -1933,7 +1931,7 @@ public class TextDocumentModel
         alwaysActions.add(new ActionUIElementPair(action, alwaysConf));
       } catch (NodeNotFoundException x)
       {
-        LOGGER.error(L.m("Incorrect ALWAYS specification in 'Buttonanpassung-Section'"), x);
+        LOGGER.error("Incorrect ALWAYS specification in section 'Buttonanpassung'", x);
       }
     }
     return Pair.of(neverActions, alwaysActions);

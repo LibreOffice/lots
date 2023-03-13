@@ -38,19 +38,20 @@ public class GlobalFunctions
   private static GlobalFunctions instance;
 
   /**
-   * Contains the functions defined in the functions section of wollmux.conf.
+
+   * Contains the functions defined in the "Funktionen" section of wollmux.conf.
    */
   private FunctionLibrary globalFunctions;
   /**
-   * Contains the functions defined in the Wollmux.conf document actions.
+   * Contains the functions defined in the wollmux.conf "Dokumentaktionen" section.
    */
   private FunctionLibrary documentActionFunctions;
   /**
-   * Contains the dialogs defined in the function dialogs section of wollmux,conf.
+   * Contains the dialogs defined in the "Funktionsdialoge" section of wollmux.conf.
    */
   private DialogLibrary funcDialogs;
   /**
-   * Contains the functions defined in the functions section of wollmux.conf.
+   * Contains the functions defined in the "Funktionen" section of wollmux.conf.
    */
   private PrintFunctionLibrary globalPrintFunctions;
 
@@ -65,16 +66,17 @@ public class GlobalFunctions
   private GlobalFunctions()
   {
     /*
-     * Parse global function dialogs. DANGER! Must be done before parseGlobalFunctions(). As
-     * context is passed null because global functions have no context.
+     * Parse global function dialogs.
+     * ATTENTION! Must be done before parseGlobalFunctions().
+     * Null is passed as context, because global functions have no context.
      */
     funcDialogs =
       DialogFactory.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, null);
 
     /*
-     * Parse global functions. DANGER! Uses the function dialogs. This
-     * must therefore be parsed beforehand. As context, null is passed because global
-     * Functions have no context.
+     * Parse global functions. ATTENTION! Use the function dialogs.
+     * These must be parsed before. Null is passed as context,
+     * because global functions have no context.
      */
     globalFunctions =
       FunctionFactory.parseFunctions(WollMuxFiles.getWollmuxConf(),
@@ -88,7 +90,7 @@ public class GlobalFunctions
     PrintFunction.addPrintFunctions(globalPrintFunctions);
 
     /*
-     * Parse document actions. These have neither context nor dialogues.
+     * Parse document actions. These have neither context nor dialogs.
      */
     documentActionFunctions = new FunctionLibrary(null, true);
     FunctionFactory.parseFunctions(documentActionFunctions,
@@ -104,7 +106,7 @@ public class GlobalFunctions
   }
 
   /**
-   * Returns the function library containing the document actions.
+   *  Returns the function library that contains the document actions.
    */
   public FunctionLibrary getDocumentActionFunctions()
   {
@@ -112,8 +114,7 @@ public class GlobalFunctions
   }
 
   /**
-   * Returns the function library containing the globally defined print functions
-   * contains.
+   * Returns the function library that contains the globally defined print functions.
    */
   public PrintFunctionLibrary getGlobalPrintFunctions()
   {
@@ -121,8 +122,8 @@ public class GlobalFunctions
   }
 
   /**
-   * Returns the dialog library containing the dialogs contained in functions
-   * (basic function "DIALOG") can be used.
+   * Returns the dialog library containing the dialogs that are used in functions
+   * (basic function "DIALOG").
    */
   public DialogLibrary getFunctionDialogs()
   {
