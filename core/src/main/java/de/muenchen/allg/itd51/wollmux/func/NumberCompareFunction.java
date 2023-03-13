@@ -56,7 +56,7 @@ public class NumberCompareFunction extends NumberFunction
   /**
    * The subfunctions of conf are evaluated as BigDecimals and respectively
     * compared with the result of the first function via compareTo, where if
-    * MARGIN is specified, whose distance <= abs(MARGIN) is considered equal
+    * MARGIN is specified, whose distance &lt;= abs(MARGIN) is considered equal
     * becomes (equivalent to compareTo result 0). cmp1 and cmp2 are cancellation results
     * of this comparison. As soon as a compareTo returns cmp1 or cmp2, the breaks
     * Calculation and the result "false" is returned. If a compareTo

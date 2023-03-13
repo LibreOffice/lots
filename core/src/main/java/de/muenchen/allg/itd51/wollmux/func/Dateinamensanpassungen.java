@@ -79,7 +79,7 @@ public class Dateinamensanpassungen
 
   /**
    * works like
-   * {@link Filename Customizations#UseavailablePath(String)} and
+   * {@link Dateinamensanpassungen#verfuegbarenPfadVerwenden(String)} and
    * additionally takes the following LHM-specific file name adjustments
    * before:
    *

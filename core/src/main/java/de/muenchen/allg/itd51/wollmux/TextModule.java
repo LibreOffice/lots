@@ -92,7 +92,7 @@ public class TextModule
    *          denotes insertions that have been made manually. Puts
    *          the optional node MODE = "manual"
    *
-   * @throws WollMuxErrorException
+   * @throws WollMuxFehlerException
    *          if a problem has occurred (e.g. no text module recognized or
    *          an insertFrag command already exists). An exception becomes exact
    *          then thrown if no text module reference is inserted
@@ -255,7 +255,7 @@ public class TextModule
    *          A string of the form "&lt;identifier&gt;#arg1#...#argN" where the
    *          Changed the separator "#" to text modules via the SEPARATOR key
    *          can be.
-   * @param text modules
+   * @param textbausteine
    *          Description of a boilerplate section in the form
    *          "Text modules(SEPARATOR ... abbreviation(...))"
    * @return array of strings with (frag_id + args) or null
@@ -340,7 +340,7 @@ public class TextModule
    *
    * @param doc
    *          Current text document
-   * @paramrange
+   * @param range
    *          Place where the bookmark should be set
    * @param args
    *          Parameters passed
