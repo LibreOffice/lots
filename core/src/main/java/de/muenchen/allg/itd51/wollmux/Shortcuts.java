@@ -148,8 +148,7 @@ public class Shortcuts
    * xAcceleratorConfiguration.removeCommandFromAllKeyEvents(). OOo Issue #72558
    *
    * @param xAcceleratorConfiguration
-   * AcceleratorConfiguration (must be persistent afterwards with store()
-   *          be made)
+   * AcceleratorConfiguration (must be made persistent afterwards with store())
    */
   private static void removeComandFromAllKeyEvents(
       XAcceleratorConfiguration xAcceleratorConfiguration)
