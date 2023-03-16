@@ -37,63 +37,63 @@ import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.Values;
 
 /**
- * Nimmt ein Dataset und stellt mit Hilfe von WollMux-Funktionen aus dessen Spalten
- * berechnete Pseudo-Spalten zur Verfügung.
+ * Takes a dataset and provides pseudo-columns calculated from its columns using WollMux functions.
  */
+
 public class ColumnTransformer
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ColumnTransformer.class);
 
   /**
-   * Die Namen aller Pseudospalten, die für diesen ColumnTransformer definiert sind.
+   * The names of all pseudo-columns defined for this ColumnTransformer.
    */
   private Set<String> schema = new HashSet<>();
 
   /**
-   * Bildet den Namen einer Pseudospalte auf die zugehörige Funktion ab.
+   * Maps the name of a pseudo-column to its associated function.
    */
   private Map<String, Function> columnTranslations = new HashMap<>();
 
   /**
-   * Initialisiert einen ColumnTransformer mit allen Abschnitten, die
-   * trafoConf,query(nodeName, 1) zurückliefert.
-   *
-   *    * trafoConf hat folgenden Aufbau
-   *
+   * 
+   * Initializes a ColumnTransformer with all sections returned by trafoConf,query(nodeName, 1).
+   * trafoConf has the following structure:
+   * 
    * <pre>
-   *   BeliebigerBezeichner(
-   *      Name1( WollMux-Funktion1 )
-   *      Name2( WollMux-Funktion2 )
-   *      ...
-   *   )
+   AnyIdentifier(
+       Name1(WollMux-Function1 )
+       Name2( WollMux-Function2 )
+       ...
+       )
    * </pre>
-   *
-   * NameX ist jeweils der Name, der zum Zugriff auf den entsprechenden Funktionswert
-   * an {@link #get(String, Dataset)} übergeben werden muss. Innerhalb der
-   * WollMux-Funktionen verwendete Aufrufe der VALUE-Grundfunktion beziehen sich
-   * IMMER auf die untransformierten Spalten des zu übersetzenden {@link Dataset}s,
-   * NIEMALS auf Pseudospalten. Wird der selbe NameX mehrfach verwendet, so gilt nur
-   * die letzte Definition.
+   * 
+   * NameX is the name that must be passed to {@link #get(String, Dataset)} to access the
+   * corresponding function value. Calls to the VALUE basic function used within the WollMux
+   * functions always refer to the untransformed columns of the Dataset to be translated, NEVER to
+   * pseudo-columns. If the same NameX is used multiple times, only the last definition applies.
    */
+
   public ColumnTransformer(Map<String, Function> trafos)
   {
     addTrafos(trafos);
   }
 
   /**
-   * Erzeugt einen ColumnTransformer ohne Pseudospalten. Dieser reicht
-   * {@link #get(String, Dataset)} Abfragen einfach zum entsprechenden Datensatz
-   * durch.
+   * Creates a ColumnTransformer without pseudo-columns. This simply forwards
+   * {@link #get(String, Dataset)} queries to the corresponding dataset.
    */
+
   public ColumnTransformer()
-  {}
+  {
+  }
 
   /**
-   * Liefert true gdw eine Pseudospalte namens name definiert ist, d,h, wenn
-   * {@link #get(String, Dataset)} für diesen Namen einen berechneten Wert und nicht
-   * direkt den Wert des {@link Dataset}s zurückliefert.
+   * Returns true if a pseudo column with the given name is defined, i.e. if
+   * {@link #get(String, Dataset)} returns a computed value for this name, rather than directly
+   * returning the value of the {@link Dataset}.
    */
+
   public boolean hasPseudoColumn(String name)
   {
     return schema.contains(name);
@@ -109,56 +109,60 @@ public class ColumnTransformer
   }
 
   /**
-   * Liefert die Menge aller Namen von Pseudospalten, die definiert sind, d,h, alle
-   * Namen für die {@link #get(String, Dataset)} einen berechneten Wert und nicht
-   * direkt den Wert des {@link Dataset}s zurückliefert.
+   * Returns the set of all names of pseudo-columns that are defined, i.e. all names for which
+   * {@link #get(String, Dataset)} returns a computed value and not the value of the {@link Dataset}
+   * directly.
    */
+
   public List<String> getSchema()
   {
     return new ArrayList<>(schema);
   }
 
   /**
-   * Liefert den Wert der Pseudospalte columnName, der anhand der Umsetzungsregeln
-   * aus dem {@link Dataset} ds berechnet wird. Falls keine Umsetzungsregel für
-   * columnName existiert, wird direkt der Wert der Spalte columnName von ds
-   * zurückgeliefert (null falls nicht belegt).
-   *
+   * Returns the value of the pseudo column columnName, which is calculated based on the
+   * transformation rules from the {@link Dataset} ds. If there is no transformation rule for
+   * columnName, the value of the columnName column from ds is returned directly (null if not set).
+   * 
    * @throws ColumnNotFoundException
-   *           falls weder eine Umsetzungsregel für columnName definiert ist noch ds
-   *           eine Spalte mit diesem Namen besitzt.
+   *           if neither a transformation rule is defined for columnName nor ds has a column with
+   *           that name.
    */
+
   public String get(String columnName, Dataset ds) throws ColumnNotFoundException
   {
     Function func = columnTranslations.get(columnName);
-    if (func == null) {
+    if (func == null)
+    {
       return ds.get(columnName);
     }
     return func.getResult(new DatasetValues(ds));
   }
 
   /**
-   * Liefert ein {@link Dataset}, das eine transformierte Sicht von ds darstellt. ACHTUNG! Die
-   * Berechnung der Spalten wird on-demand durchgeführt, d.h. spätere Aufrufe von
-   * {@link #addTrafos(Map)} wirken sich auf das zurückgelieferte {@link Dataset} aus.
+   * Returns a {@link Dataset} that represents a transformed view of ds. ATTENTION! The calculation
+   * of the columns is performed on-demand, i.e. later calls to {@link #addTrafos(Map)} will affect
+   * the returned {@link Dataset}.
    */
+
   public Dataset transform(Dataset ds)
   {
     return new TransformedDataset(ds);
   }
 
   /**
-   * Liefert {@link QueryResults}, die eine transformierte Sicht von qres darstellen. ACHTUNG! Die
-   * Berechnung der {@link Dataset}s wird on-demand durchgeführt, d.h. spätere Aufrufe von
-   * {@link #addTrafos(Map)} wirken sich auf die {@link Dataset}s der {@link QueryResults} aus.
+   * Returns {@link QueryResults} representing a transformed view of {@code qres}. WARNING! The
+   * calculation of the {@link Dataset}s is performed on-demand, i.e. subsequent calls to
+   * {@link #addTrafos(Map)} will affect the {@link Dataset}s of the {@link QueryResults}.
    */
+
   public QueryResults transform(QueryResults qres)
   {
     return new TranslatedQueryResults(qres);
   }
 
   /**
-   * Stellt die Spalten eines Datasets als Values zur Verfügung.
+   * Provides the columns of a dataset as values.
    */
   private static class DatasetValues implements Values
   {
@@ -175,8 +179,7 @@ public class ColumnTransformer
       try
       {
         ds.get(id);
-      }
-      catch (ColumnNotFoundException x)
+      } catch (ColumnNotFoundException x)
       {
         LOGGER.trace("", x);
         return false;
@@ -191,8 +194,7 @@ public class ColumnTransformer
       try
       {
         str = ds.get(id);
-      }
-      catch (ColumnNotFoundException x)
+      } catch (ColumnNotFoundException x)
       {
         LOGGER.trace("", x);
       }
@@ -208,19 +210,20 @@ public class ColumnTransformer
   }
 
   /**
-   * Wendet Spaltenumsetzungen auf QueryResults an und stellt das Ergebnis wieder als
-   * QueryResults zur Verfügung.
+   * Applies column transformations to QueryResults and provides the result again as QueryResults.
    */
+
   private class TranslatedQueryResults implements QueryResults
   {
     /**
-     * Die Original-{@link QueryResults}.
+     * The original {@link QueryResults}.
      */
     private QueryResults qres;
 
     /**
-     * Die QueryResults res werden mit dem columnTransformer übersetzt.
+     * The QueryResults res are translated using the columnTransformer.
      */
+
     public TranslatedQueryResults(QueryResults res)
     {
       qres = res;
