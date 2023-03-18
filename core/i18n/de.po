@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 10:15+0100\n"
-"PO-Revision-Date: 2023-01-23 12:21+0000\n"
+"PO-Revision-Date: 2023-03-19 05:34+0000\n"
 "Last-Translator: Christian Kühl <kuehl.christian@googlemail.com>\n"
 "Language-Team: German <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/de/>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.12.2\n"
+"X-Generator: Weblate 4.15.2\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -557,22 +557,20 @@ msgid "Saving the file \"{0}\" failed!"
 msgstr "Das Speichern der Datei \"{0}\" ist fehlgeschlagen!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:69
-#, fuzzy
 msgid "Über WollMux"
-msgstr "WollMux"
+msgstr "Über WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:80
 msgid "License: European Union Public License"
-msgstr ""
+msgstr "Lizenz: European Union Public License"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:82
-#, fuzzy
 msgid "Visit website"
-msgstr "Sichtbarkeiten"
+msgstr "Webseite besuchen"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:85
 msgid "Credits"
-msgstr ""
+msgstr "Beitragende"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:67
 msgid "Select sender"
