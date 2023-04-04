@@ -28,37 +28,36 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Eine Menge benannter {@link de.muenchen.allg.itd51.wollmux.func.Value}s.
+ * Plenty of known {@link de.muenchen.allg.itd51.wollmux.func.Value}s.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface Values
 {
   /**
-   * Liefert true genau dann wenn ein Wert mit der ID id vorhanden ist (ACHTUNG, bei
-   * mit BIND zusammengesetzten Funktionen bekommt die gebundene Funktion unter
-   * Umständen hier keine akkurate Antwort).
+   * Deliver exact true then, if a value with the ID id exists (WARNING, the bound
+   * function get possibly no accurate answer here for functions
+   * put together with BIND).
    */
   public boolean hasValue(String id);
 
   /**
-   * Der aktuelle Wert des mit id identifizierten Values als String. Falls es sich um
-   * einen booleschen Wert handelt, wird der String "true" oder "false"
-   * zurückgeliefert. Falls kein Wert mit dieser id vorhanden ist wird der leere
-   * String geliefert.
+   * The current value of the value identified by id as String. If it is
+   * a bolean value, the String 'true' or 'false' will be
+   * delivered. If no value with this id is available an empty
+   * String will be delivered.
    */
   public String getString(String id);
 
   /**
-   * Der aktuelle Wert des mit id identifizierten Values als boolean. Falls der Wert
-   * seiner Natur nach ein String ist, so ist das Ergebnis implementierungsabhängig.
-   * Falls kein Wert mit dieser id vorhanden ist wird false geliefert.
+   * The current value of the value identified by id as boolean. If the value
+   * by its nature is a String, the result is implementation dependent.
+   * If no value with this id is available false will be delivered.
    */
   public boolean getBoolean(String id);
 
   /**
-   * Dummy-Klasse, die ein Values-Interface zur Verfügung stellt, das keine Werte
-   * enthält.
+   * Dummy class, that provides a values interface, which contains no values.
    */
   public static class None implements Values
   {
@@ -82,7 +81,7 @@ public interface Values
   }
 
   /**
-   * Simple Implementierung des Values-Interfaces in der Art einer Map.
+   * Simple implementation of the values interface in the way of a map.
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -101,8 +100,8 @@ public interface Values
     }
 
     /**
-     * Fügt den Wert value hinzu, identifiziert mit id. Ein bereits vorhandener Wert
-     * wird ersetzt. Falls value==null, so wird der Aufruf behandelt wie
+     * Add the value identified by idF. An allready existing value will
+     * be replaced. If value==null, the call will be treated like
      * {@link #remove(String)}.
      */
     public void put(String id, String value)
@@ -114,7 +113,7 @@ public interface Values
     }
 
     /**
-     * Entfernt den Wert, der durch id identifiziert wird (falls vorhanden).
+     * Removes the value, which was identified by id (if existing).
      */
     public void remove(String id)
     {
@@ -122,10 +121,10 @@ public interface Values
     }
 
     /**
-     * Fügt alle Werte aus der anderen SimpleMap dieser hinzu.
+     * Add all values from the other SimpleMap to this one.
      *
      * @param map
-     *          Die andere SimpleMap, aus der die Werte übernommen werden sollen.
+     *          The other SimpleMap, from which the values should be taken.
      */
     public void putAll(SimpleMap map)
     {
