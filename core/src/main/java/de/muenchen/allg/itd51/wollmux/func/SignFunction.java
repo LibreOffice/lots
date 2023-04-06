@@ -38,7 +38,7 @@ public class SignFunction extends SumFunction
   @Override
   protected String computationResult()
   {
-    // signum() liefert int, deswegen hier nur ""+ und nicht formatBigDecimal()
+    // signum() returns int, so here only ""+ and not formatBigDecimal()
     return "" + numericComputationResult().signum();
   }
 }

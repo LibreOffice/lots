@@ -41,7 +41,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
- * Erzeugt Functions aus ConfigThingys.
+ * Generates functions from ConfigThingys.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -52,7 +52,7 @@ public class FunctionFactory
       .getLogger(FunctionFactory.class);
 
   /**
-   * Eine Funktion, die immer true liefert.
+   * A function that always returns true.
    */
   private static final Function myAlwaysTrueFunction = new AlwaysTrueFunction();
 
@@ -62,7 +62,7 @@ public class FunctionFactory
   }
 
   /**
-   * Liefert eine Funktion, die immer true liefert.
+   * Returns a function that always returns true.
    */
   public static Function alwaysTrueFunction()
   {
@@ -70,27 +70,27 @@ public class FunctionFactory
   }
 
   /**
-   * Erzeugt ein Function-Objekt aus den ENKELN von conf. Hat conf keine Enkel, so
-   * wird null geliefert. Hat conf genau einen Enkel, so wird eine Funktion
-   * geliefert, die diesem Enkel entspricht. Hat conf mehr als einen Enkel, so wird
-   * eine Funktion geliefert, die alle Enkel als Booleans auswertet und
-   * UND-verknüpft.
+   * Constructs a Function object from the GRANDSONS of conf. Does conf have no grandchildren, so
+   * will be delivered as zero. If conf has exactly one grandson, it becomes a function
+   * delivered corresponding to this grandson. If conf has more than one grandson, it will
+   * provided a function that evaluates all grandchildren as booleans and
+   * AND-linked.
    *
    * @param funcLib
-   *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
-   *          aufgelöst werden sollen.
+   *          the function library based on its references to functions
+   *          are to be resolved.
    * @param dialogLib
-   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelöst
-   *          werden sollen.
+   *          resolved the dialog library based on its references to dialogs
+   *          should be.
    * @param context
-   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige Werte.
-   *          Zur Unterscheidung der verschiedenen Instanzen dient die context Map,
-   *          in der die verschiedenen Instanzen abgelegt werden. Wird hier null
-   *          übergeben, dann wird eine ConfigurationErrorException geworfen, wenn
-   *          conf eine Funktion enthält, die einen Kontext benötigt.
+   *          Some basic functions (especially DIALOG) hold context-dependent values.
+   *          The context map is used to distinguish between the different instances,
+   *          in which the various instances are stored. becomes zero here
+   *          is passed, then a ConfigurationErrorException is thrown if
+   *          conf contains a function that needs a context.
    * @throws ConfigurationErrorException
-   *           falls conf keine korrekte Funktionsbeschreibung ist oder die Funktion
-   *           einen context benötigt aber null übergeben wurde.
+   *           if conf is not a correct function description or the function
+   *           requires a context but null was passed.
    */
   public static Function parseGrandchildren(ConfigThingy conf,
       FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context)
@@ -119,26 +119,26 @@ public class FunctionFactory
   }
 
   /**
-   * Erzeugt ein Function-Objekt aus den KINDERN von conf. Hat conf keine Kinder, so
-   * wird null geliefert. Hat conf genau ein Kind, so wird eine Funktion geliefert,
-   * die diesem Kind entspricht. Hat conf mehr als ein Kind, so wird eine Funktion
-   * geliefert, die alle Kinder als Booleans auswertet und UND-verknüpft.
+   * Constructs a Function object from the CHILDREN of conf. If conf has no children, like this
+   * will be delivered as zero. If conf has exactly one child, a function is returned
+   * corresponding to this child. If conf has more than one child, it becomes a function
+   * supplied, which evaluates all children as Booleans and ANDs them.
    *
    * @param funcLib
-   *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
-   *          aufgelöst werden sollen.
+   *          the function library based on its references to functions
+   *          are to be resolved.
    * @param dialogLib
-   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelöst
-   *          werden sollen.
+   *          resolved the dialog library based on its references to dialogs
+   *          should be.
    * @param context
-   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige Werte.
-   *          Zur Unterscheidung der verschiedenen Instanzen dient die context Map,
-   *          in der die verschiedenen Instanzen abgelegt werden. Wird hier null
-   *          übergeben, dann wird eine ConfigurationErrorException geworfen, wenn
-   *          conf eine Funktion enthält, die einen Kontext benötigt.
+   *          Some basic functions (especially DIALOG) hold context-dependent values.
+   *          The context map is used to distinguish between the different instances,
+   *          in which the various instances are stored. becomes zero here
+   *          is passed, then a ConfigurationErrorException is thrown if
+   *          conf contains a function that needs a context.
    * @throws ConfigurationErrorException
-   *           falls conf keine korrekte Funktionsbeschreibung ist oder die Funktion
-   *           einen context benötigt aber null übergeben wurde.
+   *           if conf is not a correct function description or the function
+   *           requires a context but null was passed.         
    */
   public static Function parseChildren(ConfigThingy conf, FunctionLibrary funcLib,
       DialogLibrary dialogLib, Map<Object, Object> context)
@@ -163,24 +163,24 @@ public class FunctionFactory
   }
 
   /**
-   * Liefert ein Function Objekt zu conf, wobei conf selbst schon ein erlaubter
-   * Knoten der Funktionsbeschreibung (z,B, "AND" oder "MATCH") sein muss.
+   * Returns a Function object to conf, where conf itself is a legal
+   * Must be a node of the function description (e.g., "AND" or "MATCH").
    *
    * @param funcLib
-   *          die Funktionsbibliothek anhand derer Referenzen auf Funktionen
-   *          aufgelöst werden sollen.
+   *          the function library based on its references to functions
+   *          are to be resolved.
    * @param dialogLib
-   *          die Dialogbibliothek anhand derer Referenzen auf Dialoge aufgelöst
-   *          werden sollen.
+   *          resolved the dialog library based on its references to dialogs
+   *          should be.
    * @param context
-   *          Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige Werte.
-   *          Zur Unterscheidung der verschiedenen Instanzen dient die context Map,
-   *          in der die verschiedenen Instanzen abgelegt werden. Wird hier null
-   *          übergeben, dann wird eine ConfigurationErrorException geworfen, wenn
-   *          conf eine Funktion enthält, die einen Kontext benötigt.
+   *          Some basic functions (especially DIALOG) hold context-dependent values.
+   *          The context map is used to distinguish between the different instances,
+   *          in which the various instances are stored. becomes zero here
+   *          is passed, then a ConfigurationErrorException is thrown if
+   *          conf contains a function that needs a context.
    * @throws ConfigurationErrorException
-   *           falls conf keine korrekte Funktionsbeschreibung ist oder die Funktion
-   *           einen context benötigt aber null übergeben wurde.
+   *           if conf is not a correct function description or the function
+   *           requires a context but null was passed.
    */
   public static Function parse(ConfigThingy conf, FunctionLibrary funcLib,
       DialogLibrary dialogLib, Map<Object, Object> context)
@@ -326,8 +326,8 @@ public class FunctionFactory
   }
 
   /**
-   * Liefert "Text an der Fehlerstelle: " + die ersten 100 Zeichen der
-   * Stringdarstellung von conf
+   * Returns "Text at the error location: " + the first 100 characters of the
+   * String representation of conf
    */
   private static String outputErrorPosition(ConfigThingy conf)
   {
@@ -355,9 +355,9 @@ public class FunctionFactory
       throw new ConfigurationErrorException(L.m("For functions of type \"BIND\", "
           + "\"FUNCTION\" must not be followed by a list, but only by a function name or a function."));
 
-    funcConf = funcConf.iterator().next(); // <Funktionsname>|<Funktion> - ...
+    funcConf = funcConf.iterator().next(); // <function name>|<function> - ...
 
-    if (funcConf.count() == 0) // d.h. es wurde nur ein <Funktionsname> angegeben
+    if (funcConf.count() == 0) // i.e. only a <function name> was specified
     {
       String funcName = funcConf.toString();
 
@@ -366,7 +366,7 @@ public class FunctionFactory
         throw new ConfigurationErrorException(L.m(
           "Function \"{0}\" is used before it was even defined", funcName));
     }
-    else // d.h. es wurde eine ganze Funktion angegeben
+    else // i.e. an entire function was specified
     {
       func = parse(funcConf, funcLib, dialogLib, context);
     }
@@ -392,7 +392,7 @@ public class FunctionFactory
     }
     catch (NodeNotFoundException x)
     {
-      /* Kann nicht sein, weil count() getestet */
+      /* Can't be because count() tested */
       dialogName = null;
       dataName = null;
     }
@@ -438,8 +438,8 @@ public class FunctionFactory
     Iterator<ConfigThingy> iter = conf.iterator();
     ConfigThingy condition;
     do
-    { // oben wurde überprüft, dass es genau einen Knoten gibt, der nicht ELSE oder
-      // THEN ist
+    { // above it was checked that there is exactly one node that is not ELSE or
+      // THEN is
       condition = iter.next();
     } while (condition.getName().equals("THEN")
       || condition.getName().equals("ELSE"));
@@ -679,9 +679,9 @@ public class FunctionFactory
     {
       if (byFun == null)
       {
-        // Division durch 1 nichts kaputt macht
-        maxScale = 1024; // eigentlich sollte hier Integer.MAX_SIZE stehen, aber
-        // auch bei Division durch 1 reserviert die BigDecimal-Klasse Speicher entsprechend der maximalen Stelligkeit
+        // Division by 1 doesn't break anything
+        maxScale = 1024; // Integer.MAX_SIZE should actually be here, but
+        // Even when dividing by 1, the BigDecimal class reserves memory according to the maximum arity
       }
       else
       {
@@ -702,17 +702,17 @@ public class FunctionFactory
   }
 
   /**
-   * Parst die "Funktionen" Abschnitte aus conf und liefert eine entsprechende
-   * FunctionLibrary.
+   * Parses the "Functions" sections from conf and returns an appropriate one
+   * Function Library.
    *
    * @param context
-   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
-   *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
-   *          gespeichert, es ist nicht nur ein Schlüssel.
+   *          the context in which the function definitions are to be evaluated
+   *          (especially DIALOG functions). DANGER! Here are values
+   *          saved, it's not just a key.
    *
    * @param baselib
-   *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
-   *          liefern, die anderweitig nicht gefunden werden.
+   *          if non-null this is linked as a fallback to functions
+   *          deliver that cannot be found elsewhere.
    */
   public static FunctionLibrary parseFunctions(ConfigThingy conf,
       DialogLibrary dialogLib, Map<Object, Object> context, FunctionLibrary baselib)
@@ -722,13 +722,13 @@ public class FunctionFactory
   }
 
   /**
-   * Parst die Inhalte von conf,query(section) als Funktionsdefinitionen und fügt sie
-   * funcs hinzu.
+   * Parses and inserts the contents of conf,query(section) as function definitions
+   * added funcs.
    *
    * @param context
-   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
-   *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
-   *          gespeichert, es ist nicht nur ein Schlüssel.
+   *          the context in which the function definitions are to be evaluated
+   *          (especially DIALOG functions). DANGER! Here are values
+   *          saved, it's not just a key.
    *
    * @return funcs
    */

@@ -25,42 +25,42 @@ package de.muenchen.allg.itd51.wollmux.func;
 import java.util.Collection;
 
 /**
- * Eine Funktion, die einen Wert in Abhängigkeit von Parametern berechnet.
+ * A function that calculates a value depending on parameters.
  */
 public interface Function
 {
   /**
-   * Liefert die Namen der Parameter, die die Funktion erwartet.
-   * Die Reihenfolge ist undefiniert. Es kann kein Name mehrfach vorkommen.
+   * Returns the names of the parameters expected by the function.
+   * The order is undefined. No name can appear more than once.
    */
   public String[] parameters();
 
   /**
-   * Zu set werden die Namen aller Funktionsdialoge hinzugefügt, die diese
-   * Funktion referenziert.
+   * The names of all function dialogs that use this
+   * Function referenced.
    */
   public void getFunctionDialogReferences(Collection<String> set);
 
   /**
-   * Ruft die Funktion mit Argumenten aus parameters auf und liefert das
-   * Funktionsergebnis als String. Falls es sich um einen booleschen Wert
-   * handelt, wird der String "true" oder "false" zurückgeliefert.
-   * Falls während der Ausführung ein Fehler auftritt, wird möglicherweise (dies
-   * hängt von der Funktion ab) das String-Objekt
-   * {@link FunctionLibrary#ERROR} (== vergleichbar) zurückgeliefert.
-   * @param parameters sollte zu jedem der von {@link #parameters()} gelieferten
-   *        Namen einen String-Wert enthalten.
+   * Calls the function with arguments from parameters and returns that
+   * Function result as a string. If it is a boolean value
+   * is used, the string "true" or "false" is returned.
+   * If an error occurs during execution, it may (this
+   * depends on the function) the String object
+   * {@link FunctionLibrary#ERROR} (== comparable) returned.
+   * @param parameters should match any of those returned by {@link #parameters()}
+   *        Names contain a string value.
    */
   public String getResult(Values parameters);
 
    /**
-   * Ruft die Funktion mit Argumenten aus parameters auf und liefert das
-   * Funktionsergebnis als boolean. Falls der Wert seiner Natur nach ein
-   * String ist, so wird true geliefert, falls er (ohne Berücksichtigung von
-   * Groß-/Kleinschreibung) der Zeichenkette "true" entspricht.
-   * Falls während der Ausführung ein Fehler auftritt wird false zurückgeliefert.
-   * @param parameters sollte zu jedem der von {@link #parameters()} gelieferten
-   *        Namen einen String-Wert enthalten.
+   * Calls the function with arguments from parameters and returns that
+   * Function result as boolean. If the value by its nature a
+   * is a string, true is returned if it (disregarding
+   * case sensitive) matches the string "true".
+   * If an error occurs during execution, false is returned.
+   * @param parameters should match any of those returned by {@link #parameters()}
+   *        Names contain a string value.
    */
   public boolean getBoolean(Values parameters);
 

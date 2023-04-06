@@ -32,7 +32,7 @@ import java.util.Set;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
- * Eine Bibliothek von benannten Functions
+ * A library of named functions
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -45,7 +45,7 @@ public class FunctionLibrary implements Iterable<Function>
   private FunctionLibrary baselib;
 
   /**
-   * Erzeugt eine leere Funktionsbibliothek.
+   * Creates an empty function library.
    */
   public FunctionLibrary()
   {
@@ -53,9 +53,9 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht kopiert!).
-   * baselib wird immer dann befragt, wenn die Funktionsbibliothek selbst keine
-   * Funktion des entsprechenden Namens enthält. baselib darf null sein.
+   * Generates a function library that references baselib (not copied!).
+   * baselib is always queried if the function library itself does not
+   * Contains function of the corresponding name. baselib may be null.
    *
    * @param baselib
    */
@@ -65,15 +65,15 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht kopiert!).
-   * baselib wird immer dann befragt, wenn die Funktionsbibliothek selbst keine
-   * Funktion des entsprechenden Namens enthält. baselib darf null sein.
+   * Generates a function library that references baselib (not copied!).
+   * baselib is always queried if the function library itself does not
+   * Contains function of the corresponding name. baselib may be null.
    *
    * @param ordered
-   *          Falls true liefert der Iterator dieser Funktionsbibliothek die
-   *          Funktionen in Einfügereihenfolge. Ansonsten werden sie in unbestimmter
-   *          Reihenfolge geliefert. Es sollte offensichtlich sein, dass
-   *          ordered==true mit einem erhöhten Overhead verbunden ist.
+   *          If true, the iterator of this function library returns the
+   *          Features in insertion order. Otherwise they will be indefinite
+   *          Order delivered. It should be obvious that
+   *          ordered==true comes with increased overhead.
    */
   public FunctionLibrary(FunctionLibrary baselib, boolean ordered)
   {
@@ -85,8 +85,8 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Fügt func dieser Funktionsbibliothek unter dem Namen funcName hinzu. Eine
-   * bereits existierende Funktion mit diesem Namen wird dabei ersetzt.
+   * Adds func to this function library under the name funcName. One
+   * already existing function with this name will be replaced.
    */
   public void add(String funcName, Function func)
   {
@@ -97,10 +97,10 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Liefert die Function namens funcName zurück oder null, falls keine Funktion mit
-   * diesem Namen bekannt ist. Wurde die Funktionsbibliothek mit einer Referenz auf
-   * eine andere Funktionsbibliothek initialisiert, so wird diese befragt, falls die
-   * Funktionsbibliothek selbst keine Funktion des entsprechenden Namens kennt.
+   * Returns the function named funcName or null if no function is included
+   * known by that name. Was the function library with a reference to
+   * initializes another function library, it will be queried if the
+   * Function library itself does not know a function of the corresponding name.
    */
   public Function get(String funcName)
   {
@@ -112,15 +112,15 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Versucht, alle Funktionen namens funcName aus dieser und evtl, verketteter
-   * Funktionsbibliotheken zu entfernen.
+   * Tried all functions named funcName from this and possibly chained
+   * Remove function libraries.
    *
-   * @return true, falls nach Ausführung des Befehls {@link #hasFunction(String)} für
-   *         funcName false zurückliefert, false sonst. D.h. true wird geliefert,
-   *         wenn alle Funktionen entfernt werden konnten. Falls false
-   *         zurückgeliefert wird, wurden evtl. manche, aber definitiv nicht alle
-   *         Funktionen entfernt. Falls von vorneherein keine Funktion funcName
-   *         vorhanden war, wird auch true geliefert.
+   * @return true if after executing the {@link #hasFunction(String)} command for
+   *         funcName returns false, otherwise false. I.e. true is returned,
+   *         if all functions could be removed. If false
+   *         is returned, some may have been, but definitely not all
+   *         Features removed. If no function funcName
+   *         was present, true is also returned.
    */
   public boolean remove(String funcName)
   {
@@ -132,7 +132,7 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Liefert true wenn diese Funktionsbibliothek eine Funktion namens funcName kennt.
+   * Returns true if this function library knows a function named funcName.
    */
   public boolean hasFunction(String funcName)
   {
@@ -146,8 +146,8 @@ public class FunctionLibrary implements Iterable<Function>
   }
 
   /**
-   * Liefert die Namen aller Funktionen, die über diese Funktionsbibliothek verfügbar
-   * sind.
+   * Returns the names of all functions available through this function library
+   * are.
    */
   public Set<String> getFunctionNames()
   {

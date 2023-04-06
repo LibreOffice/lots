@@ -62,13 +62,13 @@ public abstract class MultiFunction implements Function
   }
 
   /**
-   * Liefert true, wenn conf von handleParam bereits vollständig behandelt wurde
-   * und nicht mehr als Subfunktion erfasst werden soll. Diese Funktion wird von
-   * Unterklassen überschrieben, um spezielle Parameter zu behandeln. ACHTUNG! Wird
-   * diese Methode überschrieben, so sind normalerweise auch
-   * {@link #getAdditionalParams()} und
-   * {@link #getFunctionDialogReferences(Collection)} zu überschreiben, um die
-   * zusätzlichen Funktionen aus dem behandelten Parameter zu behandeln.
+   * Returns true if conf has already been fully handled by handleParam
+   * and should no longer be recorded as a subfunction. This function is provided by
+   * Overridden subclasses to handle special parameters. DANGER! Becomes
+   * overridden this method, so are normally too
+   * {@link #getAdditionalParams()} and
+   * Override {@link #getFunctionDialogReferences(Collection)} to get the
+   * Handle additional functions from the handled parameters.
    */
   @SuppressWarnings("squid:S1172")
   protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib,
@@ -78,9 +78,9 @@ public abstract class MultiFunction implements Function
   }
 
   /**
-   * Liefert die Namen der Parameter der zusätzlichen Funktionen, die von
+   * Returns the names of the parameters of the additional functions provided by
    * {@link #handleParam(ConfigThingy, FunctionLibrary, DialogLibrary, Map)}
-   * geparst wurden oder null, falls es keine gibt.
+   * have been parsed, or null if there are none.
    */
   protected String[] getAdditionalParams()
   {
@@ -96,13 +96,13 @@ public abstract class MultiFunction implements Function
   {
     this.subFunction = subFunction;
 
-    // Ein Set wäre performanter, aber so wird die Reihenfolge beibehalten. Evtl.
-    // macht es Sinn, auch die anderen Function-Klassen, die im Moment Sets
-    // verwenden auf das Konstrukt mit Liste und contains()-Test umzustellen und
-    // dadurch eine wohldefinierte Reihenfolge zu erreichen. Derzeit ist der Bedarf
-    // dafür aber nicht gegeben, insbes. da insertFunctionValue umgeschrieben
-    // werden soll und der FM4000 bereits umgeschrieben wurde um nicht von der
-    // Reihenfolge abzuhängen.
+    // A set would be more performant, but this way the order is preserved. Possibly.
+    // Does it make sense to include the other Function classes that are currently Sets
+    // use switch to construct with list and contains() test and
+    // thereby achieving a well-defined order. Currently the need
+    // but not given for this, especially since insertFunctionValue was rewritten
+    // should be and the FM4000 has already been rewritten so as not to be affected by the
+    // Depend order.
     ArrayList<String> deps = new ArrayList<>();
     for (Function f : subFunction)
     {

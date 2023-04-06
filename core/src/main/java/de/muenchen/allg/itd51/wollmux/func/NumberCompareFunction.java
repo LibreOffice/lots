@@ -54,24 +54,24 @@ public class NumberCompareFunction extends NumberFunction
   Function marginFun;
 
   /**
-   * Die Unterfunktionen von conf werden als BigDecimals ausgewertet und jeweils
-   * mit dem Ergebnis der ersten Funktion verglichen via compareTo, wobei falls
-   * MARGIN angegeben ist, dessen Abstand &lt;= abs(MARGIN) ist als gleich angesehen
-   * wird (entspricht compareTo Ergebnis 0). cmp1 und cmp2 sind Abbruchergebnisse
-   * dieses Vergleichs. Sobald ein compareTo cmp1 oder cmp2 liefert bricht die
-   * Berechnung ab und es wird das Ergebnis "false" geliefert. Falls ein compareTo
-   * +1 liefert und ein späteres compareTo -1, so wird abgebrochen und als Ergebnis
-   * "0" geliefert. Analog wenn ein compareTo -1 liefert und eine späteres +1.
-   * Falls result nicht null ist, so wird dieser String als Ergebnis geliefert,
-   * wenn nicht wie oben beschrieben mit "false" oder "0" abgebrochen wurde. Falls
-   * result null ist, so wird falls alle compareTos 0 geliefert haben "true"
-   * geliefert. Falls mindestens ein compareTo -1 geliefert hat wird "-1"
-   * zurückgeliefert. Falls mindestens ein compareTo +1 geliefert hat wird "1"
-   * geliefert. Der Fall, dass ein compareTo -1 und ein anderer +1 geliefert hat
-   * wird wie bereits oben beschrieben schon früher abgefangen.
-   *
-   * @throws ConfigurationErrorException
-   *           falls nicht mindestens 2 Unterfunktionen in conf enthalten sind.
+   * The subfunctions of conf are evaluated as BigDecimals and respectively
+    * compared with the result of the first function via compareTo, where if
+    * MARGIN is specified, whose distance &lt;= abs(MARGIN) is considered equal
+    * becomes (equivalent to compareTo result 0). cmp1 and cmp2 are cancellation results
+    * of this comparison. As soon as a compareTo returns cmp1 or cmp2, the breaks
+    * Calculation and the result "false" is returned. If a compareTo
+    * +1 returns and a later compareTo -1, so is aborted and as a result
+    * "0" delivered. Similarly if a compareTo returns -1 and a later +1.
+    * If result is not null, this string is returned as the result,
+    * if not aborted with "false" or "0" as described above. If
+    * result is zero, so if all compareTos returned 0, it becomes "true"
+    * delivered. If at least one compareTo returned -1, it becomes "-1"
+    * returned. If at least one compareTo returned +1, it becomes "1"
+    * delivered. The case that one compareTo returned -1 and another +1
+    * is intercepted earlier as described above.
+    *
+    * @throws ConfigurationErrorException
+    *           unless at least 2 subfunctions are included in conf.
    */
   public NumberCompareFunction(int cmp1, int cmp2, String result,
       ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib,

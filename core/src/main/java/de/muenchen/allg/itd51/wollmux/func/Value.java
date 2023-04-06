@@ -23,21 +23,21 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 /**
- * Ein Wert, der als verschiedene Datentypen abrufbar ist
+ * A value that is available as different data types
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface Value
 {
   /**
-   * Der aktuelle Wert als String. Falls es sich um einen booleschen Wert handelt,
-   * wird der String "true" oder "false" zurückgeliefert.
+   * The current value as a string. If it is a boolean value,
+   * the string "true" or "false" is returned.
    */
   public String getString();
 
   /**
-   * Der aktuelle Wert als boolean. Falls der Wert seiner Natur nach ein String ist,
-   * so ist das Ergebnis abhängig von der konkreten Implementierung.
+   * The current value as boolean. If the value is a string by nature,
+   * so the result depends on the specific implementation.
    */
   public boolean getBoolean();
 }
