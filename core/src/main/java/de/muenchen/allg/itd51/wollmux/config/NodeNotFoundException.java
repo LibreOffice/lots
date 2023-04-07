@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2023 Landeshauptstadt München
+ * Copyright (C) 2005 - 2023 City of Munich
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -23,7 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.config;
 
 /**
- * Signalisiert, dass ein gesuchter Knoten nicht gefunden wurde.
+ * Signals that a searched node was not found.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class NodeNotFoundException extends Exception
