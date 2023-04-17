@@ -78,7 +78,7 @@
           <configuration>
             <licenseName>eupl_v1_1</licenseName>
             <inceptionYear>2005</inceptionYear>
-            <organizationName>Landeshauptstadt München</organizationName>
+            <organizationName>Landeshauptstadt München and LibreOffice contributors</organizationName>
             <trimHeaderLine>true</trimHeaderLine>
             <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
             <canUpdateCopyright>true</canUpdateCopyright>
