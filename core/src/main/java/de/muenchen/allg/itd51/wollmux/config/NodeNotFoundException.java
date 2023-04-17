@@ -23,7 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.config;
 
 /**
- * Signalisiert, dass ein gesuchter Knoten nicht gefunden wurde.
+ * Signals that a searched node was not found.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class NodeNotFoundException extends Exception
