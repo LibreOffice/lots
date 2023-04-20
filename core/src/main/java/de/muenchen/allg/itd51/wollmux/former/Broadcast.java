@@ -23,7 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 /**
- * Interface for messages on the global broadcast channel. See also
+ * Interface for sending a message on the global publishing subscribe channel. See also
  * {@link de.muenchen.allg.itd51.wollmux.former.BroadcastListener}.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -31,7 +31,7 @@ package de.muenchen.allg.itd51.wollmux.former;
 public interface Broadcast
 {
   /**
-   * Send this broadcast message to listener.
+   * Send the global message to the listener.
    */
   public void sendTo(BroadcastListener listener);
 }

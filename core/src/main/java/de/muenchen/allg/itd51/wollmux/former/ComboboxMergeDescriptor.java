@@ -28,7 +28,7 @@ import de.muenchen.allg.itd51.wollmux.former.control.model.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.model.IdModel;
 
 /**
- * Contains information about a happened fusing together of multiple checkboxes to
+ * Information container for merging seperate checkboxes into
  * a single combobox.
  */
 public class ComboboxMergeDescriptor
@@ -40,9 +40,9 @@ public class ComboboxMergeDescriptor
   private FormControlModel combo;
 
   /**
-   * A {@link Map}, which keys are the {@link IdModel}s of the checkboxes,
-   * which have been merged, in which every of these IDs were mapped on a string,
-   * which describes the combobox value. The choose one of them matches the activation of the old
+   * A {@link Map}, which keys are the {@link IdModel}s of the merged checkboxes.
+   * Every of this IDs will be mapped on a string, which describes the ComboBox value.
+   * The choose of one of them correspondents to the activation of the old
    * checkbox.
    */
   private Map<IdModel, String> mapCheckboxId2ComboboxEntry;

@@ -23,8 +23,8 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 /**
- * Message that an object was selected in a view. This message will be
- * evaluated by another view to align also your selections.
+ * Message for object selection in a View. This message will be
+ * evaluated by another View to align also your selections.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -47,7 +47,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   private int state;
 
   /**
-   * true =&gt; Selektion delete complete first bevor selecting/deselecting the object.
+   * true =&gt; Selektion delete fully bevor selecting/deselecting the object.
    */
   private boolean clearSelection;
 
@@ -59,7 +59,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
    * @param state
    *          -1 =&gt; deselect, 1 =&gt; select, 0: toggle
    * @param clearSelection
-   *          true =&gt; Selektion delete complete first bevor selecting/deselecting of myObject.
+   *          true =&gt; Selektion delete fully bevor selecting/deselecting of myObject.
    */
   protected BroadcastObjectSelection(Object model, int state, boolean clearSelection)
   {
@@ -74,7 +74,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   }
 
   /**
-   * true =&gt; Selektion delete complete first bevor selecting/deselecting the object.
+   * true =&gt; Selektion delete fully bevor selecting/deselecting the object.
    */
   public boolean getClearSelection()
   {
