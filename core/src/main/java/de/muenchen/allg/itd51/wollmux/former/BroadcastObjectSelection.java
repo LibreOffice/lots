@@ -47,7 +47,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   private int state;
 
   /**
-   * true =&gt; Selektion delete fully bevor selecting/deselecting the object.
+   * true =&gt; Delete selection fully before selecting/deselecting the object.
    */
   private boolean clearSelection;
 
@@ -59,7 +59,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
    * @param state
    *          -1 =&gt; deselect, 1 =&gt; select, 0: toggle
    * @param clearSelection
-   *          true =&gt; Selektion delete fully bevor selecting/deselecting of myObject.
+   *          true =&gt; Delete selection fully before selecting/deselecting of myObject.
    */
   protected BroadcastObjectSelection(Object model, int state, boolean clearSelection)
   {
@@ -74,7 +74,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   }
 
   /**
-   * true =&gt; Selektion delete fully bevor selecting/deselecting the object.
+   * true =&gt; Delete selection fully before selecting/deselecting the object.
    */
   public boolean getClearSelection()
   {
