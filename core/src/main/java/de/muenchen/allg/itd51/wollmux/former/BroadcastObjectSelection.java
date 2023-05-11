@@ -23,8 +23,8 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 /**
- * Nachricht, dass in einer View ein Object ausgewählt wurde. Diese Nachricht wird
- * von anderen Views ausgewertet, um ihre Selektionen ebenfalls anzupassen.
+ * Message for object selection in a View. This message will be
+ * evaluated by another View to align also your selections.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -37,29 +37,29 @@ public abstract class BroadcastObjectSelection implements Broadcast
   public static final int STATE_SHIFT_CLICK = 2;
 
   /**
-   * das {@link Object} das ausgewählt wurde.
+   * the {@link Object} which was selected.
    */
   private Object myObject;
 
   /**
-   * -1 =&gt; abwählen, 1 =&gt; anwählen, 0: toggle.
+   * -1 =&gt; deselect, 1 =&gt; select, 0: toggle.
    */
   private int state;
 
   /**
-   * true =&gt; Selektion erst ganz löschen vor an/abwählen des Objektes.
+   * true =&gt; Delete selection fully before selecting/deselecting the object.
    */
   private boolean clearSelection;
 
   /**
-   * Erzeugt eine neue Nachricht.
+   * Creates a new message.
    *
    * @param model
-   *          das {@link Object} das ausgewählt wurde.
+   *          the {@link Object} which was selected.
    * @param state
-   *          -1 =&gt; abwählen, 1 =&gt; anwählen, 0: toggle
+   *          -1 =&gt; deselect, 1 =&gt; select, 0: toggle
    * @param clearSelection
-   *          true =&gt; Selektion erst ganz löschen vor an/abwählen von myObject.
+   *          true =&gt; Delete selection fully before selecting/deselecting of myObject.
    */
   protected BroadcastObjectSelection(Object model, int state, boolean clearSelection)
   {
@@ -74,7 +74,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   }
 
   /**
-   * true =&gt; Selektion erst ganz löschen vor an/abwählen des Objekts.
+   * true =&gt; Delete selection fully before selecting/deselecting the object.
    */
   public boolean getClearSelection()
   {
@@ -82,7 +82,7 @@ public abstract class BroadcastObjectSelection implements Broadcast
   }
 
   /**
-   * Liefert das Objekt zurück, das de/selektiert wurde.
+   * Returns the object, which was de/selected.
    */
   public Object getObject()
   {
