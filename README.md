@@ -1,19 +1,19 @@
-# WollMux
+# LibreOffice Template System
 
 ## Introduction
-WollMux is a LibreOffice extension with enhanced template, form, and autotext functionality. It can construct templates on the fly from multiple files (e.g. letterhead, footer, and body text) and will fill in personal and organizational data from various databases such as LDAP. An extra form GUI presents fields in an easily navigable manner and offers plausibility checks and computed values to ease filling in the form. Chainable printing functions allow various transformations during print and custom dialogs.
+LibreOffice Template System (formerly WollMux) is a LibreOffice extension with enhanced template, form, and autotext functionality. It can construct templates on the fly from multiple files (e.g. letterhead, footer, and body text) and will fill in personal and organizational data from various databases such as LDAP. An extra form GUI presents fields in an easily navigable manner and offers plausibility checks and computed values to ease filling in the form. Chainable printing functions allow various transformations during print and custom dialogs.
 
-WollMux is licensed under the [European Union Public Licence (EUPL)](https://joinup.ec.europa.eu/licence/european-union-public-licence-version-11-or-later-eupl).
+The LibreOffice Template System is licensed under the [European Union Public Licence (EUPL)](https://joinup.ec.europa.eu/licence/european-union-public-licence-version-11-or-later-eupl).
 
-**More information about WollMux can be found at our main page at [wollmux.org](https://wollmux.org/)**
+**More information about the LibreOffice Template System can be found at our main page at [wollmux.org](https://wollmux.org/)**
 
 ## How to build?
-WollMux is separated into 3 modules:
+LibreOffice Template System is separated into 3 modules:
 * wollmux: All main classes of the extension
 * [wollmux-interfaces](idl/): UNO API Interfaces
 * [unohelper](https://github.com/LibreOffice/UNOHelper): Support classes for using UNO
 
-The following applications have to be installed to compile WollMux:
+The following applications have to be installed to compile the LibreOffice Template System:
 * JAVA Development Kit (e.g. [Adoptium](https://adoptium.net)) (at least Java 11)
 * [Apache Maven](https://maven.apache.org/download.cgi)
 * [Git](http://git-scm.com/downloads/)
@@ -36,14 +36,14 @@ Afterwards the property `UNO_PATH` has to be set in the maven settings.
 ```
 * `<UNO_PATH>` is the folder, where the LibreOffice executable is located (eg. /opt/libreoffice/program)
 
-Before building WollMux, you need to install UNOHelper to your local maven repo (the prebuilt package is currently not available):
+Before building the LibreOffice Template System, you need to install UNOHelper to your local maven repo (the prebuilt package is currently not available):
 
 ```
 git clone https://github.com/LibreOffice/UNOHelper.git
 mvn install
 ```
 
-Then run the following commands to download and build WollMux:
+Then run the following commands to download and build the LibreOffice Template System:
 
 ```
 git clone https://github.com/LibreOffice/WollMux.git
@@ -60,7 +60,7 @@ mvn license:update-file-header
 ```
 
 ## Debugging
-### External WollMux (Eclipse)
+### External Debugging with Eclipse
 WollMux.oxt extension is not installed in LibreOffice, but is loaded from external by starting a debug session in eclipse. There exist an additional extension **WollMux_ButtonsOnly.oxt**, which only contains the toolbars and dialogs. This extension must be installed in LibreOffice. Therefore call
 
 ```
@@ -105,7 +105,7 @@ If suspend is set to `y`, LibreOffice waits until an external process connects b
 <img src="https://translations.documentfoundation.org/widgets/wollmux/-/wollmux/multi-auto.svg" alt="Translation status" />
 </a>
 
-[Translate WollMux](https://translations.documentfoundation.org/engage/wollmux)
+[Translate the LibreOffice Template System](https://translations.documentfoundation.org/engage/wollmux)
 
 To update pot files from source, run these commands:
 
@@ -115,4 +115,4 @@ xgettext --default-domain=wollmux --output=core/i18n/wollmux.pot --language=java
 
 This creates the `core/i18n/wollmux.pot` template file. It will be picked up by Weblate, and the po files will be updated accordingly.
 
-The translations will be committed to this repository from time to time. The build system will then pick up the po files, and convert and bundle them with WollMux.
+The translations will be committed to this repository from time to time. The build system will then pick up the po files, and convert and bundle them with the LibreOffice Template System.
