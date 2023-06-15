@@ -47,7 +47,7 @@ public class FunkyDatasourceTest
         new MockDatasource("mock", List.of("column"), List.of(new MockDataset("ds", Map.of("column", "value")),
             new MockDataset("ds2", Map.of("column", "value2")))));
     Datasource ds = new FunkyDatasource(nameToDatasource, new ConfigThingy("",
-        "NAME \"funky\" SOURCE \"mock\" Spaltenumsetzung(column2(CAT(\"neu_\" VALUE(\"column\"))))"));
+        "NAME \"funky\" SOURCE \"mock\" ColumnTransformation(column2(CAT(\"neu_\" VALUE(\"column\"))))"));
     assertEquals("funky", ds.getName());
     assertEquals(List.of("column2", "column"), ds.getSchema());
 
@@ -69,11 +69,11 @@ public class FunkyDatasourceTest
         new MockDatasource("mock", List.of("column"), List.of(new MockDataset("ds", Map.of("column", "value")),
             new MockDataset("ds2", Map.of("column", "value2")))));
     assertThrows(ConfigurationErrorException.class, () -> new FunkyDatasource(nameToDatasource, new ConfigThingy("",
-        "SOURCE \"mock\" Spaltenumsetzung(column2(CAT(\"neu_\" VALUE(\"column\"))))")));
+        "SOURCE \"mock\" ColumnTransformation(column2(CAT(\"neu_\" VALUE(\"column\"))))")));
     assertThrows(ConfigurationErrorException.class, () -> new FunkyDatasource(nameToDatasource,
-        new ConfigThingy("", "NAME \"funky\" Spaltenumsetzung(column2(CAT(\"neu_\" VALUE(\"column\"))))")));
+        new ConfigThingy("", "NAME \"funky\" ColumnTransformation(column2(CAT(\"neu_\" VALUE(\"column\"))))")));
     assertThrows(ConfigurationErrorException.class, () -> new FunkyDatasource(nameToDatasource, new ConfigThingy("",
-        "NAME \"funky\" SOURCE \"unknown\" Spaltenumsetzung(column2(CAT(\"neu_\" VALUE(\"column\"))))")));
+        "NAME \"funky\" SOURCE \"unknown\" ColumnTransformation(column2(CAT(\"neu_\" VALUE(\"column\"))))")));
   }
 
 }

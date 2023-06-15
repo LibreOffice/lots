@@ -101,7 +101,7 @@ public class DatasourceSearchDialog implements Dialog
   private ConfigThingy myConf;
 
   /**
-   * All IDs provided by Spaltenumsetzung
+   * All IDs provided by ColumnTransformation
    */
   private Set<String> schema;
 
@@ -171,7 +171,7 @@ public class DatasourceSearchDialog implements Dialog
     if (schema.isEmpty())
     {
       throw new ConfigurationErrorException(
-          L.m("Error within the function dialogue: Section 'Spaltenumsetzung' could not be parsed!"));
+          L.m("Error within the function dialogue: Section 'ColumnTransformation' could not be parsed!"));
     }
     this.data = new HashMap<>();
   }
@@ -357,7 +357,7 @@ public class DatasourceSearchDialog implements Dialog
     private Layout layout;
 
     /**
-     * The columns defined in the section Spaltenumsetzung.
+     * The columns defined in the section ColumnTransformation.
      */
     private List<String> dialogWindowSchema;
 
@@ -415,10 +415,10 @@ public class DatasourceSearchDialog implements Dialog
       try
       {
         columnTransformer = new ColumnTransformer(
-            FunctionFactory.parseTrafos(conf, "Spaltenumsetzung", funcLib, dialogLib, context));
+            FunctionFactory.parseTrafos(conf, "ColumnTransformation", funcLib, dialogLib, context));
       } catch (ConfigurationErrorException x)
       {
-        LOGGER.error("Error while parsing the section 'Spaltenumsetzung'", x);
+        LOGGER.error("Error while parsing the section 'ColumnTransformation'", x);
       }
       dialogWindowSchema = columnTransformer.getSchema();
       layout = new VerticalLayout();
@@ -639,8 +639,8 @@ public class DatasourceSearchDialog implements Dialog
           }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error("Error within the section 'Spaltenumsetzung' or 'Vorschau'. Column '{}' is to be "
-              + "displayed in the preview, but is not defined in the section 'Spaltenumsetzung'.", dbSpalte);
+          LOGGER.error("Error within the section 'ColumnTransformation' or 'Vorschau'. Column '{}' is to be "
+              + "displayed in the preview, but is not defined in the section 'ColumnTransformation'.", dbSpalte);
         }
       }
     }
@@ -838,7 +838,7 @@ public class DatasourceSearchDialog implements Dialog
     {
       for (ConfigThingy tab : fenster)
       {
-        for (ConfigThingy columnMapping : tab.query("Spaltenumsetzung", 1))
+        for (ConfigThingy columnMapping : tab.query("ColumnTransformation", 1))
         {
           for (ConfigThingy column : columnMapping)
           {
