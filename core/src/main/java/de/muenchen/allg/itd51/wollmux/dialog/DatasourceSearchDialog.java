@@ -436,7 +436,7 @@ public class DatasourceSearchDialog implements Dialog
       addUIElements(conf.query("SearchResult"), controlContainer, resultLayout);
       mainLayout.addLayout(resultLayout, 1);
       Layout previewLayout = new VerticalLayout(0, 0, 0, 0, 5);
-      addUIElements(conf.query("Vorschau"), controlContainer, previewLayout);
+      addUIElements(conf.query("Preview"), controlContainer, previewLayout);
       mainLayout.addLayout(previewLayout, 1);
 
       Layout footerLayout = new HorizontalLayout(10, 0, 5, 5, 15);
@@ -639,7 +639,7 @@ public class DatasourceSearchDialog implements Dialog
           }
         } catch (ColumnNotFoundException e)
         {
-          LOGGER.error("Error within the section 'ColumnTransformation' or 'Vorschau'. Column '{}' is to be "
+          LOGGER.error("Error within the section 'ColumnTransformation' or 'Preview'. Column '{}' is to be "
               + "displayed in the preview, but is not defined in the section 'ColumnTransformation'.", dbSpalte);
         }
       }
