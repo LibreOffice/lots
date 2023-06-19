@@ -262,7 +262,7 @@ public class WollMuxSingleton
    */
   private static void registerDatasources(ConfigThingy conf, URL context)
   {
-    Iterator<ConfigThingy> iter = conf.query("Datenquellen").query("Registriere").iterator();
+    Iterator<ConfigThingy> iter = conf.query("DataSources").query("Registriere").iterator();
     while (iter.hasNext())
     {
       ConfigThingy regConf = iter.next();
@@ -272,7 +272,7 @@ public class WollMuxSingleton
         name = regConf.get("NAME").toString();
       } catch (NodeNotFoundException e)
       {
-        LOGGER.error("NAME attribute is missing in 'Datenquellen'/'Registriere' section", e);
+        LOGGER.error("NAME attribute is missing in 'DataSources'/'Registriere' section", e);
         continue;
       }
 
@@ -282,7 +282,7 @@ public class WollMuxSingleton
         urlStr = regConf.get("URL").toString();
       } catch (NodeNotFoundException e)
       {
-        LOGGER.error("URL attribute is missing in 'DatenquellenRegistriere' section for data source '{0}'", name, e);
+        LOGGER.error("URL attribute is missing in 'DataSources'/'Registriere' section for data source '{0}'", name, e);
         continue;
       }
 
