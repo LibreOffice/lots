@@ -57,7 +57,7 @@ public class Shortcuts
    * sets new keyboard shortcut in OOo-Writer.
    *
    * @param tastenkombinationenConf
-   *          .conf section Tastenkuerzel with all nodes
+   *          .conf section KeyboardShortcuts with all nodes
    */
   public static void createShortcuts(ConfigThingy tastenkombinationenConf)
   {
@@ -124,7 +124,7 @@ public class Shortcuts
       }
       else
       {
-        LOGGER.error("Invalid shortcut '{}' in .conf section \"Tastenkuerzel\"", shortcut);
+        LOGGER.error("Invalid shortcut '{}' in .conf section \"KeyboardShortcuts\"", shortcut);
       }
     }
 
