@@ -371,7 +371,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     layout.addControl(line, 1);
 
     ConfigThingy menubar = conf.query("Menubar");
-    ConfigThingy menuConf = conf.query("Menues");
+    ConfigThingy menuConf = conf.query("Menus");
 
     if (menubar.count() > 0)
     {
@@ -591,7 +591,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
           resultBox.removeItems((short) 0, resultBox.getItemCount());
           searchActions.clear();
 
-          ConfigThingy menues = WollMuxFiles.getWollmuxConf().get("Menues");
+          ConfigThingy menues = WollMuxFiles.getWollmuxConf().get("Menus");
           ConfigThingy labels = menues.queryAll("LABEL", 4, true);
 
           List<UIElementConfig> newItems = new ArrayList<>(labels.count());
