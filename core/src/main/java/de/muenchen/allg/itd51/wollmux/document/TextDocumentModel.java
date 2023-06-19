@@ -456,7 +456,7 @@ public class TextDocumentModel
       return;
     }
 
-    final String errmsg = String.format("Error while reading the 'Druckfunktionen' section \"%s\":", data);
+    final String errmsg = String.format("Error while reading the 'PrintFunctions' section \"%s\":", data);
 
     ConfigThingy conf = new ConfigThingy("");
     try
@@ -471,14 +471,14 @@ public class TextDocumentModel
       {
         // backwards compatibility for print blocks with only the function name.
         ConfigThingy.checkIdentifier(data);
-        conf = new ConfigThingy("", "WM(Druckfunktionen((FUNCTION '" + data + "')))");
+        conf = new ConfigThingy("", "WM(PrintFunctions((FUNCTION '" + data + "')))");
       } catch (java.lang.Exception forgetMe)
       {
         LOGGER.error(errmsg, e);
       }
     }
 
-    ConfigThingy functions = conf.query("WM").query("Druckfunktionen").queryByChild(FUNCTION);
+    ConfigThingy functions = conf.query("WM").query("PrintFunctions").queryByChild(FUNCTION);
     for (Iterator<ConfigThingy> iter = functions.iterator(); iter.hasNext();)
     {
       ConfigThingy func = iter.next();
@@ -780,7 +780,7 @@ public class TextDocumentModel
    *
    * <pre>
    * WM(
-   *   Druckfunktionen(
+   *   PrintFunctions(
    *     (FUNCTION 'name')
    *          ...
    *     )
@@ -803,7 +803,7 @@ public class TextDocumentModel
       Collections.sort(names);
 
       ConfigThingy wm = new ConfigThingy("WM");
-      ConfigThingy druckfunktionen = new ConfigThingy("Druckfunktionen");
+      ConfigThingy druckfunktionen = new ConfigThingy("PrintFunctions");
       wm.addChild(druckfunktionen);
       for (String name : names)
       {

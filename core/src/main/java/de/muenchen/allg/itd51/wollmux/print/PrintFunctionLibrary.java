@@ -141,7 +141,7 @@ public class PrintFunctionLibrary
   {
     PrintFunctionLibrary funcs = new PrintFunctionLibrary();
 
-    conf = conf.query("Druckfunktionen");
+    conf = conf.query("PrintFunctions");
     for (ConfigThingy printFunctionCollection : conf)
     {
       for (ConfigThingy printFunction : printFunctionCollection)
