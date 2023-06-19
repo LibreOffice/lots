@@ -69,7 +69,7 @@ public class PreferDatasource extends Datasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser PreferDatasource
    *          bereits vollständig instanziierten Datenquellen.
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser PreferDatasource
+   *          der "DataSource"-Knoten, der die Beschreibung dieser PreferDatasource
    *          enthält.
    * @param context
    *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht

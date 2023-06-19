@@ -706,7 +706,7 @@ public class MailMergeController implements PreviewModelListener, DatasourceMode
     String type = "unknown";
     try
     {
-      ConfigThingy query = mmconf.query("Datenquelle");
+      ConfigThingy query = mmconf.query("DataSource");
       if (query.count() > 0)
       {
         datenquelle = query.getLastChild();

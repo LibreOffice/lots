@@ -109,7 +109,7 @@ public class OverlayDatasource extends Datasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser OverlayDatasource bereits
    *          vollständig instanziierten Datenquellen.
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser OverlayDatasource enthält.
+   *          der "DataSource"-Knoten, der die Beschreibung dieser OverlayDatasource enthält.
    * @param context
    *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht verwendet).
    */

@@ -64,7 +64,7 @@ public class Datasources
     ConfigThingy joinConf = WollMuxFiles.getWollmuxConf();
     URL context = WollMuxFiles.getDefaultContext();
 
-    ConfigThingy datenquellen = joinConf.query("DataSources").query("Datenquelle");
+    ConfigThingy datenquellen = joinConf.query("DataSources").query("DataSource");
     for (ConfigThingy sourceDesc : datenquellen)
     {
       String name = sourceDesc.getString("NAME");

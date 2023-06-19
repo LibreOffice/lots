@@ -193,7 +193,7 @@ public class OOoDatasource extends Datasource
    *          bereits vollständig instanziierten Datenquellen (zur Zeit nicht
    *          verwendet).
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser OOoDatasource
+   *          der "DataSource"-Knoten, der die Beschreibung dieser OOoDatasource
    *          enthält.
    * @param noKey
    *          Falls true, so wird immer die erste Spalte als Schlüsselspalte

@@ -292,7 +292,7 @@ public class DBModel implements DatasourceModel
       throw new NoTableSelectedException();
     }
 
-    ConfigThingy dq = new ConfigThingy("Datenquelle");
+    ConfigThingy dq = new ConfigThingy("DataSource");
     if (datasourceName != null && !getTableNames().isEmpty())
     {
       ConfigThingy arg = new ConfigThingy("TYPE");
