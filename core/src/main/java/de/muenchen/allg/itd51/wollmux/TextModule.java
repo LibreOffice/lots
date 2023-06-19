@@ -108,7 +108,7 @@ public class TextModule
     // Order in LinkedList tbList. So later defined
     // Text module sections always take precedence.
     LinkedList<ConfigThingy> tbListe = new LinkedList<>();
-    ConfigThingy tbConf = conf.query("Textbausteine");
+    ConfigThingy tbConf = conf.query("TextBlocks");
     Iterator<ConfigThingy> iter = tbConf.iterator();
     while (iter.hasNext())
     {
@@ -257,7 +257,7 @@ public class TextModule
    *          can be.
    * @param textbausteine
    *          Description of a boilerplate section in the form
-   *          "Text modules(SEPARATOR ... abbreviation(...))"
+   *          "TextBlocks(SEPARATOR ... abbreviation(...))"
    * @return array of strings with (frag_id + args) or null
    */
   public static String[] parseIdentifierInTextbausteine(String identifierWithArgs,
