@@ -107,7 +107,7 @@ public class TextDocumentModel
 
   private static final String FENSTER = "Fenster";
 
-  private static final String FUNKTIONEN = "Funktionen";
+  private static final String FUNKTIONEN = "Functions";
 
   private static final String BUTTONS = "Buttons";
 

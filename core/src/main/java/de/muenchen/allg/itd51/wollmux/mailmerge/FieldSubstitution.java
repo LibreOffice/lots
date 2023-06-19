@@ -272,7 +272,7 @@ public class FieldSubstitution implements Iterable<FieldSubstitution.SubstElemen
     try
     {
       ConfigThingy trafoConf = controller.getModel().getFormDescription().query("Formular")
-          .query("Funktionen").query(trafoName, 2).getLastChild();
+          .query("Functions").query(trafoName, 2).getLastChild();
       substituteValueRecursive(trafoConf, oldFieldId, newFieldId);
 
       // persist form description

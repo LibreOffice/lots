@@ -225,10 +225,10 @@ public class FunctionFactoryTest
   @Test
   public void testParseFunctions() throws Exception
   {
-    FunctionLibrary lib = FunctionFactory.parseFunctions(new ConfigThingy("Functions", "Funktionen( func1 \"abc\")"),
+    FunctionLibrary lib = FunctionFactory.parseFunctions(new ConfigThingy("Functions", "Functions( func1 \"abc\")"),
         dialogLib, context, funcLib);
     assertTrue(lib.hasFunction("func1"));
-    lib = FunctionFactory.parseFunctions(new ConfigThingy("Functions", "Funktionen( func1 (unknown \"abc\"))"),
+    lib = FunctionFactory.parseFunctions(new ConfigThingy("Functions", "Functions( func1 (unknown \"abc\"))"),
         dialogLib, context, funcLib);
     assertFalse(lib.hasFunction("func1"));
   }

@@ -824,7 +824,7 @@ public class FormularMax4kController
 
   /**
    * Extrahiert aus conf die globalen Eingenschaften des Formulars wie z,B, den
-   * Formulartitel oder die Funktionen des Funktionen-Abschnitts.
+   * Formulartitel oder die Funktionen des "Functions"-Abschnitts.
    *
    * @param conf
    *          der WM-Knoten der über einer beliebigen Anzahl von Formular-Knoten
