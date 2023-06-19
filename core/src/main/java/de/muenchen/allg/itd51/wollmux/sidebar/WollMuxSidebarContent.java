@@ -130,7 +130,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
    * Error message if no configuration can be found.
    */
   public static final String WOLLMUX_CONFIG_ERROR_MESSAGE = L
-      .m("No section \"Symbolleisten\" could be read from your WollMux configuration.\n"
+      .m("No section \"Toolbars\" could be read from your WollMux configuration.\n"
           + "Therefore, the WollMux toolbar cannot be started. "
           + "Please check if in your wollmux.conf the %include for the configuration "
           + "of the WollMuxBar (e.g. wollmuxbar_standard.conf) is present "
@@ -383,7 +383,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
       }
     }
 
-    ConfigThingy bkl = conf.query("Symbolleisten").query("Briefkopfleiste");
+    ConfigThingy bkl = conf.query("Toolbars").query("Briefkopfleiste");
     createUIElements(menuConf, bkl.getLastChild(), false);
 
     tree.expandNode(root);
@@ -432,7 +432,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     {
       LOGGER.debug("WollMuxBar gestartet");
 
-      if (combinedConf.query("Symbolleisten").count() == 0)
+      if (combinedConf.query("Toolbars").count() == 0)
       {
         LOGGER.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
         InfoDialog.showInfoModal(L.m("Incorrect configuration"), WOLLMUX_CONFIG_ERROR_MESSAGE);
