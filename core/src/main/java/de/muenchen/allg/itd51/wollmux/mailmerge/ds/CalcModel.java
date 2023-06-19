@@ -277,7 +277,7 @@ public class CalcModel implements DatasourceModel
     {
       throw new NoTableSelectedException();
     }
-    ConfigThingy dq = new ConfigThingy("Datenquelle");
+    ConfigThingy dq = new ConfigThingy("DataSource");
     String url = UNO.XModel(spreadSheetDocument).getURL();
     if (!url.isEmpty() && !sheetName.isEmpty())
     {

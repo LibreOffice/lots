@@ -62,7 +62,7 @@ public class UnionDatasource extends Datasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser UnionDatasource
    *          bereits vollständig instanziierten Datenquellen.
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser UnionDatasource
+   *          der "DataSource"-Knoten, der die Beschreibung dieser UnionDatasource
    *          enthält.
    * @param context
    *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht

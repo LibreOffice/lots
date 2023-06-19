@@ -55,7 +55,7 @@ public class ThingyDatasource extends RAMDatasource
    *          enthält alle bis zum Zeitpunkt der Definition dieser
    *          ThingyDatasource bereits vollständig instanziierten Datenquellen.
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser
+   *          der "DataSource"-Knoten, der die Beschreibung dieser
    *          ThingyDatasource enthält.
    * @param context
    *          der Kontext relativ zu dem URLs aufgelöst werden sollen.
