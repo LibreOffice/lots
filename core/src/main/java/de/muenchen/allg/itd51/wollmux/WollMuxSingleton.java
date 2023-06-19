@@ -164,9 +164,8 @@ public class WollMuxSingleton
         LOGGER.error("", e);
       }
 
-      // Set the settings set in the OOoSettings sections
-      // configuration options
-      this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("OOoEinstellungen"));
+      // Set the settings set in the LibreOfficeSettings sections configuration options
+      this.setOOoConfiguration(WollMuxFiles.getWollmuxConf().query("LibreOfficeSettings"));
     }
   }
 
@@ -339,15 +338,15 @@ public class WollMuxSingleton
   }
 
   /**
-   * Sets the settings contained in the ConfigThingy passed OOoEinstellungen section to
-   * the OOo-Registry.
+   * Sets the settings contained in the ConfigThingy passed LibreOfficeSettings section to
+   * the LibreOffice registry.
    *
-   * @param oooEinstellungenConf
-   *          The OOoEinstellungen node of such a section.
+   * @param libreOfficeSettingsConf
+   *          The LibreOfficeSettings node of such a section.
    */
-  private static void setConfigurationValues(ConfigThingy oooEinstellungenConf)
+  private static void setConfigurationValues(ConfigThingy libreOfficeSettingsConf)
   {
-    for (ConfigThingy element : oooEinstellungenConf)
+    for (ConfigThingy element : libreOfficeSettingsConf)
     {
       try
       {
@@ -360,7 +359,7 @@ public class WollMuxSingleton
         setConfigurationValue(node, prop, v);
       } catch (Exception e)
       {
-        LOGGER.error("OOoConfiguration: Configuration '{}' could not be set:", element.stringRepresentation(), e);
+        LOGGER.error("LibreOfficeSettings: Configuration '{}' could not be set:", element.stringRepresentation(), e);
       }
     }
   }
