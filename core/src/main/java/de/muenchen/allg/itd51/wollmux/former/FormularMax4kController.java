@@ -471,7 +471,7 @@ public class FormularMax4kController
     {
       if (tabConf == null)
       {
-        tabConf = new ConfigThingy("Empfaengerauswahl", tabConfUrl);
+        tabConf = new ConfigThingy("RecipientSelection", tabConfUrl);
       }
       parseTab(tabConf, 0);
       updateDocument();
