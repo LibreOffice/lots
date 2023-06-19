@@ -241,7 +241,7 @@ public class ConfigEditor extends JFrame implements SearchListener
     DefaultCompletionProvider provider = new DefaultCompletionProvider();
 
     provider.addCompletion(new BasicCompletion(provider, "WM"));
-    provider.addCompletion(new BasicCompletion(provider, "Eingabefelder"));
+    provider.addCompletion(new BasicCompletion(provider, "InputFields"));
     provider.addCompletion(new BasicCompletion(provider, "Fenster"));
     provider.addCompletion(new BasicCompletion(provider, "Formular"));
     provider.addCompletion(new BasicCompletion(provider, "Tab"));

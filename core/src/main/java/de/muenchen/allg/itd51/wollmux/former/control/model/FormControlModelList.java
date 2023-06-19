@@ -280,7 +280,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
     ConfigThingy conf = export;
     ConfigThingy tabConf = export;
 
-    int phase = 0; // 0: tab start, 1: Eingabefelder, 2: Buttons
+    int phase = 0; // 0: tab start, 1: InputFields, 2: Buttons
     String id = makeUniqueId(FormularMax4kController.STANDARD_TAB_NAME);
     FormControlModel currentTab =
     FormControlModel.createTab(id, id, formularMax4000);
@@ -306,7 +306,7 @@ public class FormControlModelList implements Iterable<FormControlModel>
          * wenn der Button ein trac#20601 Button ist, soll dieser nicht in einen eigenen Knoten
          * Button( ... ) exportiert werden da er sonst in der Fusszeile der FormularGUI auftauchen
          * würde in der auch die Standardbuttons gezeigt werden. der button wird dadurch ohne
-         * expliziten Button-Knoten in den Knoten "Eingabefelder" exportiert.
+         * expliziten Button-Knoten in den Knoten "InputFields" exportiert.
          */
         if(model.getAction().equals("openExt") || model.getAction().equals("openTemplate")) {
           conf = tabConf.add(FormMaxConstants.INPUT_FIELDS);
