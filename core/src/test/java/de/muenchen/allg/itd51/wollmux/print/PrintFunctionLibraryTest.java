@@ -40,7 +40,7 @@ import de.muenchen.allg.itd51.wollmux.interfaces.XPrintModel;
 public class PrintFunctionLibraryTest
 {
   private static final String functionString = "TestFunction(EXTERN(URL \"java:de.muenchen.allg.itd51.wollmux.print.PrintFunctionLibraryTest.testDefaultPrintFunctions\") ORDER \"50\")";
-  private static final String confString = "Druckfunktionen(" + functionString + ")";
+  private static final String confString = "PrintFunctions(" + functionString + ")";
   private static PrintFunction testFunction = new PrintFunction("test", 300)
   {
 

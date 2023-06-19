@@ -124,7 +124,7 @@ interface XWollMuxDocument
        Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
 
        @param functionName
-                der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
+                der Name einer Druckfunktion, die im Abschnitt "PrintFunctions" der
                 WollMux-Konfiguration definiert sein muss.
      */
     void addPrintFunction([in] string functionName);
