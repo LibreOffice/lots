@@ -153,7 +153,7 @@ public class FileCache implements SenderCache
     List<SenderConf> newData = new ArrayList<>();
     try
     {
-      for (ConfigThingy dsconf : cacheData.get("Daten"))
+      for (ConfigThingy dsconf : cacheData.get("Data"))
       {
         String key = dsconf.get("Key").toString();
         Map<String, String> cached = readCachedValues(dsconf, newSchema);
@@ -269,7 +269,7 @@ public class FileCache implements SenderCache
 
   private ConfigThingy dumpData(List<Sender> senderList, List<String> mainSchema) throws SenderException
   {
-    ConfigThingy conf = new ConfigThingy("Daten");
+    ConfigThingy conf = new ConfigThingy("Data");
     for (Sender ds : senderList)
     {
       ConfigThingy dsConf = conf.add("");
