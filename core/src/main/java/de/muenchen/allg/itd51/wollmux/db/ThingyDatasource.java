@@ -127,7 +127,7 @@ public class ThingyDatasource extends RAMDatasource
     List<Dataset> data = new ArrayList<>();
     try
     {
-      ConfigThingy daten = dataDesc.get("Daten");
+      ConfigThingy daten = dataDesc.get("Data");
 
       for (ConfigThingy dsDesc : daten)
       {
@@ -141,7 +141,7 @@ public class ThingyDatasource extends RAMDatasource
     catch (NodeNotFoundException x)
     {
       throw new ConfigurationErrorException(
-          L.m("Error in Conf-file of data source {0}: Section 'Daten' is missing", name), x);
+          L.m("Error in Conf-file of data source {0}: Section 'Data' is missing", name), x);
     }
 
     return data;
