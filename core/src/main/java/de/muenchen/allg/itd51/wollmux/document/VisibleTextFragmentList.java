@@ -41,7 +41,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
  * TODO: überarbeiten! Die VisibleTextFragmentList repräsentiert die ausgewertete
- * Liste aller in den Konfigurationsdateien beschriebener "Textfragmente" Abschnitte.
+ * Liste aller in den Konfigurationsdateien beschriebener "TextFragments" Abschnitte.
  * Sie kümmert sich insbesondere um das Auswerten der Variablen in den URL-Attributen
  * und um die Beachtung der Vorrangregelung: Immer das zuletzt definierte
  * Textfragment oder die zuletzt definierte Variable gewinnt.
@@ -146,7 +146,7 @@ public class VisibleTextFragmentList
     ConfigThingy.checkIdentifier(fragId);
 
     LinkedList<ConfigThingy> tfListe = new LinkedList<>();
-    ConfigThingy tfConf = conf.query("Textfragmente");
+    ConfigThingy tfConf = conf.query("TextFragments");
     Iterator<ConfigThingy> iter = tfConf.iterator();
     while (iter.hasNext())
     {
