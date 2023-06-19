@@ -396,7 +396,7 @@ public class FormularMax4kView extends JFrame
   }
 
   /**
-   * Wertet den Konfigurationsabschnitt FormularMax4000/Standardelemente aus und fügt
+   * Wertet den Konfigurationsabschnitt FormularMax4000/DefaultElements aus und fügt
    * submenu entsprechende Einträge hinzu.
    *
    * @return false, falls der Konfigurationsabschnitt nicht existiert.
@@ -410,7 +410,7 @@ public class FormularMax4kView extends JFrame
     for (ConfigThingy fm4000conf : WollMuxFiles.getWollmuxConf().query(
       "FormularMax4000", 1))
     {
-      for (ConfigThingy eleConf : fm4000conf.query("Standardelemente", 1))
+      for (ConfigThingy eleConf : fm4000conf.query("DefaultElements", 1))
       {
         found = true;
         for (ConfigThingy conf : eleConf)
@@ -459,7 +459,7 @@ public class FormularMax4kView extends JFrame
           catch (Exception x)
           {
             LOGGER.error(
-              L.m("Error while parsing the sections FormularMax4000/Standardelemente"),
+              L.m("Error while parsing the sections FormularMax4000/DefaultElements"),
               x);
           }
         }
@@ -471,7 +471,7 @@ public class FormularMax4kView extends JFrame
   /**
    * Fügt submenu die alten im WollMux gespeicherten Standardelemente-Einträge hinzu.
    * Sollte nur verwendet werden, wenn der entsprechende Konfigurationsabschnitt in
-   * der wollmux,conf fehlt.
+   * der wollmux.conf fehlt.
    *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -479,7 +479,7 @@ public class FormularMax4kView extends JFrame
   {
     JMenuItem menuItem;
     menuItem = new JMenuItem(L.m("Recipient Selection Tab"));
-    
+
     final URL EMPFAENGER_TAB_URL =
       this.getClass().getClassLoader().getResource(
             "default_buttons/empfaengerauswahl_controls.conf");
@@ -491,7 +491,7 @@ public class FormularMax4kView extends JFrame
     submenu.add(menuItem);
 
     menuItem = new JMenuItem(L.m("Cancel, <-Back, Next->"));
-    
+
     final URL STANDARD_BUTTONS_MIDDLE_URL =
         this.getClass().getClassLoader().getResource("default_buttons/standardbuttons_mitte.conf");
 
