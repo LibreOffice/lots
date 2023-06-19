@@ -47,7 +47,7 @@ public class DialogFactory
   }
 
   /**
-   * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis eine
+   * Parst die "FunctionDialogs" Abschnitte aus conf und liefert als Ergebnis eine
    * DialogLibrary zurück.
    *
    * @param baselib
@@ -65,7 +65,7 @@ public class DialogFactory
 
     Set<String> dialogsInBlock = new HashSet<>();
 
-    conf = conf.query("Funktionsdialoge");
+    conf = conf.query("FunctionDialogs");
     Iterator<ConfigThingy> parentIter = conf.iterator();
     while (parentIter.hasNext())
     {
@@ -77,7 +77,7 @@ public class DialogFactory
         String name = dialogConf.getName();
         if (dialogsInBlock.contains(name))
           LOGGER.error("Function dialog '{}' was defined more than once "
-              + "in the same 'Funktionsdialoge' section", name);
+              + "in the same 'FunctionDialogs' section", name);
         dialogsInBlock.add(name);
         try
         {

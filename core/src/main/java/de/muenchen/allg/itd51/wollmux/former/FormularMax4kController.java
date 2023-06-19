@@ -846,7 +846,7 @@ public class FormularMax4kController
     }
 
     funktionsDialogeAbschnitteConf =
-      conf.query(FormMaxConstants.FORMULAR).query("Funktionsdialoge", 2);
+      conf.query(FormMaxConstants.FORMULAR).query("FunctionDialogs", 2);
     tempConf = conf.query(FormMaxConstants.FORMULAR).query(FormMaxConstants.FUNKTIONEN);
 
     if (tempConf.count() >= 1)
