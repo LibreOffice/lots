@@ -277,7 +277,7 @@ public class SenderService implements XPALProvider
     {
       // search by strategy defined in configuration
       ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
-      ConfigThingy strat = wmConf.query("PersonalSenderListInit").query("Suchstrategie")
+      ConfigThingy strat = wmConf.query("PersonalSenderListInit").query("SearchStrategy")
           .getLastChild();
       for (ConfigThingy element : strat)
       {

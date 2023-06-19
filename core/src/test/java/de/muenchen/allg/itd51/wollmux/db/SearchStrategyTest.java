@@ -38,7 +38,7 @@ public class SearchStrategyTest
   {
     SearchStrategy strategy = SearchStrategy
         .parse(new ConfigThingy("",
-            "Suchstrategie(ds (column \"${suchanfrage2}\" column2 \"${suchanfrage1}\") "
+            "SearchStrategy(ds (column \"${suchanfrage2}\" column2 \"${suchanfrage1}\") "
                 + "ds (column \"${suchanfrage2}\" column2 \"${suchanfrage1}\"))"));
     List<Query> queries = strategy.getTemplate(2);
     assertEquals(2, queries.size());
