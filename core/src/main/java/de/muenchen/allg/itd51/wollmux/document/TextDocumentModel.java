@@ -1684,7 +1684,7 @@ public class TextDocumentModel
       mergeSection(conf, FENSTER, mapFensterIdToConfigThingy, tabNames, true);
       mergeSection(conf, "Sichtbarkeit", mapSichtbarkeitIdToConfigThingy, null, false);
       mergeSection(conf, FUNKTIONEN, mapFunktionenIdToConfigThingy, null, false);
-      mergeSection(conf, "Funktionsdialoge", mapFunktionsdialogeIdToConfigThingy, null, false);
+      mergeSection(conf, "FunctionDialogs", mapFunktionsdialogeIdToConfigThingy, null, false);
     }
 
     ConfigThingy conf = new ConfigThingy(FORMULAR);
@@ -1747,7 +1747,7 @@ public class TextDocumentModel
 
     addSubConfiguration(conf, "Sichtbarkeit", mapSichtbarkeitIdToConfigThingy.values());
     addSubConfiguration(conf, FUNKTIONEN, mapFunktionenIdToConfigThingy.values());
-    addSubConfiguration(conf, "Funktionsdialoge", mapFunktionsdialogeIdToConfigThingy.values());
+    addSubConfiguration(conf, "FunctionDialogs", mapFunktionsdialogeIdToConfigThingy.values());
 
     return conf;
   }

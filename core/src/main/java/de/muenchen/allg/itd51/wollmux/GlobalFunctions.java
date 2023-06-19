@@ -46,7 +46,7 @@ public class GlobalFunctions
    */
   private FunctionLibrary documentActionFunctions;
   /**
-   * Contains the dialogs defined in the "Funktionsdialoge" section of wollmux.conf.
+   * Contains the dialogs defined in the "FunctionDialogs" section of wollmux.conf.
    */
   private DialogLibrary funcDialogs;
   /**
