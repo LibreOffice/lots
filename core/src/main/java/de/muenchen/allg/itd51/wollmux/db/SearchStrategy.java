@@ -55,17 +55,17 @@ public class SearchStrategy
   }
 
   /**
-   * Parst den "Suchstrategie"-Abschnitt von conf und liefert eine entsprechende
+   * Parst den "SearchStrategy"-Abschnitt von conf und liefert eine entsprechende
    * SearchStrategy.
    *
    * @param conf
-   *          das {@link ConfigThingy}, dessen "Suchstrategie"-Abschnitt geparst
+   *          das {@link ConfigThingy}, dessen "SearchStrategy"-Abschnitt geparst
    *          werden soll.
    */
   public static SearchStrategy parse(ConfigThingy conf)
   {
     SearchStrategy strategy = new SearchStrategy();
-    conf = conf.query("Suchstrategie");
+    conf = conf.query("SearchStrategy");
     for (ConfigThingy searchConfig : conf)
     {
       for (ConfigThingy queryConf : searchConfig)

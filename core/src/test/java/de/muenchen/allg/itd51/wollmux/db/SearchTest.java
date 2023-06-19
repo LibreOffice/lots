@@ -41,7 +41,7 @@ public class SearchTest
   public void testSearchWithStrategy() throws Exception
   {
     SearchStrategy strategy = SearchStrategy
-        .parse(new ConfigThingy("", "Suchstrategie(test (column \"${suchanfrage1}\"))"));
+        .parse(new ConfigThingy("", "SearchStrategy(test (column \"${suchanfrage1}\"))"));
     Map<String, Datasource> datasources = Map.of("test", new MockDatasource());
     assertNull(Search.search(null, null, null));
     assertNull(Search.search("value", null, null));
@@ -57,16 +57,16 @@ public class SearchTest
     results = Search.search("", strategy, datasources);
     assertEquals(0, results.size());
 
-    strategy = SearchStrategy.parse(new ConfigThingy("", "Suchstrategie(test ())"));
+    strategy = SearchStrategy.parse(new ConfigThingy("", "SearchStrategy(test ())"));
     results = Search.search("value", strategy, datasources);
     assertEquals(2, results.size());
 
-    strategy = SearchStrategy.parse(new ConfigThingy("", "Suchstrategie(test ())"));
+    strategy = SearchStrategy.parse(new ConfigThingy("", "SearchStrategy(test ())"));
     results = Search.search("value", strategy, datasources);
     assertEquals(2, results.size());
 
     strategy = SearchStrategy.parse(
-        new ConfigThingy("", "Suchstrategie(test (column \"${suchanfrage1}\") test (column \"${suchanfrage1}3\"))"));
+        new ConfigThingy("", "SearchStrategy(test (column \"${suchanfrage1}\") test (column \"${suchanfrage1}3\"))"));
     datasources = Map.of("test", new MockDatasource("test", List.of("column", "column2"), List
         .of(
         new MockDataset("ds", Map.of("column", "value", "column2", "value2")),
