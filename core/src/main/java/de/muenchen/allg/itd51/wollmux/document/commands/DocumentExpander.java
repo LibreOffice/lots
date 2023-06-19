@@ -482,7 +482,7 @@ class DocumentExpander extends AbstractExecutor
 
     // Wenn mehr Platzhalter angegeben als Einfügestellen vorhanden, erscheint
     // ein Eintrag in der wollmux.log. Wenn in einer Conf Datei im Bereich
-    // "TextBlocks" dort im Bereich Warnungen ein Eintrag mit
+    // "TextBlocks" dort im Bereich "Warnings" ein Eintrag mit
     // MSG_TOO_MANY_ARGS "true|on|1" ist, erscheint die Fehlermeldung in einem
     // Fenster im Writer.
     if (placeholders.size() < args.size())
@@ -494,7 +494,7 @@ class DocumentExpander extends AbstractExecutor
       LOGGER.error(error);
 
       ConfigThingy conf = WollMuxFiles.getWollmuxConf();
-      ConfigThingy warnungenConf = conf.query("TextBlocks").query("Warnungen");
+      ConfigThingy warnungenConf = conf.query("TextBlocks").query("Warnings");
 
       String message = "";
       try
