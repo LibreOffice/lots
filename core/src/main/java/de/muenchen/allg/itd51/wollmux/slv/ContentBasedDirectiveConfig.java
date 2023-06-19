@@ -89,7 +89,7 @@ public class ContentBasedDirectiveConfig
     {
       if (config != null)
       {
-        ConfigThingy conf = config.query("SachleitendeVerfuegungen");
+        ConfigThingy conf = config.query("ContentBasedDirectives");
         if (conf.count() > 0)
         {
           conf = conf.getLastChild();
