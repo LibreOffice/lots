@@ -383,7 +383,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
       }
     }
 
-    ConfigThingy bkl = conf.query("Toolbars").query("Briefkopfleiste");
+    ConfigThingy bkl = conf.query("Toolbars").query("LetterheadToolbar");
     createUIElements(menuConf, bkl.getLastChild(), false);
 
     tree.expandNode(root);
