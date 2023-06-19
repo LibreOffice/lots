@@ -142,7 +142,7 @@ public class OpenExt
 
   /**
    * Creates a new OpenExt object for the ext extension, taking information about the external
-   * application from wollmuxConf.query("ExterneAnwendungen").
+   * application from wollmuxConf.query("ExternalApplications").
    *
    * ATTENTION! Each OpenExt object can be used only once.
    *
@@ -154,7 +154,7 @@ public class OpenExt
   {
     this.ext = ext;
 
-    ConfigThingy conf = wollmuxConf.query("ExterneAnwendungen");
+    ConfigThingy conf = wollmuxConf.query("ExternalApplications");
     for (ConfigThingy parentConf : conf)
     {
       for (ConfigThingy appConf : parentConf)
@@ -164,7 +164,7 @@ public class OpenExt
         extConf = appConf.query("EXT");
         if (extConf.count() == 0)
         {
-          LOGGER.error("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält "
+          LOGGER.error("Ein Eintrag im Abschnitt \"ExternalApplications\" enthält "
               + "keine gültige EXT-Angabe.");
           continue;
         }
@@ -197,7 +197,7 @@ public class OpenExt
         }
         catch (NodeNotFoundException e)
         {
-          LOGGER.error("One entry within the section \"ExterneAnwendungen\""
+          LOGGER.error("One entry within the section \"ExternalApplications\""
               + " contains an invalid PROGRAM-Specification.");
           continue;
         }

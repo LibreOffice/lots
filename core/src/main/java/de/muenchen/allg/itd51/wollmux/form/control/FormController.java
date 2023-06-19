@@ -153,7 +153,7 @@ public class FormController
   }
 
   /**
-   * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in ExterneAnwendungen
+   * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in ExternalApplications
    * für ext festgelegten FILTERs, startet dann die zugehörige externe Anwendung mit dieser Datei
    * und schließt das Formular.
    *
@@ -166,7 +166,7 @@ public class FormController
   }
 
   /**
-   * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in ExterneAnwendungen
+   * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in ExternalApplications
    * für ext festgelegten FILTERs und startet dann die zugehörige externe Anwendung mit dieser
    * Datei.
    *
