@@ -162,7 +162,7 @@ public class SenderService implements XPALProvider
         DialogLibrary dialogLib = new DialogLibrary();
         Map<Object, Object> context = new HashMap<>();
         ColumnTransformer columnTransformer = new ColumnTransformer(FunctionFactory
-            .parseTrafos(WollMuxFiles.getWollmuxConf(), "AbsenderdatenSpaltenumsetzung", funcLib, dialogLib, context));
+            .parseTrafos(WollMuxFiles.getWollmuxConf(), "SenderDataColumnTransformation", funcLib, dialogLib, context));
 
         Datasource datasource = dataSources.get(senderSourceStr);
         if (datasource == null)
