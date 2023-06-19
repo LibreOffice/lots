@@ -156,7 +156,7 @@ public class EMailSender
 
     try
     {
-      wollmuxconf = wollmuxconf.query("EMailEinstellungen").getLastChild();
+      wollmuxconf = wollmuxconf.query("MailSettings").getLastChild();
       mailserver.setMailserver(wollmuxconf.get("SERVER").toString());
     }
     catch (NodeNotFoundException e)
