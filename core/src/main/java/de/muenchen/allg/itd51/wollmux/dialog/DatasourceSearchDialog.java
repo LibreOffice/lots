@@ -433,7 +433,7 @@ public class DatasourceSearchDialog implements Dialog
       Layout mainLayout = new HorizontalLayout(10, 0, 5, 5, 15);
       layout.addLayout(mainLayout, 1);
       Layout resultLayout = new VerticalLayout();
-      addUIElements(conf.query("Suchergebnis"), controlContainer, resultLayout);
+      addUIElements(conf.query("SearchResult"), controlContainer, resultLayout);
       mainLayout.addLayout(resultLayout, 1);
       Layout previewLayout = new VerticalLayout(0, 0, 0, 0, 5);
       addUIElements(conf.query("Vorschau"), controlContainer, previewLayout);
