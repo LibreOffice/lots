@@ -63,7 +63,7 @@ public class FunctionSelectionProvider
   /**
    * Erzeugt einen FunctionSelectionProvider, der {@link FunctionSelection}s sowohl zu Funktionen
    * aus funcLib (darf null sein) als auch zu Funktionen, die funConf (welches ein legaler
-   * "Funktionen"-Abschnitt eines Formulars sein muss) definiert liefern kann. Bei gleichem Namen
+   * "Functions"-Abschnitt eines Formulars sein muss) definiert liefern kann. Bei gleichem Namen
    * haben Funktionen aus funConf vorrang vor solchen aus funcLib.
    *
    * @param idManager

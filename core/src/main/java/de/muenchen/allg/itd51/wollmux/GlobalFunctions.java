@@ -38,7 +38,7 @@ public class GlobalFunctions
   private static GlobalFunctions instance;
 
   /**
-   * Contains the functions defined in the "Funktionen" section of wollmux.conf.
+   * Contains the functions defined in the "Functions" section of wollmux.conf.
    */
   private FunctionLibrary globalFunctions;
   /**
@@ -50,7 +50,7 @@ public class GlobalFunctions
    */
   private DialogLibrary funcDialogs;
   /**
-   * Contains the functions defined in the "Funktionen" section of wollmux.conf.
+   * Contains the functions defined in the "Functions" section of wollmux.conf.
    */
   private PrintFunctionLibrary globalPrintFunctions;
 

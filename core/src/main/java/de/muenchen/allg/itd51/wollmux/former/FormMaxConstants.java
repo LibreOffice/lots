@@ -37,7 +37,7 @@ public class FormMaxConstants
 
   public static final String FORMULAR = "Formular";
 
-  public static final String FUNKTIONEN = "Funktionen";
+  public static final String FUNKTIONEN = "Functions";
 
   public static final String SICHTBARKEIT = "Sichtbarkeit";
 

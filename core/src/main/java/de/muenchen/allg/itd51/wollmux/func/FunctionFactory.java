@@ -138,7 +138,7 @@ public class FunctionFactory
    *          conf contains a function that needs a context.
    * @throws ConfigurationErrorException
    *           if conf is not a correct function description or the function
-   *           requires a context but null was passed.         
+   *           requires a context but null was passed.
    */
   public static Function parseChildren(ConfigThingy conf, FunctionLibrary funcLib,
       DialogLibrary dialogLib, Map<Object, Object> context)
@@ -717,7 +717,7 @@ public class FunctionFactory
   public static FunctionLibrary parseFunctions(ConfigThingy conf,
       DialogLibrary dialogLib, Map<Object, Object> context, FunctionLibrary baselib)
   {
-    return parseFunctions(new FunctionLibrary(baselib), conf, "Funktionen",
+    return parseFunctions(new FunctionLibrary(baselib), conf, "Functions",
       dialogLib, context);
   }
 

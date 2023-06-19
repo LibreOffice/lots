@@ -90,7 +90,7 @@ public class TextDocumentController
 
   private static final String FORMULAR = "Formular";
 
-  private static final String FUNKTIONEN = "Funktionen";
+  private static final String FUNKTIONEN = "Functions";
 
   private static final String FENSTER = "Fenster";
 
