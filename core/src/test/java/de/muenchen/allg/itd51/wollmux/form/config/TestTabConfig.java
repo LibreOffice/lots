@@ -37,7 +37,7 @@ public class TestTabConfig
   {
     ConfigThingy conf = new ConfigThingy("Tab",
         "ID \"id\" TITLE \"title\" TIP \"tip\" HOTKEY \"key\" CLOSEACTION \"action\"");
-    ConfigThingy inputConf = new ConfigThingy("Eingabefelder", "(TYPE \"LABEL\")");
+    ConfigThingy inputConf = new ConfigThingy("InputFields", "(TYPE \"LABEL\")");
     conf.addChild(inputConf);
     ConfigThingy buttonConf = new ConfigThingy("Buttons", "(TYPE \"LABEL\")");
     conf.addChild(buttonConf);

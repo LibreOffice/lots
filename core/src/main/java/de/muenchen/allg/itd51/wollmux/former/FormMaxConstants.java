@@ -31,7 +31,7 @@ public class FormMaxConstants
 
   public static final String BUTTONS = "Buttons";
 
-  public static final String INPUT_FIELDS = "Eingabefelder";
+  public static final String INPUT_FIELDS = "InputFields";
 
   public static final String TITLE = "TITLE";
 

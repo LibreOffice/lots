@@ -42,7 +42,7 @@ public class TestFormConfig
     ConfigThingy conf = new ConfigThingy("Tab",
         "TITLE \"title\" PLAUSI_MARKER_COLOR \"#0000FF\" HOTKEY \"key\" CLOSEACTION \"action\"");
     ConfigThingy tabConf = new ConfigThingy("Fenster",
-        "Tab(Eingabefelder((TYPE \"LABEL\")) Buttons((TYPE \"LABEL\")))");
+        "Tab(InputFields((TYPE \"LABEL\")) Buttons((TYPE \"LABEL\")))");
     conf.addChild(tabConf);
     ConfigThingy visConf = new ConfigThingy("Sichtbarkeit", "(Test \"true\")");
     conf.addChild(visConf);
@@ -60,7 +60,7 @@ public class TestFormConfig
     ConfigThingy conf = new ConfigThingy("Tab",
         "TITLE \"title\" PLAUSI_MARKER_COLOR \"#0000FF\" HOTKEY \"key\" CLOSEACTION \"action\"");
     ConfigThingy tabConf = new ConfigThingy("Fenster",
-        "Tab(Eingabefelder((TYPE \"LABEL\")) Buttons((TYPE \"LABEL\")))");
+        "Tab(InputFields((TYPE \"LABEL\")) Buttons((TYPE \"LABEL\")))");
     conf.addChild(tabConf);
     ConfigThingy visConf = new ConfigThingy("Sichtbarkeit", "(Test \"true\")");
     conf.addChild(visConf);
@@ -74,7 +74,7 @@ public class TestFormConfig
     ConfigThingy conf = new ConfigThingy("Tab",
         "TITLE \"title\" PLAUSI_MARKER_COLOR \"#0000FF\" HOTKEY \"key\" CLOSEACTION \"action\"");
     ConfigThingy tabConf = new ConfigThingy("Fenster",
-        "Tab(Eingabefelder((TYPE \"LABEL\")) Buttons((TYPE \"LABEL\")))");
+        "Tab(InputFields((TYPE \"LABEL\")) Buttons((TYPE \"LABEL\")))");
     conf.addChild(tabConf);
     FormConfig form = new FormConfig(conf, null);
     assertTrue(form.getVisibilities().isEmpty());

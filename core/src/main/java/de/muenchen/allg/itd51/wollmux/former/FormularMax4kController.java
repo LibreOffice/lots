@@ -460,9 +460,9 @@ public class FormularMax4kController
 
   /**
    * Fügt am Anfang der Liste einen Tab ein, dessen Konfiguration aus tabConf kommt
-   * (Wurzelknoten wird ignoriert, darunter sollten TITLE, Eingabefelder etc, liegen)
+   * (Wurzelknoten wird ignoriert, darunter sollten TITLE, InputFields etc, liegen)
    * falls tabConf != null, ansonsten aus einem ConfigThingy was an der URL
-   * tabConfUrl gespeichert ist (hier sind TITLE, Eingabefelder, etc, auf oberster
+   * tabConfUrl gespeichert ist (hier sind TITLE, InputFields, etc, auf oberster
    * Ebene).
    */
   public void insertStandardTab(ConfigThingy tabConf, URL tabConfUrl)
@@ -894,7 +894,7 @@ public class FormularMax4kController
    * {@link #formControlModelList} hinzu.
    *
    * @param conf
-   *          der Knoten direkt über "Eingabefelder" und "Buttons".
+   *          der Knoten direkt über "InputFields" und "Buttons".
    * @param idx
    *          falls >= 0 werden die Steuerelemente am entsprechenden Index der Liste
    *          in die Formularbeschreibung eingefügt, ansonsten ans Ende angehängt.
