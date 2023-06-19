@@ -440,7 +440,7 @@ public class DatasourceSearchDialog implements Dialog
       mainLayout.addLayout(previewLayout, 1);
 
       Layout footerLayout = new HorizontalLayout(10, 0, 5, 5, 15);
-      addUIElements(conf.query("Fussbereich"), controlContainer, footerLayout);
+      addUIElements(conf.query("BottomArea"), controlContainer, footerLayout);
       layout.addLayout(footerLayout, 1);
 
       if (autosearch)
