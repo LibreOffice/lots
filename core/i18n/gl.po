@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 10:15+0100\n"
-"PO-Revision-Date: 2023-06-18 22:33+0000\n"
+"PO-Revision-Date: 2023-06-20 16:33+0000\n"
 "Last-Translator: Xosé <xosecalvo@gmail.com>\n"
 "Language-Team: Galician <https://translations.documentfoundation.org/"
 "projects/wollmux/wollmux/gl/>\n"
@@ -75,13 +75,15 @@ msgstr "«{0}» non é un nome de columna válido"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:260
 #, java-format
 msgid "Column \"{0}\" does not exist!"
-msgstr ""
+msgstr "A columna «{0}» non existe!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:216
 #, java-format
 msgid ""
 "Data source \"{0}\": Name of OOo-data source has to be specified as SOURCE"
 msgstr ""
+"Fonte de datos «{0}»: O nome da fonte de datos de OOo ten que ser indicada "
+"como FONTE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:218
 #, java-format
@@ -89,21 +91,23 @@ msgid ""
 "Data source \"{0}\": Name of table/view within the OOo-Data Source has to be "
 "specified as TABLE"
 msgstr ""
+"Fonte de datos «{0}»: O nome da táboa/vista dentro da fonte de datos de OOo "
+"ten que ser indicada como TÁBOA"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:238
 #, java-format
 msgid "SQL_SYNTAX \"{0}\" not supported"
-msgstr ""
+msgstr "Non se admite SQL_SYNTAX «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:256
 #, java-format
 msgid "Data source \"{0}\": Schema-section is empty"
-msgstr ""
+msgstr "Fonte de datos «{0}»: A sección do esquema está baleira"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:260
 #, java-format
 msgid "Data source \"{0}\": Key-section is missing"
-msgstr ""
+msgstr "Fonte de datos «»{0}: falta a sección da clave"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:306
 #, java-format
@@ -111,11 +115,13 @@ msgid ""
 "Table or query \"{0}\" does not exist in data source \"{1}\" or error when "
 "determining the columns "
 msgstr ""
+"A táboa ou consulta «{0}» non existe na fonte de datos «{1}» ou produciuse "
+"un erro ao determinar as columnas "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:315
 #, java-format
 msgid "Data source \"{0}\": Table \"{1}\" has no columns"
-msgstr ""
+msgstr "Fonte de datos «{0}»: A táboa «{1}» non ten columnas"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:345
 #, java-format
@@ -123,26 +129,28 @@ msgid ""
 "Data source \"{0}\": No key columns defined. Automatic determination of key "
 "column not possible."
 msgstr ""
+"Fonte de datos «{0}»: Non hai columnas clave definidas. Non é posíbel "
+"realizar unha determinación automática da columna clave"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:359
 #, java-format
 msgid "Schema of OOo-datasource \"{0}\" could not be read."
-msgstr ""
+msgstr "Non foi posíbel ler o esquema da fonte de datos «{0}» de OOo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:365
 #, java-format
 msgid "Data source \"{0}\": No Key column defined"
-msgstr ""
+msgstr "Fonte de datos «{0}»: Non hai columna clave definida"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:387
 #, java-format
 msgid "Key column \"{0}\" not defined in schema"
-msgstr ""
+msgstr "A columna clave «{0}» non está definida no esquema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:390
 #, java-format
 msgid "Key column \"{0}\" was specified twice in the key section"
-msgstr ""
+msgstr "A columna clave «{0}» foi especificada dúas veces na sección de claves"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:527
 msgid "Could not create RowSet"
@@ -152,7 +160,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:320
 #, java-format
 msgid "Column {0} does not exist!"
-msgstr ""
+msgstr "A columna {0} non existe!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:83
 #, java-format
