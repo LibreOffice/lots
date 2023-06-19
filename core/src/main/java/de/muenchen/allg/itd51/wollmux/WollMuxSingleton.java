@@ -150,7 +150,7 @@ public class WollMuxSingleton
       ConfigThingy tastenkuerzel = new ConfigThingy("");
       try
       {
-        tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
+        tastenkuerzel = WollMuxFiles.getWollmuxConf().query("KeyboardShortcuts").getLastChild();
       } catch (NodeNotFoundException e)
       {
         LOGGER.error("", e);
