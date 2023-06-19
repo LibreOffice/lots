@@ -370,7 +370,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
     controlContainer.addControl("line", line);
     layout.addControl(line, 1);
 
-    ConfigThingy menubar = conf.query("Menueleiste");
+    ConfigThingy menubar = conf.query("Menubar");
     ConfigThingy menuConf = conf.query("Menues");
 
     if (menubar.count() > 0)
