@@ -40,29 +40,34 @@ import de.muenchen.allg.itd51.wollmux.config.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.util.L;
 
 /**
- * Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt. Zur Erstellung der Menge der
- * Ergebnisdatensätze wird jeder Datensatz aus SOURCE1 genau einmal verwendet und jeder Datensatz
- * aus SOURCE2 beliebig oft (auch keinmal). Unterschiede zu einem richtigen Join:<br>
+ * 
+ * A data source that adds columns to another data source. To create the set of result data records,
+ * each record from SOURCE1 is used exactly once, and each record from SOURCE2 is used any number of
+ * times (including zero times). Differences from a proper join:<br>
+ * 
  * <br>
- * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 Einträge mit Verkehrsverbindungen
- * für ihre Adresse gibt<br>
- * b) Verhindert, dass eine Person rausfliegt, weil es zu ihrer Adresse keine Verkehrsverbindung
- * gibt<br>
- * c) Die Schlüssel der Ergebnisdatensätze bleiben die aus SOURCE1 und werden nicht kombiniert aus
- * SOURCE1 und SOURCE2. Das verhindert, dass ein Datensatz bei einer Änderung der Adresse aus der
- * lokalen Absenderliste fliegt, weil er beim Cache-Refresh nicht mehr gefunden wird. <br>
+ * a) Prevents a person from appearing twice just because there are 2 entries for transport
+ * connections to their address.<br>
+ * b) Prevents a person from being excluded because there is no transport connection to their
+ * address.<br>
+ * c) The keys of the result data records remain those from SOURCE1 and are not combined from
+ * SOURCE1 and SOURCE2. This prevents a record from being removed from the local sender list due to
+ * a change in address, because it cannot be found during cache refresh.<br>
+ * 
  * <br>
- * In der Ergebnisdatenquelle sind alle Spalten von SOURCE1 unter ihrem ursprünglichen Namen, alle
- * Spalten von SOURCE2 unter dem Namen von SOURCE2 konkateniert mit "." konkateniert mit dem
- * Spaltennamen zu finden. <br>
+ * In the result data source, all columns from SOURCE1 can be found under their original name, and
+ * all columns from SOURCE2 can be found under the name of SOURCE2 concatenated with "."
+ * concatenated with the column name.<br>
+ * 
  * <br>
- * Argument gegen automatische Umbenennung/Aliase für Spalten aus SOURCE2, deren Name sich nicht mit
- * einer Spalte aus SOURCE1 stört:<br>
+ * Argument against automatic renaming/aliasing of columns from SOURCE2 whose name does not conflict
+ * with a column from SOURCE1:<br>
+ * 
  * <br>
- * - Der Alias würde verschwinden, wenn die Quelle SOURCE1 später einmal um eine Spalte mit dem
- * entsprechenden Namen erweitert wird. Definitionen, die den Alias verwendet haben verwenden ab da
- * stillschweigend die Spalte aus SOURCE1, was schwierig zu findende Fehler nach sich ziehen kann.
- *
+ * The alias would disappear if the SOURCE1 source is later extended with a column with the
+ * corresponding name. Definitions that used the alias would then silently use the column from
+ * SOURCE1, which can lead to difficult-to-find errors.
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AttachDatasource extends Datasource
@@ -91,24 +96,23 @@ public class AttachDatasource extends Datasource
   private String source2Prefix;
 
   /**
-   * Erzeugt eine neue AttachDatasource.
-   *
+   * Creates a new AttachDatasource.
+   * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser AttachDatasource bereits
-   *          vollständig instanziierten Datenquellen.
+   *          contains all data sources that have already been fully instantiated up to the point of
+   *          defining this AttachDatasource.
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser AttachDatasource enthält.
+   *          the "data source" node that contains the description of this AttachDatasource.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht verwendet).
+   *          the context in which URLs should be resolved (not currently used).
    */
-  public AttachDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc,
-      URL context)
+
+  public AttachDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc, URL context)
   {
-    name = sourceDesc
-        .get("NAME", ConfigurationErrorException.class, L.m("NAME of data source is missing"))
+    name = sourceDesc.get("NAME", ConfigurationErrorException.class, L.m("NAME of data source is missing")).toString();
+    source1Name = sourceDesc
+        .get("SOURCE", ConfigurationErrorException.class, L.m("SOURCE1 of data source \"{0}\" is missing", name))
         .toString();
-    source1Name = sourceDesc.get("SOURCE", ConfigurationErrorException.class,
-        L.m("SOURCE1 of data source \"{0}\" is missing", name)).toString();
     source2Name = sourceDesc.get("ATTACH", ConfigurationErrorException.class,
         L.m("ATTACH specification of data source {0} is missing", name)).toString();
     source1 = nameToDatasource.get(source1Name);
@@ -152,8 +156,7 @@ public class AttachDatasource extends Datasource
     {
       ConfigThingy matchDesc = iter.next();
       if (matchDesc.count() != 2)
-        throw new ConfigurationErrorException(
-            L.m("Incorrect MATCH specification in data source \"{0}\"", name));
+        throw new ConfigurationErrorException(L.m("Incorrect MATCH specification in data source \"{0}\"", name));
 
       String spalte1 = "";
       String spalte2 = "";
@@ -179,7 +182,7 @@ public class AttachDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
   @Override
@@ -190,9 +193,10 @@ public class AttachDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util. Collection, long)
    */
+
   @Override
   public QueryResults getDatasetsByKey(Collection<String> keys)
   {
@@ -207,9 +211,10 @@ public class AttachDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
+
   @Override
   public QueryResults find(List<QueryPart> query)
   {
@@ -220,8 +225,7 @@ public class AttachDatasource extends Datasource
     {
       if (p.getColumnName().startsWith(source2Prefix))
       {
-        query2.add(new QueryPart(p.getColumnName().substring(source2Prefix.length()),
-            p.getSearchString()));
+        query2.add(new QueryPart(p.getColumnName().substring(source2Prefix.length()), p.getSearchString()));
         query2WithPrefix.add(p);
       } else
       {
@@ -230,10 +234,11 @@ public class AttachDatasource extends Datasource
     }
 
     /*
-     * Die ATTACH-Datenquelle ist normalerweise nur untergeordnet und Spaltenbedingungen dafür
-     * schränken die Suchergebnisse wenig ein. Deshalb werten wir falls wir mindestens eine
-     * Bedingung an die Hauptdatenquelle haben, die Anfrage auf dieser Datenquelle aus.
+     * The ATTACH data source is usually only subordinate, and column conditions for it only
+     * minimally restrict the search results. Therefore, if we have at least one condition on the
+     * main data source, we evaluate the request on this data source.
      */
+
     if (!query1.isEmpty())
     {
       QueryResults results = source1.find(query1);
@@ -247,9 +252,10 @@ public class AttachDatasource extends Datasource
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getName()
    */
+
   @Override
   public String getName()
   {
