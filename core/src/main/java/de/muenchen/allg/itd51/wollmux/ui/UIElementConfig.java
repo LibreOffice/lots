@@ -247,7 +247,7 @@ public class UIElementConfig
       }
     }
     menu = controlConf.getString("MENU", null);
-    dbSpalte = controlConf.getString("DB_SPALTE", null);
+    dbSpalte = controlConf.getString("DB_COLUMN", null);
     display = controlConf.getString("DISPLAY", null);
     sidebar = Boolean.parseBoolean(controlConf.getString("SIDEBAR", "true"));
   }

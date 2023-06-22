@@ -65,7 +65,7 @@ interface XWollMux
      * Datensatz angelegt werden) oder von temporären Dokumenten, die für die
      * Einfügung von Autotexten im Hintergrund erzeugt werden. Solche Dokumente
      * werden durch den WollMux nicht verarbeitet.
-     */	
+     */
     interface com::sun::star::document::XEventBroadcaster;
 
     /**
@@ -81,11 +81,11 @@ interface XWollMux
 
     /**
       Liefert die zum aktuellen Zeitpunkt im WollMux ausgewählten Absenderdaten (die
-      über das Dokumentkommandos WM(CMD'insertValue' DB_SPALTE'<dbSpalte>') in ein
+      über das Dokumentkommandos WM(CMD'insertValue' DB_COLUMN'<dbSpalte>') in ein
       Dokument eingefügt würden) in einem Array von PropertyValue-Objekten
       zurück. Dabei repräsentieren die Attribute PropertyValue.Name die
       verfügbaren DB_SPALTEn und die Attribute PropertyValue.Value die zu
-      DB_SPALTE zugehörigen Absenderdaten.
+      DB_COLUMN zugehörigen Absenderdaten.
 
       Jeder Aufruf erzeugt ein komplett neues und unabhängiges Objekt mit allen
       Einträgen die zu dem Zeitpunkt gültig sind. Eine Änderung der Werte des
@@ -100,7 +100,7 @@ interface XWollMux
     /**
       Diese Methode liefert den Wert der Absenderdaten zur Datenbankspalte dbSpalte,
       der dem Wert entspricht, den das Dokumentkommando WM(CMD'insertValue'
-      DB_SPALTE'<dbSpalte>') in das Dokument einfügen würde, oder den Leerstring ""
+      DB_COLUMN'<dbSpalte>') in das Dokument einfügen würde, oder den Leerstring ""
       wenn dieser Wert nicht bestimmt werden kann (z.B. wenn ein ungültiger
       Spaltennamen dbSpalte übergeben wurde).
 
@@ -111,7 +111,7 @@ interface XWollMux
                Name der Datenbankspalte deren Wert zurückgeliefert werden soll.
       @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewählten Absenders
               oder "", wenn der Wert nicht bestimmt werden kann.
-     */	
+     */
     string getValue([in] string dbSpalte);
 
     /**

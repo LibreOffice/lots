@@ -1125,10 +1125,10 @@ public abstract class DocumentCommand
       super(wmCmd, bookmark);
       try
       {
-        dbSpalte = wmCmd.get("WM").get("DB_SPALTE").toString();
+        dbSpalte = wmCmd.get("WM").get("DB_COLUMN").toString();
       } catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException(L.m("Missing attribute DB_SPALTE"));
+        throw new InvalidCommandException(L.m("Missing attribute DB_COLUMN"));
       }
 
       Iterator<ConfigThingy> autoseps = wmCmd.query("AUTOSEP").iterator();
