@@ -49,7 +49,7 @@ interface XWollMuxDocument
 {
 
     /**
-       Setzt den Wert, der bei insertValue-Dokumentkommandos mit DB_SPALTE "dbSpalte"
+       Setzt den Wert, der bei insertValue-Dokumentkommandos mit DB_COLUMN "dbSpalte"
        eingefügt werden soll auf Wert. Es ist nicht garantiert, dass der neue Wert im
        Dokument sichtbar wird, bevor updateInsertFields() aufgerufen wurde. Eine
        Implementierung mit einer Queue ist möglich.

@@ -196,7 +196,7 @@ public class FormularMax4kController
   public static final Integer NAMESPACE_FORMCONTROLMODEL = Integer.valueOf(0);
 
   /**
-   * Der {@link IDManager}-Namensraum für die DB_SPALTE-Angaben von
+   * Der {@link IDManager}-Namensraum für die DB_COLUMN-Angaben von
    * {@link InsertionModel}s.
    */
   public static final Integer NAMESPACE_DB_SPALTE = Integer.valueOf(1);

@@ -103,7 +103,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   private int sourceType = FORM_TYPE;
 
   /**
-   * DB_SPALTE oder ID je nach {@link #sourceType}.
+   * DB_COLUMN oder ID je nach {@link #sourceType}.
    */
   private IdModel dataId;
 
@@ -169,7 +169,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
     String cmd = conf.query("CMD").toString();
     if (cmd.equals("insertValue"))
     {
-      ConfigThingy dbSpalteConf = conf.query("DB_SPALTE");
+      ConfigThingy dbSpalteConf = conf.query("DB_COLUMN");
       if (dbSpalteConf.count() == 0) throw new SyntaxErrorException();
       dataId =
         formularMax4000.getIDManager().getID(FormularMax4kController.NAMESPACE_DB_SPALTE,
@@ -243,7 +243,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   {
     ConfigThingy conf = new ConfigThingy("WM");
     String cmd = "insertValue";
-    String idType = "DB_SPALTE";
+    String idType = "DB_COLUMN";
     if (sourceType == FORM_TYPE)
     {
       cmd = "insertFormValue";
@@ -304,7 +304,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   /**
-   * Liefert je nach Typ der Einfügung das DB_SPALTE oder ID Attribut.
+   * Liefert je nach Typ der Einfügung das DB_COLUMN oder ID Attribut.
    */
   public IdModel getDataID()
   {
@@ -312,7 +312,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
   }
 
   /**
-   * Ändert je nach Type der Einfügung DB_SPALTE oder ID Attribut auf den Wert newId (falls newId
+   * Ändert je nach Type der Einfügung DB_COLUMN oder ID Attribut auf den Wert newId (falls newId
    * gleich der alten ID ist, wird nichts getan). ACHTUNG! Die Änderung betrifft nur die Einfügung
    * und wird nicht auf die Formularelemente übertragen (wogegen umgekehrt Änderungen an den
    * Formularelemente-IDs zu Änderungen der Einfügungen führen). Hintergrund dieser Implementierung
@@ -324,7 +324,7 @@ public class InsertionModel4InsertXValue extends InsertionModel
    *           falls diese Einfügung eine Formularwert-Einfügung ist (d.h. das ID-Attribut betroffen
    *           wäre) und newID dem IDManager im Namensraum
    *           {@link FormularMax4kController#NAMESPACE_FORMCONTROLMODEL} unbekannt ist, oder falls
-   *           newId der leere String ist. Im Falle des DB_SPALTE Attributs wird nur geworfen, wenn
+   *           newId der leere String ist. Im Falle des DB_COLUMN Attributs wird nur geworfen, wenn
    *           newId der leere String ist.
    */
   public void setDataID(String newId) throws UnknownIDException

@@ -544,13 +544,13 @@ public class ScanVisitor implements DocumentTreeVisitor
   }
 
   /**
-   * Liefert "WM(CMD'insertValue' DB_SPALTE '&lt;id>').
+   * Liefert "WM(CMD'insertValue' DB_COLUMN '&lt;id>').
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String insertValue(String id)
   {
-    return "WM(CMD 'insertValue' DB_SPALTE '" + id + "')";
+    return "WM(CMD 'insertValue' DB_COLUMN '" + id + "')";
   }
 
   /**

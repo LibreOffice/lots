@@ -87,7 +87,7 @@ public class OneInsertionLineView extends LineView
   private boolean ignoreAttributeChanged = false;
 
   /**
-   * Die ComboBox, die DB_SPALTE bzw, ID anzeigt und ändern lässt.
+   * Die ComboBox, die DB_COLUMN bzw, ID anzeigt und ändern lässt.
    */
   private JComboBox<String> idBox;
 
@@ -117,7 +117,7 @@ public class OneInsertionLineView extends LineView
   }
 
   /**
-   * Liefert eine Komponente, die je nach Art der Einfügung das DB_SPALTE oder ID
+   * Liefert eine Komponente, die je nach Art der Einfügung das DB_COLUMN oder ID
    * Attribut anzeigt und Änderungen an das Model weitergibt.
    */
   private JComponent makeIDView()

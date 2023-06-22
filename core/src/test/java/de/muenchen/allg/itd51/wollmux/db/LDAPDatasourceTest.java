@@ -67,7 +67,7 @@ public class LDAPDatasourceTest
     String url = "ldap://localhost:" + server.getListenPort();
     Datasource ds = new LDAPDatasource(null,
         new ConfigThingy("", "NAME \"ldap\" URL \"" + url + "\" BASE_DN \"" + BASE_DN
-            + "\" OBJECT_CLASS \"person\" Spalten ((DB_SPALTE \"column\" PATH \"0:sn\") (DB_SPALTE \"column2\" PATH \"-1:ou\")) Schluessel (\"column\")"),
+            + "\" OBJECT_CLASS \"person\" Spalten ((DB_COLUMN \"column\" PATH \"0:sn\") (DB_COLUMN \"column2\" PATH \"-1:ou\")) Schluessel (\"column\")"),
         null);
     assertEquals("ldap", ds.getName());
     assertEquals(List.of("column", "column2"), ds.getSchema());
@@ -90,7 +90,7 @@ public class LDAPDatasourceTest
     String url = "ldap://localhost:" + server.getListenPort();
     Datasource ds = new LDAPDatasource(null, new ConfigThingy("", "NAME \"ldap\" URL \"" + url + "\" BASE_DN \""
         + BASE_DN
-        + "\" OBJECT_CLASS \"person\" Spalten ((DB_SPALTE \"column\" PATH \"0:sn\") (DB_SPALTE \"column2\" PATH \"-1:ou\")) Schluessel (\"column\" \"column2\")"),
+        + "\" OBJECT_CLASS \"person\" Spalten ((DB_COLUMN \"column\" PATH \"0:sn\") (DB_COLUMN \"column2\" PATH \"-1:ou\")) Schluessel (\"column\" \"column2\")"),
         null);
     assertEquals("ldap", ds.getName());
     assertEquals(List.of("column", "column2"), ds.getSchema());
@@ -107,7 +107,7 @@ public class LDAPDatasourceTest
     String url = "ldap://localhost:" + server.getListenPort();
     Datasource ds = new LDAPDatasource(null, new ConfigThingy("", "NAME \"ldap\" URL \"" + url + "\" BASE_DN \""
         + BASE_DN
-        + "\" OBJECT_CLASS \"person\" Spalten ((DB_SPALTE \"column\" PATH \"0:sn\") (DB_SPALTE \"column2\" PATH \"-1:ou\")) Schluessel (\"column2\")"),
+        + "\" OBJECT_CLASS \"person\" Spalten ((DB_COLUMN \"column\" PATH \"0:sn\") (DB_COLUMN \"column2\" PATH \"-1:ou\")) Schluessel (\"column2\")"),
         null);
     assertEquals("ldap", ds.getName());
     assertEquals(List.of("column", "column2"), ds.getSchema());

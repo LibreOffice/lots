@@ -215,8 +215,8 @@ public class LDAPDatasource extends Datasource
       // iteriere über eine Spalten-Relation
       for (ConfigThingy spalteDesc : spaltenDesc)
       {
-        String spalte = parseConfig(spalteDesc, "DB_SPALTE",
-            () -> errorMessage() + L.m("Specification of DB_SPALTE is missing"));
+        String spalte = parseConfig(spalteDesc, "DB_COLUMN",
+            () -> errorMessage() + L.m("Specification of DB_COLUMN is missing"));
         if (!SPALTENNAME.matcher(spalte).matches())
         {
           throw new ConfigurationErrorException(errorMessage()
