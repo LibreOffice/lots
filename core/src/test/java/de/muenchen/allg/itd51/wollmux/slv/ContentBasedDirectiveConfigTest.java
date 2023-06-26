@@ -40,7 +40,7 @@ public class ContentBasedDirectiveConfigTest
   public void testConfig() throws IOException, SyntaxErrorException
   {
     ContentBasedDirectiveConfig.configure(new ConfigThingy("", null,
-        new StringReader("ContentBasedDirectives(NUMBERS \"roman\" ABDRUCK_NAME \"Abdruck\""
+        new StringReader("ContentBasedDirectives(NUMBERS \"roman\" COPY_NAME \"Abdruck\""
             + " ALL_VERSIONS_HIGHLIGHT_COLOR \"ffffc8\" NOT_IN_ORIGINAL_HIGHLIGHT_COLOR \"ffc8ff\""
             + " ORIGINAL_ONLY_HIGHLIGHT_COLOR \"b8b8ff\" DRAFT_ONLY_HIGHLIGHT_COLOR \"c8ffff\""
             + " COPY_ONLY_HIGHLIGHT_COLOR \"b8ffb8\")")));
@@ -64,7 +64,7 @@ public class ContentBasedDirectiveConfigTest
   public void testConfig2() throws IOException, SyntaxErrorException
   {
     ContentBasedDirectiveConfig.configure(new ConfigThingy("", null, new StringReader(
-        "ContentBasedDirectives(NUMBERS \"arabic\" ABDRUCK_NAME \"Copy\")")));
+        "ContentBasedDirectives(NUMBERS \"arabic\" COPY_NAME \"Copy\")")));
 
     assertEquals("Copy", ContentBasedDirectiveConfig.getName(), "Wrong name for copies");
 
