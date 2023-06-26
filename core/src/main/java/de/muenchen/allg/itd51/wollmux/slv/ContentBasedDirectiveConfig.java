@@ -100,7 +100,7 @@ public class ContentBasedDirectiveConfig
             case "NUMBERS":
               formatOption = child.toString();
               break;
-            case "ABDRUCK_NAME":
+            case "COPY_NAME":
               nameOption = child.toString();
               break;
             case "ALL_VERSIONS_HIGHLIGHT_COLOR":
@@ -137,7 +137,7 @@ public class ContentBasedDirectiveConfig
       LOGGER.debug("\"Verwende Zahlenformat '{}' aus Attribut NUMBERS.\"", format);
 
       copyName = nameOption;
-      LOGGER.debug("Verwende ABDRUCK_NAME '{}'", copyName);
+      LOGGER.debug("Verwende COPY_NAME '{}'", copyName);
     }
   }
 
