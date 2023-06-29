@@ -20,11 +20,12 @@
   -->
 
 <description xmlns="http://openoffice.org/extensions/description/2006"
-	     xmlns:xlink="http://www.w3.org/1999/xlink">
+	     xmlns:xlink="http://www.w3.org/1999/xlink"
+		 xmlns:lo="http://libreoffice.org/extensions/description/2011">
 	<version value="${project.version}" />
 	<identifier value="${wollmux.oxt.id}"/>
 	<dependencies>
-		<OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>
+		<lo:LibreOffice-minimal-version value="4.1" name="LibreOffice 4.1"/>
 	</dependencies>
 
 	<publisher>

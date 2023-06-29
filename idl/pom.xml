@@ -50,28 +50,17 @@
                 <fail unless="UNO_PATH" message="No UNO_PATH set! Set UNO_PATH as property in maven settings." />
                 <echo message="Using UNO_PATH: ${UNO_PATH}" />
                 <echo message="Create urd files" />
-                <exec executable="${libreoffice.sdk}/bin/idlc" failonerror="true">
-                  <arg value="-verbose" />
-                  <arg value="-O${idlcOutput}" />
-                  <arg value="-I${libreoffice.sdk}/idl;src/main/idl" />
+                <exec executable="${libreoffice.sdk}/bin/unoidl-write" failonerror="true">
+                  <arg value="${UNO_PATH}/types.rdb" />
+                  <arg value="${UNO_PATH}/types/offapi.rdb" />
+                  <arg value="src/main/idl" />
                   <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALChangeEventBroadcaster.idl" />
                   <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALChangeEventListener.idl" />
                   <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALProvider.idl" />
                   <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPrintModel.idl" />
                   <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XWollMux.idl" />
                   <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XWollMuxDocument.idl" />
-                </exec>
-                <echo message="Create registry library" />
-                <exec executable="${UNO_PATH}/regmerge" failonerror="true">
-                  <arg value="-v" />
                   <arg value="target/WollMux.rdb" />
-                  <arg value="/UCR" />
-                  <arg value="${idlcOutput}/XPALChangeEventBroadcaster.urd" />
-                  <arg value="${idlcOutput}/XPALChangeEventListener.urd" />
-                  <arg value="${idlcOutput}/XPALProvider.urd" />
-                  <arg value="${idlcOutput}/XPrintModel.urd" />
-                  <arg value="${idlcOutput}/XWollMux.urd" />
-                  <arg value="${idlcOutput}/XWollMuxDocument.urd" />
                 </exec>
                 <echo message="Create class files" />
                 <exec executable="${libreoffice.sdk}/bin/javamaker" failonerror="true">
