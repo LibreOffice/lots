@@ -38,7 +38,7 @@
 			</node>
 			<node oor:name="WollMuxSeriendruckDeck" oor:op="replace">
 				<prop oor:name="Title" oor:type="xs:string">
-					<value xml:lang="en-US">Seriendruck</value>
+					<value xml:lang="en-US">Mail Merge</value>
 				</prop>
 				<prop oor:name="Id" oor:type="xs:string">
 					<value>WollMuxSeriendruckDeck</value>
@@ -57,7 +57,7 @@
 			</node>
 			<node oor:name="FormularGuiDeck" oor:op="replace">
 				<prop oor:name="Title" oor:type="xs:string">
-					<value xml:lang="en-US">Formular</value>
+					<value xml:lang="en-US">Form</value>
 				</prop>
 				<prop oor:name="Id" oor:type="xs:string">
 					<value>FormularGuiDeck</value>
@@ -78,7 +78,7 @@
 		<node oor:name="PanelList">
 			<node oor:name="WollMuxSidebarPanel" oor:op="replace">
 				<prop oor:name="Title" oor:type="xs:string">
-					<value xml:lang="en-US">Dokumente &amp; Vorlagen</value>
+					<value xml:lang="en-US">Documents and templates</value>
 				</prop>
 				<prop oor:name="Id" oor:type="xs:string">
 					<value>WollMuxSidebarPanel</value>
@@ -109,7 +109,7 @@
 			</node>
 			<node oor:name="WollMuxSeriendruckPanel" oor:op="replace">
 				<prop oor:name="Title" oor:type="xs:string">
-					<value xml:lang="en-US">Seriendruck</value>
+					<value xml:lang="en-US">Mail merge</value>
 				</prop>
 				<prop oor:name="Id" oor:type="xs:string">
 					<value>WollMuxSeriendruckPanel</value>
@@ -140,7 +140,7 @@
 			</node>
 			<node oor:name="FormularGuiSidebarPanel" oor:op="replace">
 				<prop oor:name="Title" oor:type="xs:string">
-					<value xml:lang="en-US">Formular</value>
+					<value xml:lang="en-US">Form</value>
 				</prop>
 				<prop oor:name="Id" oor:type="xs:string">
 					<value>FormularGuiSidebarPanel</value>
