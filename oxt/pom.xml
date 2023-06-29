@@ -266,7 +266,7 @@
       <id>ButtonsOnly</id>
       <properties>
         <wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>
-        <wollmux.oxt.name>WollMux-ButtonsOnly</wollmux.oxt.name>
+        <wollmux.oxt.name>LibreOffice Template System ButtonsOnly</wollmux.oxt.name>
       </properties>
       <build>
         <plugins>

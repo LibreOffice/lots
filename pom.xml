@@ -12,7 +12,7 @@
     <maven.compiler.release>11</maven.compiler.release>
     <libreoffice.version>7.4.0</libreoffice.version>
     <wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
-    <wollmux.oxt.name>WollMux</wollmux.oxt.name>
+    <wollmux.oxt.name>LibreOffice Template System</wollmux.oxt.name>
     <wollmux.test.conf.url>https://github.com/LibreOffice/lots-config/releases/download/</wollmux.test.conf.url>
     <wollmux.test.conf.release>v19.0.1/wollmux-config-19.0.1.tar.gz</wollmux.test.conf.release>
     <wollmux.test.conf>${project.build.directory}/config/.wollmux/wollmux.conf</wollmux.test.conf>
