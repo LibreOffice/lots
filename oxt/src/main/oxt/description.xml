@@ -35,9 +35,6 @@
 		<name lang="de-DE">${wollmux.oxt.name}</name>
 	</display-name>
 
-	<update-information>
-	  <src xlink:href="http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/packages/WollMux-snapshot/WollMux.update.xml"/>
-	</update-information>
 <!--	<registration>
 		<simple-license accept-by="admin" default-license-id="en-NZ" suppress-on-update="true" >
 			<license-text xlink:href="registration/license_de-DE.txt" lang="de-DE" />
