@@ -46,7 +46,7 @@ mvn install
 Then run the following commands to download and build the LibreOffice Template System:
 
 ```
-git clone https://github.com/LibreOffice/WollMux.git
+git clone https://github.com/LibreOffice/lots.git
 mvn clean package
 ```
 
