@@ -54,12 +54,6 @@
                   <arg value="${UNO_PATH}/types.rdb" />
                   <arg value="${UNO_PATH}/types/offapi.rdb" />
                   <arg value="src/main/idl" />
-                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALChangeEventBroadcaster.idl" />
-                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALChangeEventListener.idl" />
-                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPALProvider.idl" />
-                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XPrintModel.idl" />
-                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XWollMux.idl" />
-                  <arg value="src/main/idl/de/muenchen/allg/itd51/wollmux/interfaces/XWollMuxDocument.idl" />
                   <arg value="target/WollMux.rdb" />
                 </exec>
                 <echo message="Create class files" />
