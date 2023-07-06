@@ -63,7 +63,7 @@ pipeline {
               }
             }
           } else {
-            archiveArtifacts artifacts: 'oxt/target/WollMux.oxt'
+            archiveArtifacts artifacts: 'oxt/target/LOTS.oxt'
             withMaven(
               maven: 'mvn',
               mavenLocalRepo: '.repo',

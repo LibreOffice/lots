@@ -13,7 +13,7 @@
   </properties>
 
   <artifactId>wollmux-oxt</artifactId>
-  <name>WollMux LibreOffice Extension</name>
+  <name>LOTS Extension</name>
 
   <build>
     <testResources>
@@ -108,7 +108,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>WollMux</finalName>
+              <finalName>LOTS</finalName>
               <appendAssemblyId>false</appendAssemblyId>
               <descriptors>
                 <descriptor>assembly-oxt.xml</descriptor>
@@ -126,7 +126,7 @@
             <phase>prepare-package</phase>
             <configuration>
               <target>
-                <copy file="${project.build.directory}/WollMux.zip" tofile="${project.build.directory}/WollMux.oxt" />
+                <copy file="${project.build.directory}/LOTS.zip" tofile="${project.build.directory}/LOTS.oxt" />
               </target>
             </configuration>
             <goals>
@@ -165,7 +165,7 @@
                 <echo level="info">unopkg add:</echo>
                 <mkdir dir="${office.user.profile}" />
                 <exec executable="${UNO_PATH}/unopkg" failifexecutionfails="false">
-                  <arg line="add -f -env:UserInstallation=file://${office.user.profile} ${project.build.directory}/WollMux.oxt" />
+                  <arg line="add -f -env:UserInstallation=file://${office.user.profile} ${project.build.directory}/LOTS.oxt" />
                 </exec>
                 <replaceregexp>
                   <regexp pattern="&lt;vmParameters xsi:nil=&quot;true&quot;/&gt;" />
@@ -284,7 +284,7 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <finalName>WollMux_ButtonsOnly</finalName>
+                  <finalName>LOTS_ButtonsOnly</finalName>
                   <appendAssemblyId>false</appendAssemblyId>
                   <descriptors>
                     <descriptor>assembly-buttons-only.xml</descriptor>
@@ -305,10 +305,10 @@
                 </goals>
                 <configuration>
                   <target>
-                    <move file="${project.build.directory}/WollMux_ButtonsOnly.zip" tofile="${project.build.directory}/WollMux_ButtonsOnly.oxt" />
+                    <move file="${project.build.directory}/LOTS_ButtonsOnly.zip" tofile="${project.build.directory}/LOTS_ButtonsOnly.oxt" />
                     <echo level="info">unopkg add:</echo>
                     <exec executable="${UNO_PATH}/unopkg" failifexecutionfails="false">
-                      <arg line="add -f ${project.build.directory}/WollMux_ButtonsOnly.oxt" />
+                      <arg line="add -f ${project.build.directory}/LOTS_ButtonsOnly.oxt" />
                     </exec>
 
                     <tstamp>

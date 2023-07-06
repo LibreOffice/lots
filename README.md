@@ -50,7 +50,7 @@ git clone https://github.com/LibreOffice/lots.git
 mvn clean package
 ```
 
-The compiled extension can be found at oxt/target/WollMux.oxt
+The compiled extension can be found at oxt/target/LOTS.oxt
 
 ### Build errors
 * **There are files with header to update**: Some of the source files don't have a license header. The header can be updated with:
@@ -61,13 +61,13 @@ mvn license:update-file-header
 
 ## Debugging
 ### External Debugging with Eclipse
-WollMux.oxt extension is not installed in LibreOffice, but is loaded from external by starting a debug session in eclipse. There exist an additional extension **WollMux_ButtonsOnly.oxt**, which only contains the toolbars and dialogs. This extension must be installed in LibreOffice. Therefore call
+LOTS.oxt extension is not installed in LibreOffice, but is loaded from external by starting a debug session in eclipse. There exist an additional extension **LOTS_ButtonsOnly.oxt**, which only contains the toolbars and dialogs. This extension must be installed in LibreOffice. Therefore call
 
 ```
 mvn -P ButtonsOnly generate-sources
 ```
 
-and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at oxt/target/WollMux_ButtonsOnly.oxt.
+and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at oxt/target/LOTS_ButtonsOnly.oxt.
 
 Activate the maven profile "development" in Project > Properties > Maven > Active Maven Profiles.
 
