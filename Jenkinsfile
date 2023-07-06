@@ -4,7 +4,7 @@ pipeline {
   agent {
     label 'wollmux'
   }
-	
+
   options {
     disableConcurrentBuilds()
   }
@@ -16,7 +16,7 @@ pipeline {
   environment {
     UNO_PATH = '/opt/libreoffice6.4/program/'
   }
-	
+
   stages {
     stage('Build') {
       steps {
