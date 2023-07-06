@@ -142,8 +142,6 @@ interface XWollMux
 
 };
 
-service WollMux: XWollMux;
-
 }; }; }; }; }; };
 
 #endif
