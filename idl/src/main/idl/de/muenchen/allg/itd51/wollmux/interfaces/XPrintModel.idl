@@ -49,7 +49,7 @@ interface XPrintModel
      * sind.
      */
 	interface com::sun::star::beans::XPropertySet;
-	
+
 	/**
 	 * Diese Komfortmethode verhält sich wie
 	 * c.s.s.b.XPropertySet.getPropertyValue([in] string PropertyName), mit
@@ -57,9 +57,9 @@ interface XPrintModel
 	 * defaultValue zurück liefert.
 	 */
 	any getProp( [in] string PropertyName, [in] any defaultValue);
-	
+
     /**
-     * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
+     * Lädt die in der lots.conf definierte Druckfunktion mit dem Namen
      * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut an der
      * richtigen Position in die Aufrufkette der zu bearbeitenden Druckfunktionen
      * ein; Wird die Druckfunktion aufgerufen, so bekommt sie genau ein Argument
@@ -93,7 +93,7 @@ interface XPrintModel
      * Druckfunktionen vollständig ausgeführt wurde.
      */
     void printWithProps();
-	
+
     /**
      * Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit
      * einer Formularbeschreibung) handelt, wird das Formularfeld mit der ID id
@@ -134,7 +134,7 @@ interface XPrintModel
      * Diese Methode setzt den DocumentModified-Status auf modified.
      */
     void setDocumentModified( [in] boolean modified);
-	
+
     /**
      * Sammelt alle Formularfelder des Dokuments auf, die nicht von
      * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden
@@ -211,7 +211,7 @@ interface XPrintModel
      * @param maxValue
      *          den maximalen Wert der von dieser Druckfunktion zu druckenden
      *          Ausfertigungen.
-     */	
+     */
 	void setPrintProgressMaxValue([in] short maxValue);
 
     /**

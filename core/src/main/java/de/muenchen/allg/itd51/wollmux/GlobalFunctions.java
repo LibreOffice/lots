@@ -38,19 +38,19 @@ public class GlobalFunctions
   private static GlobalFunctions instance;
 
   /**
-   * Contains the functions defined in the "Functions" section of wollmux.conf.
+   * Contains the functions defined in the "Functions" section of lots.conf.
    */
   private FunctionLibrary globalFunctions;
   /**
-   * Contains the functions defined in the wollmux.conf "Dokumentaktionen" section.
+   * Contains the functions defined in the lots.conf "Dokumentaktionen" section.
    */
   private FunctionLibrary documentActionFunctions;
   /**
-   * Contains the dialogs defined in the "FunctionDialogs" section of wollmux.conf.
+   * Contains the dialogs defined in the "FunctionDialogs" section of lots.conf.
    */
   private DialogLibrary funcDialogs;
   /**
-   * Contains the functions defined in the "Functions" section of wollmux.conf.
+   * Contains the functions defined in the "Functions" section of lots.conf.
    */
   private PrintFunctionLibrary globalPrintFunctions;
 

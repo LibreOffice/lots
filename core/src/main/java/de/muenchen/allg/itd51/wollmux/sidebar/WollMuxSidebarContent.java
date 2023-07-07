@@ -132,7 +132,7 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
   public static final String WOLLMUX_CONFIG_ERROR_MESSAGE = L
       .m("No section \"Toolbars\" could be read from your WollMux configuration.\n"
           + "Therefore, the WollMux toolbar cannot be started. "
-          + "Please check if in your wollmux.conf the %include for the configuration "
+          + "Please check if in your lots.conf the %include for the configuration "
           + "of the WollMuxBar (e.g. wollmuxbar_standard.conf) is present "
           + "and check with the wollmux.log if possibly an error occurred "
           + "while processing a %include.");
