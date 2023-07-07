@@ -42,7 +42,7 @@ public class GlobalFunctions
    */
   private FunctionLibrary globalFunctions;
   /**
-   * Contains the functions defined in the wollmux.conf "Dokumentaktionen" section.
+   * Contains the functions defined in the lots.conf "DocumentActions" section.
    */
   private FunctionLibrary documentActionFunctions;
   /**
@@ -93,7 +93,7 @@ public class GlobalFunctions
      */
     documentActionFunctions = new FunctionLibrary(null, true);
     FunctionFactory.parseFunctions(documentActionFunctions,
-      WollMuxFiles.getWollmuxConf(), "Dokumentaktionen", null, null);
+      WollMuxFiles.getWollmuxConf(), "DocumentActions", null, null);
   }
 
   /**
