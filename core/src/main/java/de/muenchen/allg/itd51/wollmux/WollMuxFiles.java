@@ -157,7 +157,7 @@ public class WollMuxFiles
   private static File setupWollMuxDir()
   {
     String userHome = System.getProperty("user.home");
-    wollmuxDir = new File(userHome, ".wollmux");
+    wollmuxDir = new File(userHome, ".lots");
 
     if (!wollmuxDir.exists())
     {
