@@ -21,7 +21,7 @@
 
 <Configuration status="info" name="WollMux" packages="">
   <Appenders>
-    <File name="wollmuxLog" fileName="${sys:user.home}/.wollmux/wollmux.log">
+    <File name="wollmuxLog" fileName="${sys:user.home}/.lots/lots.log">
       <PatternLayout>
         <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c:%L - %m%n</Pattern>
       </PatternLayout>
