@@ -202,10 +202,10 @@ public class LDAPDatasource extends Datasource
       properties.put(Context.SECURITY_CREDENTIALS, password);
     }
 
-    ConfigThingy spalten = sourceDesc.query("Spalten");
+    ConfigThingy spalten = sourceDesc.query("Columns");
 
     if (spalten.count() == 0)
-      throw new ConfigurationErrorException(errorMessage() + L.m("Section 'Spalten' is missing."));
+      throw new ConfigurationErrorException(errorMessage() + L.m("Section 'Columns' is missing."));
 
     schema = new ArrayList<>();
 
