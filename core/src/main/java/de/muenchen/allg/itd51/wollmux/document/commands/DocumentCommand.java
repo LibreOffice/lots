@@ -1125,7 +1125,7 @@ public abstract class DocumentCommand
       super(wmCmd, bookmark);
       try
       {
-        dbSpalte = wmCmd.get("WM").get("DB_COLUMN").toString();
+        dbSpalte = wmCmd.get("WM").get("DB_COLUMN", "DB_SPALTE").toString();
       } catch (NodeNotFoundException e)
       {
         throw new InvalidCommandException(L.m("Missing attribute DB_COLUMN"));

@@ -99,8 +99,8 @@ public class FunkyDatasource extends Datasource
     DialogLibrary dialogLib = new DialogLibrary();
     Map<Object, Object> context = new HashMap<>();
     columnTransformer =
-      new ColumnTransformer(FunctionFactory.parseTrafos(sourceDesc, "ColumnTransformation", funcLib, dialogLib,
-    	        context));
+      new ColumnTransformer(FunctionFactory.parseTrafos(sourceDesc, "ColumnTransformation", "Spaltenumsetzung",
+          funcLib, dialogLib, context));
 
     schema = columnTransformer.getSchema();
     schema.addAll(source.getSchema());

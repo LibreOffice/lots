@@ -237,10 +237,10 @@ public class FunctionFactoryTest
   public void testParseTrafos() throws Exception
   {
     Map<String, Function> trafos = FunctionFactory.parseTrafos(new ConfigThingy("Trafos", "TRAFOS (trafo \"abc\")"),
-        "TRAFOS", funcLib, dialogLib, context);
+        "TRAFOS", null, funcLib, dialogLib, context);
     assertTrue(trafos.containsKey("trafo"));
 
-    trafos = FunctionFactory.parseTrafos(new ConfigThingy("Trafos", "TRAFOS \"abc\""), "TRAFOS", funcLib, dialogLib,
+    trafos = FunctionFactory.parseTrafos(new ConfigThingy("Trafos", "TRAFOS \"abc\""), "TRAFOS", null, funcLib, dialogLib,
         context);
     assertTrue(trafos.isEmpty());
   }

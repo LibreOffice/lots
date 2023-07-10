@@ -415,7 +415,7 @@ public class DatasourceSearchDialog implements Dialog
       try
       {
         columnTransformer = new ColumnTransformer(
-            FunctionFactory.parseTrafos(conf, "ColumnTransformation", funcLib, dialogLib, context));
+            FunctionFactory.parseTrafos(conf, "ColumnTransformation", "Spaltenumsetzung", funcLib, dialogLib, context));
       } catch (ConfigurationErrorException x)
       {
         LOGGER.error("Error while parsing the section 'ColumnTransformation'", x);

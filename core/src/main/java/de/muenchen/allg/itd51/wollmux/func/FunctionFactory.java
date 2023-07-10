@@ -761,11 +761,11 @@ public class FunctionFactory
     return funcs;
   }
 
-  public static Map<String, Function> parseTrafos(ConfigThingy trafoConf, String nodeName, FunctionLibrary funcLib,
+  public static Map<String, Function> parseTrafos(ConfigThingy trafoConf, String nodeName, String nodeNameFallback, FunctionLibrary funcLib,
       DialogLibrary dialogLib, Map<Object, Object> context)
   {
     Map<String, Function> trafos = new HashMap<>();
-    Iterator<ConfigThingy> suIter = trafoConf.query(nodeName, 1).iterator();
+    Iterator<ConfigThingy> suIter = trafoConf.query(nodeName, nodeNameFallback, 1).iterator();
     while (suIter.hasNext())
     {
       ConfigThingy spaltenumsetzung = suIter.next();

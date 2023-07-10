@@ -579,6 +579,24 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     return get(name, INTEGER_MAX);
   }
 
+  /**
+   * Performs a breadth-first search for descendant nodes of {@code this}
+   * that have {@code name} as their name.
+   *
+   * @return If there are corresponding nodes, the lowest search depth is determined
+   * on which corresponding nodes can be found and all nodes on this search depth are returned.
+   * If that is exactly one, it is returned directly, otherwise a ConfigThingy
+   * named {@code <query results>} is returned which has these nodes (and only these) as children.
+   *
+   * @throws NodeNotFoundException
+   *           if no corresponding nodes were found.
+   *           If this is not desired, {@link #query(String)} can be used.
+   */
+  public ConfigThingy get(String name, String fallbackName) throws NodeNotFoundException
+  {
+    return get(name, fallbackName, INTEGER_MAX);
+  }
+
   public <T extends RuntimeException> ConfigThingy get(String name, Class<T> ex, String msg)
   {
   	try
@@ -637,6 +655,15 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
+   * Like {@link #get(String)}, but it returns maximum results of
+   * search depth {@code maxlevel} (0 is {@code this}).
+   */
+  public ConfigThingy get(String name, String fallbackName, int maxlevel) throws NodeNotFoundException
+  {
+    return get(name, fallbackName, maxlevel, DEFAULT_MINLEVEL);
+  }
+
+  /**
    * Like {@link #get(String)}, but only results whose search depth is less than/equal
    * to {@code maxlevel} and greater than/equal to {@code minlevel} (0 is {@code this}) are returned.
    */
@@ -645,8 +672,31 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   {
     ConfigThingy res = query(name, false, maxlevel, minlevel);
     if (res.count() == 0)
-      throw new NodeNotFoundException("Knoten " + getName()
-        + " hat keinen Nachfahren '" + name + "'");
+    {
+      throw new NodeNotFoundException("Knoten " + getName() + " hat keinen Nachfahren '" + name + "'");
+    }
+
+    if (res.count() == 1) {
+      res = res.iterator().next();
+    }
+    return res;
+  }
+
+  /**
+   * Like {@link #get(String)}, but only results whose search depth is less than/equal
+   * to {@code maxlevel} and greater than/equal to {@code minlevel} (0 is {@code this}) are returned.
+   */
+  public ConfigThingy get(String name, String fallbackName, int maxlevel, int minlevel)
+      throws NodeNotFoundException
+  {
+    ConfigThingy res = query(name, false, maxlevel, minlevel);
+    if (res.count() == 0)
+    {
+      res = query(fallbackName, false, maxlevel, minlevel);
+      if (res.count() == 0)
+        throw new NodeNotFoundException("Knoten " + getName() + " hat keinen Nachfahren '" + name + "'");
+    }
+
     if (res.count() == 1) {
       res = res.iterator().next();
     }
@@ -673,6 +723,28 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   public ConfigThingy query(String name, int maxlevel)
   {
     return query(name, false, maxlevel, DEFAULT_MINLEVEL);
+  }
+
+  /**
+   * Like {@link #get(String, int)}, but it basically sets a ConfigThingy named
+   * {@code <query results>} over the results.
+   * In case there are no results, a ConfigThingy without children is returned
+   * instead of {@code null}.
+   */
+  public ConfigThingy query(String name, String fallbackName, int maxlevel)
+  {
+    return query(name, fallbackName, false, maxlevel, DEFAULT_MINLEVEL);
+  }
+
+  /**
+   * Like {@link #get(String, int, int)}, but it basically sets a ConfigThingy
+   * named {@code <query results>} over the results.
+   * In case there are no results, a ConfigThingy without children is returned
+   * instead of null.
+   */
+  public ConfigThingy query(String name, String fallbackName, int maxlevel, int minlevel)
+  {
+    return query(name, fallbackName, false, maxlevel, minlevel);
   }
 
   /**
@@ -817,6 +889,31 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
     if (found.isEmpty()) {
       return new ConfigThingy("<query results>");
+    }
+    return new ConfigThingy("<query results>", found);
+  }
+
+  /**
+   * If {@code getParents == false} this function behaves like {@link #get(String, int, int)},
+   * if {@code getParents == true} like {@link #getByChild(String, int, int)}.
+   */
+  protected ConfigThingy query(String name, String fallbackName, boolean getParents, int maxlevel,
+      int minlevel)
+  {
+    List<ConfigThingy> found = new ArrayList<>();
+    boolean haveMore;
+    int searchlevel = minlevel;
+    do
+    {
+      if (searchlevel > maxlevel) {
+        break;
+      }
+      haveMore = rollcall(this, name, found, -1, searchlevel, getParents);
+      ++searchlevel;
+    } while (found.isEmpty() && haveMore);
+
+    if (found.isEmpty()) {
+      return query(fallbackName, getParents, maxlevel, minlevel);
     }
     return new ConfigThingy("<query results>", found);
   }
