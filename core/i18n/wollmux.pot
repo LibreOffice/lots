@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-26 21:07+0200\n"
+"POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -343,7 +343,7 @@ msgid "OBJECT_CLASS contains of forbidden characters: "
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:208
-msgid "Section 'Spalten' is missing."
+msgid "Section 'Columns' is missing."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
@@ -1766,7 +1766,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
 msgid ""
-"No WollMux configuration (wollmux.conf) found - therefore WollMux runs in "
+"No WollMux configuration (lots.conf) found - therefore WollMux runs in "
 "NoConfig mode."
 msgstr ""
 
@@ -1797,7 +1797,7 @@ msgstr ""
 msgid ""
 "No section \"Toolbars\" could be read from your WollMux configuration.\n"
 "Therefore, the WollMux toolbar cannot be started. Please check if in your "
-"wollmux.conf the %include for the configuration of the WollMuxBar (e.g. "
+"lots.conf the %include for the configuration of the WollMuxBar (e.g. "
 "wollmuxbar_standard.conf) is present and check with the wollmux.log if "
 "possibly an error occurred while processing a %include."
 msgstr ""
