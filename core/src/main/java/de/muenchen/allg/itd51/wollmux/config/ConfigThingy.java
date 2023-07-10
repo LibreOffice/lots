@@ -35,8 +35,10 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -97,6 +99,45 @@ public class ConfigThingy implements Iterable<ConfigThingy>
 
   /** The name of the node. For leaves, this is the (string) value of the node. */
   private String name;
+
+  /** Fallback names (to support old German config items) */
+  Map<String, String> oldConfigItems = new HashMap<String, String>() {{
+      put("ColumnTransformation", "Spaltenumsetzung");
+      put("LibreOfficeSettings", "OOoEinstellungen");
+      put("Functions", "Funktionen");
+      put("PrintFunctions", "Druckfunktionen");
+      put("MailSettings", "EMailEinstellungen");
+      put("DataSources", "Datenquellen");
+      put("DataSource", "Datenquelle");
+      put("PersonalSenderListInit", "PersoenlicheAbsenderlisteInitialisierung");
+      put("SearchStrategy", "Suchstrategie");
+      put("TextBlocks", "Textbausteine");
+      put("Warnings", "Warnungen");
+      put("TextFragments", "Textfragmente");
+      put("KeyboardShortcuts", "Tastenkuerzel");
+      put("DefaultElements", "Standardelemente");
+      put("RecipientSelection", "Empfaengerauswahl");
+      put("InputFields", "Eingabefelder");
+      put("SenderDataColumnTransformation", "AbsenderdatenSpaltenumsetzung");
+      put("ExternalApplications", "ExterneAnwendungen");
+      put("ContentBasedDirectives", "SachleitendeVerfuegungen");
+      put("FunctionDialogs", "Funktionsdialoge");
+      put("Search", "Suche");
+      put("SearchResult", "Suchergebnis");
+      put("Preview", "Vorschau");
+      put("BottomArea", "Fussbereich");
+      put("Menubar", "Menueleiste");
+      put("Toolbars", "Symbolleisten");
+      put("LetterheadToolbar", "Briefkopfleiste");
+      put("Elemente", "Elements");
+      put("Data", "Daten");
+      put("DocumentActions", "Dokumentaktionen");
+      put("Columns", "Spalten");
+      put("DB_COLUMN", "DB_SPALTE");
+      put("COPY_NAME", "ABDRUCK_NAME");
+      put("OVERRIDE_FRAG_DB_COLUMN", "OVERRIDE_FRAG_DB_SPALTE");
+  }};
+
 
   /**
    * Parses the data from the file specified by {@code url}.
@@ -645,8 +686,13 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   {
     ConfigThingy res = query(name, false, maxlevel, minlevel);
     if (res.count() == 0)
-      throw new NodeNotFoundException("Knoten " + getName()
-        + " hat keinen Nachfahren '" + name + "'");
+    {
+      if (oldConfigItems.containsKey(name))
+        res = get(oldConfigItems.get(name), maxlevel, minlevel);
+      if (res.count() == 0)
+        throw new NodeNotFoundException("Knoten " + getName() + " hat keinen Nachfahren '" + name + "'");
+    }
+
     if (res.count() == 1) {
       res = res.iterator().next();
     }
@@ -815,6 +861,11 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       ++searchlevel;
     } while (found.isEmpty() && haveMore);
 
+    if (found.isEmpty() && oldConfigItems.containsKey(name)) {
+      ConfigThingy res = query(oldConfigItems.get(name), getParents, maxlevel, minlevel);
+      if (res.count() == 0)
+        return new ConfigThingy("<query results>");
+    }
     if (found.isEmpty()) {
       return new ConfigThingy("<query results>");
     }
