@@ -27,7 +27,7 @@
   </modules>
 
   <scm>
-    <developerConnection>scm:git:https://github.com/LibreOffice/lots.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:LibreOffice/lots.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
