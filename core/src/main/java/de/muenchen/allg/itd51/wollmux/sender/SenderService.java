@@ -78,7 +78,7 @@ public class SenderService implements XPALProvider
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SenderService.class);
 
-  public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
+  public static final String OVERRIDE_FRAG_DB_COLUMN = "OVERRIDE_FRAG_DB_COLUMN";
 
   private static SenderService instance;
 
@@ -142,13 +142,13 @@ public class SenderService implements XPALProvider
       }
 
       String overrideFragDbSpalte;
-      ConfigThingy overrideFragDbSpalteConf = WollMuxFiles.getWollmuxConf().query(OVERRIDE_FRAG_DB_SPALTE, 1);
+      ConfigThingy overrideFragDbSpalteConf = WollMuxFiles.getWollmuxConf().query(OVERRIDE_FRAG_DB_COLUMN, 1);
       try
       {
         overrideFragDbSpalte = overrideFragDbSpalteConf.getLastChild().toString();
       } catch (NodeNotFoundException x)
       {
-        // no OVERRIDE_FRAG_DB_SPALTE directive found
+        // no OVERRIDE_FRAG_DB_COLUMN directive found
         overrideFragDbSpalte = "";
       }
 
@@ -511,13 +511,13 @@ public class SenderService implements XPALProvider
         overrideFragConf = new ConfigThingy("overrideFrag", value);
       } catch (SenderException e)
       {
-        throw new SenderException("No sender selected => OVERRIDE_FRAG_DB_SPALTE is ineffective", e);
+        throw new SenderException("No sender selected => OVERRIDE_FRAG_DB_COLUMN is ineffective", e);
       } catch (ColumnNotFoundException e)
       {
-        LOGGER.debug("OVERRIDE_FRAG_DB_SPALTE {} does not exist", overrideFragDbSpalte, e);
+        LOGGER.debug("OVERRIDE_FRAG_DB_COLUMN {} does not exist", overrideFragDbSpalte, e);
       } catch (IOException | SyntaxErrorException e)
       {
-        throw new SenderException("Error parsing OVERRIDE_FRAG_DB_SPALTE " + overrideFragDbSpalte, e);
+        throw new SenderException("Error parsing OVERRIDE_FRAG_DB_COLUMN " + overrideFragDbSpalte, e);
       }
     }
 
