@@ -474,7 +474,7 @@ public class TextDocumentController
         {
           return Integer.MAX_VALUE;
         }
-        LOGGER.error("Unbekannter Rückgabewert \"{}\" von Dokumentaktionen-Funktion", res);
+        LOGGER.error("Unbekannter Rückgabewert \"{}\" von DocumentActions-Funktion", res);
       }
     }
     return -1;
