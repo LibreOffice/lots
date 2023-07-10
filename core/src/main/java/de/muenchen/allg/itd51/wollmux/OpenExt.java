@@ -229,7 +229,7 @@ public class OpenExt
    * Whether the URL itself is passed as a parameter to the program or whether the
    * contents of the url are downloaded and saved to a file whose path is passed as
    * a parameter is determined by the `DOWNLOAD` specification in the external
-   * application definition in wollmux.conf.
+   * application definition in lots.conf.
    *
    * @see #setSource(XStorable)
    *

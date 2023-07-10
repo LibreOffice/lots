@@ -105,7 +105,7 @@ public class WollMuxSingleton
     if (!WollMuxFiles.initLocalization(WollMuxFiles.getWollmuxConf()))
     {
       LOGGER
-          .info("No localization found in wollmux.conf. WollMux starts with default localization.");
+          .info("No localization found in lots.conf. WollMux starts with default localization.");
     }
 
     // init default context

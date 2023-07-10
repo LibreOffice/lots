@@ -144,11 +144,11 @@
                 <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
                 <if>
                   <not>
-                    <available file="${project.build.directory}/config/.wollmux/wollmux.conf" />
+                    <available file="${project.build.directory}/config/.lots/lots.conf" />
                   </not>
                   <then>
                     <get src="${wollmux.test.conf.url}${wollmux.test.conf.release}" dest="${project.build.directory}" />
-                    <untar src="${project.build.directory}/wollmux-config-19.0.1.tar.gz" dest="${project.build.directory}/config" compression="gzip" />
+                    <untar src="${project.build.directory}/lots-config-19.0.2.tar.gz" dest="${project.build.directory}/config" compression="gzip" />
                   </then>
                 </if>
               </target>

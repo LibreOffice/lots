@@ -57,7 +57,7 @@ import de.muenchen.allg.itd51.wollmux.util.L;
  * <br>
  * In der Ergebnisdatenquelle sind alle Spalten unter ihren ursprünglichen Namen verfügbar
  * (Unterschied zu {@link AttachDatasource}). Konflikte werden über den MODE-Spezifizierer aufgelöst
- * (siehe wollmux.conf Doku).<br>
+ * (siehe lots.conf Doku).<br>
  *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */

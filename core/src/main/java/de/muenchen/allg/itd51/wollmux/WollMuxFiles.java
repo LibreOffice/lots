@@ -95,7 +95,7 @@ public class WollMuxFiles
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WollMuxFiles.class);
 
-  private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
+  private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/lots/lots.conf";
 
   private static final String WOLLMUX_CONF_PATH = "WOLLMUX_CONF_PATH";
 
@@ -112,10 +112,10 @@ public class WollMuxFiles
   private static final String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
 
   private static final String WOLLMUX_NOCONF = L.m(
-      "No WollMux configuration (wollmux.conf) found - therefore WollMux runs in NoConfig mode.");
+      "No WollMux configuration (lots.conf) found - therefore WollMux runs in NoConfig mode.");
 
   /**
-   * Default context defined in wollmux.conf.
+   * Default context defined in lots.conf.
    */
   private static URL defaultContextURL;
 
@@ -236,33 +236,33 @@ public class WollMuxFiles
 
   private static File findWollMuxConf(File wollMuxDir)
   {
-    String relativeWollMuxConf = "/.wollmux/wollmux.conf";
+    String relativeWollMuxConf = "/.lots/lots.conf";
     ArrayList<String> searchPaths = new ArrayList<>();
 
     String wollmuxConfPath = null;
 
-    // wollmux.conf set by environment "WOLLMUX_CONF_PATH".
+    // lots.conf set by environment "WOLLMUX_CONF_PATH".
     if (System.getenv(WOLLMUX_CONF_PATH) != null)
     {
       wollmuxConfPath = System.getenv(WOLLMUX_CONF_PATH);
       searchPaths.add(wollmuxConfPath);
     }
 
-    // wollmux.conf set by system property "WOLLMUX_CONF_PATH"
+    // lots.conf set by system property "WOLLMUX_CONF_PATH"
     if (System.getProperty(WOLLMUX_CONF_PATH) != null)
     {
       wollmuxConfPath = System.getProperty(WOLLMUX_CONF_PATH);
       searchPaths.add(wollmuxConfPath);
     }
 
-    searchPaths.add(new File(wollMuxDir, "wollmux.conf").getAbsolutePath());
+    searchPaths.add(new File(wollMuxDir, "lots.conf").getAbsolutePath());
     searchPaths.add(System.getProperty("user.dir") + relativeWollMuxConf);
     searchPaths.add(ETC_WOLLMUX_WOLLMUX_CONF);
 
     // Check if windows
     if (System.getProperty("os.name").toLowerCase().contains("windows"))
     {
-      // try reading path to wollmux.conf from HKCU registry
+      // try reading path to lots.conf from HKCU registry
       if (Advapi32Util.registryKeyExists(WinReg.HKEY_CURRENT_USER, WOLLMUX_KEY))
       {
         wollmuxConfPath = Advapi32Util.registryGetStringValue(WinReg.HKEY_CURRENT_USER, WOLLMUX_KEY,
@@ -273,7 +273,7 @@ public class WollMuxFiles
         LOGGER.debug("Kein Registry-Eintrag unter HKEY_CURRENT_USER");
       }
 
-      // try reading path to wollmux.conf from HKLM registry
+      // try reading path to lots.conf from HKLM registry
       if (Advapi32Util.registryKeyExists(WinReg.HKEY_LOCAL_MACHINE, WOLLMUX_KEY))
       {
         wollmuxConfPath = Advapi32Util.registryGetStringValue(WinReg.HKEY_LOCAL_MACHINE,
@@ -552,9 +552,9 @@ public class WollMuxFiles
       out.write("\n");
       out.write("===================== END wollmuxConfFile ==================\n");
 
-      out.write("===================== START wollmux.conf ==================\n");
+      out.write("===================== START lots.conf ==================\n");
       out.write(getWollmuxConf().stringRepresentation());
-      out.write("===================== END wollmux.conf ==================\n");
+      out.write("===================== END lots.conf ==================\n");
 
       out.write("===================== START losCacheFile ==================\n");
       out.flush();

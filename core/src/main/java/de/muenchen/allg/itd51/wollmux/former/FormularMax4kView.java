@@ -471,7 +471,7 @@ public class FormularMax4kView extends JFrame
   /**
    * Fügt submenu die alten im WollMux gespeicherten Standardelemente-Einträge hinzu.
    * Sollte nur verwendet werden, wenn der entsprechende Konfigurationsabschnitt in
-   * der wollmux.conf fehlt.
+   * der lots.conf fehlt.
    *
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
