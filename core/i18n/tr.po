@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 10:15+0100\n"
-"PO-Revision-Date: 2023-03-14 21:33+0000\n"
+"PO-Revision-Date: 2023-07-12 22:33+0000\n"
 "Last-Translator: Ayhan YALÇINSOY <ayhanyalcinsoy@gmail.com>\n"
 "Language-Team: Turkish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/tr/>\n"
@@ -106,7 +106,7 @@ msgstr "Veri kaynağı \"{0}\": Şema bölümü boş"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:260
 #, java-format
 msgid "Data source \"{0}\": Key-section is missing"
-msgstr ""
+msgstr "Veri kaynağı \"{0}\": Anahtar bölümü eksik"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:306
 #, java-format
@@ -139,32 +139,32 @@ msgstr "OOo-datasource \"{0}\" şeması okunamadı."
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:365
 #, java-format
 msgid "Data source \"{0}\": No Key column defined"
-msgstr ""
+msgstr "Veri kaynağı \"{0}\": Tanımlanmış Anahtar sütunu yok"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:387
 #, java-format
 msgid "Key column \"{0}\" not defined in schema"
-msgstr ""
+msgstr "Anahtar sütun \"{0}\" şemada tanımlanmamış"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:390
 #, java-format
 msgid "Key column \"{0}\" was specified twice in the key section"
-msgstr ""
+msgstr "Anahtar sütun \"{0}\" anahtar bölümünde iki kez belirtildi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:527
 msgid "Could not create RowSet"
-msgstr ""
+msgstr "RowSet oluşturulamadı"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:719
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:320
 #, java-format
 msgid "Column {0} does not exist!"
-msgstr ""
+msgstr "Sütun {0} mevcut değil!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:83
 #, java-format
 msgid "OVER-Specification of data source {0} is missing"
-msgstr ""
+msgstr "OVER-Veri kaynağının {0} belirtimi eksik"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:89
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:93
