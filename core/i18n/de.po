@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 10:15+0100\n"
+"POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: 2023-03-19 05:34+0000\n"
 "Last-Translator: Christian Kühl <kuehl.christian@googlemail.com>\n"
 "Language-Team: German <https://translations.documentfoundation.org/projects/"
@@ -239,8 +239,9 @@ msgid "Error in Conf-file of data source {0}: "
 msgstr "Fehler in Conf-Datei von Datenquelle {0}: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:144
-#, java-format
-msgid "Error in Conf-file of data source {0}: Section 'Daten' is missing"
+#, fuzzy, java-format
+#| msgid "Error in Conf-file of data source {0}: Section 'Daten' is missing"
+msgid "Error in Conf-file of data source {0}: Section 'Data' is missing"
 msgstr "Fehler in Conf-Datei von Datenquelle {0}: Abschnitt 'Daten' fehlt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:165
@@ -370,11 +371,15 @@ msgid "OBJECT_CLASS contains of forbidden characters: "
 msgstr "OBJECT_CLASS enthält unerlaubte Zeichen: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:208
-msgid "Section 'Spalten' is missing."
+#, fuzzy
+#| msgid "Section 'Spalten' is missing."
+msgid "Section 'Columns' is missing."
 msgstr "Abschnitt 'Spalten' fehlt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
-msgid "Specification of DB_SPALTE is missing"
+#, fuzzy
+#| msgid "Specification of DB_SPALTE is missing"
+msgid "Specification of DB_COLUMN is missing"
 msgstr "Angabe von DB_SPALTE fehlt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:223
@@ -1093,9 +1098,13 @@ msgid "Neither dialog name nor the dialog itself must be null"
 msgstr "Weder Dialogname noch Dialog darf null sein"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:174
+#, fuzzy
+#| msgid ""
+#| "Error within the function dialogue: Section 'Spaltenumsetzung' could not "
+#| "be parsed!"
 msgid ""
-"Error within the function dialogue: Section 'Spaltenumsetzung' could not be "
-"parsed!"
+"Error within the function dialogue: Section 'ColumnTransformation' could not "
+"be parsed!"
 msgstr ""
 "Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst "
 "werden!"
@@ -1701,7 +1710,9 @@ msgid "No Tab or Buttons section"
 msgstr "Weder Abschnitt Register noch Schaltflächen"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:462
-msgid "Error while parsing the sections FormularMax4000/Standardelemente"
+#, fuzzy
+#| msgid "Error while parsing the sections FormularMax4000/Standardelemente"
+msgid "Error while parsing the sections FormularMax4000/DefaultElements"
 msgstr "Fehler beim Parsen des Abschnitts FormularMax4000/Standardelemente"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:481
@@ -1761,7 +1772,7 @@ msgstr ""
 "auf."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1143
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:244
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:243
 msgid "unknown"
 msgstr "unbekannt"
 
@@ -1785,7 +1796,9 @@ msgid "STYLE \"{0}\" is unknown."
 msgstr "STYLE \"{0}\" ist unbekannt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1131
-msgid "Missing attribute DB_SPALTE"
+#, fuzzy
+#| msgid "Missing attribute DB_SPALTE"
+msgid "Missing attribute DB_COLUMN"
 msgstr "Fehlendes Attribut DB_SPALTE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1160
@@ -1891,8 +1904,12 @@ msgid "Missing section \"Formular\" in the form description."
 msgstr "Fehlender Abschnitt 'Formular' in der Formularbeschreibung."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
+#, fuzzy
+#| msgid ""
+#| "No WollMux configuration (wollmux.conf) found - therefore WollMux runs in "
+#| "NoConfig mode."
 msgid ""
-"No WollMux configuration (wollmux.conf) found - therefore WollMux runs in "
+"No WollMux configuration (lots.conf) found - therefore WollMux runs in "
 "NoConfig mode."
 msgstr ""
 "Es wurde keine WollMux-Konfiguration (wollmux.conf) gefunden – deshalb läuft "
@@ -1924,10 +1941,18 @@ msgid "At the insertion place no text block could be found."
 msgstr "An der Einfügestelle konnte kein Textbaustein gefunden werden."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:133
+#, fuzzy
+#| msgid ""
+#| "No section \"Symbolleisten\" could be read from your WollMux "
+#| "configuration.\n"
+#| "Therefore, the WollMux toolbar cannot be started. Please check if in your "
+#| "wollmux.conf the %include for the configuration of the WollMuxBar (e.g. "
+#| "wollmuxbar_standard.conf) is present and check with the wollmux.log if "
+#| "possibly an error occurred while processing a %include."
 msgid ""
-"No section \"Symbolleisten\" could be read from your WollMux configuration.\n"
+"No section \"Toolbars\" could be read from your WollMux configuration.\n"
 "Therefore, the WollMux toolbar cannot be started. Please check if in your "
-"wollmux.conf the %include for the configuration of the WollMuxBar (e.g. "
+"lots.conf the %include for the configuration of the WollMuxBar (e.g. "
 "wollmuxbar_standard.conf) is present and check with the wollmux.log if "
 "possibly an error occurred while processing a %include."
 msgstr ""
@@ -2004,11 +2029,11 @@ msgstr ""
 msgid "About WollMux"
 msgstr "Info über WollMux"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:241
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:240
 msgid "none loaded"
 msgstr "keine geladen"
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:403
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:402
 #, java-format
 msgid ""
 "The TYPE \"{0}\" is invalid. Valid are 'boolean', 'integer', 'float' and "

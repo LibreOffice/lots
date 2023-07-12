@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 10:15+0100\n"
+"POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: 2023-06-20 16:33+0000\n"
 "Last-Translator: Xosé <xosecalvo@gmail.com>\n"
 "Language-Team: Galician <https://translations.documentfoundation.org/"
@@ -232,9 +232,10 @@ msgid "Error in Conf-file of data source {0}: "
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:144
-#, java-format
-msgid "Error in Conf-file of data source {0}: Section 'Daten' is missing"
-msgstr ""
+#, fuzzy, java-format
+#| msgid "Data source \"{0}\": Key-section is missing"
+msgid "Error in Conf-file of data source {0}: Section 'Data' is missing"
+msgstr "Fonte de datos «»{0}: falta a sección da clave"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:165
 #, java-format
@@ -355,11 +356,11 @@ msgid "OBJECT_CLASS contains of forbidden characters: "
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:208
-msgid "Section 'Spalten' is missing."
+msgid "Section 'Columns' is missing."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
-msgid "Specification of DB_SPALTE is missing"
+msgid "Specification of DB_COLUMN is missing"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:223
@@ -1020,8 +1021,8 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:174
 msgid ""
-"Error within the function dialogue: Section 'Spaltenumsetzung' could not be "
-"parsed!"
+"Error within the function dialogue: Section 'ColumnTransformation' could not "
+"be parsed!"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:222
@@ -1596,7 +1597,7 @@ msgid "No Tab or Buttons section"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:462
-msgid "Error while parsing the sections FormularMax4000/Standardelemente"
+msgid "Error while parsing the sections FormularMax4000/DefaultElements"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:481
@@ -1653,7 +1654,7 @@ msgid ""
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1143
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:244
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:243
 msgid "unknown"
 msgstr ""
 
@@ -1677,7 +1678,7 @@ msgid "STYLE \"{0}\" is unknown."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1131
-msgid "Missing attribute DB_SPALTE"
+msgid "Missing attribute DB_COLUMN"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1160
@@ -1695,8 +1696,8 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1353
 msgid ""
-"Specified TYPE is invalid or incorrectly written. Expect "
-"\"templateTemplate\", \"normalTemplate\" or \"formDocument\"!"
+"Specified TYPE is invalid or incorrectly written. Expect \"templateTemplate"
+"\", \"normalTemplate\" or \"formDocument\"!"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1461
@@ -1778,7 +1779,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
 msgid ""
-"No WollMux configuration (wollmux.conf) found - therefore WollMux runs in "
+"No WollMux configuration (lots.conf) found - therefore WollMux runs in "
 "NoConfig mode."
 msgstr ""
 
@@ -1807,9 +1808,9 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:133
 msgid ""
-"No section \"Symbolleisten\" could be read from your WollMux configuration.\n"
+"No section \"Toolbars\" could be read from your WollMux configuration.\n"
 "Therefore, the WollMux toolbar cannot be started. Please check if in your "
-"wollmux.conf the %include for the configuration of the WollMuxBar (e.g. "
+"lots.conf the %include for the configuration of the WollMuxBar (e.g. "
 "wollmuxbar_standard.conf) is present and check with the wollmux.log if "
 "possibly an error occurred while processing a %include."
 msgstr ""
@@ -1866,11 +1867,11 @@ msgstr ""
 msgid "About WollMux"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:241
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:240
 msgid "none loaded"
 msgstr ""
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:403
+#: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:402
 #, java-format
 msgid ""
 "The TYPE \"{0}\" is invalid. Valid are 'boolean', 'integer', 'float' and "
