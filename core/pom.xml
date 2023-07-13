@@ -82,7 +82,7 @@
         <configuration>
           <keysFile>wollmux.pot</keysFile>
           <poDirectory>${basedir}/i18n</poDirectory>
-          <targetBundle>de.muenchen.allg.itd51.wollmux.i18n.Messages</targetBundle>
+          <targetBundle>org.libreoffice.lots.i18n.Messages</targetBundle>
           <outputFormat>properties</outputFormat>
         </configuration>
         <executions>
@@ -105,7 +105,7 @@
               <addClasspath>true</addClasspath>
             </manifest>
             <manifestEntries>
-              <RegistrationClassName>de.muenchen.allg.itd51.wollmux.ComponentRegistration</RegistrationClassName>
+              <RegistrationClassName>org.libreoffice.lots.ComponentRegistration</RegistrationClassName>
               <UNO-Type-Path>&lt;&gt;</UNO-Type-Path>
             </manifestEntries>
           </archive>
