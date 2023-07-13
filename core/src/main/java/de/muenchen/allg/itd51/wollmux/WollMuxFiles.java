@@ -237,6 +237,7 @@ public class WollMuxFiles
   private static File findWollMuxConf(File wollMuxDir)
   {
     String relativeWollMuxConf = "/.lots/lots.conf";
+    String oldRelativeWollMuxConf = "/.wollmux/wollmux.conf";
     ArrayList<String> searchPaths = new ArrayList<>();
 
     String wollmuxConfPath = null;
@@ -257,6 +258,7 @@ public class WollMuxFiles
 
     searchPaths.add(new File(wollMuxDir, "lots.conf").getAbsolutePath());
     searchPaths.add(System.getProperty("user.dir") + relativeWollMuxConf);
+    searchPaths.add(System.getProperty("user.dir") + oldRelativeWollMuxConf);
     searchPaths.add(ETC_WOLLMUX_WOLLMUX_CONF);
 
     // Check if windows
