@@ -47,11 +47,11 @@ import com.sun.star.uno.UnoRuntime;
 
 import org.libreoffice.ext.unohelper.common.UNO;
 import org.libreoffice.ext.unohelper.common.UnoHelperException;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.interfaces.XWollMux;
 import org.libreoffice.ext.unohelper.util.UnoComponent;
+import org.libreoffice.lots.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.interfaces.XWollMux;
 
-@Tag("de.muenchen.allg.itd51.wollmux.test.WollMuxTest")
+@Tag("org.libreoffice.lots.test.WollMuxTest")
 public abstract class WollMuxTest
 {
 
@@ -73,7 +73,7 @@ public abstract class WollMuxTest
       options.add("-env:UserInstallation=file://" + prop.getProperty("office.profile"));
       UNO.init(options);
       wollmux = UnoRuntime.queryInterface(XWollMux.class,
-          UnoComponent.createComponentWithContext("de.muenchen.allg.itd51.wollmux.WollMux"));
+          UnoComponent.createComponentWithContext("org.libreoffice.lots.WollMux"));
     } catch (Exception e)
     {
       fail("Can't start office", e);

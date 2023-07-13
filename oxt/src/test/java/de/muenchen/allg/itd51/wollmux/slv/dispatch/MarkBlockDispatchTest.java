@@ -37,10 +37,12 @@ import com.sun.star.text.XTextViewCursor;
 
 import org.libreoffice.ext.unohelper.common.UNO;
 import org.libreoffice.ext.unohelper.common.UnoDictionary;
-import de.muenchen.allg.itd51.wollmux.slv.ContentBasedDirectiveConfig;
-import de.muenchen.allg.itd51.wollmux.slv.PrintBlockSignature;
+
 import de.muenchen.allg.itd51.wollmux.test.WollMuxTest;
 import org.libreoffice.ext.unohelper.util.UnoProperty;
+import org.libreoffice.lots.slv.ContentBasedDirectiveConfig;
+import org.libreoffice.lots.slv.PrintBlockSignature;
+import org.libreoffice.lots.slv.dispatch.MarkBlockDispatch;
 
 public class MarkBlockDispatchTest extends WollMuxTest
 {
