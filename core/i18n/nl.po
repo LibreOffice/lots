@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-03-14 21:33+0000\n"
-"Last-Translator: vpanter <Leo.Moons@proximus.be>\n"
+"PO-Revision-Date: 2023-07-14 07:33+0000\n"
+"Last-Translator: kees538 <kees538@gmail.com>\n"
 "Language-Team: Dutch <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/nl/>\n"
 "Language: nl\n"
@@ -239,10 +239,9 @@ msgid "Error in Conf-file of data source {0}: "
 msgstr "Fout in Conf-bestand van gegevensbron {0}: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:144
-#, fuzzy, java-format
-#| msgid "Error in Conf-file of data source {0}: Section 'Daten' is missing"
+#, java-format
 msgid "Error in Conf-file of data source {0}: Section 'Data' is missing"
-msgstr "Fout in Conf-bestand van gegevensbron {0}: Sectie 'Daten' ontbreekt"
+msgstr "Fout in Conf-bestand van gegevensbron {0}: Sectie 'Data' ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:165
 #, java-format
@@ -372,16 +371,12 @@ msgid "OBJECT_CLASS contains of forbidden characters: "
 msgstr "OBJECT_CLASS bevat verboden tekens: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:208
-#, fuzzy
-#| msgid "Section 'Spalten' is missing."
 msgid "Section 'Columns' is missing."
-msgstr "Rubriek 'Spalten' ontbreekt."
+msgstr "Rubriek 'Kolommen' ontbreekt."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
-#, fuzzy
-#| msgid "Specification of DB_SPALTE is missing"
 msgid "Specification of DB_COLUMN is missing"
-msgstr "Specificatie van DB_SPALTE ontbreekt"
+msgstr "Specificatie van DB_KOLOM ontbreekt"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:223
 #, java-format
@@ -1101,16 +1096,12 @@ msgstr ""
 "zijn"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:174
-#, fuzzy
-#| msgid ""
-#| "Error within the function dialogue: Section 'Spaltenumsetzung' could not "
-#| "be parsed!"
 msgid ""
 "Error within the function dialogue: Section 'ColumnTransformation' could not "
 "be parsed!"
 msgstr ""
-"Fout in het functiedialoogvenster: Sectie 'Spaltenumsetzung' kon niet worden "
-"geparseerd!"
+"Fout in het functiedialoogvenster: Sectie 'ColumnTransformation' kon niet "
+"worden geparseerd!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:222
 msgid "Select dataset"
@@ -1711,10 +1702,8 @@ msgid "No Tab or Buttons section"
 msgstr "Geen sectie met tabbladen of knoppen"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:462
-#, fuzzy
-#| msgid "Error while parsing the sections FormularMax4000/Standardelemente"
 msgid "Error while parsing the sections FormularMax4000/DefaultElements"
-msgstr "Fout bij het ontleden van de secties FormularMax4000/Standardelemente"
+msgstr "Fout bij het ontleden van de secties FormularMax4000/DefaultElements"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:481
 msgid "Recipient Selection Tab"
@@ -1796,10 +1785,8 @@ msgid "STYLE \"{0}\" is unknown."
 msgstr "STYLE \"{0}\" is onbekend"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1131
-#, fuzzy
-#| msgid "Missing attribute DB_SPALTE"
 msgid "Missing attribute DB_COLUMN"
-msgstr "Ontbrekende attribuut DB_SPALTE"
+msgstr "Ontbrekende attribuut DB_COLUMN"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1160
 #, java-format
@@ -1904,10 +1891,6 @@ msgid "Missing section \"Formular\" in the form description."
 msgstr "Ontbrekende sectie 'Formular' in de formulierbeschrijving."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
-#, fuzzy
-#| msgid ""
-#| "No WollMux configuration (wollmux.conf) found - therefore WollMux runs in "
-#| "NoConfig mode."
 msgid ""
 "No WollMux configuration (lots.conf) found - therefore WollMux runs in "
 "NoConfig mode."
@@ -1940,14 +1923,6 @@ msgid "At the insertion place no text block could be found."
 msgstr "Op de invoegplaats kon geen tekstblok gevonden worden."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:133
-#, fuzzy
-#| msgid ""
-#| "No section \"Symbolleisten\" could be read from your WollMux "
-#| "configuration.\n"
-#| "Therefore, the WollMux toolbar cannot be started. Please check if in your "
-#| "wollmux.conf the %include for the configuration of the WollMuxBar (e.g. "
-#| "wollmuxbar_standard.conf) is present and check with the wollmux.log if "
-#| "possibly an error occurred while processing a %include."
 msgid ""
 "No section \"Toolbars\" could be read from your WollMux configuration.\n"
 "Therefore, the WollMux toolbar cannot be started. Please check if in your "
@@ -1955,8 +1930,7 @@ msgid ""
 "wollmuxbar_standard.conf) is present and check with the wollmux.log if "
 "possibly an error occurred while processing a %include."
 msgstr ""
-"Er kon geen sectie \"Symbolleisten\" worden gelezen uit uw WollMux-"
-"configuratie.\n"
+"Er kon geen sectie \"Toolbars\" worden gelezen uit uw WollMux-configuratie.\n"
 "Daarom kan de WollMux-werkbalk niet worden gestart. Controleer of in uw "
 "wollmux.conf de %include voor de configuratie van de WollMuxBar (bijv. "
 "wollmuxbar_standard.conf) aanwezig is en controleer met de wollmux.log of er "
