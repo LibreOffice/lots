@@ -238,7 +238,7 @@
       <dependency>
         <groupId>org.libreoffice.ext</groupId>
         <artifactId>unohelper</artifactId>
-        <version>5.0.0</version>
+        <version>5.0.3</version>
       </dependency>
       <dependency>
         <groupId>org.openjfx</groupId>
