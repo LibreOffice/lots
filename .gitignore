@@ -3,6 +3,8 @@ localization.conf
 localizedConfigStrings.conf
 idl/de/muenchen/allg/itd51/wollmux/*.urd
 idl/de/muenchen/allg/itd51/wollmux/*.class
+idl/org/libreoffice/lots/*.urd
+idl/org/libreoffice/lots/*.class
 *~
 /core/target
 /idl/target
