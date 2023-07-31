@@ -2,8 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.muenchen</groupId>
-    <artifactId>wollmux-parent</artifactId>
+    <groupId>org.libreoffice</groupId>
+    <artifactId>lots-parent</artifactId>
     <version>19.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
@@ -12,8 +12,8 @@
     <jacoco.report.file>${project.build.directory}/jacoco-office.exec</jacoco.report.file>
   </properties>
 
-  <artifactId>wollmux-oxt</artifactId>
-  <name>LOTS Extension</name>
+  <artifactId>lots-oxt</artifactId>
+  <name>LibreOffice Template System Extension</name>
 
   <build>
     <testResources>
@@ -233,12 +233,12 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>de.muenchen</groupId>
-          <artifactId>wollmux</artifactId>
+          <groupId>org.libreoffice</groupId>
+          <artifactId>lots</artifactId>
         </dependency>
         <dependency>
-          <groupId>de.muenchen</groupId>
-          <artifactId>wollmux-interfaces</artifactId>
+          <groupId>org.libreoffice</groupId>
+          <artifactId>lots-interfaces</artifactId>
           <version>${project.version}</version>
           <type>rdb</type>
         </dependency>
@@ -265,7 +265,7 @@
     <profile>
       <id>ButtonsOnly</id>
       <properties>
-        <wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>
+        <wollmux.oxt.id>org.libreoffice.ext.lots.debug</wollmux.oxt.id>
         <wollmux.oxt.name>LibreOffice Template System ButtonsOnly</wollmux.oxt.name>
       </properties>
       <build>

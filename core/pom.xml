@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.muenchen</groupId>
-    <artifactId>wollmux-parent</artifactId>
+    <groupId>org.libreoffice</groupId>
+    <artifactId>lots-parent</artifactId>
     <version>19.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>wollmux</artifactId>
-  <name>WollMux</name>
+  <artifactId>lots</artifactId>
+  <name>LibreOffice Template System</name>
 
   <build>
     <resources>
@@ -120,8 +120,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>de.muenchen</groupId>
-      <artifactId>wollmux-interfaces</artifactId>
+      <groupId>org.libreoffice</groupId>
+      <artifactId>lots-interfaces</artifactId>
     </dependency>
     <dependency>
       <groupId>org.libreoffice</groupId>

@@ -32,7 +32,7 @@ public class UtilsTest
   @Test
   public void testExtensionId()
   {
-    assertEquals("de.muenchen.allg.d101.wollmux", Utils.getWollMuxProperties().getProperty("extension.id"));
+    assertEquals("org.libreoffice.ext.lots", Utils.getWollMuxProperties().getProperty("extension.id"));
   }
 
 }

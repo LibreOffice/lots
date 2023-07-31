@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.muenchen</groupId>
-    <artifactId>wollmux-parent</artifactId>
+    <groupId>org.libreoffice</groupId>
+    <artifactId>lots-parent</artifactId>
     <version>19.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>wollmux-interfaces</artifactId>
-  <name>WollMux Interfaces</name>
+  <artifactId>lots-interfaces</artifactId>
+  <name>LibreOffice Template System Interfaces</name>
 
   <properties>
     <libreoffice.sdk>${UNO_PATH}/../sdk</libreoffice.sdk>
