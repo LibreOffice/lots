@@ -1,17 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>de.muenchen</groupId>
-  <artifactId>wollmux-parent</artifactId>
+  <groupId>org.libreoffice.ext</groupId>
+  <artifactId>lots-parent</artifactId>
   <version>19.0.1-SNAPSHOT</version>
-  <name>WollMux Parent</name>
+  <name>LibreOffice Template System Parent</name>
   <packaging>pom</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>11</maven.compiler.release>
     <libreoffice.version>7.4.0</libreoffice.version>
-    <wollmux.oxt.id>de.muenchen.allg.d101.wollmux</wollmux.oxt.id>
+    <wollmux.oxt.id>org.libreoffice.ext.lots</wollmux.oxt.id>
     <wollmux.oxt.name>LibreOffice Template System</wollmux.oxt.name>
     <wollmux.test.conf.url>https://github.com/LibreOffice/lots-config/releases/download/</wollmux.test.conf.url>
     <wollmux.test.conf.release>v19.0.2/lots-config-19.0.2.tar.gz</wollmux.test.conf.release>
@@ -63,6 +63,7 @@
                     <failWhenParentIsSnapshot>false</failWhenParentIsSnapshot>
                     <excludes>
                       <exclude>de.muenchen:*</exclude>
+                      <exclude>org.libreoffice:*</exclude>
                       <exclude>org.libreoffice.ext:unohelper</exclude>
                     </excludes>
                   </requireReleaseDeps>
@@ -216,13 +217,13 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>de.muenchen</groupId>
-        <artifactId>wollmux-interfaces</artifactId>
+        <groupId>org.libreoffice</groupId>
+        <artifactId>lots-interfaces</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.muenchen</groupId>
-        <artifactId>wollmux</artifactId>
+        <groupId>org.libreoffice</groupId>
+        <artifactId>lots</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -378,7 +379,7 @@
     <profile>
       <id>development</id>
       <properties>
-        <wollmux.oxt.id>de.muenchen.allg.d101.wollmux.debug</wollmux.oxt.id>
+        <wollmux.oxt.id>org.libreoffice.ext.lots.debug</wollmux.oxt.id>
       </properties>
     </profile>
     <profile>
