@@ -59,7 +59,7 @@ abstract class SenderFinder
   }
 
   /**
-   * Build the query parameter from the {@link ConfigTingy} and search for senders. Keys are used as
+   * Build the query parameter from the {@link ConfigThingy} and search for senders. Keys are used as
    * column names. Values have to be matched by the sender. All parameters have to match.
    *
    * @param conf
