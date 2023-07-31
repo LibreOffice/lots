@@ -28,8 +28,33 @@
 
   <scm>
     <developerConnection>scm:git:git@github.com:LibreOffice/lots.git</developerConnection>
+    <url>https://github.com/LibreOffice/lots</url>
     <tag>HEAD</tag>
   </scm>
+
+  <issueManagement>
+    <url>https://github.com/LibreOffice/lots/issues</url>
+    <system>LibreOffice Template System Issue Tracker</system>
+  </issueManagement>
+
+  <developers>
+    <developer>
+      <name>The Document Foundation</name>
+    </developer>
+  </developers>
+
+  <distributionManagement>
+    <repository>
+      <id>ossrh-repository</id>
+      <name>maven-central-release</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>ossrh-repository</id>
+      <name>maven-central-snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <build>
     <pluginManagement>
