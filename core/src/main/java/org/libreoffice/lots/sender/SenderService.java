@@ -322,7 +322,7 @@ public class SenderService implements XPALProvider
    *  the method returns the empty string "".
    *  This special case should of course be handled accordingly by the calling method.
    *
-   * @see org.libreoffice.lots.XPALProvider#getCurrentSender()
+   * @see de.muenchen.allg.itd51.wollmux.interfaces.XPALProvider#getCurrentSender()
    *
    * @return the sender currently selected from the PAL as a string.
    *         If no sender is selected the empty string "" is returned.
@@ -395,7 +395,7 @@ public class SenderService implements XPALProvider
    * Each PAL entry always contains the string "§§%=%§§" at the end
    * followed by the key of the corresponding entry!
    *
-   * @see org.libreoffice.lots.XPALProvider#getPALEntries()
+   * @see de.muenchen.allg.itd51.wollmux.interfaces.XPALProvider#getPALEntries()
    * @return Sender names
    */
   @Override
