@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-02-02 12:24+0000\n"
-"Last-Translator: Adolfo Jayme Barrientos <fito@libreoffice.org>\n"
+"PO-Revision-Date: 2023-07-31 21:16+0000\n"
+"Last-Translator: Joan Montané <joan@montane.cat>\n"
 "Language-Team: Catalan <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/ca/>\n"
 "Language: ca\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.12.2\n"
+"X-Generator: Weblate 4.15.2\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -222,14 +222,16 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:120
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:139
-#, fuzzy, java-format
+#, java-format
 msgid "Error in Conf-file of data source {0}: "
-msgstr "Error en diàleg de funció {0}"
+msgstr "Error en el fitxer de configuració de l'origen de dades {0}: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:144
-#, fuzzy, java-format
+#, java-format
 msgid "Error in Conf-file of data source {0}: Section 'Data' is missing"
-msgstr "Error en diàleg de funció {0}"
+msgstr ""
+"Error en el fitxer de configuració de l'origen de dades {0}: Manca la secció "
+"«Data»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:165
 #, java-format
@@ -368,9 +370,9 @@ msgid "Path specification is missing for column {0}"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:239
-#, fuzzy, java-format
+#, java-format
 msgid "Syntax error in path specification of {0}"
-msgstr "Ignora font de dades amb tipus desconegut \"{0}\""
+msgstr "Error de sintaxi en l'especificació de camí de {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:248
 #, java-format
@@ -378,9 +380,9 @@ msgid "Syntaxerror in specification of the relative path of {0}"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:254
-#, fuzzy, java-format
+#, java-format
 msgid "Illegal attribute identifier: \"{0}\""
-msgstr "Valor CLASSPATH no permés: \"{0}\""
+msgstr "Identificador d'atribut no legal: «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:271
 msgid "Schluessel section is missing."
@@ -395,18 +397,18 @@ msgid "No Key column specified."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:306
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Column \"{0}\" was not defined in the schema and therefore it cannot be used "
 "as a key column."
 msgstr ""
-"El TRAFO \"{0}\" no està definit en aquest document i per tant no es pot "
-"modificar"
+"La columna «{0}» no està definida en l'esquema i, per tant, no es pot usar "
+"com a columna clau."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1472
-#, fuzzy, java-format
+#, java-format
 msgid "Error in data source definition of \"{0}\": "
-msgstr "Ignora font de dades amb tipus desconegut \"{0}\""
+msgstr "Error en la definició de l'origen de dades de «{0}»: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:41
 msgid "Create error information"
@@ -465,10 +467,11 @@ msgid "The textfragment with the FRAG_ID \"{0}\" is not defined!"
 msgstr "El fragment de text amb el FRAG_ID \"{0}\" no està definit!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:123
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "The URL for the text fragment with the FRAG_ID \"{0}\" cannot be determined:"
-msgstr "El fragment de text amb el FRAG_ID \"{0}\" no està definit!"
+msgstr ""
+"No es pot determinar l'URL per al fragment de text amb el FRAG_ID «{0}»:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:153
 #, java-format
@@ -476,29 +479,27 @@ msgid "The URL \"{0}\" is invalid:"
 msgstr "L'URL «{0}» no és vàlid:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:167
-#, fuzzy, java-format
+#, java-format
 msgid "The text fragment with the FRAG_ID \"{0}\" cannot be resolved:"
-msgstr "El fragment de text amb el FRAG_ID \"{0}\" no està definit!"
+msgstr "No es pot resoldre el fragment de text amb el FRAG_ID «{0}»:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:199
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/DocumentLoader.java:100
-#, fuzzy, java-format
+#, java-format
 msgid "The template with the URL \"{0}\" could not be opened."
-msgstr "El fragment de text amb el FRAG_ID \"{0}\" no està definit!"
+msgstr "No es pot obrir la plantilla amb l'URL «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
-#, fuzzy
 msgid "Insertion succesful"
-msgstr "insercions"
+msgstr "La inserció s'ha realitzat correctament"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
 msgid "The text block reference was inserted."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:82
-#, fuzzy
 msgid "Insertion failed"
-msgstr "insercions"
+msgstr "La inserció ha fallat"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnFunctionDialog.java:86
 #, java-format
@@ -525,18 +526,16 @@ msgid "Saving the file \"{0}\" failed!"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:69
-#, fuzzy
 msgid "Über WollMux"
-msgstr "WollMux"
+msgstr "Über WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:80
 msgid "License: European Union Public License"
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:82
-#, fuzzy
 msgid "Visit website"
-msgstr "visibilitats"
+msgstr "Vista el lloc web"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:85
 msgid "Credits"
