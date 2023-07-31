@@ -416,7 +416,7 @@
             <artifactId>maven-release-plugin</artifactId>
             <version>3.0.0-M1</version>
             <configuration>
-              <tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
+              <tagNameFormat>lots-@{project.version}</tagNameFormat>
               <releaseProfiles>release</releaseProfiles>
             </configuration>
           </plugin>
