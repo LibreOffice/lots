@@ -163,7 +163,7 @@
             <configuration>
               <target>
                 <echo level="info">unopkg add:</echo>
-                <mkdir dir="${office.user.profile}" />
+                <mkdir dir="${office.user.profile}/user/config" />
                 <exec executable="${UNO_PATH}/unopkg" failifexecutionfails="false">
                   <arg line="add -f -env:UserInstallation=file://${office.user.profile} ${project.build.directory}/LOTS.oxt" />
                 </exec>
