@@ -3,7 +3,7 @@
 
   <groupId>org.libreoffice</groupId>
   <artifactId>lots-parent</artifactId>
-  <version>19.0.1-SNAPSHOT</version>
+  <version>19.0.1</version>
   <name>LibreOffice Template System Parent</name>
   <packaging>pom</packaging>
 
@@ -29,7 +29,7 @@
   <scm>
     <developerConnection>scm:git:git@github.com:LibreOffice/lots.git</developerConnection>
     <url>https://github.com/LibreOffice/lots</url>
-    <tag>HEAD</tag>
+    <tag>lots-parent-19.0.1</tag>
   </scm>
 
   <issueManagement>
