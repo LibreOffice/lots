@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-06-20 16:33+0000\n"
+"PO-Revision-Date: 2023-08-17 22:36+0000\n"
 "Last-Translator: Xosé <xosecalvo@gmail.com>\n"
 "Language-Team: Galician <https://translations.documentfoundation.org/"
 "projects/wollmux/wollmux/gl/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.15.2\n"
+"X-Generator: Weblate 4.18.2\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -1538,7 +1538,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:158
 msgid "Please enter form title"
-msgstr ""
+msgstr "Introduza o título do formulario"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:169
 msgid "Set print function"
@@ -1546,7 +1546,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:176
 msgid "Enter file name"
-msgstr ""
+msgstr "Introduza o nome do ficheiro"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:183
 msgid "Remove WollMux-form-elements from template"
@@ -1562,15 +1562,15 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:207
 msgid "View"
-msgstr ""
+msgstr "Ver"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:244
 msgid "Element-specific fields"
-msgstr ""
+msgstr "Campos específicos do elemento"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:288
 msgid "Insert main elements"
-msgstr ""
+msgstr "Inserir elementos principais"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:297
 msgid "Checkboxes to ComboBox"
@@ -1578,56 +1578,57 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:315
 msgid "Save as..."
-msgstr ""
+msgstr "Gardar como..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:319
 msgid "Exit"
-msgstr ""
+msgstr "Saír"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:424
 msgid "More than one Tab section"
-msgstr ""
+msgstr "Máis de unha sección de lapelas"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:443
 msgid "More than one Buttons section"
-msgstr ""
+msgstr "Máis de unha sección de botóns"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:446
 msgid "No Tab or Buttons section"
-msgstr ""
+msgstr "Non hai seccións de lapelas ou de botóns"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:462
 msgid "Error while parsing the sections FormularMax4000/DefaultElements"
 msgstr ""
+"Produciuse un erro ao anlizar as seccións FormularMax4000/DefaultElements"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:481
 msgid "Recipient Selection Tab"
-msgstr ""
+msgstr "Lapela de selección de destinatario"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:493
 msgid "Cancel, <-Back, Next->"
-msgstr ""
+msgstr "Cancelar, <-Atrás, Seguinte->"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:504
 msgid "Cancel, <-Back, PDF, Print"
-msgstr ""
+msgstr "Cancelar, <-Atrás, PDF, Imprimir"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:516
 msgid "Cancel, <-Back, Send as Email, Print"
-msgstr ""
+msgstr "Cancelar, <-Atrás, Enviar como correo electrónico, Imprimir"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:97
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:135
 msgid "File name"
-msgstr ""
+msgstr "Nome do ficheiro"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:131
 msgid "ID"
-msgstr ""
+msgstr "Identificador"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:142
 msgid "-- none --"
-msgstr ""
+msgstr "-- ningún --"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:157
 msgid "Supplemental Mods"
@@ -1635,16 +1636,16 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:172
 msgid "Warning: Function not defined!"
-msgstr ""
+msgstr "Advertencia: Función non definida!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/VisibleTextFragmentList.java:130
 #, java-format
 msgid "Infinite loop after replacing the variable in URL \"{0}\"."
-msgstr ""
+msgstr "Bucle infinito após substituír a variábel no URL «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:151
 msgid "!!!CHECK!!!"
-msgstr ""
+msgstr "COMPROBE!!!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:663
 #, java-format
@@ -1656,7 +1657,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1143
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:243
 msgid "unknown"
-msgstr ""
+msgstr "descoñecido"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:708
 msgid "Missing CMD-attribute"
@@ -1665,21 +1666,21 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:775
 #, java-format
 msgid "Unknown command \"{0}\""
-msgstr ""
+msgstr "Orde descoñecida «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:978
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1398
 msgid "Missing attribute FRAG_ID"
-msgstr ""
+msgstr "Falta o atributo FRAG_ID"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1016
 #, java-format
 msgid "STYLE \"{0}\" is unknown."
-msgstr ""
+msgstr "O ESTILO «{0}» resulta descoñecido."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1131
 msgid "Missing attribute DB_COLUMN"
-msgstr ""
+msgstr "Falta o atributo DB_COLUMN"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1160
 #, java-format
@@ -1706,7 +1707,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/MainProcessor.java:116
 msgid "<ERROR: No sender selected!>"
-msgstr ""
+msgstr "<ERRO: Non hai destinatario seleccionado!>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:190
 #, java-format
@@ -1724,10 +1725,12 @@ msgid ""
 "The text fragment with the identifier \"{0}\" \"{1}\" {2} could not be "
 "inserted:"
 msgstr ""
+"Non foi posíbel inserir o fragmento de texto co identificador «{0}» «{1}» "
+"«{2}»:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:243
 msgid "Error inserting fragment"
-msgstr ""
+msgstr "Erro ao inserir fragmento"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:492
 msgid "There are more parameters specified than the number of placeholders"
@@ -1735,20 +1738,20 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:511
 msgid "Invalid parameters"
-msgstr ""
+msgstr "Parámetros incorrectos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommandInterpreter.java:236
 msgid "Please contact your system administrator."
-msgstr ""
+msgstr "Contacte coa administración do sistema."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:176
 #, java-format
 msgid "Error at document command \"{0}\""
-msgstr ""
+msgstr "Erro na orde do documento «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:190
 msgid "<ERROR:  >"
-msgstr ""
+msgstr "<ERRO:  >"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/FrameController.java:238
 #, java-format
@@ -1767,11 +1770,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1574
 msgid "The note associated with the form description is missing."
-msgstr ""
+msgstr "Falta a nota asociada coa descrición do formulario."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1581
 msgid "The note associated with the form description can not be read."
-msgstr ""
+msgstr "Non é posíbel ler a nota asociada coa descrición do formulario."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1808
 msgid "Missing section \"Formular\" in the form description."
@@ -1786,7 +1789,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:637
 #, java-format
 msgid "File \"{0}\" could not be found.\n"
-msgstr ""
+msgstr "Non foi posíbel atopar o ficheiro «{0}».\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:640
 #, java-format
@@ -1796,15 +1799,15 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:728
 #, java-format
 msgid "Error while extracting the OOo configuration with the node path \"{0}\""
-msgstr ""
+msgstr "Erro ao extraer a configuración de OOo coa ruta ao nodo «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:182
 msgid "At the insertion point there is already a reference to a text block."
-msgstr ""
+msgstr "Xa hai unha referencia a un bloque de texto no punto de inserción."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:213
 msgid "At the insertion place no text block could be found."
-msgstr ""
+msgstr "Non foi posíbel atopar ningún bloque de texto no lugar de inserción."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:133
 msgid ""
@@ -1825,17 +1828,19 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:438
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:933
 msgid "Incorrect configuration"
-msgstr ""
+msgstr "Configuración incorrecta"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:861
 msgid "Multi-forms no longer supported"
-msgstr ""
+msgstr "Os multi-formularios xa non son compatíbeis"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:862
 msgid ""
 "Multi-forms are no longer supported. You need to open and fill each form "
 "individually."
 msgstr ""
+"Os multi-formularios xa non son compatíbeis. Ten que abrir e encher cada "
+"formulario individualmente."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:902
 #, java-format
@@ -1843,6 +1848,8 @@ msgid ""
 "Error during download of file:\n"
 "{0}"
 msgstr ""
+"Produciuse un erro ao descargar o ficheiro:\n"
+"{0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:934
 #, java-format
@@ -1850,10 +1857,12 @@ msgid ""
 "{0}\n"
 "Please contact your system administrator."
 msgstr ""
+"{0}\n"
+"Contacte coa administración do sistema."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/form/config/FormConfig.java:79
 msgid "Unknown form"
-msgstr ""
+msgstr "Formulario descoñecido"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:145
 msgid ""
@@ -1862,14 +1871,18 @@ msgid ""
 "Please close Wollmux and LibreOffice and make sure no 'soffice.bin' "
 "processes are still running."
 msgstr ""
+"Hai que ler de novo a configuración do Wollmux.\n"
+"\n"
+"Peche o Wollmux e LibreOffice e comprobe que non haxa procesos «soffice.bin» "
+"aínda en execución."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:229
 msgid "About WollMux"
-msgstr ""
+msgstr "Sobre o WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:240
 msgid "none loaded"
-msgstr ""
+msgstr "nada cargado"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:402
 #, java-format
@@ -1886,12 +1899,12 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:309
 #, java-format
 msgid "Error when storing the file: {0}"
-msgstr ""
+msgstr "Erro ao almacenar o ficheiro: {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:324
 #, java-format
 msgid "Could not create a temporay file \"{0}\""
-msgstr ""
+msgstr "Non foi posíbel crear un ficheiro temporal «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:338
 msgid "setSource() was not called"
@@ -1904,10 +1917,14 @@ msgid ""
 "\"{0}\"\n"
 "does not exist or it cannot be written!"
 msgstr ""
+"O directorio temporal\n"
+"«{0}»\n"
+"non existe ou non é posíbel escribir nel!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:369
 msgid "Could not create a temporary directory for the file download!"
 msgstr ""
+"Non foi posíbel crear un directorio temporal para a descarga de ficheiros!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:464
 #, java-format
@@ -1915,6 +1932,9 @@ msgid ""
 "None of the programs configured for the extension \"{0}\" could be started!\n"
 "{1}"
 msgstr ""
+"Non foi posíbel iniciar ningún dos programas configurados para a extensión "
+"«{0}»!\n"
+"{1}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:517
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
