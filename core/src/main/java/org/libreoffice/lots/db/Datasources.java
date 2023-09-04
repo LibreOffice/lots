@@ -119,9 +119,9 @@ public class Datasources
       {
         LOGGER.error("Data source {} of type {} could not be initialized", name, type);
         /*
-         * Falls schon eine alte Datenquelle name registriert ist, entferne diese Registrierung.
-         * Ansonsten würde mit der vorher registrierten Datenquelle weitergearbeitet, was seltsame
-         * Effekte zur Folge hätte die schwierig nachzuvollziehen sind.
+         * If an old data source with the name 'name' is already registered, remove that registration.
+         * Otherwise, continuing with the previously registered data source 
+         * would result in strange and hard-to-trace effects.
          */
       }
 

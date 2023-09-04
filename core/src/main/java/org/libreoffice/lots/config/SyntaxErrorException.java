@@ -23,13 +23,13 @@
 package org.libreoffice.lots.config;
 
 /**
- * Signalisiert einen Fehler in einer zu parsenden Zeichenfolge
+ * Indicates an error in a string to be parsed.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class SyntaxErrorException extends Exception
 {
   /**
-   * keine Ahnung was das soll, aber es macht Eclipse glücklich.
+   * I have no idea what this is for, but it makes Eclipse happy.
    */
   private static final long serialVersionUID = 7215084024054862356L;
   public SyntaxErrorException() {super();}

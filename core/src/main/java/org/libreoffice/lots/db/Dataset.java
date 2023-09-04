@@ -23,23 +23,22 @@
 package org.libreoffice.lots.db;
 
 /**
- * Interface für Datensätze einer Tabelle.
+ * Interface for records of a table.
  */
 public interface Dataset
 {
   /**
-   * Liefert den Wert des Datensatzes aus der Spalte columnName (null falls nicht belegt).
+   * Returns the value of the record from the column columnName (null if not filled).
    *
    * @throws ColumnNotFoundException
-   *           falls die Spalte nicht existiert. Man beachte, dass dies eine Eigenschaft des
-   *           Datenbankschemas ist und nichts damit zu tun hat, ob der Wert des Datensatzes in der
-   *           entsprechenden Spalte gesetzt ist.
+   *           If the column does not exist. Note that this is a property of the database schema
+   *           and has nothing to do with whether the value of the record is set in the
+   *           corresponding column.
    */
   public String get(String columnName) throws ColumnNotFoundException;
 
   /**
-   * Liefert den Schlüsselwert dieses Datensatzes. Dieser sollte den Datensatz in seiner Datenbank
-   * eindeutig identifizieren muss es aber nicht.
+   * Returns the key value of this record. This should uniquely identify the record in its database, but it's not mandatory.
    */
   public String getKey();
 }

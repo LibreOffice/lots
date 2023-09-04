@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * Eine Datenquelle, die keine Datensätze enthält.
+ * A data source that contains no records.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */

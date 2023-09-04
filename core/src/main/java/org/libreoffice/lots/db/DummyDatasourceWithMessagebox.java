@@ -27,10 +27,9 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * Eine Dummy-Datenquelle, die im Schema keine Datensätze enthält und als QueryResult
- * bei getDatasetsByKey den String "&lt;key&gt;" zurück liefert.
- *
- * verwendet im  noConfig Modus.
+ * A dummy data source that does not contain any records in the schema and 
+ * returns the string  &lt;key&gt; as a QueryResult 
+ * when used in 'noConfig' mode
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
