@@ -34,26 +34,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Interface für Datenquellen, die der DJ verwalten kann. ACHTUNG! Die Konstruktoren dieser Klasse
- * dürfen keine potentiell lange blockierenden Aktionen (zum Beispiel Netzverbindung herstellen)
- * ausführen. Sie dürfen auch nicht versagen, falls irgendeine Rahmenbedingung nicht gegeben ist,
- * die nur für Zugriffe auf die Datensätze relevant ist (z.B. Verbindung zum LDAP-Server). Der
- * Konstruktor darf (und muss) nur dann versagen, wenn es nicht möglich ist, die Datenquelle in
- * einen Zustand zu bringen, in dem sie die Methoden ausführen kann, die unabhängig von den
- * Datensätzen sind. Am wichtigsten sind hier die Methoden zur Abfrage des Schemas. Für die
- * Methoden, die auf Datensätze zugreifen gilt, dass ihr Versagen aufgrund von Rahmenbedingungen
- * (z.B. kein Netz) nicht dazu führen darf, dass das Datenquellen-Objekt in einen unbrauchbaren
- * Zustand gerät. Wo immer sinnvoll sollte es möglich sein, eine Operation zu einem späteren
- * Zeitpunkt zu wiederholen, wenn die Rahmenbedingungen sich geändert haben, und dann sollte die
- * Operation gelingen. Dies bedeutet insbesondere, dass Verbindungsaufbau zu Servern wo nötig
- * jeweils neu versucht wird und nicht nur einmalig im Konstruktor. In diesem Zusammenhang sei
- * darauf hingewiesen, dass Verbindungen explizit mit close() beendet werden sollten (typischerweise
- * in einem finally() Block, damit der Befehl auch im Ausnahmefall ausgeführt wird), weil die
- * Garbage Collection von Java dies evtl. sehr spät tut. <br>
- * <br>
- * Argumente gegen Datasource-Typ "override": - (korrekte) Suche nur schwierig und ineffizient zu
- * implementieren - würde vermutlich dazu führen, dass Daten im LDAP schlechter gepflegt werden,
- * weil es einfacher ist, einen Override einzuführen
+ * Interface for data sources that the DJ can manage. CAUTION! The constructors of this class must not perform 
+ * potentially long-blocking actions (e.g., establishing a network connection). 
+ * They must not fail if any preconditions are not met, which are only relevant for
+ * accessing the records (e.g., connection to the LDAP server).
+ * The constructor should (and must) only fail if it's not possible to bring the data source 
+ * into a state where it can execute methods that are independent of the records. 
+ * Most importantly, this includes methods for querying the schema.
+ * For methods that access records, their failure due to conditions (e.g., no network)
+ * must not render the data source object unusable. Wherever possible,
+ * it should be possible to retry an operation at a later time if the conditions have changed,
+ * and the operation should succeed then. This particularly means that connection establishment to servers,
+ * where necessary, should be retried as needed and not just once in the constructor.
+ * In this context, it should be noted that connections should be explicitly
+ * closed using close() (typically in a finally() block to ensure it's executed even in exceptional cases)
+ * because Java's Garbage Collection may do this very late. <br>
+ * <br> Arguments against the "override" data source type: - (correct) search implementation
+ * would be difficult and inefficient - would likely result in poorer data maintenance in
+ * LDAP because it's easier to introduce an override
  */
 public abstract class Datasource
 {
@@ -63,14 +61,14 @@ public abstract class Datasource
   private static Long datasourceTimeout = null;
 
   /**
-   * Liefert eine Liste, die die Titel aller Spalten der Datenquelle enthält.
+   * Returns a list containing the titles of all columns in the data source.
    */
   public abstract List<String> getSchema();
 
   /**
-   * Liefert alle Datensätze, deren Schlüssel in der Collection keys enthalten sind. Man beachte,
-   * dass die Eindeutigkeit von Schlüsseln nur eine Empfehlung darstellt. Die Anzahl der
-   * zurückgelieferten Datensätze kann also die Anzahl der übergebenen Schlüssel übersteigen.
+   * Returns all records whose keys are included in the collection 'keys.'
+   * Please note that the uniqueness of keys is only a recommendation.
+   * The number of returned records may exceed the number of provided keys.
    *
    * @param keys
    *          Keys to search against.
@@ -79,9 +77,9 @@ public abstract class Datasource
   public abstract QueryResults getDatasetsByKey(Collection<String> keys);
 
   /**
-   * Liefert alle Datensätze, die alle Bedingungen von query (Liste von {@link QueryPart}s)
-   * erfüllen. Ist query leer, werden keine Datensätze zurückgeliefert. Enthält query Bedingungen
-   * über Spalten, die die Datenbank nicht hat, werden keine Datensätze zurückgeliefert.
+   * Returns all records that satisfy all conditions specified in the 'query' (a list of {@link QueryPart}s).
+   * If 'query' is empty, no records are returned. If 'query' contains conditions on columns that the database
+   * does not have, no records are returned.
    *
    * @param query
    *          Query to search against the main datasource.
@@ -90,14 +88,14 @@ public abstract class Datasource
   public abstract QueryResults find(List<QueryPart> query);
 
   /**
-   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle. Wenn möglich
-   * sollte die Datenquelle hier all ihre Datensätze zurückliefern oder zumindest soviele wie
-   * möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze zurückgeliefert werden.
+   * Returns an implementation-dependent subset of records from the data source.
+   * Ideally, the data source should return all of its records here, or at least as many as possible.
+   * However, it is also permissible for no records to be returned in this context.
    */
   public abstract QueryResults getContents();
 
   /**
-   * Liefert den Namen dieser Datenquelle.
+   * Returns the name of this data source.
    */
   public abstract String getName();
 

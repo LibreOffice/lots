@@ -23,9 +23,9 @@
 package org.libreoffice.lots.db;
 
 /**
- * Wird geworfen, falls kein passender Datensatz gefunden wurde und
- * die Möglichkeit, eine leere Ergebnisliste zurückzugeben nicht
- * existiert.
+ * Thrown if no matching record was found and
+ * the possibility to return an empty result list does not
+ * exists.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatasetNotFoundException extends Exception
