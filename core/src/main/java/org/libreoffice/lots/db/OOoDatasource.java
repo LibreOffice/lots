@@ -55,7 +55,7 @@ import org.libreoffice.lots.config.ConfigurationErrorException;
 import org.libreoffice.lots.util.L;
 
 /**
- * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
+ * Provides an OpenOffice.org data source as a WollMux data source.
  */
 public class OOoDatasource extends Datasource
 {
@@ -63,121 +63,116 @@ public class OOoDatasource extends Datasource
   private static final Logger LOGGER = LoggerFactory.getLogger(OOoDatasource.class);
 
   /**
-   * Maximale Zeit in Sekunden, die die Datenquelle für die Verbindungsaufnahme mit
-   * der Datenbank brauchen darf.
+   * Maximum time in seconds that the data source is allowed to take for connecting to the database.
    */
   private static final int LOGIN_TIMEOUT = 5;
 
   /**
-   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in Oracle-Syntax
-   * abgesetzt werden sollen.
+   * Constant for {@link #sqlSyntax} indicating that SQL queries should be executed in Oracle syntax.
    */
   private static final int SQL_SYNTAX_ANSI = 0;
 
   /**
-   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in Oracle-Syntax
-   * abgesetzt werden sollen.
+   * Constant for {@link #sqlSyntax} indicating that SQL queries should be executed in Oracle syntax.
    */
   private static final int SQL_SYNTAX_ORACLE = 1;
 
   /**
-   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in MySQL-Syntax
-   * abgesetzt werden sollen.
+   * Constant for {@link #sqlSyntax} indicating that SQL queries should be executed in MySQL syntax.
    */
   private static final int SQL_SYNTAX_MYSQL = 2;
 
   /**
-   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in PervasiveSQL-Syntax
-   * abgesetzt werden sollen.
+   * Constant for {@link #sqlSyntax} indicating that SQL queries should be executed in PervasiveSQL syntax.
    */
   private static final int SQL_SYNTAX_PERVASIVESQL = 3;
 
   /**
-   * Welche Syntax soll verwendet werden.
+   * Which syntax should be used?
    *
-   * Default ist Oracle-Syntax.
+   * The default is Oracle syntax
    *
    * o *** ANSI ********* <doublequote symbol> ::= 2 consecutive double quote characters
    *
-   * (Lexical Elements, 135 Foundation) Ein delimited Identifier ist ein von "..." umschlossener
-   * Identifier. Im Identifier enthaltene Doublequotes werden durch <doublequote symbol> ersetzt.
+   * (Lexical Elements, 135 Foundation)A delimited Identifier is an Identifier enclosed in '...' double quotes.
+   * Double quotes contained within the Identifier are replaced by <doublequote symbol>.
    * (Lexical Elements, 134 Foundation)
    *
    * <quote symbol> ::= <quote><quote> (2 consecutive quote characters) (Lexical elements, 143
-   * Foundation) In einem <character string literal> werden einzelne <quote>s durch <quote symbol>
-   * ersetzt. (Lexical elements, 143 Foundation)
+   * Foundation) In a <character string literal> individual <quote>s by <quote symbol>
+   * replaced. (Lexical elements, 143 Foundation)
    *
-   * o**** Datensätze zu vorgegebener Schlüsselliste finden *********
+   * o**** Find records based on a given key list *********
    *
    * SELECT * FROM "<id>" WHERE ("<colId>"='<colVal>' AND "<colId>"='<colVal>' AND ...) OR (...) OR
    * ...;
    *
-   * In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
+   * In <id> and <colId> Doublequotes are replaced by <doublequote symbol>.
    *
-   * In <colVal> sind Quotes durch <quote symbol> ersetzt.
+   * In <colVal> Quotes are replaced by <quote symbol>.
    *
-   * o ***** Datensätze finden, die bestimmte Kriterien erfüllen ********
+   * o ***** Find records that meet certain criteria ********
    *
-   * 8.5 <like predicate> (385 Foundation) Der String hinter ESCAPE muss genau ein Zeichen lang
-   * sein. Ansonsten gibt es eine Exception (387 Foundation, 8.5 General Rules 3b)) _ und % sowie
-   * das ESCAPE-Zeichen selbst müssen im String-Ausdruck hinter LIKE escapet werden (durch
-   * Voranstellen des Escape-Zeichens). Andere Zeichen dürfen nicht escapet werden.
+   * 8.5 <like predicate> (385 Foundation)The string behind ESCAPE must be exactly one character long.
+   * Otherwise, an exception is thrown (387 Foundation, 8.5 General Rules 3b)) _ and % as well as the
+   * ESCAPE character itself must be escaped in the string expression behind
+   * LIKE (by prepending the escape character). Other characters must not be escaped.
    *
    * SELECT * FROM "<id>" WHERE (lower("<colId>") LIKE lower('<pattern>') ESCAPE '|') AND (...) AND
-   * ...; In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt. In <pattern>
-   * sind "_", "%" und "|" ersetzt durch "|_", "|%" und "||".
+   * ...; In <id> und <colId> Doublequotes are replaced by <doublequote symbol>. In <pattern>
+   * are "_", "%" and "|" replaced by "|_", "|%" und "||".
    *****
-   * Alle Datensätze auslesen ******
+   * Read all records ******
    *
-   * SELECT * FROM "<id>"; In <id> sind Doublequotes durch <doublequote symbol> ersetzt.
+   * SELECT * FROM "<id>"; In <id> Doublequotes is replaced by <doublequote symbol>.
    ****
-   * Oracle ***** Wie ANSI MySQL ******* Wie ANSI, aber mit lcase() statt lower() PervasiveSQL
-   * ******* Wie ANSI, aber rechts vom LIKE dürfen nur einfache Konstanten (also kein lower oder
-   * lcase) stehen. Außerdem wird "DATENBANK.TABELLE" nicht unterstützt. Nur "DATENBANK"."TABELLE",
-   * DATENBANK."TABELLE" oder "TABELLE".
+   * Oracle ***** Like ANSI MySQL ******* Like ANSI, but with lcase() instead of lower() for PervasiveSQL.
+   * ******* Like ANSI, but to the right of LIKE, only simple constants are allowed (no lower or lcase).
+   * Additionally, "DATABASE.TABLE" is not supported.
+   * Only "DATABASE"."TABLE", DATABASE."TABLE", or "TABLE"." is allowed.
    */
   private int sqlSyntax = SQL_SYNTAX_ANSI;
 
   /**
-   * Der Name dieser Datenquelle.
+   * The name of this data source.
    */
   private String datasourceName;
 
   /**
-   * Der Name der OpenOffice-Datenquelle.
+   * The name of the OpenOffice data source.
    */
   private String oooDatasourceName;
 
   /**
-   * Der Name der Tabelle in der OpenOffice-Datenquelle.
+   * The name of the table in the OpenOffice data source.
    */
   private String oooTableName;
 
   /**
-   * Das Schema dieser Datenquelle.
+   * The schema of this data source.
    */
   private List<String> schema;
 
   /**
-   * Die Namen der Spalten, die den Primärschlüssel bilden.
+   * The names of the columns that form the primary key.
    */
   private String[] keyColumns;
 
   /**
-   * Benutzername für den Login bei der Datenbank.
+   * Username for logging in to the database.
    */
   private String userName = "";
 
   private static final String SQL_SELECT_COMMAND = "SELECT * FROM ";
 
   /**
-   * Passwort für den Login bei der Datenbank.
+   * Password for logging in to the database.
    */
   @SuppressWarnings("squid:S2068")
   private String password = "";
 
   /**
-   * Wie {@link #OOoDatasource(Map, ConfigThingy, boolean)}, wobei noKey==false übergeben wird.
+   * How {@link #OOoDatasource(Map, ConfigThingy, boolean)}, where noKey==false is passed.
    */
   public OOoDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc)
   {
@@ -185,28 +180,23 @@ public class OOoDatasource extends Datasource
   }
 
   /**
-   * Erzeugt eine neue OOoDatasource. Wenn kein SQL_SYNTAX Parameter in ConfigThingy
-   * gesetzt ist, wird 'mysql' als Standard verwendet.
+   * Creates a new OOoDatasource. If no SQL_SYNTAX parameter is set in ConfigThingy, 'mysql' is used as the default.
    *
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser OOoDatasource
-   *          bereits vollständig instanziierten Datenquellen (zur Zeit nicht
-   *          verwendet).
+   *          Contains all data sources that were fully instantiated up to the
+   *          time of defining this OOoDatasource (currently not used).
    * @param sourceDesc
-   *          der "DataSource"-Knoten, der die Beschreibung dieser OOoDatasource
-   *          enthält.
+   *          The 'DataSource' node containing the description of this OOoDatasource.
    * @param noKey
-   *          Falls true, so wird immer die erste Spalte als Schlüsselspalte
-   *          verwendet. Diese Option sollte nur verwendet werden, wenn keine
-   *          Operationen getätigt werden sollen, die den Schlüssel verwenden.
+   *          If true, the first column is always used as the key column.
+   *          This option should only be used if no operations are to be performed that use the key.
    * @throws ConfigurationErrorException
-   *           falls in der Definition in sourceDesc ein Fehler ist. Falls sourceDesc
-   *           keinen Schema-Unterabschnitt aufweist, wird versucht, das Schema von
-   *           der Datenquelle selbst zu bekommen. Tritt dabei ein Fehler auf wird
-   *           ebenfalls diese Exception geworfen. *Keine* Exception wird geworfen,
-   *           wenn die Spalten des Schema-Abschnitts nicht in der realen Datenbank
-   *           vorhanden sind. In diesem Fall werden die entsprechenden Spalten als
-   *           leer behandelt. TESTED
+   *           If there is an error in the definition in sourceDesc. 
+   *           If sourceDesc does not have a schema subsection,
+   *           an attempt is made to obtain the schema from the data source itself.
+   *           If an error occurs in this process, this exception is also thrown.
+   *           No exception is thrown if the columns of the schema section do not exist in the real database.
+   *           In this case, the corresponding columns are treated as empty. TESTED
    */
   public OOoDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, boolean noKey)
@@ -266,7 +256,7 @@ public class OOoDatasource extends Datasource
         }
       }
       else
-        parseKey(schluesselConf); // Test ob kein Schluessel vorhanden siehe weiter
+        parseKey(schluesselConf); // Test if no key is present, see further.
       // unten
     }
     else
@@ -280,7 +270,7 @@ public class OOoDatasource extends Datasource
         XConnection conn = ds.getConnection(userName, password);
 
         /*
-         * Laut IDL-Doku zu "View" müssen hier auch die Views enthalten sein.
+         * According to the IDL documentation for 'View,' views must also be included here
          */
         UnoDictionary<XColumnsSupplier> tables = UnoDictionary
             .create(UNO.XTablesSupplier(conn).getTables(), XColumnsSupplier.class);
@@ -327,10 +317,10 @@ public class OOoDatasource extends Datasource
           ConfigThingy schluesselConf = sourceDesc.query("Schluessel");
           if (schluesselConf.count() != 0)
           {
-            // Test ob kein Schluessel vorhanden siehe weiter unten
+            // Test if no key is present, see further below
             parseKey(schluesselConf);
           } else
-          { // Schlüssel von Datenbank abfragen.
+          { // Query keys from the database.
             try
             {
               XKeysSupplier keysSupp = UNO.XKeysSupplier(table);
@@ -345,7 +335,7 @@ public class OOoDatasource extends Datasource
               throw new ConfigurationErrorException(L.m("Data source \"{0}\": No key columns defined."
                   + " Automatic determination of key column not possible.", datasourceName), x);
             }
-            // Test ob kein Schluessel vorhanden siehe weiter unten
+            // Test if no key is present, see further below
           }
         }
       }
@@ -367,11 +357,9 @@ public class OOoDatasource extends Datasource
   }
 
   /**
-   * Parst das erste Kind von conf (das existieren und ein Schluessel-Knoten sein
-   * muss) und setzt {@link #keyColumns} entsprechend.
+   * Parses the first child of conf (which must exist and be a key node) and sets {@link #keyColumns} accordingly.
    * @throws ConfigurationErrorException
-   *           falls eine Schluessel-Spalte nicht im {@link #schema} ist. Es wird
-   *           *keine* Exception geworfen, wenn der Schluessel-Abschnitt leer ist.
+   *           If a key column is not in the {@link #schema}. No exception is thrown if the key section is empty.
    *           TESTED
    */
   private void parseKey(ConfigThingy conf)
@@ -467,12 +455,10 @@ public class OOoDatasource extends Datasource
       buffy.append(" LIKE ");
 
       if (SQL_SYNTAX_PERVASIVESQL == sqlSyntax) {
-          // Rechts vom LIKE können nur einfache Konstanten und keine Funktionen wie
-          // lcase oder lower genutzt werden. Daher wird hier über die Java Methode
-          // toLowerCase der zu suchende String in Kleinbuchstaben umgewandelt.
-          // Die Inhalte der zu durchsuchenden Spalte können wiederum mit lcase/lower
-          // behandelt werden. Somit ist sichergestellt, dass der durchsuchende und der zu
-          // suchende String nur Kleinbuchstaben enthält.
+          // To the right of LIKE, only simple constants and no functions like lcase or lower can be used.
+          // Therefore, the search string is converted to lowercase using the Java method toLowerCase.
+          // The contents of the column to be searched can in turn be treated with lcase/lower.
+          // This ensures that the searching and the search string both contain only lowercase letters.
           buffy.append(sqlLiteral(sqlSearchPattern(part.getSearchString())).toLowerCase());
       } else {
         buffy.append(sqlLower());
@@ -495,7 +481,7 @@ public class OOoDatasource extends Datasource
   }
 
   /**
-   * Setzt die SQL-Anfrage query an die Datenbank ab und liefert die Resultate.
+   * Executes the SQL query query against the database and returns the results.
    */
   private QueryResults sqlQuery(String query)
   {
@@ -529,12 +515,11 @@ public class OOoDatasource extends Datasource
       UnoProperty.setProperty(results, UnoProperty.ACTIVE_CONNECTION, conn);
 
       /*
-       * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst anfassen
-       * darf, sondern direkt an die Datenbank weiterleiten soll. Wird dies verwendet
-       * ist das Ergebnis (derzeit) immer read-only, da OOo keine Updates von
-       * Statements durchführen kann, die es nicht geparst hat. Siehe Kommentar zu
-       * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
-       * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
+       * EscapeProcessing == false means that OOo should not manipulate the query
+       * itself but should pass it directly to the database. When this is used,
+       * the result (currently) is always read-only, as OOo cannot perform updates on
+       * statements it has not parsed. See comment at http://qa.openoffice.org/issues/show_bug.cgi?id=78522.
+       * Equivalent to the button 'Execute SQL Command Directly' in the Base Query Design.
        */
       UnoProperty.setProperty(results, UnoProperty.ESCAPE_PROCESSING, Boolean.FALSE);
 
@@ -592,9 +577,9 @@ public class OOoDatasource extends Datasource
   }
 
   /**
-   * Liefert eine Abbildung der Spaltennamen aus {@link #schema} auf Integer-Indizes,
-   * die die Spaltennummern für XRow(results)::getString() sind. Falls eine Spalte
-   * nicht existiert, ist ihr index <= 0.
+   * Returns a mapping of column names from schema to integer indices,
+   * which are the column numbers for XRow(results)::getString().
+   * If a column does not exist, its index is <= 0.
    */
   private Map<String, Integer> getColumnMapping(XResultSet results)
   {
@@ -619,8 +604,7 @@ public class OOoDatasource extends Datasource
   }
 
   /**
-   * Liefert abhängig von {@link #sqlSyntax} den "richtigen" Namen der
-   * lower()-Funktion.
+   * Returns the 'correct' name of the lower() function depending on sqlSyntax.
    */
   private String sqlLower()
   {
@@ -632,11 +616,10 @@ public class OOoDatasource extends Datasource
   }
 
   /**
-   * Liefert str zurück, als String-Literal vorbereitet für das Einfügen in
-   * SQL-Statements.
+   * Returns str as a string literal prepared for insertion into SQL statements.
    *
    * @param str
-   *          beginnt und endet immer mit einem Apostroph.
+   *          The string literal returned by prepareForSqlInsert always begins and ends with a single apostrophe (').
    */
   private static String sqlLiteral(String str)
   {
@@ -644,16 +627,15 @@ public class OOoDatasource extends Datasource
   }
 
   /**
-   * Liefert str zurück, als Identifier-Name vorbereitet für das Einfügen in
-   * SQL-Statements.
+   * Returns str as an identifier name prepared for insertion into SQL statements.
    *
    * @param str
-   *          beginnt und endet immer mit einem Doublequote.
+   *          begins and ends with a double quote.
    */
   private String sqlIdentifier(String str)
   {
     if (SQL_SYNTAX_PERVASIVESQL == sqlSyntax && str.contains( "." )) {
-        // PervasiveSQL unterstützt "DATENBANK.TABELLE" nicht, wird somit in "TABELLE" geändert
+        // PervasiveSQL does not support 'DATABASE.TABLE', thus it is changed to 'TABLE'
         int dot = str.indexOf( '.' ) + 1;
         str = str.substring( dot );
     }
@@ -661,8 +643,7 @@ public class OOoDatasource extends Datasource
   }
 
   /**
-   * Ersetzt das * Wildcard so dass ein SQL-Suchmuster entsteht und escapet Zeichen,
-   * die für SQL eine Bedeutung haben mit "|".
+   * Replace the * wildcard so that an SQL search pattern is created and escape characters that have meaning in SQL with '|'.
    */
   private static String sqlSearchPattern(String str)
   {
@@ -689,10 +670,10 @@ public class OOoDatasource extends Datasource
     }
 
     /**
-     * Setzt aus den Werten der Schlüsselspalten den Schlüssel zusammen.
+     * Assembles the key from the values of the key columns.
      *
      * @param keyCols
-     *          die Namen der Schlüsselspalten
+     *          The names of the key columns
      */
     private void initKey(String[] keyCols)
     {

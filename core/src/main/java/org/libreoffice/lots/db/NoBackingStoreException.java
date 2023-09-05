@@ -23,8 +23,7 @@
 package org.libreoffice.lots.db;
 
 /**
- * Wird geworfen beim Versuch, auf eine Spalte zuzugreifen, die
- * nicht existiert.
+ * Thrown when attempting to access a column that does not exist.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
