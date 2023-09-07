@@ -24,13 +24,11 @@ package org.libreoffice.lots.db;
 
 
 /**
- * Teil einer Datenbankabfrage. Zur Zeit einfach nur ein Spaltenname und ein
- * Suchstring. Selektiert werden alle Datensätze, die in der entsprechenden Spalte
- * den Suchstring haben. Der Suchstring kann vorne und/oder hinten genau ein
- * Sternchen '*' stehen haben, um Präfix/Suffix/Teilstring-Suche zu realisieren.
- * Folgen mehrerer Sternchen oder Sternchen in der Mitte des Suchstrings sind
- * verboten und produzieren undefiniertes Verhalten. Ebenso verboten ist ein
- * Suchstring, der nur Sternchen enthält oder einer der leer ist.
+ * Part of a database query. Currently, it consists of only a column name and a search string.
+ * It selects all records that have the search string in the corresponding column.
+ * The search string can have exactly one asterisk '*' at the beginning and/or at the end to perform prefix/suffix/partial
+ * string search. Multiple asterisks or asterisks in the middle of the search string are prohibited
+ * and result in undefined behavior. Also, a search string that consists solely of asterisks or is empty is not allowed.
  */
 public class QueryPart
 {
@@ -51,7 +49,7 @@ public class QueryPart
   }
 
   /**
-   * Liefert den Name der zu testenden Spalten.
+   * Returns the name of the columns to be tested.
    */
   public String getColumnName()
   {
@@ -59,7 +57,7 @@ public class QueryPart
   }
 
   /**
-   * Liefert den Suchstring auf den getestet werden soll.
+   * Returns the search string to test for.
    */
   public String getSearchString()
   {

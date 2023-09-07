@@ -28,25 +28,25 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Stellt die Vereinigung mehrerer QueryResults dar.
+ * Represents the union of multiple QueryResults.
  *
- * Dabei werden doppelte Ergebnisse herausgefiltert. Es handelt sich um eine mathematische Vereinigung.
+ * Duplicate results are filtered out. It is a mathematical union.
  * @author daniel.sikeler
  */
 public class QueryResultsSet implements QueryResults
 {
   /**
-   * Mathematische Vereinigung der QueryResults.
+   * Mathematical union of QueryResults.
    */
   private final List<Dataset> results = new ArrayList<>();
   /**
-   * Anhand dieses Comparators wird die Gleichheit zweiter Datasets erkannt.
+   * This comparator is used to recognize the equality of two datasets.
    */
   private final Comparator<Dataset> comparator;
 
   /**
-   * Erstellt eine leere Menge.
-   * @param comparator Der Comparator, der beim Hinzufügen für Vergleiche verwendet wird.
+   * Creates an empty set.
+   * @param comparator The comparator to use for comparisons when adding.
    */
   public QueryResultsSet(Comparator<Dataset> comparator)
   {
@@ -54,9 +54,9 @@ public class QueryResultsSet implements QueryResults
   }
 
   /**
-   * Erstellt eine Ergebnisliste mit den Datensätzen aus queryResults.
-   * @param comparator Der Comparator, der beim Hinzufügen für Vergleiche verwendet wird.
-   * @param queryResults Die Liste der neuen Datensätze.
+   * Creates a results list with the records from queryResults.
+   * @param comparator The comparator to use for comparisons when adding.
+   * @param queryResults The list of new records.
    */
   public QueryResultsSet(Comparator<Dataset> comparator, QueryResults queryResults)
   {
@@ -65,8 +65,8 @@ public class QueryResultsSet implements QueryResults
   }
 
   /**
-   * Fügt einen neuen Datensatz hinzu, solange er noch nicht enthalten ist.
-   * @param dataset Der neue Datensatz.
+   * Adds a new record as long as it is not already included.
+   * @param dataset The new record.
    */
   public void add(Dataset dataset)
   {
@@ -86,8 +86,8 @@ public class QueryResultsSet implements QueryResults
   }
 
   /**
-   * Fügt alle Datensätze der Liste hinzu, solange sie noch nicht enthalten sind.
-   * @param queryResults Liste mit neuen Datensätzen.
+   * Adds all records to the list as long as they are not already included.
+   * @param queryResults List of new records.
    */
   public void addAll(QueryResults queryResults)
   {

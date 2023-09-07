@@ -29,8 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Ein Container für Ergebnisse einer Datenbankafrage zusammen mit dem zugehörigen
- * Schema.
+ * A container for results of a database query along with the associated schema.
  */
 public class QueryResultsWithSchema implements QueryResults
 {
@@ -48,8 +47,8 @@ public class QueryResultsWithSchema implements QueryResults
   }
 
   /**
-   * Erzeugt ein neues QueryResultsWithSchema, das den Inhalt von res und das Schema
-   * schema zusammenfasst. ACHTUNG! res und schema werden als Referenzen übernommen.
+   * Creates a new QueryResultsWithSchema that combines the contents of res and the schema.
+   * WARNING! res and schema are taken as references.
    */
   public QueryResultsWithSchema(QueryResults res, List<String> schema)
   {

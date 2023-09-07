@@ -41,22 +41,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt und einzelne Spaltenwerte
- * ersetzen kann. Zur Erstellung der Menge der Ergebnisdatensätze wird jeder Datensatz aus SOURCE1
- * genau einmal verwendet und jeder Datensatz aus SOURCE2 beliebig oft (auch keinmal). Unterschiede
- * zu einem richtigen Join:<br>
+ * A data source that supplements another data source with columns and can replace individual column values.
+ * To create the set of result datasets, each record from SOURCE1 is used exactly once,
+ * and each record from SOURCE2 can be used any number of times, including zero.
+ * Differences from a proper data source include: <br>
  * <br>
- * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 Einträge mit Verkehrsverbindungen
- * für ihre Adresse gibt<br>
- * b) Verhindert, dass eine Person rausfliegt, weil es zu ihrer Adresse keine Verkehrsverbindung
- * gibt<br>
- * c) Die Schlüssel der Ergebnisdatensätze bleiben die aus SOURCE1 und werden nicht kombiniert aus
- * SOURCE1 und SOURCE2. Das verhindert, dass ein Datensatz bei einer Änderung der Adresse aus der
- * lokalen Absenderliste fliegt, weil er beim Cache-Refresh nicht mehr gefunden wird. <br>
+ * a) Prevents a person from appearing twice just because there are two entries with traffic connections for their
+ *    address<br>
+ * b) Prevents a person from being removed because there is no traffic connection to their address <br>
+ * c) The keys of the result records remain those from SOURCE1 and are not combined from SOURCE1 and SOURCE2.
+ *    This prevents a record from being removed from the local sender list when the address is changed during cache refresh,
+ *    because it cannot be found anymore. <br>
  * <br>
- * In der Ergebnisdatenquelle sind alle Spalten unter ihren ursprünglichen Namen verfügbar
- * (Unterschied zu {@link AttachDatasource}). Konflikte werden über den MODE-Spezifizierer aufgelöst
- * (siehe lots.conf Doku).<br>
+ * In the result data source, all columns are available under their original names (difference from AttachDatasource).
+ * Conflicts are resolved using the MODE specifier (see lots.conf documentation)<br>
  *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -86,8 +84,8 @@ public class OverlayDatasource extends Datasource
   private String[] match2;
 
   /**
-   * Enthält die Namen aller Spaltennamen für die es ein i gibt, so dass
-   * Spaltenname,equals(match1[i]) und match1[i],equals(match2[i]).
+   * Contains the names of all column names for which there is an i such that
+   * Columnname.equals(match1[i]) and match1[i].equals(match2[i]).
    */
   private Set<String> commonMatchColumns;
 
@@ -102,15 +100,15 @@ public class OverlayDatasource extends Datasource
   private boolean treatEmptyStringsAsNull;
 
   /**
-   * Erzeugt eine neue OverlayDatasource.
+   * Creates a new OverlayDatasource.
    *
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser OverlayDatasource bereits
-   *          vollständig instanziierten Datenquellen.
+   *          Contains all data sources that have already been fully instantiated
+   *          up to the time of defining this OverlayDatasource.
    * @param sourceDesc
-   *          der "DataSource"-Knoten, der die Beschreibung dieser OverlayDatasource enthält.
+   *          the 'DataSource' node containing the description of this OverlayDatasource.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht verwendet).
+   *          the context relative to which URLs should be resolved (currently not used).
    */
   public OverlayDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc,
       URL context)
@@ -247,10 +245,10 @@ public class OverlayDatasource extends Datasource
       {
         if (schema2.contains(p.getColumnName())
             /*
-             * Wichtige Optimierung: Bedingungen für Spalten, die in beiden Datenquellen vorkommen,
-             * die geMATCHt werden (commonMatchColumns), dürfen nicht nach queryBoth gesteckt
-             * werden, da dies im schlechtesten Fall dazu führt, dass (unnötigerweise) der
-             * ineffizienteste Code-Pfad in dieser Funktion genommen wird.
+             * Important optimization: Conditions for columns that occur in both data sources,
+             * which are matched (commonMatchColumns), must not be placed after queryBoth,
+             * as this in the worst case leads to the (unnecessary) selection
+             * of the most inefficient code path in this function.
              */
             && !commonMatchColumns.contains(p.getColumnName()))
           queryBoth.add(p);
@@ -263,10 +261,9 @@ public class OverlayDatasource extends Datasource
     }
 
     /*
-     * Die OVERLAY-Datenquelle ist normalerweise nur untergeordnet und Spaltenbedingungen dafür
-     * schränken die Suchergebnisse wenig ein. Deshalb werten wir falls wir mindestens eine
-     * Bedingung haben, die exklusiv die Hauptdatenquelle betrifft, die Anfrage auf dieser Basis
-     * aus.
+     * The OVERLAY data source is usually subordinate, and column conditions for it only slightly
+     * restrict the search results. Therefore, if we have at least one condition that exclusively
+     * affects the main data source, we evaluate the query on this basis.
      */
     if (!queryOnly1.isEmpty())
     {
@@ -279,32 +276,30 @@ public class OverlayDatasource extends Datasource
       return overlayColumns(results, DatasetPredicate.makePredicate(restQuery));
     } else if (!queryOnly2.isEmpty())
     { /*
-       * in diesem Fall haben wir nur Bedingungen für Spalten, die entweder bei beiden Datenquellen
-       * vorkommen oder nur in der OVERLAY-Datenquelle. Auf jeden Fall haben wir mindestens eine
-       * Spaltenbedingung, die nur die OVERLAY-Datenquelle betrifft. Wir führen die Suche mit den
-       * Bedingungen der OVERLAY-Datenquelle durch, ergänzen dann daraus alle möglichen Datasets und
-       * Filtern dann nochmal mit den Spaltenbedingungen für die gemeinsamen Spalten.
+       * In this case, we have conditions only for columns that either exist in both data sources or only
+       * in the OVERLAY data source. In any case, we have at least one column condition that exclusively
+       * affects the OVERLAY data source. We perform the search using the conditions of the OVERLAY data source,
+       * then add all possible datasets from it, and then filter again with the column conditions for the common columns.
        */
 
       return overlayColumnsReversed(source2.find(queryOnly2),
           DatasetPredicate.makePredicate(queryBoth));
     } else
     { /*
-       * An der Abfrage sind nur Spalten beteiligt, die in beiden Datenquellen vorhanden sind. Hier
-       * wird's kompliziert, weil für jeden Spaltenwert getrennt der Wert jeweils aus der einen oder
-       * der anderen Datenquelle kommen kann. Deswegen lassen sich weder aus SOURCE noch aus OVERLAY
-       * Datensätze bestimmen, die definitiv zum Ergebnisraum gehören. Wir müssen also auf Basis
-       * beider Datenquellen entsprechende Kandidaten bestimmen. Leider entsteht dabei das Problem
-       * der Duplikatelimination. Da die Schlüssel von Datensätzen nicht zwingend eindeutig sind,
-       * ist es nicht so leicht, diese durchzuführen.
+       * Only columns present in both data sources are involved in the query.
+       * Here it gets complicated because for each column value, the value can come from either
+       * one or the other data source separately. Therefore, we cannot determine definitively which
+       * datasets belong to the result space based on either SOURCE or OVERLAY.
+       * We must determine the appropriate candidates based on both data sources.
+       * Unfortunately, this creates the problem of duplicate elimination.
+       * Since the keys of datasets are not necessarily unique, it is not so easy to perform this.
        */
 
       /*
-       * Wegen dem Problem, das im Ergebnisdatensatz evtl. Spalte 1 aus SOURCE und Spalte 2 aus
-       * OVERLAY kommt, können wir nicht nach mehreren Spaltenbedingungen aus queryBoth gleichzeitig
-       * suchen. Wir müssen uns also eine Spaltenbedingung heraussuchen, nach dieser suchen und dann
-       * mit einem Filter, der die komplette Suchbedingung aus query testet die Datensätze
-       * rausfiltern, die tatsächlich die gesuchten sind.
+       * Due to the problem that in the result dataset, column 1 may come from SOURCE and column 2 from OVERLAY,
+       * we cannot search for multiple column conditions from queryBoth simultaneously.
+       * We must select a column condition, search for it, and then filter the datasets
+       * that actually match the complete search condition from query.
        */
 
       QueryPart qp = getMostRestrictingQueryPart(queryBoth);
@@ -317,17 +312,16 @@ public class OverlayDatasource extends Datasource
       QueryResults results2 = overlayColumnsReversed(source2.find(restrictingQuery), predicate);
 
       /*
-       * An dieser Stelle haben wir alle gesuchten Datensätze. Allerdings kann es zwischen results1
-       * und results2 Überschneidungen geben. Dies ist das oben angesprochene Duplikat-Problem. Um
-       * die Duplikate zu eliminieren gehen wir wie folgt vor:
+       * At this point, we have all the desired records. However, there may be overlaps between results1 and results2.
+       * This is the aforementioned duplicate problem.
+       * To eliminate duplicates, we proceed as follows:
        *
-       * 1. Alle Datensatzschlüssel bestimmen, die sowohl in results1 als auch in results2
-       * vorkommen.
+       * 1. Determine all record keys that appear in both results1 and results2.
        *
-       * 2. Alle Datensätze mit Schlüsseln aus 1. entfernen aus den results Listen
+       * 2. Remove all records with keys from the first list (results1) from the results lists
        *
-       * 3. In einer weiteren Abfrage alle Datensätze mit den Schlüsseln aus 1. bestimmen und
-       * diejenigen, die die Filterbedingung erfüllen den Ergebnissen wieder hinzufügen.
+       * 3. In another query, determine all records with keys from the first list and add
+       *    those that meet the filter condition back to the results.
        */
       HashSet<String> results1Keys = new HashSet<>();
       for (Dataset ds : results1)
@@ -368,9 +362,9 @@ public class OverlayDatasource extends Datasource
   }
 
   /**
-   * Versucht, den QueryPart aus query (darf nicht leer sein) zu bestimmen, der den Ergebnisraum
-   * einer Suchanfrage am meisten einschränkt und liefert diesen zurück. Kriterium hierfür ist die
-   * Anzahl der Sternchen und die Anzahl der Nicht-Sternchen-Zeichen im Suchstring.
+   * Tries to determine the QueryPart from the query (which must not be empty)
+   * that most restricts the result set of a search query and returns it.
+   * The criteria for this are the number of asterisks and the number of non-asterisk characters in the search string.
    *
    * @author Matthias Benkmann (D-III-ITD-D101)
    *
@@ -378,7 +372,7 @@ public class OverlayDatasource extends Datasource
    */
   private QueryPart getMostRestrictingQueryPart(List<QueryPart> query)
   {
-    QueryPart best = query.get(0); // Sicherstellen, dass best immer initialisiert
+    QueryPart best = query.get(0); // Ensure that 'best' is always initialized
     // ist
     int bestStarCount = Integer.MAX_VALUE;
     int bestNonStarCount = -1;
@@ -511,7 +505,7 @@ public class OverlayDatasource extends Datasource
     private Dataset dataset2; // kann null sein!
 
     /**
-     * ds1 is always from SOURCE and ds2 from OVERLAY.
+     * ds1' is always from 'SOURCE' and 'ds2' is from 'OVERLAY.
      *
      * @author Matthias Benkmann (D-III-ITD-D101)
      */
@@ -555,7 +549,7 @@ public class OverlayDatasource extends Datasource
 
       try
       {
-        // ds1 kann null sein in dem Fall wo ds1 == this.ds2 (bei modeSO == false)
+        // ds1' can be null in the case where 'ds1 == this.ds2' (when 'modeSO == false')
         if (ds1 == null)
         {
           return null;
@@ -563,9 +557,9 @@ public class OverlayDatasource extends Datasource
         return ds1.get(columnName);
       } catch (ColumnNotFoundException x)
       {
-        // Die Exception darf nicht weitergeworfen werden, denn die Spalte existiert
-        // ja im Gesamtschema, wie ganz oben getestet. Wenn wir hier hinkommen, dann
-        // nur in in dem Fall, dass der Wert in ds2 unbelegt ist.
+        // The exception should not be thrown further because the column exists in the overall schema,
+        // as tested at the beginning. If we reach this point,
+        // it is only in the case that the value in 'ds2' is unset.
         return null;
       }
     }

@@ -27,25 +27,25 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * Speichert den Namen einer Datenquelle sowie eine Suchanfrage darauf.
+ * Stores the name of a data source and a search query on it.
  */
 public class Query implements Iterable<QueryPart>
 {
   /**
-   * Liste von QueryParts, die die eigentliche Query beschreiben.
+   * List of QueryParts that describe the actual query.
    */
   private List<QueryPart> listOfQueryParts;
 
   /**
-   * Der Name der Datenquelle auf der die Suche erfolgen soll.
+   * The name of the data source to search on.
    */
   private String dbName;
 
   /**
-   * Erzeugt eine neue Query.
-   * @param dbName der Name die Datenquelle auf der die Suche erfolgen soll.
-   * @param listOfQueryParts Liste von QueryParts, die die eigentliche Query
-   *        beschreiben. ACHTUNG! Wird als Referenz eingebunden.
+   * Creates a new query.
+   * @param dbName the name of the data source on which the search should take place.
+   * @param listOfQueryParts List of QueryParts that contain the actual query
+   *        Describe. DANGER! Will be included as a reference.
    */
   public Query(String dbName, List<QueryPart> listOfQueryParts)
   {
@@ -54,18 +54,18 @@ public class Query implements Iterable<QueryPart>
   }
 
   /**
-   * Liefert den Namen der Datenquelle auf der die Suche erfolgen soll.
+   * Provides the name of the data source on which the search should take place.
    */
   public String getDatasourceName() {return dbName;}
 
   /**
-   * Iteriert über die QueryParts, die diese Suchanfrage ausmachen.
+   * Iterates over the QueryParts that make up this query.
    */
   @Override
   public Iterator<QueryPart> iterator() {return listOfQueryParts.iterator();}
 
   /**
-   * Liefert die Liste der QueryParts die diese Suchanfrage definieren.
+   * Returns the list of QueryParts that define this search query.
    */
   public List<QueryPart> getQueryParts() {return new Vector<>(listOfQueryParts);}
 

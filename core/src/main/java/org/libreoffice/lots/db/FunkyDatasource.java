@@ -36,10 +36,9 @@ import org.libreoffice.lots.func.FunctionLibrary;
 import org.libreoffice.lots.util.L;
 
 /**
- * Datasource, die mit WollMux-Funktionen berechnete Spalten ermöglicht. ACHTUNG!
- * Diese Datasource verhält sich bei Suchanfragen nicht entsprechend dem normalen
- * Verhalten einer Datasource, da sie immer auf den Originaldaten sucht, jedoch
- * transformierte Datensätze zurückliefert.
+ * Data source that enables columns calculated with WollMux functions.
+ * CAUTION! This data source does not behave in search queries according to the normal behavior of a data source,
+ * as it always searches the original data but returns transformed records.
  *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -54,14 +53,12 @@ public class FunkyDatasource extends Datasource
   private ColumnTransformer columnTransformer;
 
   /**
-   * Erzeugt eine neue FunkyDatasource.
+   * Creates a new FunkyDatasource.
    *
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser UnionDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          Contains all data sources that were fully instantiated up to the point of defining this UnionDatasource.
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser UnionDatasource
-   *          enthält.
+   *          The 'data source' node containing the description of this UnionDatasource.
    */
   public FunkyDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc) throws ConfigurationErrorException

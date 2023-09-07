@@ -23,17 +23,17 @@
 package org.libreoffice.lots.db;
 
 /**
- * Ergebnisse einer Datenbankanfrage.
+ * Results of a database query.
  */
 public interface QueryResults extends Iterable<Dataset>
 {
   /**
-   * Die Anzahl der Ergebnisse.
+   * The number of results.
    */
   public int size();
 
   /**
-   * Liefert true, falls es keine Ergebnisse gibt.
+   * Returns true if there are no results.
    */
   public boolean isEmpty();
 }

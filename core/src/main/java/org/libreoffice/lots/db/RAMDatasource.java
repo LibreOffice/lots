@@ -30,35 +30,34 @@ import java.util.Vector;
 import java.util.function.Predicate;
 
 /**
- * Oberklasse für Datasources, die ihre Daten vollständig im Speicher halten
+ * Superclass for data sources that keep their data entirely in memory
  */
 public class RAMDatasource extends Datasource
 {
   /**
-   * Das Schema dieser Datenquelle.
+   * The schema of this data source.
    */
   private List<String> schema;
 
   /**
-   * Liste aller Datasets, die in dieser Datasource gespeichert sind.
+   * List of all datasets stored in this datasource.
    */
   private List<Dataset> data;
 
   /**
-   * Der Name dieser Datenquelle.
+   * The name of this data source.
    */
   private String name;
 
   /**
-   * Erzeugt eine neue RAMDatasource mit Namen name. data und schema werden direkt als Referenz
-   * eingebunden, nicht kopiert.
+   * Creates a new RAMDatasource with the name 'name'. 'data' and 'schema' are included as references, not copied.
    *
    * @param name
-   *          der Name der Datenquelle
+   *          the name of the data source
    * @param schema
-   *          das Schema der Datenquelle
+   *          the schema of the data source
    * @param data
-   *          die Datensätze der Datenquelle
+   *          the data source records
    */
   public RAMDatasource(String name, List<String> schema, List<Dataset> data)
   {
@@ -66,17 +65,16 @@ public class RAMDatasource extends Datasource
   }
 
   /**
-   * Erzeugt eine uninitialisierte RAMDatasource. Eine abgeleitete Klasse, die diesen Konstruktor
-   * verwendet sollte init() aufrufen, um die nötigen Initialisierungen zu erledigen.
+   * Creates an uninitialized RAMDatasource. A derived class that uses this constructor should call 'init()'
+   * to perform the necessary initializations.
    */
   protected RAMDatasource()
   {
   }
 
   /**
-   * Führt die Initialisierungsaktionen des Konstruktors mit den gleichen Parametern aus. Diese
-   * Methode sollte von abgeleiteten Klassen verwendet werden, wenn sie den Konstruktor ohne
-   * Argumente verwenden.
+   * Performs the initialization actions of the constructor with the same parameters.
+   * This method should be used by derived classes when they use the constructor without arguments.
    */
   protected void init(String name, List<String> schema, List<Dataset> data)
   {

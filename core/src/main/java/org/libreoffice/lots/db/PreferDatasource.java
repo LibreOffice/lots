@@ -39,12 +39,12 @@ import org.libreoffice.lots.config.ConfigurationErrorException;
 import org.libreoffice.lots.util.L;
 
 /**
- * Datasource, die Daten einer Datenquelle A von Dateien einer anderen Datenquelle B
- * verdecken lässt. Dies funktioniert so, dass Anfragen erst an Datenquelle A
- * gestellt werden und dann für alle Ergebnisdatensätze geprüft wird, ob ein
- * Datensatz (oder mehrere Datensätze) mit gleichem Schlüssel in Datenquelle B ist.
- * Falls dies so ist, werden für diesen Schlüssel nur die Datensätze aus Datenquelle
- * B zurückgeliefert.
+ * Datasource, the data from one data source A from files from another data source B
+ * can be concealed. The way this works is that queries are only sent to data source A
+ * are set and then all result data records are checked to see whether a
+ * Record (or multiple records) with the same key is in data source B.
+ * If so, only the records from data source are used for this key
+ * B returned.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -63,17 +63,15 @@ public class PreferDatasource extends Datasource
   private String name;
 
   /**
-   * Erzeugt eine neue PreferDatasource.
+   * Creates a new PreferDatasourcee.
    *
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser PreferDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          Contains all data sources that have already been fully instantiated
+   *          up to the point of defining this PreferDatasource.
    * @param sourceDesc
-   *          der "DataSource"-Knoten, der die Beschreibung dieser PreferDatasource
-   *          enthält.
+   *          the "DataSource" node that contains the description of this PreferDatasource.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
-   *          verwendet).
+   *         the context in which the URLs should be resolved (not currently used).
    */
   public PreferDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, URL context)
@@ -94,12 +92,10 @@ public class PreferDatasource extends Datasource
           + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source2Name));
 
     /*
-     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
-     * aufzuweichen (z.B. Gesamtschema ist immer Schema von bevorzugter Datenquelle)
-     * wäre es erforderlich, einen Dataset-Wrapper zu implementieren, der dafür
-     * sorgt, dass alle Datasets, die in QueryResults zurück- geliefert werden das
-     * selbe Schema haben. Solange dafür keine Notwendigkeit ersichtlich ist, spare
-     * ich mir diesen Aufwand.
+     * The following condition is "unnecessarily" strict, but to relax it (e.g., assuming that the overall
+     * schema is always the schema of the preferred data source),
+     * it would be necessary to implement a dataset wrapper that ensures that all datasets returned
+     * in QueryResults have the same schema. As long as there is no apparent need for this, I will save myself this effort.
      */
     List<String> schema1 = source1.getSchema();
     List<String> schema2 = source2.getSchema();
@@ -199,10 +195,9 @@ public class PreferDatasource extends Datasource
       }
 
       /**
-       * Datensätze für die ein Korrekturdatensatz vorliegt, dieaber nicht in
-       * overrideResults auftauchen (weil die Korrektur dafür gesorgt hat, dass die
-       * Suchbedingung nicht mehr passt) müssen auch mit ihrem Schlüssel auf die
-       * Denylist. Deswegen müssen wir diese Datensätze suchen.
+       * Records for which a correction record exists but do not appear in overrideResults 
+       * (because the correction has made the search condition no longer valid) must 
+       * also be added to the denylist with their key. Therefore, we need to search for these records.
        */
       QueryResults denylistResults =
           override.getDatasetsByKey(keyToCount.keySet());
