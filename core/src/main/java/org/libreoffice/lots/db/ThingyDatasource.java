@@ -48,16 +48,16 @@ public class ThingyDatasource extends RAMDatasource
   private static final Pattern SPALTENNAME = Pattern.compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
 
   /**
-   * Erzeugt eine neue ThingyDatasource.
+   * Creates a new ThingyDatasource.
    *
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser
-   *          ThingyDatasource bereits vollständig instanziierten Datenquellen.
+   *          contains all up to the time of the definition of this
+   *          ThingyDatasource already fully instantiated data sources.
    * @param sourceDesc
-   *          der "DataSource"-Knoten, der die Beschreibung dieser
-   *          ThingyDatasource enthält.
+   *          the "DataSource" node, which contains the description of this
+   *          Includes ThingyDatasource.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen.
+   *          the context relative to which URLs should be resolved.
    */
   public ThingyDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc, URL context)
       throws IOException
@@ -152,7 +152,7 @@ public class ThingyDatasource extends RAMDatasource
     try
     {
       ConfigThingy keys = sourceDesc.get("Schluessel");
-      // Exception werfen, falls kein Schluessel angegeben
+      // Throw exception if no key is specified
       keys.getFirstChild();
       for (ConfigThingy key : keys)
       {
@@ -174,20 +174,20 @@ public class ThingyDatasource extends RAMDatasource
   }
 
   /**
-   * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. Die Methode
-   * erkennt automatisch, ob die Beschreibung in der Form ("Spaltenwert1",
-   * "Spaltenwert2",...) oder der Form (Spalte1 "Wert1" Spalte2 "Wert2" ...)
-   * ist.
+   * Creates a new MyDataset from the dsDesc description. The method
+   * automatically detects whether the description is in the form ("ColumnValue1",
+   * "ColumnValue2",...) or the form (Column1 "Value1" Column2 "Value2" ...)
+   * is.
    *
    * @param schema
-   *          das Datenbankschema
+   *          the database schema
    * @param schemaOrdered
-   *          das Datenbankschema mit erhaltener Spaltenreihenfolge entsprechend
-   *          Schema-Sektion.
+   *          the database schema with preserved column order accordingly
+   *          Schema section.
    * @param keyCols
    *          die Schlüsselspalten
    * @throws ConfigurationErrorException
-   *           im Falle von Verstössen gegen diverse Regeln.
+   *           in the event of violations of various rules.
    */
   private Dataset createDataset(ConfigThingy dsDesc, List<String> schema, String[] schemaOrdered,
       String[] keyCols)
@@ -212,11 +212,11 @@ public class ThingyDatasource extends RAMDatasource
   }
 
   /**
-   * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. dsDesc muss in der
-   * Form (Spalte1 "Spaltenwert1" Spalte2 "Spaltenwert2 ...) sein.
+   * Creates a new MyDataset from the dsDesc description. dsDesc must be in the
+   *Form (Column1 "ColumnValue1" Column2 "ColumnValue2 ...)..
    *
    * @throws ConfigurationErrorException
-   *           bei verstössen gegen diverse Regeln
+   *           in case of violations of various rules
    */
   private Dataset createDatasetUnordered(ConfigThingy dsDesc, List<String> schema, String[] keyCols)
   { // TESTED
@@ -238,11 +238,11 @@ public class ThingyDatasource extends RAMDatasource
   }
 
   /**
-   * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. dsDesc muss in der
-   * Form ("Spaltenwert1" "Spaltenwert2 ...) sein.
+   * Creates a new MyDataset from the dsDesc description. dsDesc must be in the
+   * Form("columnvalue1" "columnvalue2 ...) to be.
    *
    * @throws ConfigurationErrorException
-   *           bei verstössen gegen diverse Regeln
+   *           in case of violations of various rules
    */
   private Dataset createDatasetOrdered(ConfigThingy dsDesc, List<String> schema,
       String[] schemaOrdered, String[] keyCols)
@@ -288,11 +288,11 @@ public class ThingyDatasource extends RAMDatasource
     }
 
     /**
-     * Setzt aus den Werten der Schlüsselspalten separiert durch KEY_SEPARATOR
-     * den Schlüssel zusammen.
+     * Sets from the values ​​of the key columns separated by KEY_SEPARATOR
+     * the key together.
      *
      * @param keyCols
-     *          die Namen der Schlüsselspalten
+     *          the names of the key columns
      */
     private void initKey(String[] keyCols)
     { // TESTED
