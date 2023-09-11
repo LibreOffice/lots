@@ -105,7 +105,7 @@ public class DocumentLoader
   }
 
   /**
-   * Loads a document and inserts it in the location of target. Target must support
+   * Loads a document and inserts it in the location of target. Target must
    * Support XDocumentInsertable service.
    *
    * @param target
