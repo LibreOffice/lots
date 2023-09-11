@@ -62,7 +62,7 @@ public class DocumentLoader
   /**
    * Access to the DocumentLoader as a singleton.
    *
-   * @return Singleton-Instance of Document_Loaders
+   * @return Singleton instance of DocumentLoader
    */
   public static DocumentLoader getInstance()
   {
