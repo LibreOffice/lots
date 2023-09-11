@@ -62,7 +62,7 @@ public class DocumentLoader
   /**
    * Access to the DocumentLoader as a singleton.
    *
-   * @return Singleton-Instance does Document_Loaders
+   * @return Singleton-Instance of Document_Loaders
    */
   public static DocumentLoader getInstance()
   {
@@ -105,7 +105,7 @@ public class DocumentLoader
   }
 
   /**
-   * Loads a document and inserts it in the location of target. target must be the
+   * Loads a document and inserts it in the location of target. Target must
    * Support XDocumentInsertable service.
    *
    * @param target
