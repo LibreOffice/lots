@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-08-17 22:36+0000\n"
+"PO-Revision-Date: 2023-10-06 16:36+0000\n"
 "Last-Translator: Xosé <xosecalvo@gmail.com>\n"
 "Language-Team: Galician <https://translations.documentfoundation.org/"
 "projects/wollmux/wollmux/gl/>\n"
@@ -181,25 +181,27 @@ msgid ""
 "Error during initialization of datasource \"{0}\": Referenced datasource "
 "\"{1}\" missing or defined incorrectly"
 msgstr ""
+"Produciuse un erro ao inicializar a fonte de datos «{0}»: Falta, ou está "
+"definida incorrectamente, a fonte de datos referida, «{1}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:131
 #, java-format
 msgid "In datasource \"{0}\" columns: {1} are missing"
-msgstr ""
+msgstr "Na fonte de datos «{0}» faltan as columnas: {1}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:132
 msgid " and "
-msgstr ""
+msgstr " e "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:133
 #, java-format
 msgid "in datasource \"{0}\" columns: {1} are missing"
-msgstr ""
+msgstr "Na fonte de datos «{0}» faltan as columnas: {1}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:67
 #, java-format
 msgid "URL of data source \"{0}\" is missing"
-msgstr ""
+msgstr "Falta o URL da fonte de datos «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:85
 #, java-format
