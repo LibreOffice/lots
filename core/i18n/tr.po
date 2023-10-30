@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-10-28 16:36+0000\n"
+"PO-Revision-Date: 2023-10-31 17:36+0000\n"
 "Last-Translator: Ayhan YALÇINSOY <ayhanyalcinsoy@gmail.com>\n"
 "Language-Team: Turkish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/tr/>\n"
@@ -208,6 +208,8 @@ msgid ""
 "Error in definition of data source {0}: Column \"{1}\" does not comply with "
 "the syntax of identifiers"
 msgstr ""
+"{0} veri kaynağının tanımında hata: \"{1}\" sütunu tanımlayıcıların "
+"sözdizimine uygun değil"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:91
 #, java-format
@@ -215,28 +217,30 @@ msgid ""
 "Error in Defition of data source {0}: Column \"{1}\" was defined twice in "
 "schema"
 msgstr ""
+"Veri kaynağı {0}'ın tanımlanmasında hata: \"{1}\" sütunu şemada iki kez "
+"tanımlandı"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:107
 #, java-format
 msgid "Error in Conf-File of data source {0}: Section 'Schema' is missing"
-msgstr ""
+msgstr "Veri kaynağı {0}'ın Yapılandırma Dosyasında hata: 'Schema' bölümü eksik"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:113
 #, java-format
 msgid "Error in Conf-file of data source {0}: Error in URL \"{1}\": "
 msgstr ""
+"{0} veri kaynağının Conf dosyasında hata: \"{1}\" URL'sinde hata oluştu: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:120
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:139
 #, java-format
 msgid "Error in Conf-file of data source {0}: "
-msgstr ""
+msgstr "{0} veri kaynağının Conf dosyasında hata: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:144
-#, fuzzy, java-format
-#| msgid "Data source \"{0}\": Key-section is missing"
+#, java-format
 msgid "Error in Conf-file of data source {0}: Section 'Data' is missing"
-msgstr "Veri kaynağı \"{0}\": Anahtar bölümü eksik"
+msgstr "Veri kaynağı {0}'ın Conf dosyasında hata: 'Veri' bölümü eksik"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:165
 #, java-format
@@ -244,31 +248,33 @@ msgid ""
 "Error in Conf-file of data source {0}: Key column \"{1}\" is not defined in "
 "schema"
 msgstr ""
+"{0} veri kaynağının Conf dosyasında hata: Anahtar sütun \"{1}\" şemada "
+"tanımlanmamış"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:172
 #, java-format
 msgid "Missing or incorrect key(...) specification for data source {0}"
-msgstr ""
+msgstr "Veri kaynağı {0} için eksik veya hatalı anahtar (...) belirtimi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:197
 #, java-format
 msgid "\"{0}\" awaits a preceding open bracket"
-msgstr ""
+msgstr "\"{0}\" kendisinden önce gelen bir açık ayraç bekler"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:233
 #, java-format
 msgid "Data set has column \"{0}\" which is not defined within the schema"
-msgstr ""
+msgstr "Veri kümesinde şemada tanımlanmamış \"{0}\" sütunu var"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:252
 msgid "Data set has more fields than the schema"
-msgstr ""
+msgstr "Veri kümesinde şemadan daha fazla alan var"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:76
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:78
 #, java-format
 msgid "\"{0}\" of data source \"{1}\" is missing."
-msgstr ""
+msgstr "\"{1}\" veri kaynağının \"{0}\" ögesi eksik."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:127
 #, java-format
@@ -276,12 +282,14 @@ msgid ""
 "In datasource \"{0}\" columns: {1} are missing and in datasource \"{2}\" "
 "columns: {3} are missing"
 msgstr ""
+"\"{0}\" veri kaynağında sütunlar: {1} eksik ve \"{2}\" veri kaynağında "
+"sütunlar: {3} eksik"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/FunkyDatasource.java:86
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:136
 #, java-format
 msgid "SOURCE of data source \"{0}\" is missing"
-msgstr ""
+msgstr "\"{0}\" veri kaynağının KAYNAĞI eksik"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SimpleDataset.java:83
 #, java-format
