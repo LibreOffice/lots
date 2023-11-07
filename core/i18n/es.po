@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-10-28 16:36+0000\n"
+"PO-Revision-Date: 2023-11-08 21:36+0000\n"
 "Last-Translator: Adolfo Jayme Barrientos <fito@libreoffice.org>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
@@ -427,6 +427,9 @@ msgid ""
 "Unfortunately an error happened. The exact error description can be found in "
 "the log file. Please contact your system administrator."
 msgstr ""
+"Desafortunadamente, se produjo un error. La descripción exacta del error se "
+"halla en el archivo de registro. Póngase en contacto con el personal de "
+"sistemas."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:61
 msgid "Multiple WollMux installations"
@@ -466,7 +469,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:153
 #, java-format
 msgid "The URL \"{0}\" is invalid:"
-msgstr ""
+msgstr "El URL «{0}» no es válido:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:167
 #, java-format
@@ -477,7 +480,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/DocumentLoader.java:100
 #, java-format
 msgid "The template with the URL \"{0}\" could not be opened."
-msgstr ""
+msgstr "No se pudo abrir la plantilla con el URL «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
 msgid "Insertion succesful"
@@ -485,7 +488,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
 msgid "The text block reference was inserted."
-msgstr ""
+msgstr "Se insertó la referencia al bloque de texto."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:82
 msgid "Insertion failed"
@@ -502,6 +505,9 @@ msgid ""
 "\n"
 "Please contact your system administrator."
 msgstr ""
+"No se pudo iniciar el diálogo.\n"
+"\n"
+"Póngase en contacto con el personal de sistemas."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:158
 msgid "Save Error"
@@ -1730,7 +1736,7 @@ msgstr "Parámetros no válidos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommandInterpreter.java:236
 msgid "Please contact your system administrator."
-msgstr "Póngase en contacto con el personal administrativo del sistema."
+msgstr "Póngase en contacto con el personal de sistemas."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:176
 #, java-format
@@ -1841,6 +1847,8 @@ msgid ""
 "{0}\n"
 "Please contact your system administrator."
 msgstr ""
+"{0}\n"
+"Póngase en contacto con el personal de sistemas."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/form/config/FormConfig.java:79
 msgid "Unknown form"
