@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: WollMux\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-08-07 16:34+0000\n"
-"Last-Translator: Joan Montané <joan@montane.cat>\n"
+"PO-Revision-Date: 2023-11-14 14:36+0000\n"
+"Last-Translator: Adolfo Jayme Barrientos <fito@libreoffice.org>\n"
 "Language-Team: Catalan <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/ca/>\n"
 "Language: ca\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.15.2\n"
+"X-Generator: Weblate 4.18.2\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -368,9 +368,8 @@ msgid "BASE_DN of LDAP-Server is missing."
 msgstr "Manca el «BASEDN» del servidor LDAP."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:173
-#, fuzzy
 msgid "BASE_DN-value is invalid: "
-msgstr "BASEDN-value no és vàlid: "
+msgstr "El valor de BASE_DN no és vàlid: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:177
 #, fuzzy
@@ -852,7 +851,6 @@ msgid "Adjust fields"
 msgstr "Ajusta camps"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:617
-#, fuzzy
 msgid "Printing could not be started."
 msgstr "No s'ha pogut iniciar la impressió."
 
@@ -1845,9 +1843,8 @@ msgid "File name"
 msgstr "Nom del fitxer"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:131
-#, fuzzy
 msgid "ID"
-msgstr "ID"
+msgstr "Id."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:142
 msgid "-- none --"
@@ -1962,27 +1959,20 @@ msgid ""
 msgstr "El fragment de text amb el FRAG_ID \"{0}\" no està definit!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:243
-#, fuzzy
 msgid "Error inserting fragment"
-msgstr "Error durant el procés d'escaneig"
+msgstr "S'ha produït un error en inserir el fragment"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:492
 msgid "There are more parameters specified than the number of placeholders"
-msgstr ""
-"N'hi més de paràmetres especificats que la quantitat de 'placeholders' "
-"disponibles"
+msgstr "Hi ha més paràmetres especificats que espais reservats"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:511
 msgid "Invalid parameters"
 msgstr "Els paràmetres no són vàlids"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommandInterpreter.java:236
-#, fuzzy
 msgid "Please contact your system administrator."
-msgstr ""
-"La plantilla utilitzada conté {0} errors.\n"
-"\n"
-"Sisplau contacta amb el teu administrador de sistema."
+msgstr "Contacteu amb la vostra administració de sistemes."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:176
 #, java-format
@@ -1996,7 +1986,7 @@ msgstr "<ERROR:  >"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/FrameController.java:238
 #, java-format
 msgid "Invalid ZOOM value \"{0}\""
-msgstr "Valor de ZOOM \"{0}\" no ès pas vàlid"
+msgstr "El valor de ZOOM «{0}» no és vàlid"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:794
 #, java-format
@@ -2010,17 +2000,15 @@ msgstr "<ERROR: TRAFO \"{0}\" no està definit>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1574
 msgid "The note associated with the form description is missing."
-msgstr "Falta la notícia relacionada amb la descripció de formulari"
+msgstr "Falta la nota associada amb la descripció del formulari."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1581
 msgid "The note associated with the form description can not be read."
-msgstr ""
-"No es pot llegir la notícia relacionada amb la descripció de formulari."
+msgstr "No es pot llegir la nota associada amb la descripció del formulari."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1808
-#, fuzzy
 msgid "Missing section \"Formular\" in the form description."
-msgstr "Error en parsear la funció d'imprimir \"{0}\""
+msgstr "Falta la secció «Formular» a la descripció del formulari."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
 #, fuzzy
