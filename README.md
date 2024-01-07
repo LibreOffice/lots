@@ -67,7 +67,7 @@ LOTS.oxt extension is not installed in LibreOffice, but is loaded from external 
 mvn -P ButtonsOnly generate-sources
 ```
 
-and the extension is build and installed, if the program `unopkg` is availble. Otherwise you have to manually install the extension, which can be found at oxt/target/LOTS_ButtonsOnly.oxt.
+and the extension is build and installed, if the program `unopkg` is available. Otherwise you have to manually install the extension, which can be found at oxt/target/LOTS_ButtonsOnly.oxt.
 
 Activate the maven profile "development" in Project > Properties > Maven > Active Maven Profiles.
 
