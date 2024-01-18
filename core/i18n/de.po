@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-07-14 07:33+0000\n"
-"Last-Translator: Christian Kühl <kuehl.christian@googlemail.com>\n"
+"PO-Revision-Date: 2024-01-19 05:36+0000\n"
+"Last-Translator: \"Dr. Peter Netz\" <zentrocdot@protonmail.com>\n"
 "Language-Team: German <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/de/>\n"
 "Language: de\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.15.2\n"
+"X-Generator: Weblate 5.3.1\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -830,7 +830,7 @@ msgstr "Datei…"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:357
 msgid "New Calc Sheet"
-msgstr "Neue Calc-Tabelle…"
+msgstr "Neue Calc-Tabelle"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:362
 msgid "Database ..."
