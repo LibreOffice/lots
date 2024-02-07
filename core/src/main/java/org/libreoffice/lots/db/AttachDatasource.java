@@ -39,31 +39,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt. Zur Erstellung der Menge der
- * Ergebnisdatensätze wird jeder Datensatz aus SOURCE1 genau einmal verwendet und jeder Datensatz
- * aus SOURCE2 beliebig oft (auch keinmal). Unterschiede zu einem richtigen Join:<br>
- * <br>
- * a) Verhindert, dass eine Person 2 mal auftaucht, nur weil es 2 Einträge mit Verkehrsverbindungen
- * für ihre Adresse gibt<br>
- * b) Verhindert, dass eine Person rausfliegt, weil es zu ihrer Adresse keine Verkehrsverbindung
- * gibt<br>
- * c) Die Schlüssel der Ergebnisdatensätze bleiben die aus SOURCE1 und werden nicht kombiniert aus
- * SOURCE1 und SOURCE2. Das verhindert, dass ein Datensatz bei einer Änderung der Adresse aus der
- * lokalen Absenderliste fliegt, weil er beim Cache-Refresh nicht mehr gefunden wird. <br>
- * <br>
- * In der Ergebnisdatenquelle sind alle Spalten von SOURCE1 unter ihrem ursprünglichen Namen, alle
- * Spalten von SOURCE2 unter dem Namen von SOURCE2 konkateniert mit "." konkateniert mit dem
- * Spaltennamen zu finden. <br>
- * <br>
- * Argument gegen automatische Umbenennung/Aliase für Spalten aus SOURCE2, deren Name sich nicht mit
- * einer Spalte aus SOURCE1 stört:<br>
- * <br>
- * - Der Alias würde verschwinden, wenn die Quelle SOURCE1 später einmal um eine Spalte mit dem
- * entsprechenden Namen erweitert wird. Definitionen, die den Alias verwendet haben verwenden ab da
- * stillschweigend die Spalte aus SOURCE1, was schwierig zu findende Fehler nach sich ziehen kann.
- *
- * @author Matthias Benkmann (D-III-ITD 5.1)
- */
+  * A data source that adds columns to another data source. To create the quantity of
+  * Result data sets, each data record from SOURCE1 is used exactly once and every data record
+  * from SOURCE2 any number of times (even none). Differences to a real join:<br>
+  * <br>
+  * a) Prevents a person from appearing twice just because there are 2 entries with transport connections
+  * for your address there<br>
+  * b) Prevents a person from being thrown out because there is no transport connection to their address
+  * gives<br>
+  * c) The keys of the result data records remain those from SOURCE1 and are not combined
+  * SOURCE1 and SOURCE2. This prevents a data record from being deleted when the address changes
+  * local sender list flies because it can no longer be found during the cache refresh. <br>
+  * <br>
+  * In the result data source, all columns from SOURCE1 are under their original name, all
+  * Columns from SOURCE2 under the name of SOURCE2 concatenated with "." concatenated with that
+  * Find column names. <br>
+  * <br>
+  * Argument against automatic renaming/aliases for columns from SOURCE2 whose name does not match
+  * a column from SOURCE1 interferes:<br>
+  * <br>
+  * - The alias would disappear if the source SOURCE1 was later expanded by a column with the
+  * is expanded accordingly. Definitions that used the alias are used from then on
+  * silently the column from SOURCE1, which can result in difficult to find errors.
+  *
+  * @author Matthias Benkmann (D-III-ITD 5.1)
+  */
 public class AttachDatasource extends Datasource
 {
 
@@ -89,17 +89,17 @@ public class AttachDatasource extends Datasource
 
   private String source2Prefix;
 
-  /**
-   * Erzeugt eine neue AttachDatasource.
-   *
-   * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser AttachDatasource bereits
-   *          vollständig instanziierten Datenquellen.
-   * @param sourceDesc
-   *          der "DataSource"-Knoten, der die Beschreibung dieser AttachDatasource enthält.
-   * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht verwendet).
-   */
+/**
+    * Creates a new AttachDatasource.
+    *
+    * @param nameToDatasource
+    * already contains everything up to the time this AttachDatasource was defined
+    * fully instantiated data sources.
+    * @param sourceDesc
+    * the "DataSource" node containing the description of this AttachDatasource.
+    * @param context
+    * the context relative to which URLs should be resolved (not currently used).
+    */
   public AttachDatasource(Map<String, Datasource> nameToDatasource, ConfigThingy sourceDesc,
       URL context)
   {
@@ -228,11 +228,11 @@ public class AttachDatasource extends Datasource
       }
     }
 
-    /*
-     * Die ATTACH-Datenquelle ist normalerweise nur untergeordnet und Spaltenbedingungen dafür
-     * schränken die Suchergebnisse wenig ein. Deshalb werten wir falls wir mindestens eine
-     * Bedingung an die Hauptdatenquelle haben, die Anfrage auf dieser Datenquelle aus.
-     */
+/*
+      * The ATTACH data source is usually only child and column conditions for it
+      * restrict the search results slightly. That's why we evaluate if we have at least one
+      * Condition on the main data source to have the query made on that data source.
+      */
     if (!query1.isEmpty())
     {
       QueryResults results = source1.find(query1);
