@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2023-10-31 17:36+0000\n"
-"Last-Translator: Ayhan YALÇINSOY <ayhanyalcinsoy@gmail.com>\n"
+"PO-Revision-Date: 2024-05-17 20:37+0000\n"
+"Last-Translator: Muhammet Kara <kara@libreoffice.org>\n"
 "Language-Team: Turkish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/tr/>\n"
 "Language: tr\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.18.2\n"
+"X-Generator: Weblate 5.3.1\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -294,7 +294,7 @@ msgstr "\"{0}\" veri kaynağının KAYNAĞI eksik"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SimpleDataset.java:83
 #, java-format
 msgid "Data set does not know column \"{0}\""
-msgstr ""
+msgstr "\"{0}\" sütunu, veri kümesi tarafından tanınmıyor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:111
 #, java-format
@@ -354,19 +354,19 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:173
 msgid "BASE_DN-value is invalid: "
-msgstr ""
+msgstr "BASE_DN-değeri geçersiz: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:177
 msgid "No OBJECT_CLASS defined."
-msgstr ""
+msgstr "OBJECT_CLASS tanımlanmamış."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:181
 msgid "OBJECT_CLASS contains of forbidden characters: "
-msgstr ""
+msgstr "OBJECT_CLASS yasaklı karakterler içeriyor: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:208
 msgid "Section 'Columns' is missing."
-msgstr ""
+msgstr "'Sütunlar' bölümü eksik."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
 #, fuzzy
@@ -382,12 +382,12 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:227
 #, java-format
 msgid "Path specification is missing for column {0}"
-msgstr ""
+msgstr "{0} sütunu için yol belirtimi eksik"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:239
 #, java-format
 msgid "Syntax error in path specification of {0}"
-msgstr ""
+msgstr "{0} ögesinin yol belirtiminde söz dizimi hatası"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:248
 #, java-format
@@ -397,15 +397,15 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:254
 #, java-format
 msgid "Illegal attribute identifier: \"{0}\""
-msgstr ""
+msgstr "Geçersiz öznitelik tanımlayıcısı: \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:271
 msgid "Schluessel section is missing."
-msgstr ""
+msgstr "Schluessel bölümü eksik."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:282
 msgid "Impossible. Count() was checked before."
-msgstr ""
+msgstr "İmkansız. Count() daha önce denetlendi."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:290
 msgid "No Key column specified."
@@ -425,34 +425,37 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:41
 msgid "Create error information"
-msgstr ""
+msgstr "Hata bilgisi oluştur"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:47
 #, java-format
 msgid ""
 "The WollMux error information has been successfully written to file \"{0}\"."
-msgstr ""
+msgstr "WollMux hata bilgisi başarıyla \"{0}\" dosyasına yazıldı."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:52
 msgid ""
 "The WollMux error information could not be written. For details have a look "
 "at the file wollmux.log!"
 msgstr ""
+"WollMux hata bilgisi yazılamadı. Ayrıntılar için wollmux.log dosyasına bakın!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/WollMuxEvent.java:98
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:144
 msgid "WollMux error"
-msgstr ""
+msgstr "WollMux hatası"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/WollMuxEvent.java:98
 msgid ""
 "Unfortunately an error happened. The exact error description can be found in "
 "the log file. Please contact your system administrator."
 msgstr ""
+"Maalesef bir hata oluştu. Hatanın tam açıklaması günlük dosyasında "
+"bulunabilir. Lütfen sistem yöneticinizle iletişime geçin."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:61
 msgid "Multiple WollMux installations"
-msgstr ""
+msgstr "Çoklu WollMux kurulumu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:62
 msgid ""
@@ -468,55 +471,55 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:99
 msgid "WollMux"
-msgstr ""
+msgstr "WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:100
 msgid "No placeholder and no 'setJumpMark' flag available!"
-msgstr ""
+msgstr "Yer tutucu ve 'setJumpMark' bayrağı mevcut değil!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:110
 #, java-format
 msgid "The textfragment with the FRAG_ID \"{0}\" is not defined!"
-msgstr ""
+msgstr "FRAG_ID \"{0}\" ile metin parçası tanımlı değil!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:123
 #, java-format
 msgid ""
 "The URL for the text fragment with the FRAG_ID \"{0}\" cannot be determined:"
-msgstr ""
+msgstr "FRAG_ID \"{0}\" ile metin parçasının URL'si belirlenemiyor:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:153
 #, java-format
 msgid "The URL \"{0}\" is invalid:"
-msgstr ""
+msgstr "URL \"{0}\" geçersiz:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:167
 #, java-format
 msgid "The text fragment with the FRAG_ID \"{0}\" cannot be resolved:"
-msgstr ""
+msgstr "FRAG_ID \"{0}\" ile metin parçası çözümlenemiyor:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:199
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/DocumentLoader.java:100
 #, java-format
 msgid "The template with the URL \"{0}\" could not be opened."
-msgstr ""
+msgstr "URL \"{0}\" ile şablon açılamadı."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
 msgid "Insertion succesful"
-msgstr ""
+msgstr "Ekleme başarılı"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
 msgid "The text block reference was inserted."
-msgstr ""
+msgstr "Metin bloğu başvurusu eklendi."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:82
 msgid "Insertion failed"
-msgstr ""
+msgstr "Ekleme başarısız oldu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnFunctionDialog.java:86
 #, java-format
 msgid "Function dialog \"{0}\" is not defined."
-msgstr ""
+msgstr "İşlev iletişim penceresi \"{0}\" tanımlı değil."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/CantStartDialogException.java:44
 msgid ""
@@ -524,15 +527,18 @@ msgid ""
 "\n"
 "Please contact your system administrator."
 msgstr ""
+"İletişim penceresi başlatılamadı!\n"
+"\n"
+"Lütfen sistem yöneticinize başvurun."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:158
 msgid "Save Error"
-msgstr ""
+msgstr "Kayıt Hatası"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:159
 #, java-format
 msgid "Saving the file \"{0}\" failed!"
-msgstr ""
+msgstr "\"{0}\" dosyasını kaydetme başarısız oldu!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:69
 msgid "Über WollMux"
@@ -540,19 +546,19 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:80
 msgid "License: European Union Public License"
-msgstr ""
+msgstr "Lisans: Avrupa Birliği Kamu Lisansı"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:82
 msgid "Visit website"
-msgstr ""
+msgstr "Web sitesini ziyaret edin"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:85
 msgid "Credits"
-msgstr ""
+msgstr "Katkıda Bulunanlar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:67
 msgid "Select sender"
-msgstr ""
+msgstr "Gönderici seçin"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:82
 #, java-format
