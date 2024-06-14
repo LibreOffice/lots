@@ -29,57 +29,54 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.management.Query;
+
 import org.libreoffice.lots.config.ConfigThingy;
 
 /**
- * Eine Suchstrategie liefert für eine gegebene Wortzahl eine Liste von Templates für
- * Suchanfragen, die der Reihe nach mit den Wörtern probiert werden sollen bis ein
- * Ergebnis gefunden ist.
+ * A search strategy returns a list of templates for a given number of words
+ * Search queries that should be tried one after the other with the words until
+ * one
+ * Result is found.
  */
-public class SearchStrategy
-{
+public class SearchStrategy {
   /**
-   * Bildet eine Wortanzahl ab auf eine Liste von {@link Query}-Objekten, die
-   * passende Templates darstellen.
+   * Maps a word count to a list of {@link Query} objects that
+   * display suitable templates.
    */
   private Map<Integer, List<Query>> mapWordcountToListOfQuerys;
 
   /**
-   * {@link #mapWordcountToListOfQuerys} wird per Referenz eingebunden und
-   * entsprechende Ergebnisse aus dieser Map werden von {@link #getTemplate(int)}
-   * zurückgeliefert.
+   * {@link #mapWordcountToListOfQuerys} is included by reference and
+   * corresponding results from this map are provided by {@link #getTemplate(int)}
+   * returned.
    */
-  private SearchStrategy()
-  {
+  private SearchStrategy() {
     this.mapWordcountToListOfQuerys = new HashMap<>();
   }
 
   /**
-   * Parst den "SearchStrategy"-Abschnitt von conf und liefert eine entsprechende
+   * Parses the "SearchStrategy" section of conf and returns an appropriate
    * SearchStrategy.
    *
    * @param conf
-   *          das {@link ConfigThingy}, dessen "SearchStrategy"-Abschnitt geparst
-   *          werden soll.
+   *             the {@link ConfigThingy}, whose "SearchStrategy" section is
+   *             parsed
+   *             shall be.
    */
-  public static SearchStrategy parse(ConfigThingy conf)
-  {
+  public static SearchStrategy parse(ConfigThingy conf) {
     SearchStrategy strategy = new SearchStrategy();
     conf = conf.query("SearchStrategy");
-    for (ConfigThingy searchConfig : conf)
-    {
-      for (ConfigThingy queryConf : searchConfig)
-      {
+    for (ConfigThingy searchConfig : conf) {
+      for (ConfigThingy queryConf : searchConfig) {
         String datasource = queryConf.getName();
         List<QueryPart> listOfQueryParts = new ArrayList<>();
         int wordcount = 0;
-        for (ConfigThingy qconf : queryConf)
-        {
+        for (ConfigThingy qconf : queryConf) {
           String columnName = qconf.getName();
           String searchString = qconf.toString();
           Matcher m = Pattern.compile("\\$\\{suchanfrage[1-9]\\}").matcher(searchString);
-          while (m.find())
-          {
+          while (m.find()) {
             int wordnum = searchString.charAt(m.end() - 2) - '0';
             if (wordnum > wordcount) {
               wordcount = wordnum;
@@ -95,10 +92,8 @@ public class SearchStrategy
     return strategy;
   }
 
-  private void addListOfQueryParts(int wordcount, String datasource, List<QueryPart> queryParts)
-  {
-    if (!mapWordcountToListOfQuerys.containsKey(wordcount))
-    {
+  private void addListOfQueryParts(int wordcount, String datasource, List<QueryPart> queryParts) {
+    if (!mapWordcountToListOfQuerys.containsKey(wordcount)) {
       mapWordcountToListOfQuerys.put(wordcount, new ArrayList<Query>());
     }
     List<Query> listOfQueries = mapWordcountToListOfQuerys.get(wordcount);
@@ -106,16 +101,15 @@ public class SearchStrategy
   }
 
   /**
-   * Liefert eine Liste von {@link Query}-Objekten, die jeweils ein Template für eine
-   * Query sind, die bei einer Suchanfrage mit wordcount Wörtern durchgeführt werden
-   * soll. Die Querys sollen in der Reihenfolge in der sie in der Liste stehen
-   * durchgeführt werden solange bis eine davon ein Ergebnis liefert.
+   * Returns a list of {@link Query} objects, each containing a template for a
+   * Queries that are carried out in a search query with wordcount words
+   * should. The queries should be in the order in which they appear in the list
+   * be carried out until one of them produces a result.
    *
-   * @return <code>null</code> falls keine Strategie für den gegebenen wordcount
-   *         vorhanden ist.
+   * @return <code>null</code> if no strategy for the given wordcount
+   *         is available.
    */
-  public List<Query> getTemplate(int wordcount)
-  {
+  public List<Query> getTemplate(int wordcount) {
     return mapWordcountToListOfQuerys.get(wordcount);
   }
 }

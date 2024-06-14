@@ -29,44 +29,42 @@ import java.util.Map;
 import org.libreoffice.lots.util.L;
 
 /**
- * Eine simple Implementierung des Interfaces Dataset.
+ * A simple implementation of the Dataset interface.
  */
-public class SimpleDataset implements Dataset
-{
+public class SimpleDataset implements Dataset {
   private Map<String, String> data;
 
   private String key;
 
   /**
-   * Erzeugt ein SimpleDataset, das eine Kopie von ds ist. Das erzeugte SimpleDataset
-   * ist von schema und ds unabhängig und hält keine Verknüpfungen darauf.
+   * Creates a SimpleDataset that is a copy of ds. This created SimpleDataset
+   * is independent of schema and ds and does not hold links to them.
    *
    * @param schema
-   *          enthält die Namen aller zu kopierenden Spalten
+   *               contains the names of all columns to be copied
    * @param ds
-   *          der zu kopierende Datensatz.
+   *               the data record to be copied.
    * @throws ColumnNotFoundException
-   *           falls eine Spalte aus schema dem Datensatz ds nicht bekannt ist
+   *                                 if a column from schema is not known to the
+   *                                 data set ds
    */
   public SimpleDataset(Collection<String> schema, Dataset ds)
-      throws ColumnNotFoundException
-  {
+      throws ColumnNotFoundException {
     key = ds.getKey();
     data = new HashMap<>();
-    for (String spalte : schema)
-    {
+    for (String spalte : schema) {
       data.put(spalte, ds.get(spalte));
     }
   }
 
   /**
-   * Erzeugt ein SimpleDataset, das den Schlüssel key hat und dessen Daten von der
-   * Map data geliefert werden. Das Schema wird implizit durch die Schlüssel
-   * bestimmt, die data kennt (d.h. wenn data.containsKey(column), dann ist column im
-   * Schema). ACHTUNG! Sowohl schema als auch data werden per Referenz eingebunden.
+   * Creates a SimpleDataset that has the key key and whose data is from the
+   * Map data will be supplied. The schema is implicit through the key
+   * determines which data knows (i.e. if data.containsKey(column), then column is
+   * in
+   * Scheme). DANGER! Both schema and data are included by reference.
    */
-  public SimpleDataset(String key, Map<String, String> data)
-  {
+  public SimpleDataset(String key, Map<String, String> data) {
     this.key = key;
     this.data = data;
   }
@@ -77,11 +75,10 @@ public class SimpleDataset implements Dataset
    * @see org.libreoffice.lots.db.Dataset#get(java.lang.String)
    */
   @Override
-  public String get(String columnName) throws ColumnNotFoundException
-  {
+  public String get(String columnName) throws ColumnNotFoundException {
     if (!data.containsKey(columnName))
       throw new ColumnNotFoundException(L.m("Data set does not know column \"{0}\"",
-        columnName));
+          columnName));
     return data.get(columnName);
   }
 
@@ -91,8 +88,7 @@ public class SimpleDataset implements Dataset
    * @see org.libreoffice.lots.db.Dataset#getKey()
    */
   @Override
-  public String getKey()
-  {
+  public String getKey() {
     return key;
   }
 }

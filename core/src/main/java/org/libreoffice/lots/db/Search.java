@@ -29,40 +29,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import javax.management.Query;
+
 import org.libreoffice.lots.config.ConfigThingy;
 
 /**
- * Diese Klasse stellt Methoden zur Verfügung um in Datenquellen Suchen durchzuführen.
+ * This class provides methods to perform searches in data sources.
  */
-public class Search
-{
+public class Search {
 
-  private Search()
-  {
+  private Search() {
     // hide implicit public constructor
   }
 
   /**
-   * Führt die übergebene Suchanfrage gemäß der übergebenen Suchstrategie aus und liefert die
-   * Ergebnisse in einem {@link QueryResults}-Objekt zurück. Falls einer der übergebenen Parameter
-   * <code>null</code> ist oder falls der queryString leer ist, wird <code>null</code>
-   * zurückgeliefert.
+   * Executes and returns the passed search query according to the passed search
+   * strategy
+   * Return results in a {@link QueryResults} object. If one of the parameters
+   * passed
+   * is <code>null</code> or if the queryString is empty, <code>null</code>
+   * returned.
    *
    * @param queryString
-   *          die Suchanfrage
+   *                       the search query
    * @param searchStrategy
-   *          die zu verwendende Suchstrategie
+   *                       the search strategy to use
    * @param datasources
-   *          Data source to use.
+   *                       Data source to use.
    * @throws IllegalArgumentException
-   *           falls eine Datenquelle, in der gesucht werden soll, nicht existiert
+   *                                  if a data source in which to search does not
+   *                                  exist
    * @return Results as an Iterable of Dataset as {@link QueryResults}
    */
   public static QueryResults search(String queryString, SearchStrategy searchStrategy,
-      Map<String, Datasource> datasources)
-  {
-    if (queryString == null || searchStrategy == null || datasources == null)
-    {
+      Map<String, Datasource> datasources) {
+    if (queryString == null || searchStrategy == null || datasources == null) {
       return null;
     }
 
@@ -71,13 +72,10 @@ public class Search
     QueryResults results = null;
     List<QueryResults> listOfQueryResultsList = new ArrayList<>();
 
-    for (Query query : queries)
-    {
-      if (query.numberOfQueryParts() == 0)
-      {
+    for (Query query : queries) {
+      if (query.numberOfQueryParts() == 0) {
         results = datasources.get(query.getDatasourceName()).getContents();
-      } else
-      {
+      } else {
         results = datasources.get(query.getDatasourceName()).find(query.getQueryParts());
       }
       listOfQueryResultsList.add(results);
@@ -86,27 +84,22 @@ public class Search
   }
 
   /**
-   * Führt die Ergenismengen zusammen. Dabei werden mehrfache Ergebnisse ausgefiltert.
+   * Merges the sets of results. Multiple results are filtered out.
    *
-   * @return bereinigte Ergebnisliste.
+   * @return cleaned results list.
    */
-  private static QueryResults mergeListOfQueryResultsList(List<QueryResults> listOfQueryResultsList)
-  {
+  private static QueryResults mergeListOfQueryResultsList(List<QueryResults> listOfQueryResultsList) {
     QueryResultsSet results = new QueryResultsSet((o1, o2) -> {
-      if (o1.getClass() == o2.getClass() && o1.getKey() == o2.getKey())
-      {
+      if (o1.getClass() == o2.getClass() && o1.getKey() == o2.getKey()) {
         return 0;
       }
       return 1;
     });
 
-    if (listOfQueryResultsList.size() == 1)
-    {
+    if (listOfQueryResultsList.size() == 1) {
       return listOfQueryResultsList.get(0);
-    } else
-    {
-      for (QueryResults queryResults : listOfQueryResultsList)
-      {
+    } else {
+      for (QueryResults queryResults : listOfQueryResultsList) {
         results.addAll(queryResults);
       }
     }
@@ -115,43 +108,43 @@ public class Search
   }
 
   /**
-   * Liefert zur Anfrage queryString eine Liste von {@link Query}s, die der Reihe nach probiert
-   * werden sollten, gemäß der Suchstrategie searchStrategy (siehe
-   * {@link SearchStrategy#parse(ConfigThingy)}). Gibt es für die übergebene Anzahl Wörter keine
-   * Suchstrategie, so wird solange das letzte Wort entfernt bis entweder nichts mehr übrig ist oder
-   * eine Suchstrategie für die Anzahl Wörter gefunden wurde.
+   * Returns a list of {@link Query}s for the queryString, which are tried one
+   * after the other
+   * should be, according to the search strategy searchStrategy (see
+   * {@link SearchStrategy#parse(ConfigThingy)}). There are none for the number of
+   * words passed
+   * Search strategy, the last word is removed until there is either nothing left
+   * or
+   * a search strategy for the number of words was found.
    *
-   * @return die leere Liste falls keine Liste bestimmt werden konnte.
+   * @return the empty list if no list could be determined.
    */
-  private static List<Query> parseQuery(SearchStrategy searchStrategy, String queryString)
-  {
+  private static List<Query> parseQuery(SearchStrategy searchStrategy, String queryString) {
     List<Query> queryList = new ArrayList<>();
 
-    // Kommata durch Space ersetzen (d.h. "Benkmann,Matthias" -> "Benkmann
+    // Replace commas with space (i.e. "Benkmann,Matthias" -> "Benkmann
     // Matthias")
     queryString = queryString.replaceAll(",", " ");
 
-    // Suchstring zerlegen.
+    // Decompose search string.
     Stream<String> queryStream = Arrays.stream(queryString.trim().split("\\p{Space}+"));
-    // Formatieren und leere Wörter entfernen
+    // Format and remove empty words
     String[] queryArray = queryStream.map(Search::formatQuery).filter(query -> query.length() != 0)
         .toArray(String[]::new);
 
     int count = queryArray.length;
 
-    // Passende Suchstrategie finden; falls nötig dazu Wörter am Ende weglassen.
+    // Find a suitable search strategy; If necessary, leave out words at the end.
     while (count >= 0 && searchStrategy.getTemplate(count) == null)
       --count;
 
-    // keine Suchstrategie gefunden
-    if (count < 0)
-    {
+    // no search strategy found
+    if (count < 0) {
       return queryList;
     }
 
     List<Query> templateList = searchStrategy.getTemplate(count);
-    for (Query template : templateList)
-    {
+    for (Query template : templateList) {
       queryList.add(resolveTemplate(template, queryArray, count));
     }
 
@@ -159,43 +152,40 @@ public class Search
   }
 
   /**
-   * Benutzerseitig wir nur ein einzelnes Sternchen am Ende eines Wortes akzeptiert. Deswegen
-   * entferne alle anderen Sternchen. Ein Punkt am Ende eines Wortes wird als Abkürzung
-   * interpretiert und durch Sternchen ersetzt.
+   * From the user side, only a single asterisk at the end of a word is accepted.
+   * Because of this
+   * remove all other asterisks. A period at the end of a word is called an
+   * abbreviation
+   * interpreted and replaced with asterisks.
    */
-  private static String formatQuery(String query)
-  {
+  private static String formatQuery(String query) {
     boolean suffixStar = query.endsWith("*") || query.endsWith(".");
     String modifiedQuery = query;
-    if (query.endsWith("."))
-    {
+    if (query.endsWith(".")) {
       modifiedQuery = query.substring(0, query.length() - 1);
     }
     modifiedQuery = modifiedQuery.replaceAll("\\*", "");
-    if (suffixStar && query.length() != 0)
-    {
+    if (suffixStar && query.length() != 0) {
       modifiedQuery += "*";
     }
     return modifiedQuery;
   }
 
   /**
-   * Nimmt ein Template für eine Suchanfrage entgegen (das Variablen der Form "${suchanfrageX}"
-   * enthalten kann) und instanziiert es mit Wörtern aus words, wobei nur die ersten wordcount
-   * Einträge von words beachtet werden.
+   * Accepts a template for a search query (the variable of the form "${search
+   * queryX}")
+   * and instantiates it with words from words, where only the first wordcount
+   * Entries from words are taken into account.
    */
-  private static Query resolveTemplate(Query template, String[] words, int wordcount)
-  {
+  private static Query resolveTemplate(Query template, String[] words, int wordcount) {
     String dbName = template.getDatasourceName();
     List<QueryPart> listOfQueryParts = new ArrayList<>();
     Iterator<QueryPart> qpIter = template.iterator();
-    while (qpIter.hasNext())
-    {
+    while (qpIter.hasNext()) {
       QueryPart templatePart = qpIter.next();
       String str = templatePart.getSearchString();
 
-      for (int i = 0; i < wordcount; ++i)
-      {
+      for (int i = 0; i < wordcount; ++i) {
         str = str.replaceAll("\\$\\{suchanfrage" + (i + 1) + "\\}",
             words[i].replaceAll("\\$", "\\\\\\$"));
       }
