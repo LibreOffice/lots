@@ -22,6 +22,8 @@
  */
 package org.libreoffice.lots.func.print;
 
+import org.libreoffice.lots.util.L;
+
 /**
  * Exception for indicating any error during printing.
  */
@@ -41,7 +43,7 @@ public class PrintException extends Exception
    */
   public PrintException(String message, Throwable cause)
   {
-    super(message, cause);
+    super(L.m(message), cause);
   }
 
 }

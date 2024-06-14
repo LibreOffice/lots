@@ -31,6 +31,8 @@ import org.libreoffice.lots.print.PrintFunctionLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.libreoffice.lots.util.L;
+
 /**
  * Definition of print functions. Each print function is a service.
  *
@@ -134,7 +136,7 @@ public abstract class PrintFunction implements Comparable<PrintFunction>
         print(printModel);
       } catch (Exception ex)
       {
-        LOGGER.error("Fehler beim Drucken", ex);
+        LOGGER.error(L.m("Fehler beim Drucken"), ex);
       }
     });
     t.start();
@@ -159,17 +161,14 @@ public abstract class PrintFunction implements Comparable<PrintFunction>
    */
   public static void addPrintFunctions(PrintFunctionLibrary library)
   {
-    ServiceLoader.load(PrintFunction.class, PrintFunction.class.getClassLoader())
-        .forEach(printFunction -> {
+    ServiceLoader.load(PrintFunction.class, PrintFunction.class.getClassLoader()).forEach(printFunction -> {
       if (library.get(printFunction.functionName) == null)
       {
         library.add(printFunction.functionName, printFunction);
-        LOGGER.debug("Registriere interne Druckfunktion {} als Fallback",
-            printFunction.functionName);
+        LOGGER.debug("Registriere interne Druckfunktion {} als Fallback", printFunction.functionName);
       } else
       {
-        LOGGER.debug("Druckfunktion mit dem Namen {} wurde bereits registriert.",
-            printFunction.functionName);
+        LOGGER.debug("Druckfunktion mit dem Namen {} wurde bereits registriert.", printFunction.functionName);
       }
     });
   }
