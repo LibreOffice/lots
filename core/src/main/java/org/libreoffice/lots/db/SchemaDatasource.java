@@ -40,13 +40,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Datenquelle, die die Daten einer existierenden Datenquelle mit geänderten Spalten
- * zur Verfügung stellt.
+ * Data source that contains the data from an existing data source with changed
+ * columns
+ * provides.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class SchemaDatasource extends Datasource
-{
+public class SchemaDatasource extends Datasource {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SchemaDatasource.class);
 
@@ -65,21 +65,24 @@ public class SchemaDatasource extends Datasource
   private Map<String, String> mapNewToOld;
 
   /**
-   * Erzeugt eine neue SchemaDatasource.
+   * Creates a new SchemaDatasource.
    *
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser SchemaDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *                         contains all up to the time of this definition
+   *                         SchemaDatasource
+   *                         already fully instantiated data sources.
    * @param sourceDesc
-   *          der "DataSource"-Knoten, der die Beschreibung dieser SchemaDatasource
-   *          enthält.
+   *                         the "DataSource" node, which contains the description
+   *                         of this
+   *                         SchemaDatasource
+   *                         contains.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
-   *          verwendet).
+   *                         the context relative to which URLs are resolved
+   *                         should (not at the moment
+   *                         used).
    */
   public SchemaDatasource(Map<String, Datasource> nameToDatasource,
-      ConfigThingy sourceDesc, URL context)
-  {
+      ConfigThingy sourceDesc, URL context) {
     name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME of data source is missing"));
     sourceName = parseConfig(sourceDesc, "SOURCE", () -> L.m("SOURCE of data source {0} is missing", name));
 
@@ -97,13 +100,12 @@ public class SchemaDatasource extends Datasource
     renameColumn(sourceDesc.query("RENAME"), columnsToDrop, columnsToAdd);
 
     /**
-     * Für alle hinzugefügten Spalten, die weder in der Originaldatenbank existieren
-     * noch durch einen RENAME auf eine Spalte der Originaldatenbank abgebildet
-     * werden, füge ein Pseudomapping auf EMPTY_COLUMN hinzu, damit
-     * RenameDataset.get() weiss, dass es für die Spalte null liefern soll.
+     * For all added columns that do not exist in the original database
+     * still mapped to a column of the original database by a RENAME
+     * will, add a pseudomapping on EMPTY_COLUMN so that
+     * RenameDataset.get() knows that it should return null for the column.
      */
-    for (String spalte : columnsToAdd)
-    {
+    for (String spalte : columnsToAdd) {
       if (!schema.contains(spalte) && !mapNewToOld.containsKey(spalte))
         mapNewToOld.put(spalte, EMPTY_COLUMN);
     }
@@ -112,33 +114,28 @@ public class SchemaDatasource extends Datasource
     schema.addAll(columnsToAdd);
   }
 
-  private void renameColumn(ConfigThingy renamesDesc, List<String> columnsToDrop, List<String> columnsToAdd)
-  {
-    for (ConfigThingy renameDesc : renamesDesc)
-    {
+  private void renameColumn(ConfigThingy renamesDesc, List<String> columnsToDrop, List<String> columnsToAdd) {
+    for (ConfigThingy renameDesc : renamesDesc) {
       if (renameDesc.count() != 2)
         throw new ConfigurationErrorException(L.m(
-          "Incorrect RENAME specification in data source \"{0}\"", name));
+            "Incorrect RENAME specification in data source \"{0}\"", name));
 
       String spalte1 = "";
       String spalte2 = "";
-      try
-      {
+      try {
         spalte1 = renameDesc.getFirstChild().toString();
         spalte2 = renameDesc.getLastChild().toString();
-      }
-      catch (NodeNotFoundException x)
-      {
+      } catch (NodeNotFoundException x) {
         LOGGER.trace("", x);
       }
 
       if (!schema.contains(spalte1))
         throw new ConfigurationErrorException(L.m(
-          "Column \"{0}\" is not defined in schema", spalte1));
+            "Column \"{0}\" is not defined in schema", spalte1));
 
       if (!SPALTENNAME.matcher(spalte2).matches())
         throw new ConfigurationErrorException(L.m(
-          "\"{1}\" is not a valid column name", spalte2));
+            "\"{1}\" is not a valid column name", spalte2));
 
       mapNewToOld.put(spalte2, spalte1);
       columnsToDrop.add(spalte1);
@@ -147,17 +144,14 @@ public class SchemaDatasource extends Datasource
     }
   }
 
-  private List<String> addColumns(ConfigThingy adds, List<String> columnsToDrop)
-  {
+  private List<String> addColumns(ConfigThingy adds, List<String> columnsToDrop) {
     List<String> columnsToAdd = new ArrayList<>();
-    for (ConfigThingy add : adds)
-    {
-      for (ConfigThingy addColumn : add)
-      {
+    for (ConfigThingy add : adds) {
+      for (ConfigThingy addColumn : add) {
         String spalte = addColumn.toString();
         if (!SPALTENNAME.matcher(spalte).matches())
           throw new ConfigurationErrorException(L.m(
-            "\"{0}\" is not a valid column name", spalte));
+              "\"{0}\" is not a valid column name", spalte));
         columnsToAdd.add(spalte);
         columnsToDrop.remove(spalte);
       }
@@ -165,17 +159,14 @@ public class SchemaDatasource extends Datasource
     return columnsToAdd;
   }
 
-  private List<String> dropColumns(ConfigThingy drops)
-  {
+  private List<String> dropColumns(ConfigThingy drops) {
     List<String> columnsToDrop = new ArrayList<>();
-    for (ConfigThingy drop : drops)
-    {
-      for (ConfigThingy dropColumn : drop)
-      {
+    for (ConfigThingy drop : drops) {
+      for (ConfigThingy dropColumn : drop) {
         String spalte = dropColumn.toString();
         if (!schema.contains(spalte))
           throw new ConfigurationErrorException(L.m(
-            "Column \"{0}\" is not defined in schema", spalte));
+              "Column \"{0}\" is not defined in schema", spalte));
         columnsToDrop.add(spalte);
       }
     }
@@ -183,39 +174,34 @@ public class SchemaDatasource extends Datasource
   }
 
   @Override
-  public List<String> getSchema()
-  {
+  public List<String> getSchema() {
     return schema;
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
-  {
+  public QueryResults getDatasetsByKey(Collection<String> keys) {
     return wrapDatasets(source.getDatasetsByKey(keys));
   }
 
   @Override
-  public QueryResults getContents()
-  {
+  public QueryResults getContents() {
     return new QueryResultsList(new Vector<RenameDataset>(0));
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query)
-  {
+  public QueryResults find(List<QueryPart> query) {
     List<QueryPart> translatedQuery = new ArrayList<>(query.size());
     Iterator<QueryPart> iter = query.iterator();
-    while (iter.hasNext())
-    {
+    while (iter.hasNext()) {
       QueryPart p = iter.next();
       String spalte = p.getColumnName();
 
-      if (!schema.contains(spalte)) // dieser Test ist nicht redundant wegen DROPs
+      if (!schema.contains(spalte)) // this test is not redundant due to DROPs
         return new QueryResultsList(new Vector<RenameDataset>(0));
 
       String alteSpalte = mapNewToOld.get(spalte);
 
-      if (alteSpalte == /* nicht equals()!!!! */EMPTY_COLUMN)
+      if (alteSpalte == /* not equals()!!!! */EMPTY_COLUMN)
         return new QueryResultsList(new Vector<RenameDataset>(0));
 
       if (alteSpalte != null)
@@ -227,13 +213,11 @@ public class SchemaDatasource extends Datasource
   }
 
   @Override
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
-  private QueryResults wrapDatasets(QueryResults res)
-  {
+  private QueryResults wrapDatasets(QueryResults res) {
     List<RenameDataset> wrappedRes = new ArrayList<>(res.size());
     Iterator<Dataset> iter = res.iterator();
     while (iter.hasNext())
@@ -242,26 +226,23 @@ public class SchemaDatasource extends Datasource
     return new QueryResultsList(wrappedRes);
   }
 
-  private class RenameDataset implements Dataset
-  {
+  private class RenameDataset implements Dataset {
     private Dataset ds;
 
-    public RenameDataset(Dataset ds)
-    {
+    public RenameDataset(Dataset ds) {
       this.ds = ds;
     }
 
     @Override
-    public String get(String columnName) throws ColumnNotFoundException
-    {
-      // dieser Test ist nicht redundant wegen DROPs
+    public String get(String columnName) throws ColumnNotFoundException {
+      // this test is not redundant due to DROPs
       if (!schema.contains(columnName))
         throw new ColumnNotFoundException(L.m("Column \"{0}\" does not exist!",
-          columnName));
+            columnName));
 
       String alteSpalte = mapNewToOld.get(columnName);
 
-      if (alteSpalte == /* nicht equals()!!!! */EMPTY_COLUMN) {
+      if (alteSpalte == /* not equals()!!!! */EMPTY_COLUMN) {
         return null;
       }
 
@@ -272,8 +253,7 @@ public class SchemaDatasource extends Datasource
     }
 
     @Override
-    public String getKey()
-    {
+    public String getKey() {
       return ds.getKey();
     }
   }
