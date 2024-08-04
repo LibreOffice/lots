@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2024-05-27 17:36+0000\n"
-"Last-Translator: Valter Mura <valtermura@gmail.com>\n"
+"PO-Revision-Date: 2024-08-05 09:36+0000\n"
+"Last-Translator: Marco Marega <marco.marega@libreitalia.it>\n"
 "Language-Team: Italian <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/it/>\n"
 "Language: it\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.3.1\n"
+"X-Generator: Weblate 5.4.3\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -34,7 +34,7 @@ msgstr "Il NAME della sorgente dati è mancante"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:85
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:82
-#, fuzzy, java-format
+#, java-format
 msgid "SOURCE of data source {0} is missing"
 msgstr "La SOURCE della sorgente dati {0} è mancante"
 
@@ -59,7 +59,7 @@ msgstr "Specifica RENAME non corretta nell'origine dati \"{0}\""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:190
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:529
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1493
-#, fuzzy, java-format
+#, java-format
 msgid "Column \"{0}\" is not defined in schema"
 msgstr "La colonna \"{0}\" non è definita nello schema"
 
@@ -79,7 +79,7 @@ msgid "Column \"{0}\" does not exist!"
 msgstr "La colonna \"{0}\" non esiste."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:216
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Data source \"{0}\": Name of OOo-data source has to be specified as SOURCE"
 msgstr ""
@@ -87,7 +87,7 @@ msgstr ""
 "specificato come SOURCE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:218
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Data source \"{0}\": Name of table/view within the OOo-Data Source has to be "
 "specified as TABLE"
@@ -106,7 +106,7 @@ msgid "Data source \"{0}\": Schema-section is empty"
 msgstr "Sorgente dati \"{0}\": la sezione dello schema è vuota"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:260
-#, fuzzy, java-format
+#, java-format
 msgid "Data source \"{0}\": Key-section is missing"
 msgstr "Sorgente dati \"{0}\": la sezione della chiave è mancante"
 
