@@ -144,6 +144,8 @@ public class OOoBasedMailMerge implements AutoCloseable
   private String dbName;
   private short type;
 
+  private Random random = new Random();
+
   /**
    * Create a mail merge based on LibreOffice.
    *
@@ -772,7 +774,7 @@ public class OOoBasedMailMerge implements AutoCloseable
     UnoDictionary<Object> names = UnoDictionary.create(UNO.dbContext, Object.class);
     do
     {
-      dbName = TEMP_WOLLMUX_MAILMERGE_PREFIX + new Random().nextInt(100000);
+      dbName = TEMP_WOLLMUX_MAILMERGE_PREFIX + this.random.nextInt(100000);
     } while (names.containsKey(dbName));
 
     try
