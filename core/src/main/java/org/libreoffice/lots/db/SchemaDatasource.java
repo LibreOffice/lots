@@ -40,11 +40,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Datenquelle, die die Daten einer existierenden Datenquelle mit geänderten Spalten
- * zur Verfügung stellt.
+ * Data source that provides the data of an existing data source with modified columns.
  *
- * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @autor Matthias Benkmann (D-III-ITD 5.1)
  */
+
 public class SchemaDatasource extends Datasource
 {
 
@@ -65,18 +65,16 @@ public class SchemaDatasource extends Datasource
   private Map<String, String> mapNewToOld;
 
   /**
-   * Erzeugt eine neue SchemaDatasource.
+   * Creates a new SchemaDatasource.
    *
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser SchemaDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          contains all data sources that have already been fully instantiated at the time of the definition of this SchemaDatasource.
    * @param sourceDesc
-   *          der "DataSource"-Knoten, der die Beschreibung dieser SchemaDatasource
-   *          enthält.
+   *          the "DataSource" node that contains the description of this SchemaDatasource.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
-   *          verwendet).
+   *          the context relative to which URLs should be resolved (currently not used).
    */
+  
   public SchemaDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, URL context)
   {
@@ -96,12 +94,11 @@ public class SchemaDatasource extends Datasource
     List<String> columnsToAdd = addColumns(sourceDesc.query("ADD"), columnsToDrop);
     renameColumn(sourceDesc.query("RENAME"), columnsToDrop, columnsToAdd);
 
-    /**
-     * Für alle hinzugefügten Spalten, die weder in der Originaldatenbank existieren
-     * noch durch einen RENAME auf eine Spalte der Originaldatenbank abgebildet
-     * werden, füge ein Pseudomapping auf EMPTY_COLUMN hinzu, damit
-     * RenameDataset.get() weiss, dass es für die Spalte null liefern soll.
+     /**
+     * For all added columns that neither exist in the original database nor are mapped to a column of the original database by a RENAME,
+     * add a pseudo-mapping to EMPTY_COLUMN so that RenameDataset.get() knows that it should return null for the column.
      */
+    
     for (String spalte : columnsToAdd)
     {
       if (!schema.contains(spalte) && !mapNewToOld.containsKey(spalte))
@@ -210,12 +207,12 @@ public class SchemaDatasource extends Datasource
       QueryPart p = iter.next();
       String spalte = p.getColumnName();
 
-      if (!schema.contains(spalte)) // dieser Test ist nicht redundant wegen DROPs
+      if (!schema.contains(spalte)) // this test is not redundant because of DROPs
         return new QueryResultsList(new Vector<RenameDataset>(0));
 
       String alteSpalte = mapNewToOld.get(spalte);
 
-      if (alteSpalte == /* nicht equals()!!!! */EMPTY_COLUMN)
+      if (alteSpalte == /* not equals()!!!! */EMPTY_COLUMN)
         return new QueryResultsList(new Vector<RenameDataset>(0));
 
       if (alteSpalte != null)
@@ -254,14 +251,14 @@ public class SchemaDatasource extends Datasource
     @Override
     public String get(String columnName) throws ColumnNotFoundException
     {
-      // dieser Test ist nicht redundant wegen DROPs
+      // this test is not redundant because of DROPs
       if (!schema.contains(columnName))
         throw new ColumnNotFoundException(L.m("Column \"{0}\" does not exist!",
           columnName));
 
       String alteSpalte = mapNewToOld.get(columnName);
 
-      if (alteSpalte == /* nicht equals()!!!! */EMPTY_COLUMN) {
+      if (alteSpalte == /* not equals()!!!! */EMPTY_COLUMN) {
         return null;
       }
 
