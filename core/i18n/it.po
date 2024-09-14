@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2024-08-28 16:36+0000\n"
+"PO-Revision-Date: 2024-09-15 17:02+0000\n"
 "Last-Translator: Valter Mura <valtermura@gmail.com>\n"
 "Language-Team: Italian <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/it/>\n"
@@ -390,17 +390,17 @@ msgid "Column \"{0}\" does not match the syntax of an identifier"
 msgstr "La colonna \"{0}\" non corrisponde alla sintassi di un identificativo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:227
-#, fuzzy, java-format
+#, java-format
 msgid "Path specification is missing for column {0}"
 msgstr "Manca la specificazione del percorso per la colonna {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:239
-#, fuzzy, java-format
+#, java-format
 msgid "Syntax error in path specification of {0}"
 msgstr "Errore di sintassi nella specificazione del percorso di {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:248
-#, fuzzy, java-format
+#, java-format
 msgid "Syntaxerror in specification of the relative path of {0}"
 msgstr "Errore di sintassi nella specificazione del percorso relativo di {0}"
 
@@ -410,7 +410,6 @@ msgid "Illegal attribute identifier: \"{0}\""
 msgstr "Attributo illegale per l'identificatore: \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:271
-#, fuzzy
 msgid "Schluessel section is missing."
 msgstr "Manca la sezione chiave."
 
@@ -610,7 +609,6 @@ msgid "Value for JavaProperty \"{0}\" could not be determined:"
 msgstr "Impossibile determinare il valore della JavaProperty \"{0}\":"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/Sender.java:204
-#, fuzzy
 msgid "Override can not be null"
 msgstr "La sovrascrittura non può avere valore null"
 
@@ -814,7 +812,6 @@ msgid "New assignment"
 msgstr "Nuova assegnazione"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:478
-#, fuzzy
 msgid "Adjust fields"
 msgstr "Modifica i campi"
 
@@ -856,7 +853,6 @@ msgid "Complement table columns"
 msgstr "Abbina le colonne della tabella"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:394
-#, fuzzy
 msgid "Adjust all fields"
 msgstr "Modifica tutti i campi"
 
@@ -940,13 +936,11 @@ msgid "Text at error position: {0}"
 msgstr "Testo nella posizione dell'errore: {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:347
-#, fuzzy
 msgid "Function of type \"BIND\" requires exactly one sub element FUNCTION"
 msgstr ""
-"La funzione di tipo \"BIND\" richiede esattamente un sotto-elemento FUNCTION"
+"La funzione di tipo \"BIND\" richiede esattamente un sottoelemento FUNCTION"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:353
-#, fuzzy
 msgid ""
 "For functions of type \"BIND\" after \"FUNCTION\" a function name or a "
 "function must follow."
@@ -955,7 +949,6 @@ msgstr ""
 "funzione o una funzione."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:355
-#, fuzzy
 msgid ""
 "For functions of type \"BIND\", \"FUNCTION\" must not be followed by a list, "
 "but only by a function name or a function."
@@ -964,42 +957,39 @@ msgstr ""
 "elenco, ma solo da un nome di funzione o da una funzione."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:367
-#, fuzzy, java-format
+#, java-format
 msgid "Function \"{0}\" is used before it was even defined"
 msgstr "La funzione \"{0}\" è stata usata prima di essere definita"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:382
-#, fuzzy, java-format
+#, java-format
 msgid "Function of type \"DIALOG\" requires exacly 2 parameters, not {0}"
 msgstr ""
 "La funzione di tipo \"DIALOG\" richiede esattamente 2 parametri, non {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:403
-#, fuzzy, java-format
+#, java-format
 msgid "Dialog \"{0}\" is not defined, but it is used by the DIALOG-Function"
 msgstr ""
 "La finestra di dialogo \"{0}\" non è definita, ma viene usata da DIALOG-"
 "Function"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:408
-#, fuzzy
 msgid "DIALOG-Function is context dependent and therefore cannot be used here."
 msgstr "DIALOG-Function dipende dal contesto e perciò qui non può essere usata."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:420
-#, fuzzy
 msgid ""
 "Within the IF statement there must not be more than one THEN and one ELSE"
 msgstr ""
 "All'interno dell'istruzione IF non devono esserci più di un THEN e un ELSE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:424
-#, fuzzy
 msgid "IF must contain exactly one condition."
 msgstr "IF deve contenere esattamente una condizione."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:459
-#, fuzzy, java-format
+#, java-format
 msgid "Function of type \"REPLACE\" requires exactly 3 parameters, not {0}"
 msgstr ""
 "La funzione di tipo \"REPLACE\" richiede esattamente 3 parametri, non {0}"
@@ -1007,32 +997,32 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:479
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:526
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:557
-#, fuzzy, java-format
+#, java-format
 msgid "Error in regex \"{0}\""
 msgstr "Errore nell'espressione regolare\"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:489
-#, fuzzy, java-format
+#, java-format
 msgid "Function of type \"SPLIT\" requires exactly 3 parameters, not {0}"
 msgstr "La funzione di tipo \"SPLIT\" richiede esattamente 3 parametri, non {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:515
-#, fuzzy, java-format
+#, java-format
 msgid "Index argument of {0} must not be negative."
 msgstr "L'indice dell'argomento {0} non può essere negativo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:546
-#, fuzzy, java-format
+#, java-format
 msgid "Function of type \"MATCH\" requires exacly 2 parameters, not {0}"
 msgstr "La funzione di tipo \"MATCH\" richiede esattamente 2 parametri, non {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:574
-#, fuzzy, java-format
+#, java-format
 msgid "Function of type \"VALUE\" requires exacly 2 parameters, not {0}"
 msgstr "La funzione di tipo \"VALUE\" richiede esattamente 2 parametri, non {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:597
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "BY-specification of {0} has to contain exacly one function or one string"
 msgstr ""
@@ -1040,22 +1030,22 @@ msgstr ""
 "stringa"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:604
-#, fuzzy, java-format
+#, java-format
 msgid "{0}-Function may only have one BY-specification"
 msgstr "{0}-Function può avere solamente una specificazione BY"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:627
-#, fuzzy, java-format
+#, java-format
 msgid "MIN-specification of {0} has to be \"<NonNegativeInteger>\""
 msgstr "La specificazione MIN di {0} deve essere un \"<InteroNonNegativo>\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:652
-#, fuzzy, java-format
+#, java-format
 msgid "MAX-Angabe von {0} muss \"<NichtNegativeGanzeZahl>\" sein"
 msgstr "La specificazione MAX di {0} deve essere un \"<InteroNonNegativo>\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:663
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "For {0}-function more than one unqualified function was specified. Note that "
 "the divisor must be enclosed with BY(...)."
@@ -1064,14 +1054,14 @@ msgstr ""
 "Fare attenzione che il divisore deve essere racchiuso con BY(...)."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:674
-#, fuzzy, java-format
+#, java-format
 msgid "For the {0}-function exactly one unqualified function must be specified"
 msgstr ""
 "Per la funzione {0} deve essere specificata esattamente una funzione non "
 "qualificata"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:690
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "{0} requires specifying MAX \"<NonNegativeInteger>\", if specified with BY "
 "divisor"
@@ -1080,12 +1070,11 @@ msgstr ""
 "specificato con il divisore BY"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:698
-#, fuzzy, java-format
+#, java-format
 msgid "In case of {0} MIN must be smaller than or equal to MAX"
 msgstr "Nel caso di {0}, MIN deve essere inferiore o uguale a MAX"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:781
-#, fuzzy
 msgid ""
 "Empty functions definition is not allowed. Instead use the empty string \"\""
 msgstr ""
@@ -1093,24 +1082,22 @@ msgstr ""
 "vuota \"\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:115
-#, fuzzy
 msgid "Printing"
 msgstr "Stampa"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrimaryPrintModel.java:142
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SecondaryPrintModel.java:225
-#, fuzzy, java-format
+#, java-format
 msgid "Print function \"{0}\" is not defined."
 msgstr "La funzione di stampa \"{0}\" non è definita."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:87
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:91
-#, fuzzy
 msgid "Could not open document."
-msgstr "Impossibile aprire il documento"
+msgstr "Impossibile aprire il documento."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintProgressBar.java:290
-#, fuzzy, java-format
+#, java-format
 msgid "{0} from {1}{2} steps"
 msgstr "{0} di {1}{2} passi"
 
@@ -1122,7 +1109,6 @@ msgstr ""
 "vuoti"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:174
-#, fuzzy
 msgid ""
 "Error within the function dialogue: Section 'ColumnTransformation' could not "
 "be parsed!"
@@ -1131,44 +1117,38 @@ msgstr ""
 "'ColumnTransformation' non può essere elaborata!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:222
-#, fuzzy
 msgid "Select dataset"
 msgstr "Seleziona dataset"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:231
-#, fuzzy
 msgid "<None>"
 msgstr "<Nessuno>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:241
-#, fuzzy, java-format
+#, java-format
 msgid "Unsupported TYPE \"{0}\" in function dialog \"{1}\""
 msgstr ""
 "TYPE \"{0}\" non supportato nella finestra di dialogo della funzione \"{1}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:245
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/form/config/FormConfig.java:97
-#, fuzzy, java-format
+#, java-format
 msgid "Key 'Fenster' is missing in {0}"
 msgstr "La chiave 'Fenster' non è presente in {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:298
-#, fuzzy
 msgid "Input"
 msgstr "Input"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:377
-#, fuzzy
 msgid "<Dataset>>"
 msgstr "<Dataset>>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:542
-#, fuzzy
 msgid "<Dataset>"
 msgstr "<Dataset>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:716
-#, fuzzy
 msgid ""
 "Processing your search query took too long and was therefore aborted.\n"
 "The reason for this could be a problem with the data source or with the "
@@ -1176,78 +1156,65 @@ msgid ""
 "search term matching too many results.\n"
 "Please try another, more precise search query."
 msgstr ""
-"L'esecuzione della vostra ricerca ha impiegato troppo tempo e perciò è stata "
-"abortita.\n"
+"L'esecuzione della ricerca ha impiegato troppo tempo e perciò è stata "
+"interrotta.\n"
 "Il motivo può essere un problema con la sorgente dati o con i termini di "
-"ricerca usati che corrispondono a troppi risultati.\n"
-"Siete pregati di riprovare con una ricerca più precisa."
+"ricerca utilizzati, che corrispondono a troppi risultati.\n"
+"Riprovare con una ricerca più precisa."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:35
-#, fuzzy
 msgid "will always be printed"
 msgstr "sarà sempre stampato"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:39
-#, fuzzy
 msgid "will only be printed in the original"
 msgstr "sarà stampato solo nell'originale"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:44
-#, fuzzy
 msgid "will not be printed in the original"
 msgstr "non sarà stampato nell'originale"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:48
-#, fuzzy
 msgid "will only be printed in the draft"
 msgstr "sarà stampato solo nella bozza"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:52
-#, fuzzy
 msgid "will only be printed in copies"
 msgstr "sarà stampato sono nelle copie"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:174
-#, fuzzy
 msgid "Print content based directives"
 msgstr "Contenuti di stampa basati sulle direttive"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:175
-#, fuzzy
 msgid "Could not merge PDF documents."
-msgstr "Impossibile unire documenti PDF."
+msgstr "Impossibile unire i documenti PDF."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:80
-#, fuzzy
 msgid "Error collecting documents"
 msgstr "Errore in fase di raccolta dei documenti"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:81
-#, fuzzy
 msgid "Could not collect documents for printing content based directive."
 msgstr ""
 "Impossibile raccogliere i documenti per stampare i contenuti basati sulle "
 "direttive."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:91
-#, fuzzy
 msgid "Error"
 msgstr "Errore"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:91
-#, fuzzy
 msgid "Please select an area to be marked."
-msgstr "Selezionare un'area da contrassegnare."
+msgstr "Seleziona un'area da contrassegnare."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:172
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:210
-#, fuzzy
 msgid "Block is no longer marked"
 msgstr "Il blocco non è più contrassegnato"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:173
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:211
-#, fuzzy
 msgid ""
 "The selected block already contained a marker 'Block {0}'. The existing "
 "marker has been removed."
@@ -1256,7 +1223,6 @@ msgstr ""
 "contrassegno esistente è stato rimosso."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:177
-#, fuzzy
 msgid "Different blocks"
 msgstr "Blocchi differenti"
 
@@ -1274,42 +1240,36 @@ msgstr ""
 "delle finestre di dialogo di avvertimento all'apertura del file."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:271
-#, fuzzy
 msgid "Block was marked"
 msgstr "Il blocco è stato contrassegnato"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:271
-#, fuzzy, java-format
+#, java-format
 msgid "The selected block {0}"
 msgstr "Il blocco selezionato {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:162
-#, fuzzy
 msgid "Overlapping printing blocks"
 msgstr "Sovrapposizione di blocchi di stampa"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:163
-#, fuzzy
 msgid ""
 "The behavior with overlapping pressure blocks is not defined. This can lead "
 "to unexpected behavior. Please contact the template author."
 msgstr ""
 "Il comportamento con la pressione di blocchi sovrapporti non è definito. "
-"Questo può causare comportamenti inaspettati. Contattate l'autore del "
-"modello."
+"Questo può causare comportamenti inaspettati. Contatta l'autore del modello."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:229
-#, fuzzy
 msgid " Original"
 msgstr " Originale"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:230
-#, fuzzy
 msgid "Recipient see recipient field"
 msgstr "Il destinatario vede il campo destinatario"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/config/InvalidIdentifierException.java:41
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "The identifier \"{0}\" is invalid, and can only contain the characters a-z, "
 "A-Z, _ and 0-9, whereas the first character cannot be a number."
@@ -1318,44 +1278,37 @@ msgstr ""
 "Z, _ e 0-9, inoltre il primo carattere non può essere un numero."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/AllInsertionTrafoViewsPanel.java:65
-#, fuzzy
 msgid "TRAFO View"
 msgstr "Vista TRAFO"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/model/InsertionModel4InputUser.java:166
-#, fuzzy, java-format
+#, java-format
 msgid "FieldMaster \"{0}\" does not exist."
 msgstr "Il campo FieldMaster \"{0}\" non esiste."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/AllInsertionLineViewsPanel.java:143
-#, fuzzy
 msgid "Remove (DeMux)"
 msgstr "Rimuovi (DeMux)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionExtViewsPanel.java:62
-#, fuzzy
 msgid "GROUPS View"
 msgstr "Vista GROUPS"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:167
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:119
-#, fuzzy
 msgid "Remove"
 msgstr "Rimuovi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:172
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/AllGroupLineViewsPanel.java:155
-#, fuzzy
 msgid "New"
 msgstr "Nuovo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:177
-#, fuzzy
 msgid "New (whole page)"
 msgstr "Nuovo (pagina intera)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:302
-#, fuzzy
 msgid "Visibility Section"
 msgstr "Sezione visibilità"
 
@@ -1365,27 +1318,22 @@ msgid "Collision while trying to change \"{0}\" to \"{1}\""
 msgstr "Conflitto tentando di modificare \"{0}\" in \"{1}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:100
-#, fuzzy
 msgid "Form GUI"
-msgstr "GUI del formulario"
+msgstr "Interfaccia del formulario"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:102
-#, fuzzy
 msgid "Insertion"
 msgstr "Inserimento"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:104
-#, fuzzy
 msgid "Visibility"
 msgstr "Visibilità"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:105
-#, fuzzy
 msgid "Sections"
 msgstr "Sezioni"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:434
-#, fuzzy
 msgid "Field type"
 msgstr "Tipo di campo"
 
