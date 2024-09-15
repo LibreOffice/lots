@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2024-09-15 17:02+0000\n"
+"PO-Revision-Date: 2024-09-16 20:03+0000\n"
 "Last-Translator: Valter Mura <valtermura@gmail.com>\n"
 "Language-Team: Italian <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/it/>\n"
@@ -1227,7 +1227,6 @@ msgid "Different blocks"
 msgstr "Blocchi differenti"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:178
-#, fuzzy
 msgid ""
 "The selected block already contains another marker.\n"
 "Should the new block is really to be created?\n"
@@ -1313,7 +1312,7 @@ msgid "Visibility Section"
 msgstr "Sezione visibilità"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/model/IdModel.java:174
-#, fuzzy, java-format
+#, java-format
 msgid "Collision while trying to change \"{0}\" to \"{1}\""
 msgstr "Conflitto tentando di modificare \"{0}\" in \"{1}\""
 
@@ -1343,63 +1342,52 @@ msgid "Input list"
 msgstr "Elenco digitazioni"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:496
-#, fuzzy
 msgid "Expandable"
 msgstr "Espandibile"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:507
-#, fuzzy
 msgid "New value"
 msgstr "Nuovo valore"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:524
-#, fuzzy
 msgid "Delete value"
 msgstr "Elimina valore"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:735
-#, fuzzy
 msgid "Rows number"
 msgstr "Numero di righe"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:783
-#, fuzzy
 msgid "Automatic word wrapping"
 msgstr "Scorrimento automatico delle parole"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/model/FormControlModel.java:205
-#, fuzzy
 msgid "Control element"
 msgstr "Elemento di controllo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/model/FormControlModel.java:666
-#, fuzzy, java-format
+#, java-format
 msgid "\"{0}\" is not a correct ID"
 msgstr "\"{0}\" non è un ID corretto"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlExtViewsPanel.java:73
-#, fuzzy
 msgid "Extra View"
 msgstr "Vista extra"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:203
-#, fuzzy
 msgid "Up"
 msgstr "In alto"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:213
-#, fuzzy
 msgid "Down"
 msgstr "In basso"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:223
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/AllGroupLineViewsPanel.java:150
-#, fuzzy
 msgid "Delete"
 msgstr "Elimina"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:232
-#, fuzzy
 msgid "New tab"
 msgstr "Nuova scheda"
 
@@ -1409,7 +1397,6 @@ msgid "New label"
 msgstr "Nuova etichetta"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:508
-#, fuzzy
 msgid "Selection"
 msgstr "Selezione"
 
@@ -1430,54 +1417,45 @@ msgid "Topmost node must be \"CAT\""
 msgstr "Il nodo di partenza deve essere \"CAT\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/view/OnDemandCardView.java:164
-#, fuzzy
 msgid "Activate"
 msgstr "Attiva"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/model/GroupModel.java:174
-#, fuzzy, java-format
+#, java-format
 msgid "\"{0}\" is not a syntactically correct ID for visibility groups"
 msgstr "\"{0}\" non è un ID sintatticamente corretto per i gruppi di visibilità"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/AllGroupFuncViewsPanel.java:62
-#, fuzzy
 msgid "Function View"
 msgstr "Vista funzione"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelection.java:37
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:81
-#, fuzzy
 msgid "<none>"
 msgstr "<nessuno>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelection.java:43
-#, fuzzy
 msgid "<Expert>"
 msgstr "<Esperto>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:86
-#, fuzzy
 msgid "<Code>"
 msgstr "<Codice>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:92
-#, fuzzy
 msgid "<Value>"
 msgstr "<Valore>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:98
-#, fuzzy
 msgid "[not hardwired]"
 msgstr "[non collegato fisicamente]"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:221
-#, fuzzy
 msgid "Function"
 msgstr "Funzione"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:169
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:278
-#, fuzzy
 msgid "Function Tester"
 msgstr "Tester della funzione"
 
@@ -1487,12 +1465,10 @@ msgid "FORMAT(Number MIN \"Zahl\" MAX \"Zahl\")"
 msgstr "FORMAT(Numero MIN \"Numero\" MAX \"Numero\")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:319
-#, fuzzy
 msgid "IF(Condition THEN(then) ELSE(else))"
 msgstr "IF(Condizione THEN(allora) ELSE(altrimenti))"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:321
-#, fuzzy
 msgid ""
 "SELECT(\n"
 "Funktion1\n"
@@ -1602,184 +1578,150 @@ msgid "DIALOG(\"Dialogname\", \"Feldname\")"
 msgstr "DIALOG(\"NomeFinestraDialogo\", \"NomeCampo\")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:384
-#, fuzzy
 msgid "Evaluate"
 msgstr "Valuta"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:421
-#, fuzzy
 msgid "Illegal or missing parameter!"
 msgstr "Parametro non valido o mancante!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:103
-#, fuzzy
 msgid "Close the Editor without saving?"
 msgstr "Chiudere l'Editor senza salvare?"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:104
-#, fuzzy
 msgid "Close Editor"
 msgstr "Chiudi l'Editor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:197
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:309
-#, fuzzy
 msgid "File"
 msgstr "File"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:199
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:311
-#, fuzzy
 msgid "Save"
 msgstr "Salva"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:210
-#, fuzzy
 msgid "Error while parsing the form description"
 msgstr "Errore nell'elaborazione della descrizione del modulo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:215
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:185
-#, fuzzy
 msgid "Cancel"
 msgstr "Annulla"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:221
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:286
-#, fuzzy
 msgid "Edit"
 msgstr "Modifica"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:309
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:548
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:638
-#, fuzzy
 msgid "Search..."
 msgstr "Cerca..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:331
-#, fuzzy
 msgid "Replace..."
-msgstr "Sostituisci"
+msgstr "Sostituisci..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:170
-#, fuzzy
 msgid "Generated by FormularMax 4000"
 msgstr "Generato da FormularMax 4000"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:191
-#, fuzzy
 msgid "Tab"
 msgstr "Tab"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/document/ScanVisitor.java:306
-#, fuzzy, java-format
+#, java-format
 msgid "A faulty bookmark was generated: \"{0}\""
 msgstr "È stato generato un contrassegno irregolare: \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:71
-#, fuzzy
 msgid "Print functions"
 msgstr "Funzioni di stampa"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:122
-#, fuzzy
 msgid "Add"
 msgstr "Aggiungi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:125
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:200
-#, fuzzy
 msgid "OK"
 msgstr "OK"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:61
-#, fuzzy
 msgid "Cut"
 msgstr "Taglia"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:85
-#, fuzzy
 msgid "Insert"
 msgstr "Inserisci"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:98
-#, fuzzy
 msgid "Select all"
 msgstr "Seleziona tutto"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:146
-#, fuzzy
 msgid "Form"
 msgstr "Modulo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:148
-#, fuzzy
 msgid "Get form fields from template"
 msgstr "Ottieni i campi del modulo dal modello"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:156
-#, fuzzy
 msgid "Set title of form"
 msgstr "Imposta il titolo del modulo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:158
-#, fuzzy
 msgid "Please enter form title"
-msgstr "Inserire il titolo del modulo"
+msgstr "Inserisci il titolo del modulo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:169
-#, fuzzy
 msgid "Set print function"
 msgstr "Imposta la funzione di stampa"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:176
-#, fuzzy
 msgid "Enter file name"
-msgstr "Inserire il nome del file"
+msgstr "Inserisci il nome del file"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:183
-#, fuzzy
 msgid "Remove WollMux-form-elements from template"
 msgstr "Rimuovi gli elementi del modulo di WollMux dal modello"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:194
-#, fuzzy
 msgid "Optimize document loading time"
 msgstr "Ottimizza il tempo di caricamento del documento"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:199
-#, fuzzy
 msgid "Edit form description"
 msgstr "Modifica la descrizione del modulo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:207
-#, fuzzy
 msgid "View"
 msgstr "Visualizza"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:244
-#, fuzzy
 msgid "Element-specific fields"
 msgstr "Campi specifici dell'elemento"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:288
-#, fuzzy
 msgid "Insert main elements"
 msgstr "Inserisci elementi principali"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:297
-#, fuzzy
 msgid "Checkboxes to ComboBox"
 msgstr "Da caselle di controllo a caselle combinate"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:315
-#, fuzzy
 msgid "Save as..."
 msgstr "Salva con nome…"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:319
-#, fuzzy
 msgid "Exit"
 msgstr "Esci"
 
@@ -1799,43 +1741,35 @@ msgid "No Tab or Buttons section"
 msgstr "Nessuna sezione Tab o Buttons"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:462
-#, fuzzy
 msgid "Error while parsing the sections FormularMax4000/DefaultElements"
 msgstr "Errore nell'elaborazione delle sezioni FormularMax4000/DefaultElements"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:481
-#, fuzzy
 msgid "Recipient Selection Tab"
 msgstr "Scheda di selezione del destinatario"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:493
-#, fuzzy
 msgid "Cancel, <-Back, Next->"
 msgstr "Annulla, <-Precedente, Successivo->"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:504
-#, fuzzy
 msgid "Cancel, <-Back, PDF, Print"
 msgstr "Annulla, <-Precedente, PDF, Stampa"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:516
-#, fuzzy
 msgid "Cancel, <-Back, Send as Email, Print"
 msgstr "Annulla, <-Precedente, Invia come email, Stampa"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:97
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:135
-#, fuzzy
 msgid "File name"
 msgstr "Nome file"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:131
-#, fuzzy
 msgid "ID"
 msgstr "ID"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:142
-#, fuzzy
 msgid "-- none --"
 msgstr "-- nessuno --"
 
@@ -1845,22 +1779,20 @@ msgid "Supplemental Mods"
 msgstr "Moduli supplementari"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:172
-#, fuzzy
 msgid "Warning: Function not defined!"
-msgstr "Attenzione: funzione non definita!"
+msgstr "Attenzione: funzione non definita."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/VisibleTextFragmentList.java:130
-#, fuzzy, java-format
+#, java-format
 msgid "Infinite loop after replacing the variable in URL \"{0}\"."
 msgstr "Ciclo infinito dopo aver sostituito la variabile nell'URL \"{0}\"."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:151
-#, fuzzy
 msgid "!!!CHECK!!!"
 msgstr "!!!CONTROLLO!!!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:663
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "With overrideFrag it is not possible to define replacement chains, the "
 "fragment \"{0}\" however appears in another overrideFrag command."
@@ -1870,85 +1802,76 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:1143
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:243
-#, fuzzy
 msgid "unknown"
 msgstr "sconosciuto"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:708
-#, fuzzy
 msgid "Missing CMD-attribute"
 msgstr "Attributo CMD mancante"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:775
-#, fuzzy, java-format
+#, java-format
 msgid "Unknown command \"{0}\""
 msgstr "Comando sconosciuto \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:978
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1398
-#, fuzzy
 msgid "Missing attribute FRAG_ID"
 msgstr "Attributo FRAG_ID mancante"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1016
-#, fuzzy, java-format
+#, java-format
 msgid "STYLE \"{0}\" is unknown."
 msgstr "STYLE \"{0}\" è sconosciuto."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1131
-#, fuzzy
 msgid "Missing attribute DB_COLUMN"
 msgstr "Attributo DB_COLUMN mancante"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1160
-#, fuzzy, java-format
+#, java-format
 msgid "Unknown AUTOSEP-Type \"{0}\". Expect \"left\", \"right\" or \"both\"."
 msgstr ""
 "AUTOSEP-Type \"{0}\" sconosciuto. Atteso \"sinistra\", \"destra\" o "
 "\"entrambi\"."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1236
-#, fuzzy
 msgid "Missing attribute ID"
 msgstr "Attributo ID mancante"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1348
-#, fuzzy
 msgid "Missing attribute TYPE"
 msgstr "Attributo TYPE mancante"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1353
-#, fuzzy
 msgid ""
 "Specified TYPE is invalid or incorrectly written. Expect "
 "\"templateTemplate\", \"normalTemplate\" or \"formDocument\"!"
 msgstr ""
 "Il TYPE specificato non è valido o è scritto in modo errato. Atteso "
-"\"templateTemplate\", \"normalTemplate\" o \"formDocument\"!"
+"\"templateTemplate\", \"normalTemplate\" o \"formDocument\"."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1461
-#, fuzzy
 msgid "Missing attribute FUNCTION"
 msgstr "Attributo FUNCTION mancante"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/MainProcessor.java:116
-#, fuzzy
 msgid "<ERROR: No sender selected!>"
-msgstr "<ERRORE: Nessun mittente selezionato!>"
+msgstr "<ERRORE: Nessun mittente selezionato.>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:190
-#, fuzzy, java-format
+#, java-format
 msgid "The textfragment with the identifier \"{0}\" \"{0}\" is not defined!"
 msgstr ""
-"Il frammento di testo con identificativo \"{0}\" \"{0}\" non è definito!"
+"Il frammento di testo con identificativo \"{0}\" \"{0}\" non è definito."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:239
-#, fuzzy, java-format
+#, java-format
 msgid "(Override for fragment \"{0}\")"
 msgstr "(Sovrascrittura del frammento \"{0}\")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:236
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "The text fragment with the identifier \"{0}\" \"{1}\" {2} could not be "
 "inserted:"
@@ -1957,68 +1880,59 @@ msgstr ""
 "inserito:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:243
-#, fuzzy
 msgid "Error inserting fragment"
 msgstr "Errore nell'inserimento del frammento"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:492
-#, fuzzy
 msgid "There are more parameters specified than the number of placeholders"
 msgstr ""
 "Sono stati specificati parametri in eccesso rispetto al numero di segnaposti"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:511
-#, fuzzy
 msgid "Invalid parameters"
 msgstr "Parametri non validi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommandInterpreter.java:236
-#, fuzzy
 msgid "Please contact your system administrator."
-msgstr "Siete pregati di contattare il vostro amministratore di sistema."
+msgstr "Contatta l'amministratore di sistema."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:176
-#, fuzzy, java-format
+#, java-format
 msgid "Error at document command \"{0}\""
 msgstr "Errore nel documento al comando \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:190
-#, fuzzy
 msgid "<ERROR:  >"
 msgstr "<ERRORE:  >"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/FrameController.java:238
-#, fuzzy, java-format
+#, java-format
 msgid "Invalid ZOOM value \"{0}\""
 msgstr "Valore di ZOOM non valido \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:794
-#, fuzzy, java-format
+#, java-format
 msgid "<ERROR: TRAFO \"{0}\" not defined>"
 msgstr "<ERRORE: TRAFO \"{0}\" non definito>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:824
-#, fuzzy, java-format
+#, java-format
 msgid "<ERROR: TRAFO \"{0}\" is not defined>"
 msgstr "<ERRORE: TRAFO \"{0}\" non è definito>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1574
-#, fuzzy
 msgid "The note associated with the form description is missing."
 msgstr "Manca la nota associata alla descrizione del modulo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1581
-#, fuzzy
 msgid "The note associated with the form description can not be read."
 msgstr "La nota associata alla descrizione del modulo non può essere letta."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1808
-#, fuzzy
 msgid "Missing section \"Formular\" in the form description."
 msgstr "Manca la sezione \"Formular\" nella descrizione del modulo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
-#, fuzzy
 msgid ""
 "No WollMux configuration (lots.conf) found - therefore WollMux runs in "
 "NoConfig mode."
@@ -2027,36 +1941,33 @@ msgstr ""
 "eseguito in modo NoConfig."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:637
-#, fuzzy, java-format
+#, java-format
 msgid "File \"{0}\" could not be found.\n"
-msgstr "File \"{0}\" non trovato.\n"
+msgstr "Impossibile trovare il file \"{0}\".\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:640
-#, fuzzy, java-format
+#, java-format
 msgid "JVM-Settings can not be determined: {0}\n"
 msgstr "Le impostazioni JVM non possono essere determinate: {0}\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:728
-#, fuzzy, java-format
+#, java-format
 msgid "Error while extracting the OOo configuration with the node path \"{0}\""
 msgstr ""
 "Errore nell'estrazione della configurazione di OOo con il nodo \"{0}\" del "
 "percorso"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:182
-#, fuzzy
 msgid "At the insertion point there is already a reference to a text block."
 msgstr ""
-"Al punto di inserimento è già presente il riferimento ad un blocco di testo."
+"Al punto di inserimento è già presente il riferimento a un blocco di testo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:213
-#, fuzzy
 msgid "At the insertion place no text block could be found."
 msgstr ""
 "Nella posizione di inserimento non è possibile trovare alcun blocco di testo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:133
-#, fuzzy
 msgid ""
 "No section \"Toolbars\" could be read from your WollMux configuration.\n"
 "Therefore, the WollMux toolbar cannot be started. Please check if in your "
@@ -2064,38 +1975,34 @@ msgid ""
 "wollmuxbar_standard.conf) is present and check with the wollmux.log if "
 "possibly an error occurred while processing a %include."
 msgstr ""
-"Nella vostra configurazione di WollMux non è possibile trovare alcuna "
-"sezione \"Toolbars\".\n"
-"Perciò, la barra degli strumenti di WollMux non può essere avviata. "
-"Controllate nel vostro file lots.conf che l'istruzione %include per la "
+"Nella tua configurazione di WollMux non è possibile trovare alcuna sezione "
+"\"Toolbars\".\n"
+"Pertanto, la barra degli strumenti di WollMux non può essere avviata. "
+"Verifica nel tuo file lots.conf che l'istruzione %include per la "
 "configurazione della WollMuxBar (ad es. wollmuxbar_standard.conf) sia "
-"presente e controllate nel file wollmux.log se si è verificato un errore "
+"presente e controlla nel file wollmux.log se si è verificato un errore "
 "durante l'elaborazione di un'istruzione %include."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:256
-#, fuzzy
 msgid ""
 "No WollMux Configuration found.\n"
 "Please setup the WollMux Configuration\n"
 "as described on the WollMux website"
 msgstr ""
 "Non è stata trovata la configurazione di WollMux.\n"
-"Siete pregati di impostare la configurazione di WollMux\n"
+"Imposta la configurazione di WollMux\n"
 "come descritto sul sito di WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:438
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:933
-#, fuzzy
 msgid "Incorrect configuration"
 msgstr "Configurazione non corretta"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:861
-#, fuzzy
 msgid "Multi-forms no longer supported"
 msgstr "I moduli multipli non sono più supportati"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:862
-#, fuzzy
 msgid ""
 "Multi-forms are no longer supported. You need to open and fill each form "
 "individually."
@@ -2104,7 +2011,7 @@ msgstr ""
 "singolarmente ognuno di essi."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:902
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Error during download of file:\n"
 "{0}"
@@ -2113,21 +2020,19 @@ msgstr ""
 "{0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:934
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "{0}\n"
 "Please contact your system administrator."
 msgstr ""
 "{0}\n"
-"Siete pregati di contattare il vostro amministratore di sistema."
+"Contatta l'amministratore di sistema."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/form/config/FormConfig.java:79
-#, fuzzy
 msgid "Unknown form"
 msgstr "Modulo sconosciuto"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:145
-#, fuzzy
 msgid ""
 "The configuration of the Wollmux must be re-read.\n"
 "\n"
@@ -2136,11 +2041,10 @@ msgid ""
 msgstr ""
 "È necessario ricaricare la configurazione di Wollmux.\n"
 "\n"
-"Chiudete Wollmux e LibreOffice ed assicuratevi che nessun processo "
-"'soffice.bin' sia ancora in esecuzione."
+"Chiudi Wollmux e LibreOffice e assicurati che non ci sia in esecuzione alcun "
+"processo 'soffice.bin'."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:229
-#, fuzzy
 msgid "About WollMux"
 msgstr "Informazioni su WollMux"
 
@@ -2150,7 +2054,7 @@ msgid "none loaded"
 msgstr "nessuno è caricato"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:402
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "The TYPE \"{0}\" is invalid. Valid are 'boolean', 'integer', 'float' and "
 "'string'."
@@ -2159,27 +2063,26 @@ msgstr ""
 "'string'."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:269
-#, fuzzy, java-format
+#, java-format
 msgid "FILTER specification is missing for application \"{0}\""
 msgstr "Manca la specificazione FILTER per l'applicazione \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:309
-#, fuzzy, java-format
+#, java-format
 msgid "Error when storing the file: {0}"
 msgstr "Errore durante l'archiviazione del file: {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:324
-#, fuzzy, java-format
+#, java-format
 msgid "Could not create a temporay file \"{0}\""
 msgstr "Impossibile creare il file temporaneo \"{0}\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:338
-#, fuzzy
 msgid "setSource() was not called"
 msgstr "setSource() non è stata chiamata"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:354
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Temporary directory\n"
 "\"{0}\"\n"
@@ -2187,13 +2090,12 @@ msgid ""
 msgstr ""
 "La cartella temporanea\n"
 "\"{0}\"\n"
-"non esiste o non è scrivibile!"
+"non esiste o non è scrivibile."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:369
-#, fuzzy
 msgid "Could not create a temporary directory for the file download!"
 msgstr ""
-"Impossibile creare una cartella temporanea per lo scaricamento del file!"
+"Impossibile creare una cartella temporanea per lo scaricamento del file."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:464
 #, fuzzy, java-format
@@ -2206,7 +2108,6 @@ msgstr ""
 "{1}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:517
-#, fuzzy
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
 msgstr ""
 "Il parametro /loadComponentFromURL/ dev'essere in formato \"Parametro="
