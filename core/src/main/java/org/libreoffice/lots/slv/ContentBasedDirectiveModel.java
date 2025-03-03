@@ -87,6 +87,8 @@ public class ContentBasedDirectiveModel
 
   private static final Map<HashableComponent, ContentBasedDirectiveModel> models = new HashMap<>();
 
+  private Random random = new Random();
+
   /**
    * Creates a model for the given controller if it doesn't exist. Otherwise
    * returns the associated model.
@@ -436,7 +438,7 @@ public class ContentBasedDirectiveModel
     XStyle style = null;
     while (style == null)
     {
-      name = "NO" + new Random().nextInt(1000) + "_" + parentName;
+      name = "NO" + this.random.nextInt(1000) + "_" + parentName;
       try
       {
         style = StyleService.createParagraphStyle(doc, name, parentName);
