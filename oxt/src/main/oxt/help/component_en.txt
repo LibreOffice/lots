@@ -1,4 +1,4 @@
-The WollMux extension consists of four main components:
+The LibreOffice Template System extension consists of four main components:
 
 a letter head system, a form system, a text module system
 and assistance for paper based workflows.
