@@ -10,11 +10,11 @@ pipeline {
   }
 
   tools {
-    jdk 'Java11'
+    jdk 'Java17'
   }
 
   environment {
-    UNO_PATH = '/opt/libreoffice6.4/program/'
+    UNO_PATH = '/opt/libreoffice24.2/program/'
   }
 
   stages {

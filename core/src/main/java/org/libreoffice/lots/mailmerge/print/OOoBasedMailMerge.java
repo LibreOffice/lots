@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2023 Landeshauptstadt München and LibreOffice contributors
+ * Copyright (C) 2005 - 2024 Landeshauptstadt München and LibreOffice contributors
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -143,6 +143,8 @@ public class OOoBasedMailMerge implements AutoCloseable
   private File inputFile;
   private String dbName;
   private short type;
+
+  private Random random = new Random();
 
   /**
    * Create a mail merge based on LibreOffice.
@@ -772,7 +774,7 @@ public class OOoBasedMailMerge implements AutoCloseable
     UnoDictionary<Object> names = UnoDictionary.create(UNO.dbContext, Object.class);
     do
     {
-      dbName = TEMP_WOLLMUX_MAILMERGE_PREFIX + new Random().nextInt(100000);
+      dbName = TEMP_WOLLMUX_MAILMERGE_PREFIX + this.random.nextInt(100000);
     } while (names.containsKey(dbName));
 
     try

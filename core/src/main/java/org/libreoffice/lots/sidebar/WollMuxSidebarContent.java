@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2023 Landeshauptstadt München and LibreOffice contributors
+ * Copyright (C) 2005 - 2024 Landeshauptstadt München and LibreOffice contributors
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -253,8 +253,8 @@ public class WollMuxSidebarContent extends ComponentBase implements XToolPanel, 
 
       if (WollMuxSingleton.getInstance().isNoConfig())
       {
-        String text = L.m("No WollMux Configuration found.\n"
-            + "Please setup the WollMux Configuration\n"
+        String text = L.m("No LibreOffice Template System Configuration found.\n"
+            + "Please setup the LibreOffice Template System Configuration\n"
             + "as described on the WollMux website");
         XControl txt = GuiFactory.createLabel(xMCF, context, text, new Rectangle(5, 15, 10, 80), null);
         controlContainer.addControl("txt", txt);

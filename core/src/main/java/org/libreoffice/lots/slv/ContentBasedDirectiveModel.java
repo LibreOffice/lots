@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2023 Landeshauptstadt München and LibreOffice contributors
+ * Copyright (C) 2005 - 2024 Landeshauptstadt München and LibreOffice contributors
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -86,6 +86,8 @@ public class ContentBasedDirectiveModel
   static final String CHAR_STYLE_NAME_NUMBER = "WollMuxRoemischeZiffer";
 
   private static final Map<HashableComponent, ContentBasedDirectiveModel> models = new HashMap<>();
+
+  private Random random = new Random();
 
   /**
    * Creates a model for the given controller if it doesn't exist. Otherwise
@@ -436,7 +438,7 @@ public class ContentBasedDirectiveModel
     XStyle style = null;
     while (style == null)
     {
-      name = "NO" + new Random().nextInt(1000) + "_" + parentName;
+      name = "NO" + this.random.nextInt(1000) + "_" + parentName;
       try
       {
         style = StyleService.createParagraphStyle(doc, name, parentName);
