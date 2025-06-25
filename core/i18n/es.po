@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2025-06-25 09:30+0000\n"
+"PO-Revision-Date: 2025-06-25 21:50+0000\n"
 "Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
@@ -252,7 +252,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:252
 msgid "Data set has more fields than the schema"
-msgstr ""
+msgstr "El conjunto de datos tiene más campos que el esquema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:76
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:78
@@ -324,11 +324,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:159
 msgid "URL of LDAP-Server is missing."
-msgstr ""
+msgstr "Falta el URL del servidor LDAP."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:166
 msgid "Error in LDAP-URL "
-msgstr ""
+msgstr "Error en el URL para LDAP "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:170
 msgid "BASE_DN of LDAP-Server is missing."
@@ -422,7 +422,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/WollMuxEvent.java:98
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:144
 msgid "WollMux error"
-msgstr ""
+msgstr "Error de WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/WollMuxEvent.java:98
 msgid ""
@@ -518,23 +518,23 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:159
 #, java-format
 msgid "Saving the file \"{0}\" failed!"
-msgstr ""
+msgstr "No se pudo guardar el archivo «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:69
 msgid "Über WollMux"
-msgstr ""
+msgstr "Acerca de WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:80
 msgid "License: European Union Public License"
-msgstr ""
+msgstr "Licencia: Licencia Pública de la Unión Europea"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:82
 msgid "Visit website"
-msgstr ""
+msgstr "Visitar sitio web"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:85
 msgid "Credits"
-msgstr ""
+msgstr "Créditos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:67
 msgid "Select sender"
@@ -1017,7 +1017,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DialogLibrary.java:66
 msgid "Neither dialog name nor the dialog itself must be null"
-msgstr ""
+msgstr "Ni el diálogo ni su nombre deben estar vacíos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:174
 msgid ""
@@ -1166,6 +1166,8 @@ msgid ""
 "The identifier \"{0}\" is invalid, and can only contain the characters a-z, "
 "A-Z, _ and 0-9, whereas the first character cannot be a number."
 msgstr ""
+"El identificador «{0}» no es válido, puede contener solo los caracteres a-z, "
+"A-Z, _ y 0-9, y no puede comenzar por un número."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/insertion/AllInsertionTrafoViewsPanel.java:65
 msgid "TRAFO View"
@@ -1497,7 +1499,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/document/ScanVisitor.java:306
 #, java-format
 msgid "A faulty bookmark was generated: \"{0}\""
-msgstr "Se generó un marcador defectuoso: \"{0}\""
+msgstr "Se generó un marcador defectuoso: «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:71
 msgid "Print functions"
