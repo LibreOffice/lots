@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: 2025-06-25 09:30+0000\n"
-"Last-Translator: Nicolas Donato <donatonicolas02@gmail.com>\n"
+"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
 "Language: es\n"
@@ -43,6 +43,8 @@ msgid ""
 "Error during initialization of datasource \"{0}\":  Referenced datasource "
 "\"{1}\" missing or defined incorrectly"
 msgstr ""
+"Error al inicializar el origen de datos «{0}»: el origen a que se hace "
+"referencia, «{1}», no existe o se ha definido incorrectamente"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:122
 #, java-format
@@ -113,7 +115,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:315
 #, java-format
 msgid "Data source \"{0}\": Table \"{1}\" has no columns"
-msgstr ""
+msgstr "Origen de datos «{0}»: la tabla «{1}» no tiene ninguna columna"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:345
 #, java-format
@@ -179,7 +181,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:132
 msgid " and "
-msgstr ""
+msgstr " y "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:133
 #, java-format
@@ -189,7 +191,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:67
 #, java-format
 msgid "URL of data source \"{0}\" is missing"
-msgstr ""
+msgstr "Falta el URL del origen de datos «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:85
 #, java-format
@@ -449,7 +451,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:99
 msgid "WollMux"
-msgstr ""
+msgstr "WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:100
 msgid "No placeholder and no 'setJumpMark' flag available!"
@@ -588,7 +590,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:311
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:73
 msgid "Copy"
-msgstr ""
+msgstr "Copiar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 msgid "Error copying sender"
@@ -688,7 +690,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:144
 #, java-format
 msgid "The sender address \"{0}\" is invalid."
-msgstr ""
+msgstr "La dirección de remitente «{0}» no es válida."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:154
 #, java-format
@@ -706,6 +708,9 @@ msgid ""
 "\n"
 "Do you want to skip this record and continue?"
 msgstr ""
+"La dirección de destinatario «{0}» no es válida.\n"
+"\n"
+"¿Quiere omitir este registro y proseguir?"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:166
 msgid "<no subject>"
@@ -806,7 +811,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunction.java:130
 #, java-format
 msgid "Script \"{0}\" not available"
-msgstr ""
+msgstr "La secuencia «{0}» no está disponible"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/IsErrorFunction.java:48
 #, java-format
@@ -857,7 +862,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:323
 #, java-format
 msgid "\"{0}\" is not a supported basic function. "
-msgstr ""
+msgstr "«{0}» no es una función de BASIC que se admita. "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:337
 #, java-format
@@ -883,7 +888,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:367
 #, java-format
 msgid "Function \"{0}\" is used before it was even defined"
-msgstr ""
+msgstr "La función «{0}» se ha usado antes de haberse definido"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:382
 #, java-format
@@ -918,7 +923,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:557
 #, java-format
 msgid "Error in regex \"{0}\""
-msgstr ""
+msgstr "Error en la expresión regular «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:489
 #, java-format
@@ -1003,7 +1008,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:87
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:91
 msgid "Could not open document."
-msgstr ""
+msgstr "No se pudo abrir el documento."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintProgressBar.java:290
 #, java-format
@@ -1026,7 +1031,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:231
 msgid "<None>"
-msgstr ""
+msgstr "<Ninguno>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:241
 #, java-format
@@ -1182,12 +1187,12 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:167
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:119
 msgid "Remove"
-msgstr ""
+msgstr "Quitar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:172
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/AllGroupLineViewsPanel.java:155
 msgid "New"
-msgstr ""
+msgstr "Nuevo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:177
 msgid "New (whole page)"
@@ -1208,15 +1213,15 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:102
 msgid "Insertion"
-msgstr ""
+msgstr "Inserción"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:104
 msgid "Visibility"
-msgstr ""
+msgstr "Visibilidad"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:105
 msgid "Sections"
-msgstr ""
+msgstr "Secciones"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:434
 msgid "Field type"
@@ -1270,7 +1275,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:223
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/AllGroupLineViewsPanel.java:150
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:232
 msgid "New tab"
@@ -1282,11 +1287,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:508
 msgid "Selection"
-msgstr ""
+msgstr "Selección"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:612
 msgid "Label"
-msgstr ""
+msgstr "Etiqueta"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/TextComponentTags.java:190
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/TextComponentTags.java:255
@@ -1300,7 +1305,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/view/OnDemandCardView.java:164
 msgid "Activate"
-msgstr ""
+msgstr "Activar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/model/GroupModel.java:174
 #, java-format
@@ -1314,7 +1319,7 @@ msgstr "Vista de funciones"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelection.java:37
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:81
 msgid "<none>"
-msgstr ""
+msgstr "<ninguno>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelection.java:43
 msgid "<Expert>"
@@ -1334,12 +1339,12 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:221
 msgid "Function"
-msgstr ""
+msgstr "Función"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:169
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:278
 msgid "Function Tester"
-msgstr ""
+msgstr "Probador de funciones"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:317
 msgid "FORMAT(Number MIN \"Zahl\" MAX \"Zahl\")"
@@ -1445,17 +1450,17 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:104
 msgid "Close Editor"
-msgstr ""
+msgstr "Cerrar editor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:197
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:309
 msgid "File"
-msgstr ""
+msgstr "Archivo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:199
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:311
 msgid "Save"
-msgstr ""
+msgstr "Guardar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:210
 msgid "Error while parsing the form description"
@@ -1464,12 +1469,12 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:215
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:185
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:221
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:286
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:309
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:548
@@ -1655,7 +1660,7 @@ msgstr "desconocido"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:708
 msgid "Missing CMD-attribute"
-msgstr ""
+msgstr "Falta el atributo CMD"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommands.java:775
 #, java-format
@@ -1673,10 +1678,8 @@ msgid "STYLE \"{0}\" is unknown."
 msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1131
-#, fuzzy
-#| msgid "Missing attribute FRAG_ID"
 msgid "Missing attribute DB_COLUMN"
-msgstr "Falta el atributo FRAG_ID"
+msgstr "Falta el atributo DB_COLUMN"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1160
 #, java-format
