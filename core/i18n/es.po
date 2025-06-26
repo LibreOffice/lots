@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: 2025-06-26 21:53+0000\n"
-"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
+"Last-Translator: Nicolas Donato <donatonicolas02@gmail.com>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
 "Language: es\n"
@@ -1606,7 +1606,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:481
 msgid "Recipient Selection Tab"
-msgstr ""
+msgstr "Pestaña de selección de destinatarios"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:493
 msgid "Cancel, <-Back, Next->"
