@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2025-06-25 21:50+0000\n"
-"Last-Translator: Nicolas Donato <donatonicolas02@gmail.com>\n"
+"PO-Revision-Date: 2025-06-26 21:53+0000\n"
+"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
 "Language: es\n"
@@ -276,7 +276,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SimpleDataset.java:83
 #, java-format
 msgid "Data set does not know column \"{0}\""
-msgstr ""
+msgstr "El conjunto de datos no reconoce la columna «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:111
 #, java-format
@@ -435,7 +435,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:61
 msgid "Multiple WollMux installations"
-msgstr ""
+msgstr "Instalaciones múltiples de WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnCheckInstallation.java:62
 msgid ""
@@ -499,7 +499,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnFunctionDialog.java:86
 #, java-format
 msgid "Function dialog \"{0}\" is not defined."
-msgstr ""
+msgstr "El diálogo de funciones «{0}» no está definido."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/CantStartDialogException.java:44
 msgid ""
@@ -598,7 +598,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 msgid "Sender could not be copied."
-msgstr ""
+msgstr "No se pudo copiar el remitente."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:382
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:715
@@ -615,11 +615,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "Search results"
-msgstr ""
+msgstr "Resultados de la búsqueda"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "No results."
-msgstr ""
+msgstr "No hay ningún resultado."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderService.java:550
 msgid "Personal sender list could not be updated."
@@ -628,7 +628,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/FileCache.java:131
 #, java-format
 msgid "Cache-File {0} could not be read."
-msgstr ""
+msgstr "No se pudo leer el archivo de antememoria {0}."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:213
 msgid "Mail merge options"
@@ -653,7 +653,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToShowOdtFile.java:61
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToOdtFile.java:64
 msgid "WollMux mail merge"
-msgstr ""
+msgstr "Combinación de correspondencia de WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:161
 msgid "Preparing mail merge"
@@ -677,7 +677,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:855
 msgid "Mail merge"
-msgstr ""
+msgstr "Combinación de correspondencia"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToShowOdtFile.java:62
 msgid "The generated merged document can not be displayed."
@@ -699,7 +699,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:157
 msgid "Invalid recipient address"
-msgstr ""
+msgstr "Dirección de destinatario no válida"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:158
 #, java-format
@@ -714,7 +714,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:166
 msgid "<no subject>"
-msgstr ""
+msgstr "<sin asunto>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:211
 msgid ""
@@ -1054,7 +1054,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:542
 msgid "<Dataset>"
-msgstr ""
+msgstr "<Conjunto de datos>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:716
 msgid ""
@@ -1103,7 +1103,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:91
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:91
 msgid "Please select an area to be marked."
@@ -1227,44 +1227,44 @@ msgstr "Secciones"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:434
 msgid "Field type"
-msgstr ""
+msgstr "Tipo de campo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:469
 msgid "Input list"
-msgstr ""
+msgstr "Lista de entrada"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:496
 msgid "Expandable"
-msgstr ""
+msgstr "Expandible"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:507
 msgid "New value"
-msgstr ""
+msgstr "Valor nuevo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:524
 msgid "Delete value"
-msgstr ""
+msgstr "Eliminar valor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:735
 msgid "Rows number"
-msgstr ""
+msgstr "Número de filas"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:783
 msgid "Automatic word wrapping"
-msgstr ""
+msgstr "Distribución de texto automática"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/model/FormControlModel.java:205
 msgid "Control element"
-msgstr ""
+msgstr "Elemento de control"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/model/FormControlModel.java:666
 #, java-format
 msgid "\"{0}\" is not a correct ID"
-msgstr ""
+msgstr "«{0}» no es un identificador correcto"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlExtViewsPanel.java:73
 msgid "Extra View"
-msgstr ""
+msgstr "Vista adicional"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:203
 msgid "Up"
@@ -1285,7 +1285,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:237
 msgid "New label"
-msgstr ""
+msgstr "Etiqueta nueva"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:508
 msgid "Selection"
@@ -1313,7 +1313,7 @@ msgstr "Activar"
 #, java-format
 msgid "\"{0}\" is not a syntactically correct ID for visibility groups"
 msgstr ""
-"\"{0}\" no es un identificador sintácticamente correcto para los grupos de "
+"«{0}» no es un identificador sintácticamente correcto para los grupos de "
 "visibilidad"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/AllGroupFuncViewsPanel.java:62
@@ -1331,11 +1331,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:86
 msgid "<Code>"
-msgstr ""
+msgstr "<Código>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:92
 msgid "<Value>"
-msgstr ""
+msgstr "<Valor>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:98
 msgid "[not hardwired]"
@@ -1692,11 +1692,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1236
 msgid "Missing attribute ID"
-msgstr ""
+msgstr "Falta el atributo ID"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1348
 msgid "Missing attribute TYPE"
-msgstr ""
+msgstr "Falta el atributo TYPE"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1353
 msgid ""
@@ -1706,7 +1706,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentCommand.java:1461
 msgid "Missing attribute FUNCTION"
-msgstr ""
+msgstr "Falta el atributo FUNCTION"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/MainProcessor.java:116
 msgid "<ERROR: No sender selected!>"
@@ -1804,11 +1804,11 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:182
 msgid "At the insertion point there is already a reference to a text block."
-msgstr ""
+msgstr "En el punto de inserción ya hay una referencia a un bloque de texto."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/TextModule.java:213
 msgid "At the insertion place no text block could be found."
-msgstr ""
+msgstr "En el lugar de inserción no se pudo encontrar algún bloque de texto."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:133
 msgid ""
@@ -1818,6 +1818,11 @@ msgid ""
 "wollmuxbar_standard.conf) is present and check with the wollmux.log if "
 "possibly an error occurred while processing a %include."
 msgstr ""
+"No se pudo leer la sección «Toolbars» de su configuración de WollMux.\n"
+"Por lo tanto, la barra de herramientas WollMux no se puede iniciar. "
+"Compruebe si en su lots.conf el %include para la configuración de la "
+"WollMuxBar (p. ej., wollmuxbar_standard.conf) está presente y revise con el "
+"wollmux.log si se produjo un error al procesar un %include."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:256
 msgid ""
@@ -1913,7 +1918,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:369
 msgid "Could not create a temporary directory for the file download!"
-msgstr ""
+msgstr "No se pudo crear un directorio temporal para la descarga de archivos."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:464
 #, java-format
@@ -1921,6 +1926,9 @@ msgid ""
 "None of the programs configured for the extension \"{0}\" could be started!\n"
 "{1}"
 msgstr ""
+"No se pudo iniciar ninguno de los programas configurados para la extensión "
+"«{0}».\n"
+"{1}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:517
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
