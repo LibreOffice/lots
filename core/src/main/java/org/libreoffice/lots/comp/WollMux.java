@@ -329,24 +329,39 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    *          The dispatch URL of the menu entry to search.
    * @return The index or -1 if no such entry exists.
    */
-  private static int findElementWithCmdURL(UnoList<PropertyValue[]> menu, String cmdUrl)
-  {
-    try
-    {
-      for (int i = 0; i < menu.size(); ++i)
-      {
-        UnoProps desc = new UnoProps(menu.get(i));
-        for (PropertyValue prop : desc.getProps())
-        {
-          if (UnoProperty.COMMAND_URL.equals(prop.Name) && cmdUrl.equals(prop.Value))
-            return i;
-        }
-      }
-    } catch (Exception e)
-    {
-      LOGGER.trace("", e);
+  private static int findElementWithCmdURL(UnoList<PropertyValue[]> menu, String cmdUrl) {
+    if (menu == null || cmdUrl == null) {
+        LOGGER.warn("findElementWithCmdURL called with null arguments: menu={}, cmdUrl={}", menu, cmdUrl);
+        return -1;
     }
+
+    try {
+        for (int i = 0; i < menu.size(); ++i) {
+            PropertyValue[] propsArray = menu.get(i);
+            if (propsArray == null) {
+                LOGGER.debug("Skipping null PropertyValue[] at index {}", i);
+                continue;
+            }
+
+            UnoProps desc = new UnoProps(propsArray);
+
+            for (PropertyValue prop : desc.getProps()) {
+                if (UnoProperty.COMMAND_URL.equals(prop.Name) &&
+                    Objects.equals(cmdUrl, prop.Value)) {
+                    return i;
+                }
+            }
+        }
+    } catch (RuntimeException e) {
+        // Catch only unchecked exceptions that might indicate data issues
+        LOGGER.error("Unexpected runtime error while searching for cmdUrl={} in menu", cmdUrl, e);
+        throw e; // rethrow to avoid hiding critical bugs
+    } catch (Exception e) {
+        // Catch and log checked exceptions (e.g. UNO bridge issues)
+        LOGGER.error("Error while searching for cmdUrl={} in menu", cmdUrl, e);
+    }
+
     return -1;
-  }
+}
 
 }
