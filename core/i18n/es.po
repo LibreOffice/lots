@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2025-06-28 08:53+0000\n"
+"PO-Revision-Date: 2025-11-06 08:54+0000\n"
 "Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
@@ -258,7 +258,7 @@ msgstr "El conjunto de datos tiene más campos que el esquema"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:78
 #, java-format
 msgid "\"{0}\" of data source \"{1}\" is missing."
-msgstr ""
+msgstr "Falta «{0}» del origen de datos «{1}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:127
 #, java-format
@@ -291,7 +291,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:136
 #, java-format
 msgid "Collision with column \"{0}\" from data source \"{1}\""
-msgstr ""
+msgstr "Colisión con la columna «{0}» del origen de datos «{1}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:145
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:161
@@ -348,7 +348,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:208
 msgid "Section 'Columns' is missing."
-msgstr ""
+msgstr "Falta la sección «Columns»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
 msgid "Specification of DB_COLUMN is missing"
@@ -401,23 +401,27 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1472
 #, java-format
 msgid "Error in data source definition of \"{0}\": "
-msgstr ""
+msgstr "Error en la definición de origen de datos de «{0}»: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:41
 msgid "Create error information"
-msgstr ""
+msgstr "Crear información sobre el error"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:47
 #, java-format
 msgid ""
 "The WollMux error information has been successfully written to file \"{0}\"."
 msgstr ""
+"La información sobre el error de WollMux se ha guardado correctamente en el "
+"archivo «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:52
 msgid ""
 "The WollMux error information could not be written. For details have a look "
 "at the file wollmux.log!"
 msgstr ""
+"No se pudo guardar la información sobre el error de WollMux. Para obtener "
+"detalles, revise el archivo wollmux.log."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/WollMuxEvent.java:98
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:144
@@ -448,6 +452,14 @@ msgid ""
 "More information regarding the affected paths can be found in the wollmux."
 "log."
 msgstr ""
+"Se detectó una instalación de WollMux tanto a nivel del sistema como local ("
+"o los restos de una desinstalación incompleta).\n"
+"Esta constelación puede provocar errores poco evidentes.\n"
+"\n"
+"Elimine una de las dos instalaciones.\n"
+"\n"
+"Encontrará más información sobre las rutas afectadas en el archivo "
+"wollmux.log."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnJumpToMark.java:99
 msgid "WollMux"
@@ -486,7 +498,7 @@ msgstr "No se pudo abrir la plantilla con el URL «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
 msgid "Insertion succesful"
-msgstr ""
+msgstr "Inserción correcta"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:77
 msgid "The text block reference was inserted."
@@ -494,7 +506,7 @@ msgstr "Se insertó la referencia al bloque de texto."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnTextbausteinEinfuegen.java:82
 msgid "Insertion failed"
-msgstr ""
+msgstr "Falló la inserción"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnFunctionDialog.java:86
 #, java-format
@@ -513,7 +525,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:158
 msgid "Save Error"
-msgstr ""
+msgstr "Error de guardado"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnSaveAs.java:159
 #, java-format
@@ -538,7 +550,7 @@ msgstr "Créditos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:67
 msgid "Select sender"
-msgstr ""
+msgstr "Seleccionar remitente"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:82
 #, java-format
@@ -549,10 +561,16 @@ msgid ""
 "If this problem persists, you might want to delete these data sets from your "
 "sender list and add them again!"
 msgstr ""
+"Los conjuntos de datos siguientes no se pudieron actualizar desde la base de "
+"datos:\n"
+"\n"
+"{0}\n"
+"Si el problema persiste, tal vez desee eliminar estos conjuntos de datos de "
+"su lista de remitentes y volver a añadirlos."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:85
 msgid "WollMux Info"
-msgstr ""
+msgstr "Información sobre WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/ByJavaPropertyFinder.java:46
 #, java-format
@@ -570,12 +588,14 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:275
 msgid "Personal sender list"
-msgstr ""
+msgstr "Lista personal de remitentes"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:276
 msgid ""
 "Data record already exists in the sender list, save data record again anyway?"
 msgstr ""
+"El registro ya existe en la lista de remitentes. ¿Quiere volver a guardar el "
+"registro de datos de todos modos?"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:293
 msgid "Missing ID"
@@ -586,6 +606,8 @@ msgid ""
 "The record does not contain a valid OID and therefore will not be included "
 "in the personal sender list."
 msgstr ""
+"El registro no contiene un OID válido y por tanto no se incluirá en la lista "
+"personal de remitentes."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:311
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:73
@@ -594,7 +616,7 @@ msgstr "Copiar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 msgid "Error copying sender"
-msgstr ""
+msgstr "Error al copiar el remitente"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 msgid "Sender could not be copied."
@@ -612,6 +634,11 @@ msgid ""
 "search term matching too many results.\n"
 "Please try another, more precise search query."
 msgstr ""
+"El procesamiento de su consulta de búsqueda ha tardado demasiado tiempo y, "
+"por tanto, se ha cancelado.\n"
+"El motivo podría ser un problema con el origen de datos o que el término de "
+"búsqueda utilizado haya dado demasiados resultados.\n"
+"Intente realizar otra consulta de búsqueda más precisa."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "Search results"
@@ -623,7 +650,7 @@ msgstr "No hay ningún resultado."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderService.java:550
 msgid "Personal sender list could not be updated."
-msgstr ""
+msgstr "No se pudo actualizar la lista personal de remitentes."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/FileCache.java:131
 #, java-format
@@ -636,7 +663,7 @@ msgstr "Opciones de combinación de correspondencia"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:224
 msgid "Mail merge failed."
-msgstr ""
+msgstr "Falló la combinación de correspondencia."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:283
 msgid "Error during printing"
@@ -665,7 +692,7 @@ msgstr "Generando el documento entero"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:263
 msgid "Unfortunately the full document could not be created."
-msgstr ""
+msgstr "No se pudo crear el documento completo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:287
 msgid "OOo-Based-MailMerge: cannot generate simulation data source."
@@ -732,7 +759,7 @@ msgstr "Columna"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:447
 msgid "Assignment (initial)"
-msgstr ""
+msgstr "Asignación (inicial)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:447
 msgid "Add columns"
@@ -765,11 +792,11 @@ msgstr "Previsualización"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:343
 msgid "Choose data source"
-msgstr ""
+msgstr "Elija el origen de datos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:352
 msgid "File ..."
-msgstr ""
+msgstr "Archivo…"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:357
 msgid "New Calc Sheet"
@@ -777,7 +804,7 @@ msgstr "Hoja de Calc nueva"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:362
 msgid "Database ..."
-msgstr ""
+msgstr "Base de datos…"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:382
 msgid "Edit sheet"
@@ -801,7 +828,7 @@ msgstr "Campo especial"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeGUI.java:449
 msgid "Print ..."
-msgstr ""
+msgstr "Imprimir…"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunction.java:119
 #, java-format
@@ -853,7 +880,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/MultiFunction.java:59
 #, java-format
 msgid "Function {0} requires at least one parameter"
-msgstr ""
+msgstr "La función {0} requiere un parámetro al menos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:317
 msgid "Opening bracket without preceding function name found. "
@@ -867,7 +894,7 @@ msgstr "«{0}» no es una función de BASIC que se admita. "
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:337
 #, java-format
 msgid "Text at error position: {0}"
-msgstr ""
+msgstr "Texto en la posición del error: {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:347
 msgid "Function of type \"BIND\" requires exactly one sub element FUNCTION"
@@ -1064,6 +1091,12 @@ msgid ""
 "search term matching too many results.\n"
 "Please try another, more precise search query."
 msgstr ""
+"El procesamiento de su consulta de búsqueda ha tardado demasiado tiempo y, "
+"por tanto, se ha cancelado.\n"
+"El motivo podría ser un problema con el origen de datos o que el término de "
+"búsqueda utilizado\n"
+"haya dado demasiados resultados.\n"
+"Intente realizar otra consulta de búsqueda más precisa."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:35
 msgid "will always be printed"
@@ -1107,12 +1140,12 @@ msgstr "Error"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:91
 msgid "Please select an area to be marked."
-msgstr ""
+msgstr "Seleccione un área para marcarla."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:172
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:210
 msgid "Block is no longer marked"
-msgstr ""
+msgstr "El bloque ya no está marcado"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:173
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:211
@@ -1123,7 +1156,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:177
 msgid "Different blocks"
-msgstr ""
+msgstr "Bloques diferentes"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:178
 msgid ""
@@ -1132,6 +1165,11 @@ msgid ""
 "This can lead to unexpected behavior and show a warning dialog\n"
 " when opening the file."
 msgstr ""
+"El bloque seleccionado ya contiene otro marcador.\n"
+"¿Quiere crear realmente el bloque nuevo?\n"
+"Esto puede provocar un comportamiento inesperado y mostrar un diálogo de "
+"alerta\n"
+" al abrir el archivo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/events/OnMarkBlock.java:271
 msgid "Block was marked"
@@ -1198,7 +1236,7 @@ msgstr "Nuevo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:177
 msgid "New (whole page)"
-msgstr ""
+msgstr "Nuevo (página entera)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/section/AllSectionLineViewsPanel.java:302
 msgid "Visibility Section"
@@ -1251,7 +1289,7 @@ msgstr "Número de filas"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:783
 msgid "Automatic word wrapping"
-msgstr "Distribución de texto automática"
+msgstr "Ajuste de texto automático"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/model/FormControlModel.java:205
 msgid "Control element"
@@ -1268,11 +1306,11 @@ msgstr "Vista adicional"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:203
 msgid "Up"
-msgstr ""
+msgstr "Arriba"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:213
 msgid "Down"
-msgstr ""
+msgstr "Abajo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:223
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/group/AllGroupLineViewsPanel.java:150
@@ -1281,7 +1319,7 @@ msgstr "Eliminar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:232
 msgid "New tab"
-msgstr ""
+msgstr "Pestaña nueva"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:237
 msgid "New label"
@@ -1442,15 +1480,15 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:384
 msgid "Evaluate"
-msgstr ""
+msgstr "Calcular"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:421
 msgid "Illegal or missing parameter!"
-msgstr ""
+msgstr "Parámetro no válido o faltante."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:103
 msgid "Close the Editor without saving?"
-msgstr ""
+msgstr "¿Quiere cerrar el editor sin guardar?"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:104
 msgid "Close Editor"
@@ -1468,7 +1506,7 @@ msgstr "Guardar"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:210
 msgid "Error while parsing the form description"
-msgstr ""
+msgstr "Error al procesar la descripción del formulario"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:215
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:185
@@ -1488,7 +1526,7 @@ msgstr "Buscar..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ConfigEditor.java:331
 msgid "Replace..."
-msgstr ""
+msgstr "Reemplazar…"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kController.java:170
 msgid "Generated by FormularMax 4000"
@@ -1590,11 +1628,11 @@ msgstr "Salir"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:424
 msgid "More than one Tab section"
-msgstr ""
+msgstr "Más de una sección de pestañas"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:443
 msgid "More than one Buttons section"
-msgstr ""
+msgstr "Más de una sección de botones"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:446
 msgid "No Tab or Buttons section"
@@ -1610,15 +1648,15 @@ msgstr "Pestaña de selección de destinatarios"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:493
 msgid "Cancel, <-Back, Next->"
-msgstr ""
+msgstr "Cancelar, < Anterior, Siguiente >"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:504
 msgid "Cancel, <-Back, PDF, Print"
-msgstr ""
+msgstr "Cancelar, < Anterior, PDF, Imprimir"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:516
 msgid "Cancel, <-Back, Send as Email, Print"
-msgstr ""
+msgstr "Cancelar, < Anterior, Enviar por correo, Imprimir"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:97
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:135
@@ -1644,7 +1682,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/VisibleTextFragmentList.java:130
 #, java-format
 msgid "Infinite loop after replacing the variable in URL \"{0}\"."
-msgstr ""
+msgstr "Bucle infinito tras reemplazar la variable en el URL «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:151
 msgid "!!!CHECK!!!"
@@ -1710,7 +1748,7 @@ msgstr "Falta el atributo FUNCTION"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/MainProcessor.java:116
 msgid "<ERROR: No sender selected!>"
-msgstr ""
+msgstr "<ERROR: no se seleccionó ningún remitente.>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:190
 #, java-format
@@ -1748,7 +1786,7 @@ msgstr "Póngase en contacto con el personal de sistemas."
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:176
 #, java-format
 msgid "Error at document command \"{0}\""
-msgstr ""
+msgstr "Error en la orden del documento «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:190
 msgid "<ERROR:  >"
@@ -1838,13 +1876,15 @@ msgstr "Configuración incorrecta"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:861
 msgid "Multi-forms no longer supported"
-msgstr ""
+msgstr "Ya no se admiten los multiformularios"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:862
 msgid ""
 "Multi-forms are no longer supported. You need to open and fill each form "
 "individually."
 msgstr ""
+"Los formularios múltiples ya no son compatibles. Debe abrir y rellenar cada "
+"formulario de manera individual."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:902
 #, java-format
@@ -1852,6 +1892,8 @@ msgid ""
 "Error during download of file:\n"
 "{0}"
 msgstr ""
+"Error al descargar el archivo:\n"
+"{0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sidebar/WollMuxSidebarContent.java:934
 #, java-format
@@ -1873,6 +1915,10 @@ msgid ""
 "Please close Wollmux and LibreOffice and make sure no 'soffice.bin' "
 "processes are still running."
 msgstr ""
+"Hay que leer nuevamente la configuración de WollMux.\n"
+"\n"
+"Cierre WollMux y LibreOffice y cerciórese de que no queden procesos "
+"«soffice.bin» en ejecución."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:229
 msgid "About WollMux"
@@ -1880,7 +1926,7 @@ msgstr "Acerca de WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:240
 msgid "none loaded"
-msgstr ""
+msgstr "no se cargó nada"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:402
 #, java-format
