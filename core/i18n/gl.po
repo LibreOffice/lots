@@ -218,6 +218,8 @@ msgid ""
 "Error in Defition of data source {0}: Column \"{1}\" was defined twice in "
 "schema"
 msgstr ""
+"Erro na definición da fonte de datos {0}: A columna \"{1}\" definiuse dúas "
+"veces no esquema"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:107
 #, java-format
