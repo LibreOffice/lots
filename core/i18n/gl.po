@@ -237,7 +237,7 @@ msgstr "Erro na Conf-file da fonte de datos {0}: Erro na URL \"{1}\": "
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:139
 #, java-format
 msgid "Error in Conf-file of data source {0}: "
-msgstr ""
+msgstr "Erro na Conf-file da fonte de datos {0}: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:144
 #, fuzzy, java-format
