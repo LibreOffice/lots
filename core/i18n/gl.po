@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: 2025-12-31 11:32+0000\n"
-"Last-Translator: Xosé <xosecalvo@gmail.com>\n"
+"Last-Translator: Adrián Ramos García <adrian.ramos.garcia.93@gmail.com>\n"
 "Language-Team: Galician <https://translations.documentfoundation.org/"
 "projects/wollmux/wollmux/gl/>\n"
 "Language: gl\n"
@@ -225,6 +225,8 @@ msgstr ""
 #, java-format
 msgid "Error in Conf-File of data source {0}: Section 'Schema' is missing"
 msgstr ""
+"Erro no ficheiro de configuración da fonte de datos {0}: falta a sección "
+"\"Esquema\""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:113
 #, java-format
