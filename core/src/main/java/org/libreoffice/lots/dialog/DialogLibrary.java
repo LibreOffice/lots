@@ -28,7 +28,7 @@ import java.util.Map;
 import org.libreoffice.lots.util.L;
 
 /**
- * Eine Bibliothek von benannten Dialogs.
+ * A library of named dialogs.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DialogLibrary
@@ -38,7 +38,7 @@ public class DialogLibrary
 
 
   /**
-   * Erzeugt eine leere Dialogsbibliothek.
+   * Creates an empty dialog library.
    */
   public DialogLibrary()
   {
@@ -46,9 +46,9 @@ public class DialogLibrary
   }
 
   /**
-   * Erzeugt eine Dialogsbibliothek, die baselib referenziert (nicht kopiert!).
-   * baselib wird immer dann befragt, wenn die Dialogsbibliothek selbst keinen
-   * Dialog des entsprechenden Namens enthält.
+   * Creates a dialog library that references (not copies!) baselib.
+   * baselib is always consulted if the dialog library itself does not have one
+   * Dialog contains the corresponding name.
    * @param baselib
    */
   public DialogLibrary(DialogLibrary baselib)
@@ -57,7 +57,7 @@ public class DialogLibrary
   }
 
   /**
-   * Fügt dialog dieser Dialogsbibliothek unter dem Namen dlgName hinzu.
+   * Adds dialog to this dialog library under the name dlg name.
    */
   public void add(String dlgName, Dialog dialog)
   {
@@ -69,11 +69,11 @@ public class DialogLibrary
   }
 
   /**
-   * Liefert den Dialog namens dlgName zurück oder null, falls kein Dialog
-   * mit diesem Namen bekannt ist. Wurde die Dialogsbibliothek mit einer
-   * Referenz auf eine andere Bibliothek initialisiert, so wird diese
-   * befragt, falls die Dialogsbibliothek selbst keinen Dialog des entsprechenden
-   * Namens kennt.
+   *  Returns the dialog named dlgName or null if no dialog
+   *  known by that name. Was the dialog library with a
+   *  Initialized reference to another library, this one will be used
+   *  queried if the dialog library itself does not have a dialog of the corresponding
+   *  Knows name.
    */
   public Dialog get(String dlgName)
   {
