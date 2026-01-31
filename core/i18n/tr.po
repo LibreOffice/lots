@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2024-06-21 08:36+0000\n"
-"Last-Translator: İnci Tuner <incituner@gmail.com>\n"
+"PO-Revision-Date: 2026-02-01 23:30+0000\n"
+"Last-Translator: Muhammet Kara <kara@libreoffice.org>\n"
 "Language-Team: Turkish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/tr/>\n"
 "Language: tr\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.4.3\n"
+"X-Generator: Weblate 5.10.1\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -572,12 +572,12 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:85
 msgid "WollMux Info"
-msgstr ""
+msgstr "WollMux Bilgisi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/ByJavaPropertyFinder.java:46
 #, java-format
 msgid "Value for JavaProperty \"{0}\" could not be determined:"
-msgstr ""
+msgstr "JavaProperty \"{0}\" değeri belirlenemedi:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/Sender.java:204
 msgid "Override can not be null"
@@ -590,7 +590,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:275
 msgid "Personal sender list"
-msgstr ""
+msgstr "Kişisel gönderici listesi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:276
 msgid ""
@@ -599,7 +599,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:293
 msgid "Missing ID"
-msgstr ""
+msgstr "Eksik Kimlik No (ID)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:294
 msgid ""
@@ -610,20 +610,20 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:311
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:73
 msgid "Copy"
-msgstr ""
+msgstr "Kopyala"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 msgid "Error copying sender"
-msgstr ""
+msgstr "Göndericiyi kopyalama hatası"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:316
 msgid "Sender could not be copied."
-msgstr ""
+msgstr "Gönderici kopyalanamadı."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:382
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:715
 msgid "Search timeout"
-msgstr ""
+msgstr "Arama zaman aşımı"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:383
 msgid ""
@@ -635,15 +635,15 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "Search results"
-msgstr ""
+msgstr "Arama sonuçları"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:390
 msgid "No results."
-msgstr ""
+msgstr "Sonuç yok."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderService.java:550
 msgid "Personal sender list could not be updated."
-msgstr ""
+msgstr "Kişisel gönderici listesi güncellenemedi."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/FileCache.java:131
 #, java-format
@@ -652,15 +652,15 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:213
 msgid "Mail merge options"
-msgstr ""
+msgstr "Posta birleştirme seçenekleri"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:224
 msgid "Mail merge failed."
-msgstr ""
+msgstr "Posta birleştirme başarısız oldu."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:283
 msgid "Error during printing"
-msgstr ""
+msgstr "Yazdırma sırasında hata oluştu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:284
 msgid ""
