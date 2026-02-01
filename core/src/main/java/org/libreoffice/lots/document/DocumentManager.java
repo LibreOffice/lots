@@ -50,7 +50,7 @@ import org.libreoffice.lots.form.control.FormController;
 import org.libreoffice.lots.former.FormularMax4kController;
 
 /**
- * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
+ * Manages information about all open OOo documents.
  *
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -60,28 +60,28 @@ public class DocumentManager
   private static final Logger LOGGER = LoggerFactory.getLogger(DocumentManager.class);
 
   /**
-   * Attributname zur Einstellung des Speichermodus für persistente Daten
+   * Attribute name for setting the storage mode for persistent data
    */
   private static final String PERSISTENT_DATA_MODE = "PERSISTENT_DATA_MODE";
   /**
-   * Wert 'annotation' des Attributs PERSISTENT_DATA_MODE
+   * Wert 'annotation' does Attribute PERSISTENT DATA MODE
    */
   private static final String PERSISTENT_DATA_MODE_ANNOTATION = "annotation";
   /**
-   * Wert 'transition' des Attributs PERSISTENT_DATA_MODE
+   * Wert 'transition' of PERSISTENT_DATA_MODE Attributes
    */
   private static final String PERSISTENT_DATA_MODE_TRANSITION = "transition";
   /**
-   * Wert 'rdf' des Attributs PERSISTENT_DATA_MODE
+   * Wert 'rdf' of PERSISTENT_DATA_MODE Attributes
    */
   private static final String PERSISTENT_DATA_MODE_RDF = "rdf";
   /**
-   * Wert 'rdfReadLegacy' des Attributs PERSISTENT_DATA_MODE
+   * Wert 'rdfReadLegacy' des Attributes PERSISTENT DATA MODE
    */
   private static final String PERSISTENT_DATA_MODE_RDFREADLEGACY = "rdfReadLegacy";
 
   /**
-   * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
+   * Manages information about all open OOo documents.
    */
   private static DocumentManager docManager;
 
@@ -90,8 +90,8 @@ public class DocumentManager
   private Map<XTextDocument, FormController> controller = new HashMap<>();
 
   /**
-   * Enthält alle registrierten XEventListener, die bei Statusänderungen der
-   * Dokumentbearbeitung informiert werden.
+   * Contains all registered XEventListeners that are activated when the status changes
+   * Document processing to be informed.
    */
   private List<XEventListener> registeredDocumentEventListener;
 
@@ -100,8 +100,8 @@ public class DocumentManager
   }
 
   /**
-   * Fügt compo den gemanageten Objekten hinzu, wobei die für Textdokumente
-   * relevanten Informationen hinterlegt werden.
+   * Adds compo to managed objects, with those for text documents
+   * Relevant information is stored.
    */
   public void addTextDocument(XTextDocument compo)
   {
@@ -116,9 +116,9 @@ public class DocumentManager
   }
 
   /**
-   * Fügt compo den gemanageten Objekten hinzu, ohne weitere Informationen zu
-   * hinterlegen. compo ist also ein Objekt, an dem für den WollMux nur interessant
-   * ist, dass es existiert.
+   * Adds compo to the managed objects without further information
+   * deposit. So compo is an object that is only interesting for WollMux
+   * is that it existst.
    */
   public synchronized void add(XComponent compo)
   {
@@ -126,12 +126,12 @@ public class DocumentManager
   }
 
   /**
-   * Entfernt alle Informationen über compo (falls vorhanden) aus diesem Manager.
+   * Removes all information about compo (if any) from this manager.
    *
-   * compo wird hier zur Optimierung nur als Object erwartet (spart einen
-   * vorangehenden UNO-Cast auf XComponent).
+   * compo is only expected as an object here for optimization (saves a
+   * previous UNO cast on XComponent).
    *
-   * @return die entfernten Informationen oder null falls keine vorhanden.
+   * @return the information removed or null if none exists.
    */
   public synchronized Info remove(Object compo)
   {
@@ -139,8 +139,8 @@ public class DocumentManager
   }
 
   /**
-   * Liefert die über dieses Objekt bekannten Informationen oder null, falls das
-   * Objekt dem Manager nicht bekannt ist.
+   * Returns the information known about this object, or null if that
+   * Object unknown to manager.
    */
   public synchronized Info getInfo(XComponent compo)
   {
@@ -148,8 +148,8 @@ public class DocumentManager
   }
 
   /**
-   * Fügt infoCollector alle Dokumente hinzu für die das
-   * OnWollMuxProcessingFinished-Event bereits verschickt wurde.
+   * Adds all documents to infoCollector for the das
+   * OnWollMuxProcessingFinished event has already been sent.
    */
   public synchronized void getProcessedDocuments(Collection<XComponent> infoCollector)
   {
@@ -166,9 +166,9 @@ public class DocumentManager
   }
 
   /**
-   * Setzt in den Informationen zu compo (falls dem DocumentManager bekannt) das Flag
-   * das anzeigt, dass das OnWollMuxProcessingFinished-Event für diese Komponente
-   * bereits verschickt wurde.
+   * Sets the flag in the information about compo (if known to the DocumentManager).
+   * indicating that the OnWollMuxProcessingFinished event for this component
+   * has already been sent.
    *
    * @param compo
    */
@@ -181,10 +181,10 @@ public class DocumentManager
   }
 
   /**
-   * Liefert einen Iterator auf alle registrierten XEventListener-Objekte, die über Änderungen am
-   * Status der Dokumentverarbeitung informiert werden sollen.
+   * Returns an iterator to all registered XEventListener objects that are to
+   * be informed about changes to the document processing status.
    *
-   * @return Liste aller registrierten XEventListener-Objekte.
+   * @return List of all registered XEventListener objects.
    */
   public synchronized List<XEventListener> getDocumentEventListener()
   {
@@ -192,15 +192,14 @@ public class DocumentManager
   }
 
   /**
-   * Diese Methode registriert einen XEventListener, der Nachrichten empfängt wenn
-   * sich der Status der Dokumentbearbeitung ändert (z.B. wenn ein Dokument
-   * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
-   * XEventListenener-Instanzen, die bereits registriert wurden.
-   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * This method registers an XEventListener that receives messages 
+   * when the document processing status changes (e.g., when a document has been fully edited/expanded). 
+   * The method ignores all XEventListener instances that have already been registered. 
+   * Therefore, it is not possible to register the same instance multiple times.
    *
-   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
-   * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
-   * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
+   * Caution: This method should not be called directly from a UNO service; instead,
+   * every call must go through the EventHandler. 
+   * That's why the WollMuxSingleton does not export the XEventBroadcaster interface.
    */
   public synchronized void addDocumentEventListener(XEventListener listener)
   {
@@ -222,12 +221,11 @@ public class DocumentManager
   }
 
   /**
-   * Diese Methode deregistriert einen XEventListener wenn er bereits registriert
-   * war.
+   * This method deregisters an XEventListener if it was already registered.
    *
-   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
-   * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
-   * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
+   * Caution: This method should not be called directly from a UNO service; 
+   * instead, every call must go through the EventHandler. 
+   * That's why the WollMuxSingleton does not export the XEventBroadcaster interface.
    */
   public synchronized void removeDocumentEventListener(XEventListener listener)
   {
@@ -243,10 +241,10 @@ public class DocumentManager
   }
 
   /**
-   * Liefert die zu diesem Dokument zugehörige FormularGUI, falls dem TextDocumentModel die Existent
-   * einer FormGUI über setFormGUI(...) mitgeteilt wurde - andernfalls wird null zurück geliefert.
+   * Returns the associated FormGUI for this document, if the TextDocumentModel 
+   * has been informed of the existence of a FormGUI through setFormGUI(...); otherwise, null is returned.
    *
-   * @return Die FormularGUI des Formulardokuments oder null
+   * @return The FormGUI of the form document, or null
    */
   public synchronized FormController getFormController(XTextDocument doc)
   {
@@ -254,9 +252,9 @@ public class DocumentManager
   }
 
   /**
-   * Gibt dem TextDocumentModel die Existent der FormularGUI formGUI bekannt und wird vom
-   * DocumentCommandInterpreter in der Methode processFormCommands() gestartet hat, falls das
-   * Dokument ein Formulardokument ist.
+   * Announces the existence of the FormGUI 'formGUI' to the TextDocumentModel 
+   * and is invoked by the DocumentCommandInterpreter in the method processFormCommands() 
+   * if the document is a form documentt.
    *
    * @param doc
    * @param formModel
@@ -267,8 +265,7 @@ public class DocumentManager
   }
 
   /**
-   * Setzt die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
-   * FormularMax4000.
+   * Sets the instance of the currently open FormularMax4000 associated with this document.
    *
    * @param max
    */
@@ -278,10 +275,10 @@ public class DocumentManager
   }
 
   /**
-   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden FormularMax4000
-   * zurück, oder null, falls kein FormularMax gestartet wurde.
+   * Returns the instance of the currently open FormularMax4000 associated with this document, 
+   * or null if no FormularMax has been started.
    *
-   * @return Den FormularMax4000 oder null.
+   * @return The FormularMax4000 or null.
    */
   public synchronized FormularMax4kController getCurrentFormularMax4000(XTextDocument doc)
   {
@@ -303,14 +300,13 @@ public class DocumentManager
   }
 
   /**
-   * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
-   * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt und das
-   * neu erzeugte zurück geliefert.
+   * Returns the current TextDocumentModel for the given XTextDocument 'doc'; 
+   * if there is no existing TextDocumentModel for 'doc', 
+   * one is created and the newly created one is returned.
    *
    * @param doc
-   *          Das XTextDocument, zu dem das zugehörige TextDocumentModel
-   *          zurückgeliefert werden soll.
-   * @return Das zu doc zugehörige TextDocumentModel.
+   *          The XTextDocument for which the associated TextDocumentModel should be returned.
+   * @return The TextDocumentModel associated with 'doc'.
    */
   public static TextDocumentController getTextDocumentController(XTextDocument doc)
   {
@@ -320,7 +316,7 @@ public class DocumentManager
       LOGGER.error("Irgendwer will hier ein TextDocumentModel für ein Objekt was der DocumentManager nicht kennt. "
           + "Das sollte nicht passieren!", new Exception());
 
-      // Wir versuchen trotzdem sinnvoll weiterzumachen.
+      // We are still trying to proceed sensibly.
       getDocumentManager().addTextDocument(doc);
       info = getDocumentManager().getInfo(doc);
     }
@@ -350,7 +346,7 @@ public class DocumentManager
   }
 
   /**
-   * Liefert eine Referenz auf den von diesem WollMux verwendeten
+   * Returns a reference to the one used by this WollMux.
    * {@link DocumentManager}.
    */
   public static DocumentManager getDocumentManager()
@@ -364,14 +360,12 @@ public class DocumentManager
   public static class Info
   {
     /**
-     * Gibt an ob für das Dokument bereits ein OnWollMuxProcessingFinished-Event an
-     * die Listener verschickt wurde.
+     * Indicates whether an OnWollMuxProcessingFinished event has already been sent to the listeners for the document.
      */
     private boolean processingFinished = false;
 
     /**
-     * Liefert true gdw für das Dokument bereits ein
-     * OnWollMuxProcessingFinished-Event an die Listener verschickt wurde.
+     * Returns true if an OnWollMuxProcessingFinished event has already been sent to the listeners for the document.
      */
     public boolean isProcessingFinished()
     {
@@ -379,11 +373,10 @@ public class DocumentManager
     }
 
     /**
-     * Liefert das zu diesem Dokument gehörige TextDocumentModel. Falls es noch nicht
-     * angelegt wurde, wird es angelegt.
+     * Returns the TextDocumentModel associated with this document. If it has not been created yet, it will be created.
      *
      * @throws UnsupportedOperationException
-     *           falls das Dokument kein TextDocument ist.
+     *           If the document is not a TextDocument.
      */
     public TextDocumentController getTextDocumentController()
     {
@@ -391,8 +384,7 @@ public class DocumentManager
     }
 
     /**
-     * Liefert true gdw dieses Dokument ein TextDocumentModel zugeordnet haben kann
-     * UND ein solches auch bereits angelegt wurde.
+     * Returns true if this document can be associated with a TextDocumentModel and one has already been created.
      */
     public boolean hasTextDocumentModel()
     {
@@ -400,7 +392,7 @@ public class DocumentManager
     }
 
     /**
-     * Setzt das Flag, das mit {@link #isProcessingFinished()} abgefragt wird auf
+     * Sets the flag queried with {@link #isProcessingFinished()}
      * true.
      */
     private void setProcessingFinished()
@@ -451,8 +443,8 @@ public class DocumentManager
   }
 
   /**
-   * Ruft die Dispose-Methoden von allen aktiven, dem TextDocumentModel zugeordneten
-   * Dialogen auf und gibt den Speicher des TextDocumentModels frei.
+   * Invokes the Dispose methods of all active dialogs associated with the 
+   * TextDocumentModel and releases the memory of the TextDocumentModel.
    */
   public synchronized void dispose(XTextDocument doc)
   {
@@ -466,16 +458,14 @@ public class DocumentManager
   }
 
   /**
-   * Liefert abhängig von der Konfigurationseinstellung PERSISTENT_DATA_MODE
-   * (annotation|transition|rdfReadLegacy|rdf) den dazugehörigen PersistentDataContainer für das
-   * Dokument doc.
+   * Depending on the configuration setting PERSISTENT_DATA_MODE (annotation|transition|rdfReadLegacy|rdf), 
+   * it returns the corresponding PersistentDataContainer for the document 'doc'.
    *
-   * Die folgende Aufstellung zeigt das Verhalten der verschiedenen Einstellungen bezüglich der
-   * möglichen Kombinationen von Metadaten in den Ausgangsdokumenten und der Aktualisierung der
-   * Metadaten in den Ergebnisdokumenten. Ein "*" symbolisiert dabei, welcher Metadatencontainer
-   * jeweils aktuell ist bzw. bei Dokumentänderungen aktualisiert wird.
+   * The following table illustrates the behavior of different settings regarding the possible 
+   * combinations of metadata in the source documents and the update of metadata in the result documents. 
+   * An "*" symbolizes which metadata container is currently up-to-date or updated when document changes occur.
    *
-   * Ausgangsdokument -&gt; bearbeitet durch -&gt; Ergebnisdokument
+   * source document -&gt; Edited by -&gt; Results document
    *
    * [N*] -&gt; annotation-Mode (WollMux-Alt) -&gt; [N*]
    *
@@ -483,7 +473,7 @@ public class DocumentManager
    *
    * [N*] -&gt; rdfReadLegacy-Mode -&gt; [R*]
    *
-   * [N*] -&gt; rdf-Mode: NICHT UNTERSTÜTZT
+   * [N*] -&gt; rdf-Mode: NOT SUPPORTED
    *
    * [N*R*] -&gt; annotation-Mode (WollMux-Alt) -&gt; [N*R]
    *
@@ -499,17 +489,17 @@ public class DocumentManager
    *
    * [N*R] -&gt; rdfReadLegacy-Mode -&gt; [R*]
    *
-   * [N*R] -&gt; rdf-Mode: NICHT UNTERSTÜTZT
+   * [N*R] -&gt; rdf-Mode: NOT SUPPORTED
    *
-   * [NR*] -&gt; annotation-Mode (WollMux-Alt) : NICHT UNTERSTÜTZT
+   * [NR*] -&gt; annotation-Mode (WollMux-Alt) : NOT SUPPORTED
    *
-   * [NR*] -&gt; transition-Mode: NICHT UNTERSTÜTZT
+   * [NR*] -&gt; transition-Mode: NOT SUPPORTED
    *
-   * [NR*] -&gt; rdfReadLegacy-Mode: NICHT UNTERSTÜTZT
+   * [NR*] -&gt; rdfReadLegacy-Mode: NOT SUPPORTED
    *
    * [NR*] -&gt; rdf -&gt; [NR*]
    *
-   * [R*] -&gt; annotation-Mode (WollMux-Alt): NICHT UNTERSTÜTZT
+   * [R*] -&gt; annotation-Mode (WollMux-Alt): NOT SUPPORTED
    *
    * [R*] -&gt; transition-Mode -&gt; [N*R*]
    *
@@ -517,8 +507,8 @@ public class DocumentManager
    *
    * [R*] -&gt; rdf-Mode -&gt; [R*]
    *
-   * Agenda: [N]=Dokument mit Notizen; [R]=Dokument mit RDF-Metadaten; [NR]=Dokument mit Notizen und
-   * RDF-Metadaten; *=N/R enthält aktuellen Stand;
+   * Agenda: [N] = Document with notes; [R] = Document with RDF metadata; 
+   * [NR] = Document with notes and RDF metadata; * = N/R contains current status;
    */
   public static PersistentDataContainer createPersistentDataContainer(
       XTextDocument doc)

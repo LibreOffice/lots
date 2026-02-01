@@ -48,8 +48,8 @@ import org.libreoffice.ext.unohelper.common.UnoHelperException;
 import org.libreoffice.lots.util.L;
 
 /**
- * Funktionen zum Laden und Einfügen von Dokumenten. Geladene Dokumente werden
- * gecacht.
+ * Document loading and insertion features. Loaded documents will be
+ * cached.
  */
 public class DocumentLoader
 {
@@ -60,9 +60,9 @@ public class DocumentLoader
   private LoadingCache<String, ByteBuffer> cache;
 
   /**
-   * Zugriff auf den DocumentLoader als Singleton.
+   * Access to the DocumentLoader as a singleton.
    *
-   * @return Singleton-Instanz des DocumentLoaders
+   * @return Singleton instance of DocumentLoader
    */
   public static DocumentLoader getInstance()
   {
@@ -105,11 +105,11 @@ public class DocumentLoader
   }
 
   /**
-   * Lädt ein Dokument und fügt es an der Stelle von target ein. target muss den
-   * Service XDocumentInsertable unterstützen.
+   * Loads a document and inserts it in the location of target. Target must
+   * Support XDocumentInsertable service.
    *
    * @param target
-   * @param path   URL des Dokuments
+   * @param path   URL of the document
    */
   public void insertDocument(Object target, String path)
   {
@@ -129,16 +129,16 @@ public class DocumentLoader
   }
 
   /**
-   * Lädt ein Dokument und öffnet es.
+   * Loads a document and opens it.
    *
    * @param path
-   *          URL des Dokuments
+   *          URL of the document
    * @param asTemplate
-   *          behandelt das Dokument als Template
+   *          treats the document as a template
    * @param allowMacros
-   *          erlaubt die Ausführung von Makros
+   *          allows macros to be executed
    *
-   * @return Das geladene Dokument.
+   * @return The loaded document.
    */
   public XComponent loadDocument(String path, boolean asTemplate,
     boolean allowMacros)
