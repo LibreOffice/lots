@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.libreoffice.lots.form.config.TabConfig;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -522,6 +524,12 @@ public class FormSidebarController
   {
     if (!noProcessValueChangedEvents.contains(id))
     {
+      // Guard: if the control's tab hasn't been lazily initialized yet, skip silently.
+      // The value will be applied via applyValuesToTab() when the tab is first opened.
+      if (!formSidebarPanel.isControlInitialized(id))
+      {
+        return;
+      }
       processUIElementEvents = false;
       formSidebarPanel.setText(id, value);
       processUIElementEvents = true;
@@ -538,6 +546,11 @@ public class FormSidebarController
    */
   public void setControlBackground(String id, boolean okay, boolean init)
   {
+    // Guard: if the control's tab hasn't been lazily initialized yet, skip silently.
+    if (!formSidebarPanel.isControlInitialized(id))
+    {
+      return;
+    }
     formSidebarPanel.setBackgroundColor(id, okay, formConfig.getPlausiMarkerColor().getRGB() & ~0xFF000000, init);
   }
 
@@ -590,9 +603,67 @@ public class FormSidebarController
     for (String control : formControls.keySet())
     {
       Control ctrl = formModel.getControl(control);
+      // setControlBackground already guards against uninitialized controls.
       if(!ctrl.isOkay())
         setControlBackground(ctrl.getId(), ctrl.isOkay(), true);
     }
+  }
+
+  /**
+   * Applies preset values and background colors to controls belonging to the given tab.
+   * Called by {@link FormSidebarPanel} immediately after a tab is lazily initialized
+   * (i.e., when the user first switches to it).
+   *
+   * @param tabId
+   *          The 1-based ID of the tab that was just initialized.
+   * @param tab
+   *          The {@link TabConfig} of the newly initialized tab.
+   */
+  public void applyValuesToTab(short tabId, TabConfig tab)
+  {
+    if (formModel == null || formConfig == null)
+    {
+      return;
+    }
+
+    processUIElementEvents = false;
+
+    // Apply preset form field values to all controls in this tab.
+    Map<String, String> formFieldValues = documentController.getFormFieldValues();
+    for (UIElementConfig controlConfig : tab.getControls())
+    {
+      String id = controlConfig.getId();
+      String value = formFieldValues.getOrDefault(id, "");
+      if (formSidebarPanel.isControlInitialized(id))
+      {
+        formSidebarPanel.setText(id, value);
+      }
+    }
+
+    // Apply background colors (plausi markers) for invalid controls.
+    for (UIElementConfig controlConfig : tab.getControls())
+    {
+      String id = controlConfig.getId();
+      Control ctrl = formModel.getControl(id);
+      if (ctrl != null && !ctrl.isOkay() && formSidebarPanel.isControlInitialized(id))
+      {
+        formSidebarPanel.setBackgroundColor(id, false,
+            formConfig.getPlausiMarkerColor().getRGB() & ~0xFF000000, true);
+      }
+    }
+
+    // Re-apply visibility for controls in this tab.
+    for (UIElementConfig controlConfig : tab.getControls())
+    {
+      Control ctrl = formModel.getControl(controlConfig.getId());
+      if (ctrl != null)
+      {
+        formSidebarPanel.setVisible(ctrl.getId(),
+            ctrl.getGroups().stream().allMatch(g -> g.isVisible()));
+      }
+    }
+
+    processUIElementEvents = true;
   }
 
   /**
