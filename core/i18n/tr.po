@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2026-02-01 23:30+0000\n"
+"PO-Revision-Date: 2026-03-13 22:30+0000\n"
 "Last-Translator: Muhammet Kara <kara@libreoffice.org>\n"
 "Language-Team: Turkish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/tr/>\n"
@@ -409,7 +409,7 @@ msgstr "İmkansız. Count() daha önce denetlendi."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:290
 msgid "No Key column specified."
-msgstr ""
+msgstr "Anahtar sütunu belirtilmedi."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:306
 #, java-format
@@ -417,11 +417,12 @@ msgid ""
 "Column \"{0}\" was not defined in the schema and therefore it cannot be used "
 "as a key column."
 msgstr ""
+"\"{0}\" sütunu şemada tanımlanmadığından anahtar sütunu olarak kullanılamaz."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1472
 #, java-format
 msgid "Error in data source definition of \"{0}\": "
-msgstr ""
+msgstr "\"{0}\" veri kaynağı tanımında hata: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:41
 msgid "Create error information"
@@ -581,7 +582,7 @@ msgstr "JavaProperty \"{0}\" değeri belirlenemedi:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/Sender.java:204
 msgid "Override can not be null"
-msgstr ""
+msgstr "Override null olamaz"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/ByOOoUserProfileFinder.java:46
 #, java-format
@@ -596,6 +597,8 @@ msgstr "Kişisel gönderici listesi"
 msgid ""
 "Data record already exists in the sender list, save data record again anyway?"
 msgstr ""
+"Veri kaydı gönderen listesinde zaten mevcut, yine de veri kaydı kaydedilsin "
+"mi?"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:293
 msgid "Missing ID"
@@ -606,6 +609,8 @@ msgid ""
 "The record does not contain a valid OID and therefore will not be included "
 "in the personal sender list."
 msgstr ""
+"Kayıt geçerli bir OID içermediğinden kişisel gönderen listesine dahil "
+"edilmeyecek."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:311
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:73
@@ -648,7 +653,7 @@ msgstr "Kişisel gönderici listesi güncellenemedi."
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/FileCache.java:131
 #, java-format
 msgid "Cache-File {0} could not be read."
-msgstr ""
+msgstr "Önbellek dosyası {0} okunamadı."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/printsettings/MailmergeWizardController.java:213
 msgid "Mail merge options"
@@ -667,25 +672,27 @@ msgid ""
 "A necessary print function is not defined. Please contact your system "
 "administrator so your configuration can be updated."
 msgstr ""
+"Gerekli bir yazdırma işlevi tanımlanmadı. Lütfen yapılandırmanızın "
+"güncellenmesi için sistem yöneticinizle iletişime geçin."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToPrinter.java:63
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:262
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToShowOdtFile.java:61
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToOdtFile.java:64
 msgid "WollMux mail merge"
-msgstr ""
+msgstr "WollMux posta birleştirme"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:161
 msgid "Preparing mail merge"
-msgstr ""
+msgstr "Posta birleştirme hazırlanıyor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:192
 msgid "Generating full document"
-msgstr ""
+msgstr "Tam belge oluşturuluyor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:263
 msgid "Unfortunately the full document could not be created."
-msgstr ""
+msgstr "Ne yazık ki tam belge oluşturulamadı."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:287
 msgid "OOo-Based-MailMerge: cannot generate simulation data source."
@@ -693,33 +700,33 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:829
 msgid "Send print job - please wait..."
-msgstr ""
+msgstr "Yazdırma işi gönderiliyor - lütfen bekleyin..."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:855
 msgid "Mail merge"
-msgstr ""
+msgstr "Posta birleştirme"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToShowOdtFile.java:62
 msgid "The generated merged document can not be displayed."
-msgstr ""
+msgstr "Üretilen birleştirilmiş belge görüntülenemiyor."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:116
 msgid "Error while sending e-mail"
-msgstr ""
+msgstr "E-posta gönderilirken hata oluştu"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:144
 #, java-format
 msgid "The sender address \"{0}\" is invalid."
-msgstr ""
+msgstr "Gönderen adresi \"{0}\" geçersiz."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:154
 #, java-format
 msgid "Sending to {0}"
-msgstr ""
+msgstr "{0} adresine gönderiliyor"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:157
 msgid "Invalid recipient address"
-msgstr ""
+msgstr "Geçersiz alıcı adresi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:158
 #, java-format
@@ -731,7 +738,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:166
 msgid "<no subject>"
-msgstr ""
+msgstr "<konusuz>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:211
 msgid ""
