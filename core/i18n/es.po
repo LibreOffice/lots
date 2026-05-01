@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: 2026-05-02 19:30+0000\n"
-"Last-Translator: Nicolas Donato <donatonicolas02@gmail.com>\n"
+"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
 "Language: es\n"
@@ -374,12 +374,12 @@ msgstr "Error sintáctico en la especificación de la ruta de {0}"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:248
 #, java-format
 msgid "Syntaxerror in specification of the relative path of {0}"
-msgstr ""
+msgstr "Error sintáctico en la especificación de la ruta relativa de {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:254
 #, java-format
 msgid "Illegal attribute identifier: \"{0}\""
-msgstr ""
+msgstr "Identificador de atributo no válido: «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:271
 msgid "Schluessel section is missing."
@@ -387,7 +387,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:282
 msgid "Impossible. Count() was checked before."
-msgstr ""
+msgstr "Imposible. Count() se comprobó antes."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:290
 msgid "No Key column specified."
@@ -481,6 +481,7 @@ msgstr ""
 msgid ""
 "The URL for the text fragment with the FRAG_ID \"{0}\" cannot be determined:"
 msgstr ""
+"No se puede determinar el URL para el fragmento de texto con FRAG_ID «{0}»:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnOpenDocument.java:153
 #, java-format
@@ -676,6 +677,8 @@ msgid ""
 "A necessary print function is not defined. Please contact your system "
 "administrator so your configuration can be updated."
 msgstr ""
+"No está definida una función necesaria para la impresión. Póngase en "
+"contacto con el personal de sistemas para que actualicen su configuración."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToPrinter.java:63
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/OOoBasedMailMerge.java:262
@@ -750,6 +753,8 @@ msgid ""
 "No mail server details could be found - possibly the WollMux configuration "
 "is not complete."
 msgstr ""
+"No se pudo encontrar ningún dato sobre el servidor de correo; quizás la "
+"configuración de WollMux esté incompleta."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:216
 msgid "Send email failed."
@@ -1195,7 +1200,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:229
 msgid " Original"
-msgstr ""
+msgstr " Original"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:230
 msgid "Recipient see recipient field"
@@ -1439,7 +1444,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:342
 msgid "ABS(number)"
-msgstr ""
+msgstr "ABS(número)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:343
 msgid "SIGN(number)"
@@ -1803,7 +1808,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:794
 #, java-format
 msgid "<ERROR: TRAFO \"{0}\" not defined>"
-msgstr ""
+msgstr "<ERROR: TRAFO «{0}» no definido>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:824
 #, java-format
@@ -1985,7 +1990,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:517
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
 msgstr ""
-"El parámetro /loadComponentFromURL/ debe tener el formato \"Param=Value\""
+"El parámetro /loadComponentFromURL/ debe tener el formato «Parámetro=Valor»"
 
 #, java-format
 #~ msgid "Error while reading \"{0}\""
