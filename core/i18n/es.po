@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2025-11-06 08:54+0000\n"
+"PO-Revision-Date: 2026-05-01 18:39+0000\n"
 "Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
@@ -123,6 +123,8 @@ msgid ""
 "Data source \"{0}\": No key columns defined. Automatic determination of key "
 "column not possible."
 msgstr ""
+"Origen de datos «{0}»: no se definió ninguna columna clave. No es posible "
+"determinar automáticamente la columna clave."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:359
 #, java-format
@@ -336,15 +338,15 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:173
 msgid "BASE_DN-value is invalid: "
-msgstr ""
+msgstr "El valor de BASE_DN no es válido: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:177
 msgid "No OBJECT_CLASS defined."
-msgstr ""
+msgstr "No se definió ninguna OBJECT_CLASS."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:181
 msgid "OBJECT_CLASS contains of forbidden characters: "
-msgstr ""
+msgstr "OBJECT_CLASS contiene caracteres prohibidos: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:208
 msgid "Section 'Columns' is missing."
@@ -352,22 +354,22 @@ msgstr "Falta la sección «Columns»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:219
 msgid "Specification of DB_COLUMN is missing"
-msgstr ""
+msgstr "Falta la especificación de DB_COLUMN"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:223
 #, java-format
 msgid "Column \"{0}\" does not match the syntax of an identifier"
-msgstr ""
+msgstr "La columna «{0}» no corresponde a la sintaxis de un identificador"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:227
 #, java-format
 msgid "Path specification is missing for column {0}"
-msgstr ""
+msgstr "Falta la especificación de la ruta para la columna {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:239
 #, java-format
 msgid "Syntax error in path specification of {0}"
-msgstr ""
+msgstr "Error sintáctico en la especificación de la ruta de {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:248
 #, java-format
@@ -575,7 +577,7 @@ msgstr "Información sobre WollMux"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/ByJavaPropertyFinder.java:46
 #, java-format
 msgid "Value for JavaProperty \"{0}\" could not be determined:"
-msgstr ""
+msgstr "No se pudo determinar el valor de la JavaProperty «{0}»:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/Sender.java:204
 msgid "Override can not be null"
@@ -584,7 +586,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/ByOOoUserProfileFinder.java:46
 #, java-format
 msgid "Value for the key \"{0}\" of OOoUserProfil could not be determined:"
-msgstr ""
+msgstr "No se pudo determinar el valor de la clave «{0}» de OOoUserProfil:"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:275
 msgid "Personal sender list"
@@ -599,7 +601,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:293
 msgid "Missing ID"
-msgstr ""
+msgstr "Falta el id."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:294
 msgid ""
@@ -625,7 +627,7 @@ msgstr "No se pudo copiar el remitente."
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:382
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:715
 msgid "Search timeout"
-msgstr ""
+msgstr "Se agotó el tiempo de espera para la búsqueda"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/dialog/PersoenlicheAbsenderlisteVerwalten.java:383
 msgid ""
@@ -667,7 +669,7 @@ msgstr "Falló la combinación de correspondencia."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:283
 msgid "Error during printing"
-msgstr ""
+msgstr "Error durante la impresión"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/MailMergeRunner.java:284
 msgid ""
@@ -708,11 +710,11 @@ msgstr "Combinación de correspondencia"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/ToShowOdtFile.java:62
 msgid "The generated merged document can not be displayed."
-msgstr ""
+msgstr "No se puede mostrar el documento combinado generado."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:116
 msgid "Error while sending e-mail"
-msgstr ""
+msgstr "Error al enviar correo electrónico"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:144
 #, java-format
@@ -751,7 +753,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/print/PrintToEmail.java:216
 msgid "Send email failed."
-msgstr ""
+msgstr "Falló el envío del correo electrónico."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/mailmerge/sidebar/MailMergeController.java:446
 msgid "Column"
@@ -843,11 +845,11 @@ msgstr "La secuencia «{0}» no está disponible"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/IsErrorFunction.java:48
 #, java-format
 msgid "Function {0} must have exactly one parameter"
-msgstr ""
+msgstr "La función {0} debe tener exactamente un parámetro"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/ExternalFunctionFunction.java:67
 msgid "Unknown error during execution of external function"
-msgstr ""
+msgstr "Error desconocido al ejecutar la función externa"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/BindFunction.java:64
 msgid "BIND: SET requires exactly 2 parameters"
@@ -871,7 +873,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/StrCmpFunction.java:41
 #, java-format
 msgid "Function {0} requires at least 2 parameters"
-msgstr ""
+msgstr "La función {0} requiere al menos dos parámetros"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/NumberCompareFunction.java:97
 msgid "MARGIN must contain exactly one function"
@@ -880,7 +882,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/MultiFunction.java:59
 #, java-format
 msgid "Function {0} requires at least one parameter"
-msgstr "La función {0} requiere un parámetro al menos"
+msgstr "La función {0} requiere al menos un parámetro"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:317
 msgid "Opening bracket without preceding function name found. "
@@ -960,7 +962,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:515
 #, java-format
 msgid "Index argument of {0} must not be negative."
-msgstr ""
+msgstr "El argumento Índice de {0} no debe ser negativo."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:546
 #, java-format
@@ -1004,6 +1006,7 @@ msgstr ""
 #, java-format
 msgid "For the {0}-function exactly one unqualified function must be specified"
 msgstr ""
+"Para la función {0} se debe especificar exactamente una función no autorizada"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/func/FunctionFactory.java:690
 #, java-format
@@ -1030,7 +1033,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/SecondaryPrintModel.java:225
 #, java-format
 msgid "Print function \"{0}\" is not defined."
-msgstr ""
+msgstr "La función de impresión «{0}» no está definida."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:87
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/ShowDocument.java:91
@@ -1040,7 +1043,7 @@ msgstr "No se pudo abrir el documento."
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/print/PrintProgressBar.java:290
 #, java-format
 msgid "{0} from {1}{2} steps"
-msgstr ""
+msgstr "{0} de {1}{2} pasos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DialogLibrary.java:66
 msgid "Neither dialog name nor the dialog itself must be null"
@@ -1054,7 +1057,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:222
 msgid "Select dataset"
-msgstr ""
+msgstr "Seleccionar conjunto de datos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:231
 msgid "<None>"
@@ -1069,7 +1072,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/form/config/FormConfig.java:97
 #, java-format
 msgid "Key 'Fenster' is missing in {0}"
-msgstr ""
+msgstr "Falta la clave «Fenster» en {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:298
 msgid "Input"
@@ -1100,23 +1103,23 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:35
 msgid "will always be printed"
-msgstr ""
+msgstr "siempre se imprimirá"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:39
 msgid "will only be printed in the original"
-msgstr ""
+msgstr "solo se imprimirá en el original"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:44
 msgid "will not be printed in the original"
-msgstr ""
+msgstr "no se imprimirá en el original"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:48
 msgid "will only be printed in the draft"
-msgstr ""
+msgstr "solo se imprimirá en el borrador"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/PrintBlockSignature.java:52
 msgid "will only be printed in copies"
-msgstr ""
+msgstr "solo se imprimirá en copias"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrint.java:174
 msgid "Print content based directives"
@@ -1128,7 +1131,7 @@ msgstr "No se pudieron combinar los documentos PDF."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:80
 msgid "Error collecting documents"
-msgstr ""
+msgstr "Error al recopilar los documentos"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/print/ContentBasedDirectivePrintCollect.java:81
 msgid "Could not collect documents for printing content based directive."
@@ -1182,7 +1185,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:162
 msgid "Overlapping printing blocks"
-msgstr ""
+msgstr "Se sobreponen los bloques de impresión"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/slv/ContentBasedDirectiveModel.java:163
 msgid ""
@@ -1245,7 +1248,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/model/IdModel.java:174
 #, java-format
 msgid "Collision while trying to change \"{0}\" to \"{1}\""
-msgstr ""
+msgstr "Conflicto al intentar cambiar «{0}» a «{1}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/LeftPanel.java:100
 msgid "Form GUI"
@@ -1677,7 +1680,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:172
 msgid "Warning: Function not defined!"
-msgstr ""
+msgstr "Atención: no se ha definido la función."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/VisibleTextFragmentList.java:130
 #, java-format
@@ -1817,7 +1820,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1808
 msgid "Missing section \"Formular\" in the form description."
-msgstr ""
+msgstr "Falta la sección «Formular» en la descripción del formulario."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxFiles.java:115
 msgid ""
@@ -1952,7 +1955,7 @@ msgstr "No se pudo crear el archivo temporal «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:338
 msgid "setSource() was not called"
-msgstr ""
+msgstr "No se llamó a setSource()"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:354
 #, java-format
@@ -1961,6 +1964,9 @@ msgid ""
 "\"{0}\"\n"
 "does not exist or it cannot be written!"
 msgstr ""
+"El directorio temporal\n"
+"«{0}»\n"
+"no existe o no se puede escribir en él."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:369
 msgid "Could not create a temporary directory for the file download!"
