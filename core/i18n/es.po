@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: 2026-05-01 18:39+0000\n"
-"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
+"Last-Translator: Nicolas Donato <donatonicolas02@gmail.com>\n"
 "Language-Team: Spanish <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/es/>\n"
 "Language: es\n"
@@ -1595,7 +1595,7 @@ msgstr "Introduzca el nombre del archivo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:183
 msgid "Remove WollMux-form-elements from template"
-msgstr ""
+msgstr "Eliminar elementos del formulario WollMux de la plantilla"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:194
 msgid "Optimize document loading time"
@@ -1985,6 +1985,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:517
 msgid "/loadComponentFromURL/ parameter must be of the form \"Param=Value\""
 msgstr ""
+"El parámetro /loadComponentFromURL/ debe tener el formato \"Param=Value\""
 
 #, java-format
 #~ msgid "Error while reading \"{0}\""
