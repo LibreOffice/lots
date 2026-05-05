@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2024-09-16 20:03+0000\n"
+"PO-Revision-Date: 2026-05-06 09:30+0000\n"
 "Last-Translator: Valter Mura <valtermura@gmail.com>\n"
 "Language-Team: Italian <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/it/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.4.3\n"
+"X-Generator: Weblate 5.10.1\n"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SchemaDatasource.java:84
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:214
@@ -1102,7 +1102,6 @@ msgid "{0} from {1}{2} steps"
 msgstr "{0} di {1}{2} passi"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DialogLibrary.java:66
-#, fuzzy
 msgid "Neither dialog name nor the dialog itself must be null"
 msgstr ""
 "Né il nome della finestra di dialogo, né la finestra stessa possono essere "
@@ -1337,7 +1336,6 @@ msgid "Field type"
 msgstr "Tipo di campo"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/OneFormControlLineView.java:469
-#, fuzzy
 msgid "Input list"
 msgstr "Elenco digitazioni"
 
@@ -1392,7 +1390,6 @@ msgid "New tab"
 msgstr "Nuova scheda"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/control/AllFormControlLineViewsPanel.java:237
-#, fuzzy
 msgid "New label"
 msgstr "Nuova etichetta"
 
@@ -1412,7 +1409,6 @@ msgid "Unknown syntaxType: {0}"
 msgstr "Sintassi sconosciuta Type: {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/TextComponentTags.java:258
-#, fuzzy
 msgid "Topmost node must be \"CAT\""
 msgstr "Il nodo di partenza deve essere \"CAT\""
 
@@ -1460,7 +1456,6 @@ msgid "Function Tester"
 msgstr "Tester della funzione"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:317
-#, fuzzy
 msgid "FORMAT(Number MIN \"Zahl\" MAX \"Zahl\")"
 msgstr "FORMAT(Numero MIN \"Numero\" MAX \"Numero\")"
 
@@ -1485,82 +1480,66 @@ msgstr ""
 ")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:323
-#, fuzzy
 msgid "ISERROR(function)"
 msgstr "ISERROR(funzione)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:325
-#, fuzzy
 msgid "ISERRORSTRING(Function)"
-msgstr "ISERRORSTRING(Funzione)"
+msgstr "ISERRORSTRING(funzione)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:333
-#, fuzzy
 msgid "MINUS(number1, number2 ,,,)"
 msgstr "MINUS(numero1, numero2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:335
-#, fuzzy
 msgid "SUM(number1, number2 ,,,)"
 msgstr "SUM(numero1, numero2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:337
-#, fuzzy
 msgid "DIFF(number1, number2 ,,,)"
 msgstr "DIFF(numero1, numero2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:339
-#, fuzzy
 msgid "PRODUCT(number1, number1 ,,,)"
 msgstr "PRODUCT(numero1, numero2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:341
-#, fuzzy
 msgid "DIVIDE(number BY(number) MIN \"Zahl\" MAX \"Zahl\")"
 msgstr "DIVIDE(numero BY(numero) MIN \"Numero\" MAX \"Numero\")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:342
-#, fuzzy
 msgid "ABS(number)"
 msgstr "ABS(numero)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:343
-#, fuzzy
 msgid "SIGN(number)"
 msgstr "SIGN(numero)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:345
-#, fuzzy
 msgid "STRCMP(String1, String2 ,,,)"
 msgstr "STRCMP(stringa1, stringa2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:347
-#, fuzzy
 msgid "NUMCMP(number1, number2 ,,, MARGIN(\"0\"))"
 msgstr "NUMCMP(numero1,numero2 ,,, MARGIN(\"0\"))"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:349
-#, fuzzy
 msgid "LT(number1, number2 ,,,)"
 msgstr "LT(numero1, numero2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:351
-#, fuzzy
 msgid "LE(number1, number2 ,,,)"
 msgstr "LE(numero1, numero2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:353
-#, fuzzy
 msgid "GT(number1, number2 ,,,)"
 msgstr "GT(numero1, numero2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:355
-#, fuzzy
 msgid "GE(number1, number2 ,,,)"
 msgstr "GE(numero1, numero2 ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:359
-#, fuzzy
 msgid ""
 "BIND(FUNCTION(Function)\n"
 " SET(\"ParamName1\" Value1)\n"
@@ -1573,7 +1552,6 @@ msgstr ""
 ")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:364
-#, fuzzy
 msgid "DIALOG(\"Dialogname\", \"Feldname\")"
 msgstr "DIALOG(\"NomeFinestraDialogo\", \"NomeCampo\")"
 
@@ -1726,17 +1704,14 @@ msgid "Exit"
 msgstr "Esci"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:424
-#, fuzzy
 msgid "More than one Tab section"
 msgstr "Più di una sezione Tab"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:443
-#, fuzzy
 msgid "More than one Buttons section"
 msgstr "Più di una sezione Buttons"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FormularMax4kView.java:446
-#, fuzzy
 msgid "No Tab or Buttons section"
 msgstr "Nessuna sezione Tab o Buttons"
 
@@ -1774,7 +1749,6 @@ msgid "-- none --"
 msgstr "-- nessuno --"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:157
-#, fuzzy
 msgid "Supplemental Mods"
 msgstr "Moduli supplementari"
 
@@ -2049,7 +2023,6 @@ msgid "About WollMux"
 msgstr "Informazioni su WollMux"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:240
-#, fuzzy
 msgid "none loaded"
 msgstr "nessuno è caricato"
 
@@ -2098,13 +2071,12 @@ msgstr ""
 "Impossibile creare una cartella temporanea per lo scaricamento del file."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:464
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "None of the programs configured for the extension \"{0}\" could be started!\n"
 "{1}"
 msgstr ""
-"Nessuno dei programmi configurati per l'estensione \"{0}\" può essere "
-"avviato!\n"
+"Impossibile avviare i programmi configurati per l'estensione \"{0}\"!\n"
 "{1}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:517
