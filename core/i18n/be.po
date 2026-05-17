@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2025-08-12 18:53+0000\n"
-"Last-Translator: Alyaksandr Koshal <alyaksandr.koshal@gmail.com>\n"
+"PO-Revision-Date: 2026-05-18 13:30+0000\n"
+"Last-Translator: Alyaksandr Koshal <alkos85@proton.me>\n"
 "Language-Team: Belarusian <https://translations.documentfoundation.org/"
 "projects/wollmux/wollmux/be/>\n"
 "Language: be\n"
@@ -103,12 +103,12 @@ msgstr "SQL_SYNTAX \"{0}\" не падтрымліваецца"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:256
 #, java-format
 msgid "Data source \"{0}\": Schema-section is empty"
-msgstr "Крыніца дадзеных \"{0}\": раздзел схемы пусты"
+msgstr "Крыніца даных «{0}»: раздзел схемы пусты"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:260
 #, java-format
 msgid "Data source \"{0}\": Key-section is missing"
-msgstr "Крыніца дадзеных \"{0}\": адсутнічае ключавы раздзел"
+msgstr "Крыніца даных «{0}»: адсутнічае ключавы раздзел"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:306
 #, java-format
@@ -116,13 +116,13 @@ msgid ""
 "Table or query \"{0}\" does not exist in data source \"{1}\" or error when "
 "determining the columns "
 msgstr ""
-"Табліца або запыт \"{0}\" не існуе ў крыніцы дадзеных \"{1}\" або ўзнікла "
-"памылка пры вызначэнні слупкоў "
+"Табліца або запыт «{0}» не існуе ў крыніцы даных «{1}» або адбылася памылка "
+"пры вызначэнні слупкоў "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:315
 #, java-format
 msgid "Data source \"{0}\": Table \"{1}\" has no columns"
-msgstr "Крыніца дадзеных \"0}\": Табліца \"{1}\" не мае слупкоў"
+msgstr "Крыніца даных «{0}»: у табліцы «{1}» адсутнічаюць слупкі"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:345
 #, java-format
@@ -130,18 +130,18 @@ msgid ""
 "Data source \"{0}\": No key columns defined. Automatic determination of key "
 "column not possible."
 msgstr ""
-"Крыніца дадзеных \"{0}\": Ключавыя слупкі не вызначаны. Аўтаматычнае "
-"вызначэнне ключавога слупка немагчыма."
+"Крыніца даных «{0}»: ключавыя слупкі не вызначаны. Аўтаматычнае вызначэнне "
+"ключавога слупка немагчыма."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:359
 #, java-format
 msgid "Schema of OOo-datasource \"{0}\" could not be read."
-msgstr "Не ўдалося прачытаць схему крыніцы дадзеных OOo \"{0}\"."
+msgstr "Не ўдалося прачытаць схему крыніцы даных OOo «{0}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:365
 #, java-format
 msgid "Data source \"{0}\": No Key column defined"
-msgstr "Крыніца дадзеных \"{0}\": ключавы слупок не вызначаны"
+msgstr "Крыніца даных «{0}»: ключавы слупок не вызначаны"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OOoDatasource.java:387
 #, java-format
@@ -166,7 +166,7 @@ msgstr "Слупок {0} не існуе!"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:83
 #, java-format
 msgid "OVER-Specification of data source {0} is missing"
-msgstr "Адсутнічае OVER-Specification крыніцы дадзеных {0}"
+msgstr "Адсутнічае OVER-Specification крыніцы даных {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:89
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/PreferDatasource.java:93
@@ -202,7 +202,7 @@ msgstr "У слупках крыніцы даных \"{0}\" адсутнічаю
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:67
 #, java-format
 msgid "URL of data source \"{0}\" is missing"
-msgstr "Адсутнічае URL-адрас крыніцы дадзеных \"{0}\""
+msgstr "Адсутнічае URL-адрас крыніцы даных «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:85
 #, java-format
@@ -210,8 +210,8 @@ msgid ""
 "Error in definition of data source {0}: Column \"{1}\" does not comply with "
 "the syntax of identifiers"
 msgstr ""
-"Памылка ў вызначэнні крыніцы дадзеных {0}: слупок \"{1}\" не адпавядае "
-"сінтаксісу ідэнтыфікатараў"
+"Памылка вызначэння крыніцы даных {0}: слупок «{1}» не адпавядае сінтаксісу "
+"ідэнтыфікатараў"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:91
 #, java-format
@@ -219,35 +219,32 @@ msgid ""
 "Error in Defition of data source {0}: Column \"{1}\" was defined twice in "
 "schema"
 msgstr ""
-"Памылка ў вызначэнні крыніцы дадзеных {0}: слупок \"{1}\" быў вызначаны "
-"двойчы ў схеме"
+"Памылка ў вызначэнні крыніцы даных {0}: слупок «{1}» быў вызначаны двойчы ў "
+"схеме"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:107
 #, java-format
 msgid "Error in Conf-File of data source {0}: Section 'Schema' is missing"
 msgstr ""
-"Памылка ў файле канфігурацыі крыніцы дадзеных {0}: адсутнічае раздзел "
-"«Schema»."
+"Памылка ў файле канфігурацыі крыніцы даных {0}: адсутнічае раздзел «Schema»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:113
 #, java-format
 msgid "Error in Conf-file of data source {0}: Error in URL \"{1}\": "
 msgstr ""
-"Памылка ў канфігурацыйным файле крыніцы дадзеных {0}: Памылка ў URL-адрасе "
-"\"{1}\": "
+"Памылка ў файле канфігурацыі крыніцы даных {0}: памылка ў URL-адрасе «{1}»: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:120
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:139
 #, java-format
 msgid "Error in Conf-file of data source {0}: "
-msgstr "Памылка ў канфігурацыйным файле крыніцы дадзеных {0}: "
+msgstr "Памылка ў файле канфігурацыі крыніцы даных {0}: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:144
 #, java-format
 msgid "Error in Conf-file of data source {0}: Section 'Data' is missing"
 msgstr ""
-"Памылка ў канфігурацыйным файле крыніцы дадзеных {0}: адсутнічае раздзел "
-"«Data»"
+"Памылка ў файле канфігурацыі крыніцы даных {0}: адсутнічае раздзел «Data»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:165
 #, java-format
@@ -255,14 +252,14 @@ msgid ""
 "Error in Conf-file of data source {0}: Key column \"{1}\" is not defined in "
 "schema"
 msgstr ""
-"Памылка ў канфігурацыйным файле крыніцы дадзеных {0}: ключавы слупок \"{1}\" "
-"не вызначаны ў схеме"
+"Памылка ў файле канфігурацыі крыніцы даных {0}: ключавы слупок «{1}» не "
+"вызначаны ў схеме"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:172
 #, java-format
 msgid "Missing or incorrect key(...) specification for data source {0}"
 msgstr ""
-"Адсутнічае або няправільная спецыфікацыя ключа(...) для крыніцы дадзеных {0}"
+"Адсутнічае або няправільная спецыфікацыя ключа(...) для крыніцы даных {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:197
 #, java-format
@@ -272,17 +269,17 @@ msgstr "\"{0}\" чакае папярэднюю адчыняючую дужку"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:233
 #, java-format
 msgid "Data set has column \"{0}\" which is not defined within the schema"
-msgstr "Набор дадзеных мае слупок \"{0}\", які не вызначаны ў схеме"
+msgstr "Набор даных мае слупок «{0}», які не вызначаны ў схеме"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/ThingyDatasource.java:252
 msgid "Data set has more fields than the schema"
-msgstr "Набор дадзеных мае больш палёў, чым схема"
+msgstr "Набор даных мае больш палёў, чым сама схема"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:76
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:78
 #, java-format
 msgid "\"{0}\" of data source \"{1}\" is missing."
-msgstr "Адсутнічае \"{0}\" з крыніцы дадзеных \"{1}\"."
+msgstr "Адсутнічае «{0}» крыніцы даных «{1}»."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/UnionDatasource.java:127
 #, java-format
@@ -297,46 +294,45 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:136
 #, java-format
 msgid "SOURCE of data source \"{0}\" is missing"
-msgstr "Крыніца дадзеных SOURCE \"{0}\" адсутнічае"
+msgstr "Адсутнічае SOURCE крыніцы даных «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/SimpleDataset.java:83
 #, java-format
 msgid "Data set does not know column \"{0}\""
-msgstr "Набор дадзеных не ведае слупка \"{0}\""
+msgstr "Набор даных не ведае слупка «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:111
 #, java-format
 msgid "SOURCE1 of data source \"{0}\" is missing"
-msgstr "SOURCE1 крыніцы дадзеных \"{0}\" адсутнічае"
+msgstr "Адсутнічае SOURCE1 крыніцы даных «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:113
 #, java-format
 msgid "ATTACH specification of data source {0} is missing"
-msgstr "Адсутнічае спецыфікацыя ATTACH крыніцы дадзеных {0}"
+msgstr "Адсутнічае спецыфікацыя ATTACH крыніцы даных {0}"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:136
 #, java-format
 msgid "Collision with column \"{0}\" from data source \"{1}\""
-msgstr "Сутыкненне са слупком \"{0}\" з крыніцы дадзеных \"{1}\""
+msgstr "Сутыкненне са слупком «{0}» з крыніцы даных «{1}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:145
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:161
 #, java-format
 msgid "At least one MATCH-specification has to be made in data source \"{0}\""
 msgstr ""
-"У крыніцы дадзеных \"{0}\" павінна быць зроблена хаця б адна спецыфікацыя "
-"MATCH"
+"У крыніцы даных «{0}» павінна быць зроблена хаця б адна спецыфікацыя MATCH"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/AttachDatasource.java:156
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:173
 #, java-format
 msgid "Incorrect MATCH specification in data source \"{0}\""
-msgstr "Няправільная спецыфікацыя MATCH у крыніцы дадзеных \"{0}\""
+msgstr "Няправільная спецыфікацыя MATCH у крыніцы даных «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:121
 #, java-format
 msgid "MODE-specification of datasource \"{0}\" is missing"
-msgstr "Адсутнічае спецыфікацыя MODE крыніцы дадзеных \"{0}\""
+msgstr "Адсутнічае спецыфікацыя MODE крыніцы даных «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:130
 #, java-format
@@ -344,13 +340,12 @@ msgid ""
 "Incorrect MODE-specification in datasource  \"{0}\": MODE \"{1}\" is not "
 "allowed"
 msgstr ""
-"Няправільная спецыфікацыя MODE ў крыніцы дадзеных   \"{0}\": MODE \"{1}\" не "
-"падтрымліваецца"
+"Няправільная спецыфікацыя MODE у крыніцы даных   «{0}»: MODE «{1}» забаронена"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/OverlayDatasource.java:138
 #, java-format
 msgid "OVERLAY-specification of data source \"{0}\" is missing"
-msgstr "Адсутнічае спецыфікацыя OVERLAY крыніцы дадзеных \"{0}\""
+msgstr "Адсутнічае спецыфікацыя OVERLAY крыніцы даных «{0}»"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:159
 msgid "URL of LDAP-Server is missing."
@@ -433,7 +428,7 @@ msgstr ""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/db/LDAPDatasource.java:1472
 #, java-format
 msgid "Error in data source definition of \"{0}\": "
-msgstr "Памылка ў вызначэнні крыніцы дадзеных \"{0}\": "
+msgstr "Памылка ў вызначэнні крыніцы дадзеных «{0}»: "
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnDumpInfo.java:41
 msgid "Create error information"
@@ -590,11 +585,11 @@ msgid ""
 "If this problem persists, you might want to delete these data sets from your "
 "sender list and add them again!"
 msgstr ""
-"Наступныя наборы дадзеных не ўдалося абнавіць з базы дадзеных:\n"
+"Наступныя наборы даных не ўдалося абнавіць з базы даных:\n"
 "\n"
 "0}\n"
-"Калі праблема не знікне, магчыма, варта выдаліць гэтыя наборы дадзеных са "
-"спісу адпраўнікоў і дадаць іх зноў!"
+"Калі праблема застанецца, паспрабуйце выдаліць гэтыя наборы даных са спіса "
+"вашых адпраўнікоў і дадаць іх паўторна!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/sender/SenderEventListener.java:85
 msgid "WollMux Info"
