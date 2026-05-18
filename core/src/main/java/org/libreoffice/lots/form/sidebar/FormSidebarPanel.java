@@ -2,7 +2,7 @@
  * #%L
  * WollMux
  * %%
- * Copyright (C) 2005 - 2024 Landeshauptstadt München and LibreOffice contributors
+ * Copyright (C) 2005 - 2026 Landeshauptstadt München and LibreOffice contributors
  * %%
  * Licensed under the EUPL, Version 1.1 or – as soon they will be
  * approved by the European Commission - subsequent versions of the
@@ -24,9 +24,11 @@ package org.libreoffice.lots.form.sidebar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Consumer;
@@ -43,7 +45,6 @@ import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.WindowEvent;
 import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlContainer;
-import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindow2;
@@ -99,6 +100,34 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   private Map<String, Pair<XControl, XControl>> controls = new HashMap<>();
   private boolean tabChanged = true;
 
+  // --- Lazy tab initialization state ---
+
+  /**
+   * Tracks which tab IDs (1-based) have had their controls fully created.
+   */
+  private final Set<Short> initializedTabs = new HashSet<>();
+
+  /**
+   * All tab configs, stored for lazy initialization of non-active tabs.
+   */
+  private List<TabConfig> allTabConfigs;
+
+  /**
+   * The form model, kept for lazy initialization callbacks.
+   */
+  private FormModel lazyFormModel;
+
+  /**
+   * The form config, kept for lazy initialization callbacks.
+   */
+  private FormConfig lazyFormConfig;
+
+  /**
+   * Per-tab VerticalLayouts (pre-created but initially empty for non-active tabs).
+   * Index is (tabId - 1).
+   */
+  private List<Layout> tabContentLayouts = new ArrayList<>();
+
   /**
    * Creates a new form panel.
    *
@@ -150,7 +179,13 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       short activeTab = tabControlContainer.getActiveTabPageID();
       for (Map.Entry<Control, Short> entry : buttons.entrySet())
       {
-        XWindow window = UNO.XWindow(controls.get(entry.getKey().getId()).getRight());
+        // Guard: the button's control may not exist yet if the tab is lazily uninitialized.
+        Pair<XControl, XControl> ctrlPair = controls.get(entry.getKey().getId());
+        if (ctrlPair == null)
+        {
+          continue;
+        }
+        XWindow window = UNO.XWindow(ctrlPair.getRight());
         if (window != null)
         {
           window.setVisible(entry.getValue() == activeTab && entry.getKey().isVisible());
@@ -163,6 +198,10 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   /**
    * Creates the tab control with its content controls.
    *
+   * <p>Only the first (default) tab's controls are created eagerly.
+   * Controls for all other tabs are created lazily on first activation,
+   * which significantly reduces startup time for forms with many tabs.</p>
+   *
    * @param config
    *          The UI configuration of the form.
    * @param model
@@ -172,54 +211,62 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   {
     if (config != null && model != null)
     {
+      // Store references for lazy initialization of non-active tabs.
+      this.lazyFormConfig = config;
+      this.lazyFormModel = model;
+      this.allTabConfigs = config.getTabs();
+
       XControl tabControl = GuiFactory.createTabPageContainer(xMCF, context);
       controlContainer.addControl("tabControl", tabControl);
       tabControlContainer = UNO.XTabPageContainer(tabControl);
-      AbstractTabPageContainerListener listener = event -> this.paint();
+
+      // Lazy-init listener: when the user switches to a tab, initialize it on demand.
+      AbstractTabPageContainerListener listener = event -> {
+        short newTabId = tabControlContainer.getActiveTabPageID();
+        if (!initializedTabs.contains(newTabId))
+        {
+          initTabControls(newTabId);
+          formSidebarController.applyValuesToTab(newTabId, allTabConfigs.get(newTabId - 1));
+        }
+        this.paint();
+      };
       tabControlContainer.addTabPageContainerListener(listener);
 
       tabControlContainer = UNO.XTabPageContainer(tabControl);
       Layout buttonLayout = new VerticalLayout(20, 5, 0, 0, 5);
 
       short tabId = 1;
-      List<TabConfig> tabs = config.getTabs();
-      List<Layout> tabLayouts = new ArrayList<>();
+      List<TabConfig> tabs = allTabConfigs;
+
+      // Phase 1: Create all tab headers and empty content layouts (cheap).
       for (int i = 0; i < tabs.size(); i++)
       {
         TabConfig tab = tabs.get(i);
         HTMLElement element = new HTMLElement(tab.getTitle());
         GuiFactory.createTab(this.xMCF, this.context, UNO.XTabPageContainerModel(tabControl.getModel()),
-            element.getText(), tabId, 1000);
-        XTabPage xTabPage = tabControlContainer.getTabPageByID(tabId);
-        XControlContainer tabPageControlContainer = UNO.XControlContainer(xTabPage);
-        Layout controlsVLayout = new VerticalLayout(5, 5, 0, 15, 6);
+            element.getText(), (short) (i + 1), 1000);
 
-        if (i > 0)
-        {
-          addTabSwitcher("backward", tabs.get(i - 1), s -> {
-            previousTab();
-            s.reduce((f, se) -> se).ifPresent(XWindow::setFocus);
-          }, tabPageControlContainer, controlsVLayout);
-        }
+        // Pre-create an empty layout for each tab; it will be populated lazily.
+        tabContentLayouts.add(new VerticalLayout(5, 5, 0, 15, 6));
+      }
 
-        setControls(tab, tabPageControlContainer, controlsVLayout);
+      // Phase 2: Eagerly initialize only the first tab (index 0, tabId 1).
+      if (!tabs.isEmpty())
+      {
+        initTabControls((short) 1);
+      }
 
-        if (i < tabs.size() - 1)
-        {
-          addTabSwitcher("forward", tabs.get(i + 1), s -> {
-            nextTab();
-            s.findFirst().ifPresent(XWindow::setFocus);
-          }, tabPageControlContainer, controlsVLayout);
-        }
-
-        tabLayouts.add(controlsVLayout);
-        addButtonsToLayout(tab, model, controlContainer, buttonLayout, tabId);
-
+      // Phase 3: Create button layouts for all tabs (buttons are always visible at the bottom
+      // regardless of which tab is shown, so they must be eager).
+      tabId = 1;
+      for (int i = 0; i < tabs.size(); i++)
+      {
+        addButtonsToLayout(tabs.get(i), model, controlContainer, buttonLayout, tabId);
         tabId++;
       }
 
       Layout tabLayout = new TabLayout(UNO.XTabPageContainer(tabControl), xMCF, context);
-      for (Layout l : tabLayouts)
+      for (Layout l : tabContentLayouts)
       {
         tabLayout.addLayout(l, 1);
       }
@@ -236,6 +283,64 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     }
 
     paint();
+  }
+
+  /**
+   * Lazily initializes (creates native UNO controls for) a tab page that has not yet been
+   * populated.
+   *
+   * <p>This is the core of the lazy loading optimization. Each tab's controls are only created
+   * (and their native OS peers instantiated) when that tab is first activated by the user.
+   * For startup this means only tab 1's controls are created, saving potentially dozens of
+   * expensive {@code calcAdjustedSize} round-trips per skipped tab.</p>
+   *
+   * @param tabId
+   *          The 1-based tab identifier to initialize.
+   */
+  private void initTabControls(short tabId)
+  {
+    if (initializedTabs.contains(tabId))
+    {
+      return;
+    }
+    initializedTabs.add(tabId);
+
+    int index = tabId - 1;
+    if (index < 0 || index >= allTabConfigs.size())
+    {
+      LOGGER.warn("initTabControls: invalid tabId {}", tabId);
+      return;
+    }
+
+    TabConfig tab = allTabConfigs.get(index);
+    XTabPage xTabPage = tabControlContainer.getTabPageByID(tabId);
+    XControlContainer tabPageControlContainer = UNO.XControlContainer(xTabPage);
+
+    // Retrieve the pre-created empty layout for this tab.
+    Layout controlsVLayout = tabContentLayouts.get(index);
+
+    // Add backward tab-switcher (invisible focus trap) if not the first tab.
+    if (index > 0)
+    {
+      addTabSwitcher("backward", allTabConfigs.get(index - 1), s -> {
+        previousTab();
+        s.reduce((f, se) -> se).ifPresent(XWindow::setFocus);
+      }, tabPageControlContainer, controlsVLayout);
+    }
+
+    // Create all controls for this tab.
+    setControls(tab, tabPageControlContainer, controlsVLayout);
+
+    // Add forward tab-switcher if not the last tab.
+    if (index < allTabConfigs.size() - 1)
+    {
+      addTabSwitcher("forward", allTabConfigs.get(index + 1), s -> {
+        nextTab();
+        s.findFirst().ifPresent(XWindow::setFocus);
+      }, tabPageControlContainer, controlsVLayout);
+    }
+
+    LOGGER.debug("initTabControls: lazily initialized tab {} ('{}')", tabId, tab.getTitle());
   }
 
   /**
@@ -577,6 +682,19 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     }
   }
 
+  /**
+   * Returns true if the control with the given ID has already been created (i.e. its tab has been
+   * initialized). Used by the controller to skip value/color updates for not-yet-existing controls.
+   *
+   * @param id
+   *          The control ID.
+   * @return True if the control exists in the UI.
+   */
+  public boolean isControlInitialized(String id)
+  {
+    return controls.containsKey(id);
+  }
+
   @Override
   public LayoutSize getHeightForWidth(int width)
   {
@@ -699,8 +817,14 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
    */
   public void setBackgroundColor(String id, boolean okay, int color, boolean init)
   {
-    XControl control = controls.get(id).getRight();
-    XControl controlleft = controls.get(id).getLeft();
+    Pair<XControl, XControl> pair = controls.get(id);
+    if (pair == null)
+    {
+      LOGGER.debug("control pair ist null. id: {}", id);
+      return;
+    }
+    XControl control = pair.getRight();
+    XControl controlleft = pair.getLeft();
 
     if (control == null)
     {
