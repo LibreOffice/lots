@@ -29,7 +29,7 @@ import com.sun.star.io.XInputStream;
 import com.sun.star.io.XSeekable;
 
 /**
- * Wrapper für ByteBuffer zur Benutzung mit UNO.
+ * Wrapper for ByteBuffer for use with UNO.
  */
 public class ByteBufferInputStream implements XInputStream, XSeekable
 {
