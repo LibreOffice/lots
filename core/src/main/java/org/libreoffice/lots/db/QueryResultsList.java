@@ -66,11 +66,12 @@ public class QueryResultsList implements QueryResults
   public int size() { return data.size();}
 
   @SuppressWarnings("unchecked")
-  // The type safety cannot be endangered here because it is loud
-  // http://docs.oracle.com/javase/tutorial/java/generics/wildcardGuidelines.htm Before
-  // above all it must be ensured that no wrong type is included in the list<? extends Dataset>
-  // will be added. Something like that is with an iterator that only has the methods
-  // hasNext(), next() und remove() know, not possible.
+  // Type safety cannot be compromised here, since according to 
+  // http://docs.oracle.com/javase/tutorial/java/generics/wildcardGuidelines.htm 
+  // it must be ensured above all that no wrong type is added to the 
+  // List<? extends Dataset>. 
+  // Such a thing is not possible with an iterator that only knows the methods 
+  // hasNext(), next() and remove().
   @Override
   public Iterator<Dataset> iterator()
   {

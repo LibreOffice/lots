@@ -32,22 +32,22 @@ import java.util.regex.Pattern;
 import org.libreoffice.lots.config.ConfigThingy;
 
 /**
- * Eine Suchstrategie liefert für eine gegebene Wortzahl eine Liste von Templates für
- * Suchanfragen, die der Reihe nach mit den Wörtern probiert werden sollen bis ein
- * Ergebnis gefunden ist.
+ * A search strategy returns a list of templates for a given word count
+ * Search queries to be tried in order with the words to a
+ * Result is found.
  */
 public class SearchStrategy
 {
   /**
-   * Bildet eine Wortanzahl ab auf eine Liste von {@link Query}-Objekten, die
-   * passende Templates darstellen.
+   * Maps a word count to a list of {@link Query} objects that
+   * display suitable templates.
    */
   private Map<Integer, List<Query>> mapWordcountToListOfQuerys;
 
   /**
-   * {@link #mapWordcountToListOfQuerys} wird per Referenz eingebunden und
-   * entsprechende Ergebnisse aus dieser Map werden von {@link #getTemplate(int)}
-   * zurückgeliefert.
+   * {@link #mapWordcountToListOfQuerys} is included by reference and
+   * corresponding results from this map are provided by {@link #getTemplate(int)}
+   * returned.
    */
   private SearchStrategy()
   {
@@ -55,12 +55,12 @@ public class SearchStrategy
   }
 
   /**
-   * Parst den "SearchStrategy"-Abschnitt von conf und liefert eine entsprechende
+   * Parses the "SearchStrategy" section of conf and returns an appropriate one
    * SearchStrategy.
    *
    * @param conf
-   *          das {@link ConfigThingy}, dessen "SearchStrategy"-Abschnitt geparst
-   *          werden soll.
+   *          the {@link ConfigThingy} parsing its "SearchStrategy" section
+   *         shall be.
    */
   public static SearchStrategy parse(ConfigThingy conf)
   {
@@ -106,13 +106,13 @@ public class SearchStrategy
   }
 
   /**
-   * Liefert eine Liste von {@link Query}-Objekten, die jeweils ein Template für eine
-   * Query sind, die bei einer Suchanfrage mit wordcount Wörtern durchgeführt werden
-   * soll. Die Querys sollen in der Reihenfolge in der sie in der Liste stehen
-   * durchgeführt werden solange bis eine davon ein Ergebnis liefert.
+   * Returns a list of {@link Query} objects, each containing a template for a
+   * Query are performed on a search query using wordcount words
+   * should. The queries should be in the order in which they are in the list
+   * be carried out until one of them returns a result.
    *
-   * @return <code>null</code> falls keine Strategie für den gegebenen wordcount
-   *         vorhanden ist.
+   * @return <code>null</code> if no strategy for the given wordcount
+   *        is available.
    */
   public List<Query> getTemplate(int wordcount)
   {
