@@ -564,9 +564,9 @@ msgstr "Errore di salvataggio"
 msgid "Saving the file \"{0}\" failed!"
 msgstr "Il salvataggio del file \"{0}\" non è riuscito."
 
-#: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:69
-msgid "Über WollMux"
-msgstr "Informazioni su WollMux"
+#: core/src/main/java/org/libreoffice/lots/form/sidebar/FormSidebarPanel.java:233
+msgid "This document is not a form."
+msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/event/handlers/OnAbout.java:80
 msgid "License: European Union Public License"
@@ -2019,6 +2019,7 @@ msgstr ""
 "processo 'soffice.bin'."
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/comp/WollMux.java:229
+#: core/src/main/java/org/libreoffice/lots/event/handlers/OnAbout.java:69
 msgid "About WollMux"
 msgstr "Informazioni su WollMux"
 

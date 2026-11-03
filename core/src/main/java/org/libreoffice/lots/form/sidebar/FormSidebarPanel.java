@@ -80,6 +80,7 @@ import org.libreoffice.lots.form.model.Control;
 import org.libreoffice.lots.form.model.FormModel;
 import org.libreoffice.lots.ui.UIElementConfig;
 import org.libreoffice.lots.ui.UIElementType;
+import org.libreoffice.lots.util.L;
 
 /**
  * form UI in sidebar.
@@ -229,7 +230,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       tabControlContainer.setActiveTabPageID((short) 1);
     } else
     {
-      XControl label = GuiFactory.createLabel(this.xMCF, this.context, "Das Dokument ist kein Formular.",
+      XControl label = GuiFactory.createLabel(this.xMCF, this.context, L.m("This document is not a form."),
           new Rectangle(0, 0, 50, 20), null);
       controlContainer.addControl("label", label);
       vLayout.addControl(label);
