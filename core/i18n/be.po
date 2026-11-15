@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
-"PO-Revision-Date: 2026-11-15 09:01+0000\n"
+"PO-Revision-Date: 2026-11-15 09:17+0000\n"
 "Last-Translator: Alyaksandr Koshal <be@l10n.io>\n"
 "Language-Team: Belarusian <https://translations.documentfoundation.org/"
 "projects/wollmux/wollmux/be/>\n"
@@ -1543,7 +1543,7 @@ msgstr ""
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:122
 msgid "Add"
-msgstr ""
+msgstr "Дадаць"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:125
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:200
