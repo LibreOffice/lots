@@ -53,7 +53,7 @@ import org.libreoffice.ext.unohelper.util.UnoService;
 import org.libreoffice.lots.util.Utils;
 
 /**
- * Implementiert die alte Zugriffsmethode auf persistente Daten in Notizen.
+ * Implements the old method of accessing persistent data in notes.
  *
  * @author Christoph Lutz (D-III-ITD-D101)
  */
@@ -65,30 +65,30 @@ public class AnnotationBasedPersistentDataContainer implements
       .getLogger(AnnotationBasedPersistentDataContainer.class);
 
   /**
-   * Der Name des Frames in dem der WollMux seine Metadaten speichert.
+   * The name of the frame in which WollMux stores its metadata.
    */
   private static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
 
   /**
-   * Maximale Länge von Textfeldern, die der WollMux schreibt. Die Länge 16000
-   * wurde gewählt, wegen http://qa.openoffice.org/issues/show_bug.cgi?id=108709.
+   * Maximum length of text fields that WollMux writes. The length 16000
+   * was chosen because of http://qa.openoffice.org/issues/show_bug.cgi?id=108709.
    */
   private static final int TEXTFIELD_MAXLEN = 16000;
 
   /**
-   * Das Dokument, in dem die Daten gespeichert werden.
+   * The document in which the data is stored.
    */
   private XTextDocument doc;
 
   /**
-   * Enthält die dataIDs, die vor dem letzten Aufruf von flush verändert wurden und
-   * wird für den Workaround für OOo-Issue 100374 benötigt. Kann mit Entfernen des
-   * Workarounds auch wieder entfernt werden.
+   * Contains the dataIDs that were changed before the last call to flush and
+   * is required for the workaround for OOo issue 100374. Can be done with removing the
+   * Workarounds can also be removed again.
    */
   private HashSet<DataID> modifiedDataIDs;
 
   /**
-   * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
+   * Creates a new persistent data store in the document doc.
    */
   public AnnotationBasedPersistentDataContainer(XTextDocument doc)
   {
@@ -97,8 +97,8 @@ public class AnnotationBasedPersistentDataContainer implements
   }
 
   /**
-   * Die Methode liefert die unter ID dataId gespeicherten Daten zurück oder null,
-   * wenn keine vorhanden sind.
+   * The method returns the data stored under ID dataId or null,
+   * if none exist.
    */
   @Override
   public String getData(DataID dataId)
@@ -118,17 +118,17 @@ public class AnnotationBasedPersistentDataContainer implements
   }
 
   /**
-   * Liefert alle Informations-Textfelder mit Id fieldName zurück.
+   * Returns all information text fields with Id fieldName.
    *
    * @param create
-   *          falls true so werden entsprechende Felder angelegt, wenn sie nicht
-   *          existieren.
-   * @size falls create == true werden soviele Felder angelegt, dass darin size
-   *       Zeichen aufgeteilt in TEXTFIELD_MAXLEN lange Blöcke untergebracht werden
-   *       können. Eventuell vorhandene überschüssige Felder werden gelöscht. Auch
-   *       bei size == 0 wird mindestens ein Block geliefert.
-   * @return leeren Vector falls das Feld nicht existiert und create == false oder
-   *         falls ein Fehler auftritt.
+   *          if true then corresponding fields will be created, if not
+   *          exist.
+   * @size falls create == true so many fields are created that size
+   *      Characters split into TEXTFIELD_MAXLEN long blocks to be accommodated
+   *      can. Any excess fields will be deleted. Also
+   *      if size == 0, at least one block is returned.
+   * @return empty Vector if field does not exist and create == false or
+   *         if an error occurs.
    */
   private List<Object> getWollMuxTextFields(String fieldName, boolean create,
       int size)
@@ -202,8 +202,7 @@ public class AnnotationBasedPersistentDataContainer implements
         }
 
         /*
-         * Falls create == true und zuviele Felder gefunden wurden, dann loesche
-         * die überzähligen.
+         * If create == true and too many fields were found, then delete the extra ones.
          */
         if (create && textfields.size() > blockCount)
         {
@@ -216,8 +215,8 @@ public class AnnotationBasedPersistentDataContainer implements
         }
 
         /*
-         * Falls create == true und zu wenige Felder gefunden wurden, dann erzeuge
-         * zusätzliche.
+         * If create == true and too few fields were found, then create
+         * additional.
          */
         if (create && textfields.size() < blockCount)
         {
@@ -243,8 +242,8 @@ public class AnnotationBasedPersistentDataContainer implements
   }
 
   /**
-   * Speichert dataValue mit der id dataId persistent im Dokument. Falls bereits
-   * Daten mit der selben dataId vorhanden sind, werden sie überschrieben.
+   * Stores dataValue with the id dataId persistently in the document. If already
+   * If there is data with the same dataId, it will be overwritten.
    */
   @Override
   public void setData(DataID dataId, String dataValue)
@@ -283,7 +282,7 @@ public class AnnotationBasedPersistentDataContainer implements
   }
 
   /**
-   * Entfernt die mit dataId bezeichneten Daten, falls vorhanden.
+   * Removes the data identified by dataId, if any.
    */
   @Override
   public void removeData(DataID dataId)

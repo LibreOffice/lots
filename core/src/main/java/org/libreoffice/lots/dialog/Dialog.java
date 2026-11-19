@@ -30,74 +30,74 @@ import org.libreoffice.lots.config.ConfigurationErrorException;
 import org.libreoffice.lots.func.FunctionLibrary;
 
 /**
- * Ein Dialog, der dem Benutzer erlaubt verschiedenen Werte zu setzen.
+ * A dialog that allows the user to set different values.
  */
 public interface Dialog
 {
   /**
-   * Liefert die Instanz dieses Dialogs für den gegebenen context (neu erstellt,
-   * falls bisher noch nicht verwendet).
+   * Returns the instance of this dialog for the given context (newly created,
+   * if not used yet).
    *
    * @param context
-   *          Für jeden Kontext hält der Dialog eine unabhängige Kopie von seinem
-   *          Zustand vor. Auf diese Weise lässt sich der Dialog an verschiedenen
-   *          Stellen unabhängig voneinander einsetzen. ACHTUNG! Diese Map wird nicht
-   *          als Schlüssel verwendet, sondern in ihr werden Werte abgelegt.
+   *          For each context, the dialog keeps an independent copy of its
+   *          state before. In this way, the dialogue can take place in different ways
+   *          Use positions independently of each other. DANGER! This map will not
+   *          used as a key, but values ​​are stored in it.
    * @throws ConfigurationErrorException
-   *           wenn der Dialog mit fehlerhaften Daten initialisiert wurde (und der
-   *           Fehler erst bei der Instanziierung diagnostiziert werden konnte).
+   *           if the dialog was initialized with erroneous data (and the
+   *           error could only be diagnosed during instantiation).
    */
   public Dialog instanceFor(Map<Object, Object> context);
 
   /**
-   * Liefert den durch id identifizierten Wert des Dialogs. Falls der Dialog noch
-   * nicht aufgerufen wurde wird ein Standardwert geliefert (typischerweise der leere
-   * String). Der Rückgabewert null ist ebenfalls möglich und signalisiert, dass der
-   * Dialog das entsprechende Feld nicht hat und auch nie haben wird. Die Rückgabe
-   * von null ist in diesem Fall allerdings nicht verpflichtend, sondern es ist
-   * ebenfalls der leere String möglich. Die Rückgabe von null sollte jedoch
-   * erfolgen, falls es dem Dialog irgendwie möglich ist.
+   * Returns the value of the dialog identified by id. If the dialogue still
+   * was not called, a default value is returned (typically the empty
+   * string). The return value null is also possible and indicates that the
+   * Dialog does not and never will have the corresponding field. The return
+   * of zero is not mandatory in this case, it is
+   * the empty string is also possible. However, returning null should
+   * take place if it is somehow possible for the dialogue.
    *
-   * Diese Funktion darf nur für mit instanceFor() erzeugte Instanzen aufgerufen
-   * werden. Ansonsten liefert sie immer null. Diese Funktion ist Thread-safe.
-   * Insbesondere muss sie nicht im EDT aufgerufen werden. Sie kann sowohl vor,
-   * während als auch nach dem Aufruf von show() aufgerufen werden, auch nachdem der
-   * Dialog schon geschlossen wurde.
+   * This function may only be called for instances created with instanceFor()
+   * become. Otherwise it always returns zero. This function is thread safe.
+   * In particular, it does not have to be called in EDT. She can
+   * be called both during and after the call to show(), even after the
+   * Dialog has already been closed.
    */
   public Object getData(String id);
 
   /**
-   * Liefert eine Menge von ids, für die {@link #getData(String)} niemals null
-   * liefert. Dies ist nicht zwangsweise eine vollständige Liste aller ids, für die
-   * der Dialog Werte zurückliefern kann. Es ist ebenfalls nicht garantiert, dass der
-   * Dialog jemeils für eine dieser ids etwas anderes als den leeren String
-   * zurückliefert. Diese Funktion kann schon vor instanceFor() aufgerufen werden, es
-   * ist jedoch möglich, dass bei Aufruf für eine mit instanceFor() erzeugte Instanz
-   * mehr Information (d.h. eine größere Menge) zurückgeliefert wird. Das
-   * zurückgelieferte Objekt darf verändert werden. Dies hat keine Auswirkungen auf
-   * den Dialog.
+   * Returns a set of ids for which {@link #getData(String)} is never null
+   * delivers. This is not necessarily a complete list of all ids for which
+   * the dialog can return values. It is also not guaranteed that the
+   * Dialogue always displays something other than the empty string for one of these ids
+   * returns. This function can be called before instanceFor(), it
+   * However, it is possible that when called for an instance created with instanceFor()
+   * more information (i.e. a larger amount) is returned. The
+   * Returned object may be changed. This has no effect
+   * the dialogue.
    */
   public Collection<String> getSchema();
 
   /**
-   * Zeigt den Dialog an. Diese Funktion darf nur für mit instanceFor() erzeugte
-   * Instanzen aufgerufen werden. Ansonsten tut sie nichts.
+   * Displays the dialog. This function may only be used for files created with instanceFor()
+   * Instances are called. Otherwise she does nothing.
    *
    * @param dialogEndListener
-   *          falls nicht null, wird die
+   *          if not null, the
    *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
-   *          Methode aufgerufen (im Event Dispatching Thread), nachdem der Dialog
-   *          geschlossen wurde. Das actionCommand des ActionEvents gibt die Aktion
-   *          an, die das Beenden des Dialogs veranlasst hat.
+   *          Method called (on the event dispatching thread) after the dialog
+   *          has been closed. The actionCommand of the ActionEvent returns the action
+   *          that caused the dialog to end.
    * @param funcLib
-   *          falls der Dialog Funktionen auswertet, so werden Referenzen auf
-   *          Funktionen mit dieser Bibliothek aufgelöst.
+   *          If the dialog evaluates functions, references are made to
+   *          Functions resolved with this library.
    * @param dialogLib
-   *          falls der Dialog wiederum Funktionsdialoge unterstützt, so werden
-   *          Referenzen auf Funktionsdialoge über diese Bibliothek aufgelöst.
+   *          if the dialog in turn supports function dialogs, then
+   *          Resolved references to function dialogs about this library.
    * @throws ConfigurationErrorException
-   *           wenn der Dialog mit fehlerhaften Daten initialisiert wurde (und der
-   *           Fehler erst bei der Anzeige diagnostiziert werden konnte).
+   *           if the dialog was initialized with erroneous data (and the
+   *          error could only be diagnosed when the display was displayed).
    */
   public void show(ActionListener dialogEndListener, FunctionLibrary funcLib, DialogLibrary dialogLib);
 }
