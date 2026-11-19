@@ -66,7 +66,7 @@ public class OnAbout extends WollMuxEvent
       XWindow window = provider.createContainerWindow(
           "vnd.sun.star.script:WollMux.about?location=application", "", peer, null);
       XDialog dialog = UNO.XDialog(window);
-      dialog.setTitle(L.m("Über WollMux"));
+      dialog.setTitle(L.m("About WollMux"));
       XControlContainer container = UNO.XControlContainer(window);
 
       // allgemeiner Teil
