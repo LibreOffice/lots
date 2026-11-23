@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-10 23:12+0200\n"
 "PO-Revision-Date: 2026-11-24 04:01+0000\n"
-"Last-Translator: Tauqeer Ahmad <tauqeerkhansurani65@gmail.com>\n"
+"Last-Translator: Parvez Qadir <mpqadir@gmail.com>\n"
 "Language-Team: Saraiki <https://translations.documentfoundation.org/projects/"
 "wollmux/wollmux/skr/>\n"
 "Language: skr\n"
@@ -1088,7 +1088,7 @@ msgstr "ڈیٹا سیٹ چݨو"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:231
 msgid "<None>"
-msgstr ""
+msgstr "<کوئی وی کائنی>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:241
 #, java-format
@@ -1107,11 +1107,11 @@ msgstr "ان پٹ"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:377
 msgid "<Dataset>>"
-msgstr ""
+msgstr "<ڈییٹاسیٹ>>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:542
 msgid "<Dataset>"
-msgstr ""
+msgstr "<ڈیٹاسیٹ>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/dialog/DatasourceSearchDialog.java:716
 msgid ""
@@ -1392,23 +1392,23 @@ msgstr "فنکشن نظارہ"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelection.java:37
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:81
 msgid "<none>"
-msgstr ""
+msgstr "<کوئی وی کائنی>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelection.java:43
 msgid "<Expert>"
-msgstr ""
+msgstr "<ماہر>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:86
 msgid "<Code>"
-msgstr ""
+msgstr "<کوڈ>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:92
 msgid "<Value>"
-msgstr ""
+msgstr "<قیمت>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:98
 msgid "[not hardwired]"
-msgstr ""
+msgstr "[کوڈ وچ پکا کائنی]"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionSelectionAccessView.java:221
 msgid "Function"
@@ -1421,11 +1421,11 @@ msgstr "فنکشن ٹیسٹر"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:317
 msgid "FORMAT(Number MIN \"Zahl\" MAX \"Zahl\")"
-msgstr ""
+msgstr "FORMAT(عدد MIN \"عدد\" MAX \"عدد\")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:319
 msgid "IF(Condition THEN(then) ELSE(else))"
-msgstr ""
+msgstr "IF(شرط THEN(تب) ELSE(ورنہ))"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:321
 msgid ""
@@ -1436,66 +1436,72 @@ msgid ""
 "ELSE(else)\n"
 ")"
 msgstr ""
+"SELECT(\n"
+"فنکشن١\n"
+"فنکشن٢\n"
+",,,\n"
+"ELSE(ورنہ)\n"
+")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:323
 msgid "ISERROR(function)"
-msgstr ""
+msgstr "ISERROR(فنکشن)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:325
 msgid "ISERRORSTRING(Function)"
-msgstr ""
+msgstr "ISERRORSTRING(فنکشن)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:333
 msgid "MINUS(number1, number2 ,,,)"
-msgstr ""
+msgstr "MINUS(عدد١, عدد٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:335
 msgid "SUM(number1, number2 ,,,)"
-msgstr ""
+msgstr "SUM(عدد١, عدد٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:337
 msgid "DIFF(number1, number2 ,,,)"
-msgstr ""
+msgstr "DIFF(عدد١, عدد٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:339
 msgid "PRODUCT(number1, number1 ,,,)"
-msgstr ""
+msgstr "PRODUCT(عدد١, عدد٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:341
 msgid "DIVIDE(number BY(number) MIN \"Zahl\" MAX \"Zahl\")"
-msgstr ""
+msgstr "DIVIDE(عدد BY(عدد) MIN \"عدد\" MAX \"عدد\")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:342
 msgid "ABS(number)"
-msgstr ""
+msgstr "ABS(عدد)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:343
 msgid "SIGN(number)"
-msgstr ""
+msgstr "SIGN(عدد)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:345
 msgid "STRCMP(String1, String2 ,,,)"
-msgstr ""
+msgstr "STRCMP(لڑی١, لڑی٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:347
 msgid "NUMCMP(number1, number2 ,,, MARGIN(\"0\"))"
-msgstr ""
+msgstr "NUMCMP(عدد١, عدد٢ ,,, MARGIN(\"٠\"))"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:349
 msgid "LT(number1, number2 ,,,)"
-msgstr ""
+msgstr "LT(عدد١, عدد٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:351
 msgid "LE(number1, number2 ,,,)"
-msgstr ""
+msgstr "LE(عدد١, عدد٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:353
 msgid "GT(number1, number2 ,,,)"
-msgstr ""
+msgstr "GT(عدد١, عدد٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:355
 msgid "GE(number1, number2 ,,,)"
-msgstr ""
+msgstr "GE(عدد١, عدد٢ ,,,)"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:359
 msgid ""
@@ -1504,10 +1510,14 @@ msgid ""
 " SET(\"ParamName2\" Value2) ,,,\n"
 ")"
 msgstr ""
+"BIND(FUNCTION(فنکشن)\n"
+" SET(\"پیرامیٹر_ناں١\" قدر١)\n"
+" SET(\"پیرامیٹر_ناں٢\" قدر٢) ,,,\n"
+")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:364
 msgid "DIALOG(\"Dialogname\", \"Feldname\")"
-msgstr ""
+msgstr "DIALOG(\"ڈائیلاگ_ناں\", \"فیلڈ_ناں\")"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/function/FunctionTester.java:384
 msgid "Evaluate"
@@ -1583,7 +1593,7 @@ msgstr "شامل کرو"
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/PrintFunctionDialog.java:125
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:200
 msgid "OK"
-msgstr ""
+msgstr "ٹھیک ہے"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/ContextMenuMouseListener.java:61
 msgid "Cut"
@@ -1696,15 +1706,15 @@ msgstr "فائل دا ناں"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:131
 msgid "ID"
-msgstr ""
+msgstr "آئی ڈی"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:142
 msgid "-- none --"
-msgstr ""
+msgstr "-- کوئی وی کائنی --"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:157
 msgid "Supplemental Mods"
-msgstr ""
+msgstr "اضافی حصے"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/former/FilenameGeneratorFunctionDialog.java:172
 msgid "Warning: Function not defined!"
@@ -1717,7 +1727,7 @@ msgstr "URL \"{0}\" وچ متغیر کوں وٹاوݨ دے بعد لامحدود
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:151
 msgid "!!!CHECK!!!"
-msgstr ""
+msgstr "!!!چیک!!!"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentModel.java:663
 #, java-format
@@ -1784,7 +1794,7 @@ msgstr "گم شدہ وصف FUNCTION"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/MainProcessor.java:116
 msgid "<ERROR: No sender selected!>"
-msgstr ""
+msgstr "<خرابی: کوئی بھیجݨ آلا منتخب نھیں کیتا ڳیا!>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/DocumentExpander.java:190
 #, java-format
@@ -1826,7 +1836,7 @@ msgstr "دستاویز دے حکم \"{0}\" وچ غلطی"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/commands/AbstractExecutor.java:190
 msgid "<ERROR:  >"
-msgstr ""
+msgstr "<خرابی:  >"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/FrameController.java:238
 #, java-format
@@ -1836,12 +1846,12 @@ msgstr "غلط ZOOM قدر \"{0}\""
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:794
 #, java-format
 msgid "<ERROR: TRAFO \"{0}\" not defined>"
-msgstr ""
+msgstr "<خرابی: TRAFO \"{0}\" مقرر کائنی>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:824
 #, java-format
 msgid "<ERROR: TRAFO \"{0}\" is not defined>"
-msgstr ""
+msgstr "<خرابی: TRAFO \"{0}\" مقرر کائنی>"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/document/TextDocumentController.java:1574
 msgid "The note associated with the form description is missing."
@@ -1967,7 +1977,7 @@ msgstr "WollMux بارے"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:240
 msgid "none loaded"
-msgstr ""
+msgstr "کجھ وی لوڈ کائنی تھیا"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/WollMuxSingleton.java:402
 #, java-format
@@ -1993,7 +2003,7 @@ msgstr "\"{0}\" عارضی فائل کائنی بݨائی ونڄ سڳی۔"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:338
 msgid "setSource() was not called"
-msgstr ""
+msgstr "setSource() نھیں سݙیا ڳیا"
 
 #: core/src/main/java/de/muenchen/allg/itd51/wollmux/OpenExt.java:354
 #, java-format
