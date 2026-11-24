@@ -38,7 +38,7 @@ import org.libreoffice.lots.config.ConfigurationErrorException;
 import org.libreoffice.lots.util.L;
 
 /**
- * Datasource, die die Vereinigung 2er Datasources darstellt
+ * Datasource that represents the union of 2 datasources
  */
 public class UnionDatasource extends Datasource
 {
@@ -55,17 +55,17 @@ public class UnionDatasource extends Datasource
   private String name;
 
   /**
-   * Erzeugt eine neue UnionDatasource.
+   * Creates a new UnionDatasource.
    *
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser UnionDatasource
-   *          bereits vollständig instanziierten Datenquellen.
+   *          contains all up to the time this UnionDatasource was defined
+   *          Already fully instantiated data sources.
    * @param sourceDesc
-   *          der "DataSource"-Knoten, der die Beschreibung dieser UnionDatasource
-   *          enthält.
+   *          the "DataSource" node, which contains the description of this UnionDatasource
+   *          contains.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
-   *          verwendet).
+   *          the context relative to which URLs should be resolved (currently not
+   *          used).
    */
   public UnionDatasource(Map<String, Datasource> nameToDatasource,
       ConfigThingy sourceDesc, URL context)
@@ -88,12 +88,12 @@ public class UnionDatasource extends Datasource
           + "Referenced datasource \"{1}\" missing or defined incorrectly", name, source2Name));
 
     /*
-     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
-     * aufzuweichen (z.B. Gesamtschema ist Vereinigung der Schemata) wäre es
-     * erforderlich, einen Dataset-Wrapper zu implementieren, der dafür sorgt, dass
-     * alle Datasets, die in QueryResults zurück- geliefert werden das selbe Schema
-     * haben. Solange dafür keine Notwendigkeit ersichtlich ist, spare ich mir diesen
-     * Aufwand.
+     * Note: The following condition is "unnecessarily" strict, but around them
+     * softening it (e.g. overall schema is a union of schemas) would be it
+     * required to implement a dataset wrapper that ensures that
+     * all datasets returned in QueryResults -the same schema
+     * have. As long as there is no obvious need for it, I'll save it
+     * Expense.
      */
     List<String> schema1 = source1.getSchema();
     List<String> schema2 = source2.getSchema();

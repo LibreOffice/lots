@@ -46,16 +46,15 @@ public class DialogFactory
   }
 
   /**
-   * Parst die "FunctionDialogs" Abschnitte aus conf und liefert als Ergebnis eine
-   * DialogLibrary zurück.
+   * Paste the "Function Dialogs" sections from conf and return a DialogLibrary as a result.
    *
    * @param baselib
-   *          falls nicht-null wird diese als Fallback verlinkt, um Dialoge zu
-   *          liefern, die anderweitig nicht gefunden werden.
+   *          if non-null this is linked as a fallback to open dialogs
+   *          provide information that cannot be found elsewhere.
    * @param context
-   *          der Kontext in dem in Dialogen enthaltene Funktionsdefinitionen
-   *          ausgewertet werden sollen (insbesondere DIALOG-Funktionen). ACHTUNG!
-   *          Hier werden Werte gespeichert, es ist nicht nur ein Schlüssel.
+   *          the context in which function definitions contained in dialogs
+   *          should be evaluated (especially DIALOG functions). DANGER!
+   *          This is where values ​​are stored, it's not just a key.
    */
   public static DialogLibrary parseFunctionDialogs(ConfigThingy conf,
       DialogLibrary baselib, Map<Object, Object> context)
